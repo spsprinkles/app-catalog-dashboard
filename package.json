@@ -1,0 +1,40 @@
+{
+  "name": "app-catalog-dashboard",
+  "version": "1.0.0",
+  "description": "Management of apps in tenant app catalog.",
+  "main": "src/index.ts",
+  "scripts": {
+    "all": "npm run build && npm run prod",
+    "build": "webpack --mode=development",
+    "prod": "webpack --mode=production"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/spsprinkles/app-catalog-dashboard.git"
+  },
+  "keywords": [],
+  "author": "Michael Vasiloff",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/spsprinkles/app-catalog-dashboard/issues"
+  },
+  "homepage": "https://github.com/spsprinkles/app-catalog-dashboard#readme",
+  "dependencies": {
+    "datatables.net": "^1.10.21",
+    "datatables.net-bs4": "^1.10.21",
+    "datatables.net-colreorder": "^1.5.2",
+    "gd-sprest-bs": "^4.9.4"
+  },
+  "devDependencies": {
+    "@babel/core": "*",
+    "@babel/preset-env": "*",
+    "babel-loader": "*",
+    "css-loader": "*",
+    "html-loader": "*",
+    "style-loader": "*",
+    "ts-loader": "*",
+    "url-loader": "^4.1.0",
+    "webpack": "*",
+    "webpack-cli": "*"
+  }
+}
