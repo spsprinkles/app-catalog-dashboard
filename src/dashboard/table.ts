@@ -1,4 +1,9 @@
-import { Components, jQuery, List, SPTypes, Types, Helper, IconTypes, $REST, ContextInfo } from "gd-sprest-bs";
+import { Components, ContextInfo, Helper, List, SPTypes, Types, Utility, Web } from "gd-sprest-bs";
+import { appIndicator } from "gd-sprest-bs/build/icons/svgs/appIndicator";
+import { chatSquareDots } from "gd-sprest-bs/build/icons/svgs/chatSquareDots";
+import { pencilSquare } from "gd-sprest-bs/build/icons/svgs/pencilSquare";
+import { trash } from "gd-sprest-bs/build/icons/svgs/trash";
+import * as jQuery from "jquery";
 import Strings from "../strings";
 import Toast from "./toast";
 
@@ -70,7 +75,7 @@ export class Table {
             List(Strings.Lists.Apps).Items().query({
                 Select: ["Id", "FileLeafRef", "CheckoutUser/Title", "AppThumbnailURL", "AuthorId", "OwnersId", "DevAppStatus", 'Title', "AppVersion", "AppPublisher", "Owners", "IsAppPackageEnabled", "PublishApp", "Owners/Id", "Owners/EMail"],
                 Expand: ["CheckoutUser", "Owners"],
-                //Filter: this._filter == "Show apps from others" ? null : "Owners eq '" + $REST.ContextInfo.userId + "'"
+                //Filter: this._filter == "Show apps from others" ? null : "Owners eq '" + ContextInfo.userId + "'"
                 Filter: filter
             }).execute(items => {
                 // Resolve the promise
@@ -113,7 +118,7 @@ export class Table {
                         Components.Button({
                             el: elDiv,
                             //text: item.Title,
-                            iconType: IconTypes.PencilSquare,
+                            iconType: pencilSquare,
                             iconSize: 20, //28
                             title: "Edit Properties",
                             isDisabled: !canEdit,
@@ -128,7 +133,7 @@ export class Table {
                                         if (result == SPTypes.ModalDialogResult.OK) {
                                             //Ensure file is checked in: May not be if user closed/uncompleted form after initial app upload
                                             if (item["CheckoutUser"].Title) {
-                                                $REST.List(Strings.Lists.Apps).Items().query({
+                                                List(Strings.Lists.Apps).Items().query({
                                                     Select: ["FileLeafRef"],
                                                     Filter: "Id eq " + item.Id
                                                 }).execute((obj) => {
@@ -136,7 +141,7 @@ export class Table {
                                                         that.render();
                                                         return;
                                                     }
-                                                    $REST.Web().getFolderByServerRelativeUrl(ContextInfo.webServerRelativeUrl + "/DeveloperApps")
+                                                    Web().getFolderByServerRelativeUrl(ContextInfo.webServerRelativeUrl + "/DeveloperApps")
                                                     .Files().getByUrl(ContextInfo.webServerRelativeUrl + "/DeveloperApps/" + obj.results[0]["FileLeafRef"])
                                                     .checkIn("New file", 1).execute(function() { //Minor:0, Major:1, OverwriteCheckIn:2
                                                         that.render();
@@ -171,7 +176,7 @@ export class Table {
                         Components.Button({
                             el: elDiv2,
                             //text: item.Title,
-                            iconType: IconTypes.AppIndicator, //Award ChatSquareDots
+                            iconType: appIndicator, //Award ChatSquareDots
                             iconSize: 20,
                             isDisabled: (canEdit && item["DevAppStatus"] == "In Testing" ? false : true),
                             title: "Submit for review",
@@ -192,7 +197,7 @@ export class Table {
                                                 that.refresh();
                                                 Toast.showMsg("/_layouts/images/mysitetitle.png", "App Submitted for Review", "Other developers can now review your app");
                                                 //Email
-                                                $REST.Utility().sendEmail({
+                                                Utility().sendEmail({
                                                     To: ["App Developers"],
                                                     Subject: "App '" + item.Title + "' submitted for review",
                                                     Body: "App Developers,<br /><br />The '" + item.Title + "' app has been submitted for review by " + ContextInfo.userDisplayName + ". Please take some time to test this app and submit an assessment/review using the App Dashboard."
@@ -214,13 +219,13 @@ export class Table {
                         Components.Button({
                             el: elDiv3,
                             //text: item.Title,
-                            iconType: IconTypes.ChatSquareDots,
+                            iconType: chatSquareDots,
                             iconSize: 20,
                             isDisabled: (item["AuthorId"] == ContextInfo.userId ? true : (item["DevAppStatus"] != "In Review" ? true : false)),
                             title: "Review this app",
                             type: Components.ButtonTypes.OutlineSecondary,
                             onClick: () => {
-                                $REST.List(Strings.Lists.Assessments).Items().query({
+                                List(Strings.Lists.Assessments).Items().query({
                                     Select: ["Id"],
                                     Filter: "RelatedApp eq " + item.Id.toString() + " and Author eq " + ContextInfo.userId
                                 }).execute((obj) => {
@@ -251,14 +256,14 @@ export class Table {
                         Components.Button({
                             el: elDiv4,
                             //text: item.Title,
-                            iconType: IconTypes.Trash,
+                            iconType: trash,
                             iconSize: 20,
                             isDisabled: (canEdit ? false : true),
                             title: "Delete app/solution",
                             type: Components.ButtonTypes.OutlineSecondary,
                             onClick: () => {
                                 //Helper.SP.ModalDialog.showWaitScreenWithNoClose("Please wait", "Verifying details...");
-                                $REST.List("Apps for SharePoint").Items().query({
+                                List("Apps for SharePoint").Items().query({
                                     Select: ["IsAppPackageEnabled", "HasUniqueRoleAssignments"],
                                     Filter: "FileLeafRef eq '" + item["FileLeafRef"] + "'"
                                 }).execute((obj) => {
@@ -289,7 +294,7 @@ export class Table {
                                                 else
                                                     data.IsAppPackageEnabled = false;
 
-                                                $REST.List(Strings.Lists.Apps).Items(item.Id).update(data).execute(function() {
+                                                List(Strings.Lists.Apps).Items(item.Id).update(data).execute(function() {
                                                     if (args == true)
                                                         Toast.showMsg("/_layouts/images/ManageWorkflow32.png", "Deleting App", "Your app will be deleted shortly");
                                                     that.render();

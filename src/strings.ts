@@ -2,7 +2,6 @@
  * Global Constants
  */
 export default {
-    //https://github.com/gunjandatta/sp-dashboard/wiki/Step-2
     AppElementId: "project-app",
     GlobalVariable: "AppDashboard",
     ProjectName: "App Dashboard",

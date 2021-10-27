@@ -1,4 +1,7 @@
-import { Components, Helper, Icons, IconTypes, List, SPTypes, jQuery } from "gd-sprest-bs";
+import { Components, List, SPTypes } from "gd-sprest-bs";
+import { columnsGap } from "gd-sprest-bs/build/icons/svgs/columnsGap";
+import { search } from "gd-sprest-bs/build/icons/svgs/search";
+import * as jQuery from "jquery";
 import Strings from "../strings";
 
 // Navigation Props
@@ -120,24 +123,24 @@ export class Navigation {
         });
 
         // Create a Shield Icon
-        let shieldIcon = Icons(IconTypes.ColumnsGap, 32, 32); //AppIndicator Bag BoundingBox Box ColumnsGap AspectRatio Award
+        let shieldIcon = columnsGap(32, 32); //AppIndicator Bag BoundingBox Box ColumnsGap AspectRatio Award
         // Add margin spacing to the shield icon
-        shieldIcon.classList.add("ml-n1");
-        shieldIcon.classList.add("mr-2");
+        shieldIcon.classList.add("ms-1");
+        shieldIcon.classList.add("me-2");
         // Color it white
         shieldIcon.classList.add("text-white");
         // Insert it to the beginning of the NavBar
         jQuery(navBar.el).prepend(shieldIcon);
         // Create a Search Icon
-        let searchIcon = Icons(IconTypes.Search, 24, 24);
+        let searchIcon = search(24, 24);
         // Add a right margin to the search icon
-        searchIcon.classList.add("mr-2");
+        searchIcon.classList.add("me-2");
         // Color it white
         searchIcon.classList.add("text-white");
         // Insert it to the beginning of the search form
-        jQuery(navBar.el.querySelector(".form-inline")).prepend(searchIcon);
+        jQuery(navBar.el.querySelector(".form-control")).prepend(searchIcon);
         // Remove the right margin on the search box
-        navBar.el.querySelector(".form-control").classList.remove("mr-sm-2");
+        navBar.el.querySelector(".form-control").classList.remove("me-2");
         // Update the placeholder attribute
         navBar.el.querySelector(".form-control").setAttribute("placeholder", "Search app list")
         // Set the title attribute

@@ -1,5 +1,7 @@
-import { ContextInfo, Components, Helper, IconTypes, $REST, List, SPTypes, Types, jQuery  } from "gd-sprest-bs";
-import Strings from "../strings";
+import { Components, Helper  } from "gd-sprest-bs";
+import { arrowRepeat } from "gd-sprest-bs/build/icons/svgs/arrowRepeat";
+//import { filePlus } from "gd-sprest-bs/build/icons/svgs/filePlus";
+import * as jQuery from "jquery";
 import Toast from "./toast";
 
 // Filter Properties
@@ -36,14 +38,14 @@ export class Filter {
                         let elDivNew = document.createElement("div");
                         elDivNew.classList.add("bg-white");
                         elDivNew.classList.add("d-inline-flex");
-                        elDivNew.classList.add("ml-auto");
+                        elDivNew.classList.add("ms-auto");
                         elDivNew.classList.add("rounded");
                         elDivNew.style.marginRight = "10px";
                         //el.appendChild(elDivNew);
                         // Define the new item button
                         Components.Button({
                             el: elDivNew,
-                            //iconType: IconTypes.FilePlus, //CloudUpload Plus Upload Box CodeSqaure
+                            //iconType: filePlus, //CloudUpload Plus Upload Box CodeSqaure
                             iconSize: 20,
                             title: "Add/Update an app/solution package",
                             text: " Add/Update App ",
@@ -72,14 +74,14 @@ export class Filter {
                         let elDivRefresh = document.createElement("div");
                         elDivRefresh.classList.add("bg-white");
                         elDivRefresh.classList.add("d-inline-flex");
-                        elDivRefresh.classList.add("ml-auto");
+                        elDivRefresh.classList.add("ms-auto");
                         elDivRefresh.classList.add("rounded");
                         elDivRefresh.style.marginRight = "25px";
                         // Define the new item button
                         Components.Button({
                             el: elDivRefresh,
                             //id: "btnRefresh",
-                            iconType: IconTypes.ArrowRepeat, //CloudUpload Plus Upload Box CodeSqaure
+                            iconType: arrowRepeat, //CloudUpload Plus Upload Box CodeSqaure
                             iconSize: 20,
                             className: "filterTopBtn",
                             title: "Refresh table",

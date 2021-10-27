@@ -1,12 +1,8 @@
-@import "../../node_modules/datatables.net-bs4/css/dataTables.bootstrap4.min.css";
+@import "../../node_modules/datatables.net-bs5/css/dataTables.bootstrap5.min.css";
 
 /* Create a reusable 'SharePoint Blue' background color */
 .bs .bg-sharepoint {
     background-color: #0078d4 !important;
-}
-
-.bs .btn-icon {
-    padding: 2px !important;
 }
 
 /* Shrink the filter card panel to match the navbar size */
@@ -16,16 +12,9 @@
 }
 
 /** Color match the toggle background color to 'SharePoint Blue' */
-.bs .custom-control-input:checked ~ .custom-control-label::before {
+.bs .form-check-input:checked {
     background-color: #0078d4;
     border-color: #0078d4;
-}
-
-/* Replace and color match the up/down caret icons and border in the paging select dropdown */
-/* Be sure to escape any characters, such as # to %23 when specifying hex color values in background */
-.bs .custom-select {
-    background: #fff url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' viewBox='0 0 16 25.333' fill='%236c757d' width='1em' height='1em'><path d='M0.34 8.03C-0.44 8.92 0.2 10.32 1.38 10.32C2.71 10.32 13.3 10.32 14.62 10.32C15.38 10.32 16 9.7 16 8.94C16 8.61 15.88 8.28 15.66 8.03C15 7.28 9.7 1.23 9.04 0.47C8.54 -0.1 7.67 -0.16 7.09 0.34C7.05 0.38 7 0.43 6.96 0.47C6.96 0.47 1.01 7.28 0.34 8.03Z'/><path d='M0.34 17.3C-0.44 16.41 0.2 15.01 1.38 15.01C2.71 15.01 13.3 15.01 14.62 15.01C15.38 15.01 16 15.63 16 16.39C16 16.73 15.88 17.05 15.66 17.3C15 18.06 9.7 24.11 9.04 24.86C8.54 25.43 7.67 25.49 7.09 24.99C7.05 24.95 7 24.91 6.96 24.86C6.96 24.86 1.01 18.06 0.34 17.3Z'/></svg>") no-repeat right 0.75rem center/8px 10px !important;
-    border: 1px solid #6c757d !important;
 }
 
 /* Align the filter buttons in the filter card panel */
@@ -61,57 +50,13 @@
     border-bottom: 3px solid #dee2e6 !important;
 }
 
-/* Build an SVG version of the SharePoint icon for the site icon */
-.sharepoint-icon {
-    background-color: #0078d4 !important;
-    border-radius: 0.25rem !important;
-    width: 180px;
-    height: 64px;
+table.dataTable tbody > tr > td {
+    vertical-align: middle !important;
 }
 
 /* Center the DataTables 'number of entries' properly */
 #table .dataTables_info {
     padding-top: 0.85rem !important;
-}
-
-/* DataTables sorting with Bootstrap Icons */
-/* Be sure to escape any characters, such as # to %23 when specifying hex color values in background-image */
-table.dataTable thead .sorting,
-table.dataTable thead .sorting_asc,
-table.dataTable thead .sorting_desc,
-table.dataTable thead .sorting_asc_disabled,
-table.dataTable thead .sorting_desc_disabled,
-table.dataTable thead .sorting:before,
-table.dataTable thead .sorting_asc:before,
-table.dataTable thead .sorting_desc:before,
-table.dataTable thead .sorting_asc_disabled:before,
-table.dataTable thead .sorting_desc_disabled:before,
-table.dataTable thead .sorting:after,
-table.dataTable thead .sorting_asc:after,
-table.dataTable thead .sorting_desc:after,
-table.dataTable thead .sorting_asc_disabled:after,
-table.dataTable thead .sorting_desc_disabled:after {
-    background-image: none;
-    background-position: right;
-    background-repeat: no-repeat;
-    background-size: 1rem 1rem;
-    content: "" !important;
-}
-/* Bootstrap Icon: caret-up */
-table.dataTable thead .sorting {
-    background-image: url("data:image/svg+xml,<svg viewBox='0 0 16 16' fill='%236c757d' xmlns='http://www.w3.org/2000/svg'><path fill-rule='evenodd' d='M3.204 11L8 5.519 12.796 11H3.204zm-.753-.659l4.796-5.48a1 1 0 0 1 1.506 0l4.796 5.48c.566.647.106 1.659-.753 1.659H3.204a1 1 0 0 1-.753-1.659z'/></svg>");
-}
-/* Bootstrap Icon: caret-up-fill */
-table.dataTable thead .sorting_asc {
-    background-image: url("data:image/svg+xml,<svg viewBox='0 0 16 16' fill='%236c757d' xmlns='http://www.w3.org/2000/svg'><path d='M7.247 4.86l-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z'/></svg>");
-}
-/* Bootstrap Icon: caret-down-fill */
-table.dataTable thead .sorting_desc {
-    background-image: url("data:image/svg+xml,<svg viewBox='0 0 16 16' fill='%236c757d' xmlns='http://www.w3.org/2000/svg'><path d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/></svg>");
-}
-
-table.dataTable tbody > tr > td {
-    vertical-align: middle !important;
 }
 
 /* Hide the datatable search box #DataTables_Table_0_filter */
@@ -136,3 +81,8 @@ table.dataTable tbody > tr > td {
 .bs .mt-lg-0, .bs .my-lg-0 { margin-top: 0 !important; }
 .bs .mb-lg-0, .bs .my-lg-0 { margin-bottom: 0 !important; }
 .bs .navbar-expand-lg .navbar-collapse { display: flex !important; flex-basis: auto; }
+
+/* Color match colReorder line */
+div.DTCR_pointer {
+    background-color: #0078d4;
+}

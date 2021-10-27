@@ -1,13 +1,12 @@
+import { ContextInfo, Helper, List, SPTypes } from "gd-sprest-bs";
+import * as jQuery from "jquery";
 import { Filter } from "./filter";
 import { Navigation } from "./navigation";
 import { Table } from "./table";
-import * as HTML from "./index.html";
-import "./styles.css";
-import { Helper } from "gd-sprest-bs/@types/webparts";
-import Strings from "../strings";
-import { $REST, SPTypes, jQuery, ContextInfo } from "gd-sprest-bs";
 import { TermsOfUse } from "./tou";
-import strings from "../strings";
+import * as HTML from "./index.html";
+import Strings from "../strings";
+import "./styles.css";
 declare var SP;
 
 /**
@@ -62,10 +61,10 @@ export class Dashboard {
 
         SP.SOD.executeOrDelayUntilScriptLoaded(() => {
             //Need to disable caching
-            $REST.List(Strings.Lists.Apps, {disableCache: true}).query({
+            List(Strings.Lists.Apps, {disableCache: true}).query({
                 Select: ["EffectiveBasePermissions"]
             }).execute(obj => {
-                if ($REST.Helper.hasPermissions(obj.EffectiveBasePermissions, SPTypes.BasePermissionTypes.EditListItems)) {
+                if (Helper.hasPermissions(obj.EffectiveBasePermissions, SPTypes.BasePermissionTypes.EditListItems)) {
                     jQuery("#filter").slideDown();
                     jQuery("#table").slideDown();
                 }
@@ -75,7 +74,7 @@ export class Dashboard {
             });
         }, "sp.js");
 
-        $REST.jQuery.ajax({
+        jQuery.ajax({
             type: "GET",
             url: ContextInfo.webAbsoluteUrl + "/code/TermsOfUse.html",
             success: data => {

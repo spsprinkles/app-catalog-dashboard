@@ -1,4 +1,5 @@
-import { ContextInfo, Components, Helper, List, jQuery, $REST  } from "gd-sprest-bs";
+import { Components, Web } from "gd-sprest-bs";
+import * as jQuery from "jquery";
 import Strings from "../strings"
 import * as HTML from "./tou.html";
 
@@ -25,7 +26,7 @@ export class TermsOfUse {
     // Render
     private render() {
         var userLogin = "";
-        $REST.Web().CurrentUser().query({
+        Web().CurrentUser().query({
             Select: ["LoginName"]
         }).execute(obj => {
             userLogin = obj.LoginName;
@@ -46,7 +47,7 @@ export class TermsOfUse {
                             type: Components.ButtonTypes.OutlineSecondary,
                             onClick: () => {
                                 btn.disable();
-                                $REST.Web().SiteGroups(Strings.Group).Users().add({
+                                Web().SiteGroups(Strings.Group).Users().add({
                                     LoginName: userLogin //Format: i:0#.f|membership|{email}
                                 }).execute(obj => {
                                     jQuery("#touRow").slideUp();
