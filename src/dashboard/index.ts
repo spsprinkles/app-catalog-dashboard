@@ -1,10 +1,9 @@
-import { ContextInfo, Helper, List, SPTypes } from "gd-sprest-bs";
+import { Helper, List, SPTypes } from "gd-sprest-bs";
 import * as jQuery from "jquery";
 import { Filter } from "./filter";
 import { Navigation } from "./navigation";
 import { Table } from "./table";
 import { TermsOfUse } from "./tou";
-import * as HTML from "./index.html";
 import Strings from "../strings";
 import "./styles.css";
 declare var SP;
@@ -13,30 +12,55 @@ declare var SP;
  * Dashboard
  */
 export class Dashboard {
-    private _el: HTMLElement = null;
-
     /**
      * Renders the project.
      * @param el - The element to render the dashboard to.
      */
-    constructor(elParent: HTMLElement) {
-        // Create the element
-        let el = document.createElement("div");
-        el.innerHTML = HTML as any;
-        this._el = el.firstChild as HTMLElement;
-
-        // Append it to the parent element
-        elParent.appendChild(this._el);
-
+    constructor(el: HTMLElement) {
         // Render the dashboard
-        this.render();
+        this.render(el);
     }
 
     /**
      * Main render method
      * @param el - The element to render the dashboard to.
      */
-    private render() {
+    private render(el: HTMLElement) {
+        // Create the element
+        let divMain = document.createElement("div");
+        let divRow = document.createElement("div");
+        let divCol = document.createElement("div");
+        divRow.className = "row";
+        divCol.className = "col";
+
+        let divNavRow = divRow.cloneNode(false) as HTMLDivElement;
+        let divNavCol = divCol.cloneNode(false) as HTMLDivElement;
+        let divTouRow = divRow.cloneNode(false) as HTMLDivElement;
+        let divTouCol = divCol.cloneNode(false) as HTMLDivElement;
+        let divFilterRow = divRow.cloneNode(false) as HTMLDivElement;
+        let divFilterCol = divCol.cloneNode(false) as HTMLDivElement;
+        let divTableRow = divRow.cloneNode(false) as HTMLDivElement;
+        let divTableCol = divCol.cloneNode(false) as HTMLDivElement;
+
+        divFilterCol.classList.add("mb-4");
+        divNavCol.id = "navigation";
+        divTouRow.id = "touRow";
+        divTouCol.id = "tou";
+        divFilterCol.id = "filter";
+        divTableCol.id = "table";
+
+        divNavRow.appendChild(divNavCol);
+        divTouRow.appendChild(divTouCol);
+        divFilterRow.appendChild(divFilterCol);
+        divTableRow.appendChild(divTableCol);
+        divMain.appendChild(divNavRow);
+        divMain.appendChild(divTouRow);
+        divMain.appendChild(divFilterRow);
+        divMain.appendChild(divTableRow);
+
+        // Append it to the parent element
+        el.appendChild(divMain);
+
         //Initially hide components before TOU check
         jQuery("#touRow").hide();
         jQuery("#filter").hide();
@@ -44,7 +68,7 @@ export class Dashboard {
 
         // Render the navigation
         new Navigation({
-            el: this._el.querySelector("#navigation"),
+            el: el.querySelector("#navigation"),
             onSearch: value => {
                 // Search the table
                 table.search(value);
@@ -52,7 +76,7 @@ export class Dashboard {
         });
 
         new TermsOfUse({
-            el: this._el.querySelector("#tou"),
+            el: el.querySelector("#tou"),
             /*onSearch: value => {
                 // Search the table
                 table.search(value);
@@ -76,7 +100,7 @@ export class Dashboard {
 
         jQuery.ajax({
             type: "GET",
-            url: ContextInfo.webAbsoluteUrl + "/code/TermsOfUse.html",
+            url: Strings.TermsOfUseUrl,
             success: data => {
                 document.getElementById("touInject").innerHTML = data;
             }
@@ -84,7 +108,7 @@ export class Dashboard {
 
         // Render the filter
         new Filter({
-            el: this._el.querySelector("#filter"),
+            el: el.querySelector("#filter"),
             onChange: value => {
                 // Filter the table data
                 table.applyFilter(value);
@@ -95,6 +119,6 @@ export class Dashboard {
         });
 
         // Render the table
-        let table = new Table(this._el.querySelector("#table"));
+        let table = new Table(el.querySelector("#table"));
     }
 }
