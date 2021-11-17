@@ -1,7 +1,7 @@
 import { Components, Web } from "gd-sprest-bs";
 import * as jQuery from "jquery";
 import Strings from "../strings"
-import * as HTML from "./tou.html";
+import { TOU_HTML } from "./templates";
 
 // TermsOfUse Properties
 export interface ITermsOfUseProps {
@@ -39,8 +39,8 @@ export class TermsOfUse {
             body: [
                 {
                     onRender: (el) => {
-                        el.innerHTML = HTML as any;
-                        
+                        el.innerHTML = TOU_HTML;
+
                         var btn = Components.Button({
                             el: el,
                             text: " I Agree ",
@@ -55,7 +55,7 @@ export class TermsOfUse {
                                     jQuery("#table").slideDown();
                                 }, obj => {
                                     var response = JSON.parse(obj.response);
-				                    alert(response.error.message.value);
+                                    alert(response.error.message.value);
                                 });
                             }
                         });

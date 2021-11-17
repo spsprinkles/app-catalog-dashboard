@@ -11,11 +11,13 @@ export default {
     GlobalVariable: "AppDashboard",
     ProjectName: "App Dashboard",
     ProjectDescription: "App Dashboard for Developers",
-    SolutionUrl: SourceUrl + "index.html",
-    TermsOfUseUrl: SourceUrl + "TermsOfUse.html",
+    Group: "App Developers",
     Lists: {
         Apps: "Developer Apps",
         Assessments: "Dev App Assessments"
     },
-    Group: "App Developers"
+    SolutionAppsCSRUrl: "~site/code/devAppsCSR.js",
+    SolutionAppAssessmentsCSRUrl: "~site/code/devAppAssessmentsCSR.js",
+    SolutionUrl: SourceUrl + "index.html",
+    TermsOfUseUrl: SourceUrl + "TermsOfUse.html",
 }
