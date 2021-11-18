@@ -34,11 +34,8 @@ export class DataSource {
     static loadStatusFilters(): PromiseLike<Components.ICheckboxGroupItem[]> {
         // Return a promise
         return new Promise((resolve, reject) => {
-            // TODO
-            resolve(null);
-            return;
             // Get the status field
-            List(Strings.Lists.Apps).Fields("Status").execute((fld: Types.SP.FieldChoice) => {
+            List(Strings.Lists.Apps).Fields("DevAppStatus").execute((fld: Types.SP.FieldChoice) => {
                 let items: Components.ICheckboxGroupItem[] = [];
 
                 // Parse the choices

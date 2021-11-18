@@ -57,11 +57,8 @@ export class App {
                         header: "Event Status",
                         items: DataSource.StatusFilters,
                         onFilter: (value: string) => {
-                            // Update the default flag
-                            DataSource.StatusFilters[0].isSelected = value ? true : false;
-
                             // Filter the dashboard
-                            this._dashboard.filter(0, value ? "" : "Active");
+                            this._dashboard.filter(4, value);
                         },
                     },
                 ],
@@ -146,6 +143,7 @@ export class App {
                                     {
                                         text: "Submit",
                                         isDisabled: (canEdit && item.DevAppStatus == "In Testing" ? false : true),
+                                        isSmall: true,
                                         onClick: () => {
                                             // Display the submit form
                                             this._forms.submit(item.Id, () => {
