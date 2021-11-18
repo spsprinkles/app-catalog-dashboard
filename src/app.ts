@@ -138,7 +138,7 @@ export class App {
                                         iconSize: 20,
                                         iconType: pencilSquare,
                                         isSmall: true,
-                                        type: Components.ButtonTypes.OutlineLight,
+                                        type: Components.ButtonTypes.OutlinePrimary,
                                         onClick: () => {
                                             // Display the edit form
                                             this._forms.edit(item.Id, () => {
@@ -153,7 +153,7 @@ export class App {
                                         iconType: appIndicator,
                                         isDisabled: (canEdit && item.DevAppStatus == "In Testing" ? false : true),
                                         isSmall: true,
-                                        type: Components.ButtonTypes.OutlineLight,
+                                        type: Components.ButtonTypes.OutlinePrimary,
                                         onClick: () => {
                                             // Display the submit form
                                             this._forms.submit(item.Id, () => {
@@ -168,7 +168,7 @@ export class App {
                                         iconType: chatSquareDots,
                                         isDisabled: (item.AuthorId == ContextInfo.userId ? true : (item.DevAppStatus != "In Review" ? true : false)),
                                         isSmall: true,
-                                        type: Components.ButtonTypes.OutlineLight,
+                                        type: Components.ButtonTypes.OutlinePrimary,
                                         onClick: () => {
                                             // Display the review form
                                             this._forms.review(item.Id, () => {
@@ -183,7 +183,7 @@ export class App {
                                         iconType: trash,
                                         isDisabled: canEdit ? false : true,
                                         isSmall: true,
-                                        type: Components.ButtonTypes.OutlineLight,
+                                        type: Components.ButtonTypes.OutlineDanger,
                                         onClick: () => {
                                             // Display the delete form
                                             this._forms.delete(item.Id, () => {
@@ -234,17 +234,17 @@ export class App {
                         name: "",
                         title: "Owners",
                         onRenderCell: (el, column, item: IAppItem) => {
-                            var owners = item[column.name] && item[column.name].results || [];
+                            var owners = item.Owners && item.Owners.results || [];
 
                             // Parse the owners
-                            var strOwners = "";
+                            var strOwners = [];
                             owners.forEach(owner => {
                                 // Append the email
-                                strOwners += owner.EMail.split("@")[0] + "; ";
+                                strOwners.push(owner.EMail.split("@")[0]);
                             });
 
                             // Display the owners
-                            el.innerText = strOwners;
+                            el.innerText = strOwners.join("; ");
                         }
                     },
                     {
