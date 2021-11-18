@@ -1,37 +1,53 @@
+import { InstallationRequired } from "dattatable";
+import { App } from "./app";
 import { Configuration } from "./cfg";
-import { Dashboard } from "./dashboard";
-import Strings from "./strings";
+import { DataSource } from "./ds";
+import Strings, { setContext } from "./strings";
 
-// Ensure the data tables plugin is configured
-//import * as DataTable from "datatables.net";
-import * as jQuery from "jquery";
-//import "datatables.net-dt/css/jquery.dataTables.min.css";
-import "datatables.net-bs5/js/dataTables.bootstrap5.min.js";
-import "datatables.net-colreorder/js/dataTables.colReorder.min.js";
-
-// See if jQuery is defined in the DataTable lib
-/* if (DataTable.default.prototype.constructor.$ == undefined) {
-    // Set the reference
-    DataTable.default.prototype.constructor.$ = jQuery;
-} else {
-    // Update this jQuery reference for this library
-    window["$REST"].jQuery = DataTable.default.prototype.constructor.$;
-} */
+// Styling
+import "./styles.scss";
 
 // Create the global variable for this solution
-window[Strings.GlobalVariable] = {
-    Configuration
-}
+const GlobalVariable = {
+    Configuration,
+    render: (el: HTMLElement, context?) => {
+        // See if the page context exists
+        if (context) {
+            // Set the context
+            setContext(context);
+        }
 
-// Get the main element to render the solution to
-let el = document.getElementById(Strings.AppElementId);
-if (el) {
-    // Initialize the solution
-    new Dashboard(el);
-} else {
-    // Log
-    console.log("[" + Strings.ProjectName + "] Error finding the element with id '" + Strings.AppElementId + "'");
-}
+        // Initialize the solution
+        DataSource.init().then(
+            // Success
+            () => {
+                // Create the application
+                new App(el);
+            },
+            // Error
+            () => {
+                // See if an install is required
+                InstallationRequired.requiresInstall(Configuration).then(installFl => {
+                    // See if an installation is required
+                    if (installFl) {
+                        // Show the installation dialog
+                        InstallationRequired.showDialog();
+                    } else {
+                        // Log
+                        console.error("[" + Strings.ProjectName + "] Error initializing the solution.");
+                    }
+                });
+            }
+        );
+    }
+};
 
-// Remove the extra border spacing on the webpart
-jQuery('table.ms-core-tableNoSpace', '#contentBox').removeClass('ms-webpartPage-root');
+// Update the DOM
+window[Strings.GlobalVariable] = GlobalVariable;
+
+// Get the element and render the app if it is found
+let elApp = document.querySelector("#" + Strings.AppElementId) as HTMLElement;
+if (elApp) {
+    // Render the application
+    GlobalVariable.render(elApp);
+}

@@ -1,10 +1,27 @@
 import { Components, List, Types } from "gd-sprest-bs";
 import Strings from "./strings";
 
-// Item
-export interface IItem extends Types.SP.ListItem {
-    ItemType: string;
-    Status: string;
+// App Item
+export interface IAppItem extends Types.SP.ListItem {
+    AppDescription: string;
+    AppImageURL1: Types.SP.FieldUrlValue;
+    AppImageURL2: Types.SP.FieldUrlValue;
+    AppImageURL3: Types.SP.FieldUrlValue;
+    AppImageURL4: Types.SP.FieldUrlValue;
+    AppImageURL5: Types.SP.FieldUrlValue;
+    AppProductID: string;
+    AppPublisher: string;
+    AppShortDescription: string;
+    AppSupportURL: Types.SP.FieldUrlValue;
+    AppThumbnailURL: Types.SP.FieldUrlValue;
+    AppVersion: string;
+    AppVideoURL: Types.SP.FieldUrlValue;
+    CheckoutUser: { Id: number; Title: string; };
+    DevAppStatus: string;
+    IsDefaultAppMetadataLocale: boolean;
+    IsAppPackageEnabled: boolean;
+    Owners: { results: { Id: number; EMail: string; }[] }
+    SharePointAppCategory: string;
 }
 
 /**
@@ -17,6 +34,9 @@ export class DataSource {
     static loadStatusFilters(): PromiseLike<Components.ICheckboxGroupItem[]> {
         // Return a promise
         return new Promise((resolve, reject) => {
+            // TODO
+            resolve(null);
+            return;
             // Get the status field
             List(Strings.Lists.Apps).Fields("Status").execute((fld: Types.SP.FieldChoice) => {
                 let items: Components.ICheckboxGroupItem[] = [];
@@ -71,28 +91,26 @@ export class DataSource {
     }
 
     // Loads the list data
-    private static _items: IItem[] = null;
-    static get Items(): IItem[] { return this._items; }
-    static load(): PromiseLike<IItem[]> {
+    private static _items: IAppItem[] = null;
+    static get Items(): IAppItem[] { return this._items; }
+    static load(): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve, reject) => {
-            // Load the data
+            // Load the list items
             List(Strings.Lists.Apps).Items().query({
-                GetAllItems: true,
-                OrderBy: ["Title"],
-                Top: 5000
-            }).execute(
-                // Success
-                items => {
-                    // Set the items
-                    this._items = items.results as any;
+                Expand: ["CheckoutUser", "Owners"],
+                Select: [
+                    "Id", "FileLeafRef", "CheckoutUser/Title", "AppThumbnailURL", "AuthorId",
+                    "OwnersId", "DevAppStatus", 'Title', "AppVersion", "AppPublisher", "Owners",
+                    "IsAppPackageEnabled", "Owners/Id", "Owners/EMail"
+                ]
+            }).execute(items => {
+                // Set the items
+                this._items = items.results as any;
 
-                    // Resolve the request
-                    resolve(this._items);
-                },
-                // Error
-                () => { reject(); }
-            );
+                // Resolve the promise
+                resolve();
+            });
         });
     }
 }

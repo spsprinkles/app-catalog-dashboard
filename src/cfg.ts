@@ -182,6 +182,8 @@ export const Configuration = Helper.SPConfig({
                     defaultValue: "Missing Metadata",
                     format: SPTypes.ChoiceFormatType.Dropdown,
                     required: true,
+                    showInEditForm: false,
+                    showInNewForm: false,
                     choices: [
                         "Missing Metadata", "Deleting...", "In Testing", "In Review", "Published"
                     ]
@@ -190,7 +192,7 @@ export const Configuration = Helper.SPConfig({
             ViewInformation: [{
                 ViewName: "All Documents",
                 ViewFields: ["DocIcon", "LinkFilename", "AppPublisher", "DevAppStatus", "Modified", "Editor"],
-                ViewQuery: '<OrderBy>"FileLeafRef" Ascending="TRUE" /></OrderBy>',
+                ViewQuery: '<OrderBy><FieldRef Name="FileLeafRef" Ascending="TRUE" /></OrderBy>',
                 JSLink: Strings.SolutionAppsCSRUrl,
             }]
         },
@@ -314,7 +316,7 @@ export const Configuration = Helper.SPConfig({
             ViewInformation: [{
                 ViewName: "All Items",
                 ViewFields: ["Title", "RelatedApp", "SupportUrlValid", "IconImages", "DescriptionText", "AppTested", "UnresolvedIssues", "ResultResponse", "Editor"],
-                ViewQuery: '<OrderBy>"ID" Ascending="FALSE" /></OrderBy>'
+                ViewQuery: '<OrderBy><FieldRef Name="ID" Ascending="FALSE" /></OrderBy>'
             }]
         }
         /*
