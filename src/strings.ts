@@ -10,13 +10,15 @@ export const setContext = (context) => {
     ContextInfo.setPageContext(context);
 
     // Update the values
-    Strings.SolutionUrl = ContextInfo.webServerRelativeUrl + "/SiteAssets/Event-Registration/index.html";
+    Strings.ConfigUrl = ContextInfo.webServerRelativeUrl + "/SiteAssets/config.json";
+    Strings.SolutionUrl = ContextInfo.webServerRelativeUrl + "/SiteAssets/index.html";
     Strings.TermsOfUseUrl = ContextInfo.webServerRelativeUrl + "/siteassets/TermsOfUse.html";
 }
 
 // Strings
 const Strings = {
     AppElementId: "app-catalog-dashboard",
+    ConfigUrl: ContextInfo.webServerRelativeUrl + "siteassets/config.json",
     GlobalVariable: "AppDashboard",
     Group: "App Developers",
     Lists: {
@@ -25,8 +27,8 @@ const Strings = {
     },
     ProjectName: "App Dashboard",
     ProjectDescription: "App Dashboard for Developers",
-    SolutionAppsCSRUrl: "~site/code/devAppsCSR.js",
-    SolutionAppAssessmentsCSRUrl: "~site/code/devAppAssessmentsCSR.js",
+    SolutionAppsCSRUrl: "~site/siteassets/devAppsCSR.js",
+    SolutionAppAssessmentsCSRUrl: "~site/siteassets/devAppAssessmentsCSR.js",
     SolutionUrl: ContextInfo.webServerRelativeUrl + "/siteassets/index.html",
     TermsOfUseUrl: ContextInfo.webServerRelativeUrl + "/siteassets/TermsOfUse.html",
     Version: "0.1",

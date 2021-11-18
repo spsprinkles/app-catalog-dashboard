@@ -151,12 +151,12 @@ export class App {
                                         text: "Submit for Review",
                                         iconSize: 20,
                                         iconType: appIndicator,
-                                        isDisabled: (canEdit && item.DevAppStatus == "In Testing" ? false : true),
+                                        isDisabled: canEdit && item.DevAppStatus != "In Review" ? false : true,
                                         isSmall: true,
                                         type: Components.ButtonTypes.OutlinePrimary,
                                         onClick: () => {
                                             // Display the submit form
-                                            this._forms.submit(item.Id, () => {
+                                            this._forms.submit(item, () => {
                                                 // Refresh the table
                                                 this.refresh();
                                             });
@@ -166,12 +166,12 @@ export class App {
                                         text: "Review this App",
                                         iconSize: 20,
                                         iconType: chatSquareDots,
-                                        isDisabled: (item.AuthorId == ContextInfo.userId ? true : (item.DevAppStatus != "In Review" ? true : false)),
+                                        isDisabled: item.DevAppStatus != "In Review" ? true : !canEdit,
                                         isSmall: true,
                                         type: Components.ButtonTypes.OutlinePrimary,
                                         onClick: () => {
                                             // Display the review form
-                                            this._forms.review(item.Id, () => {
+                                            this._forms.review(item, () => {
                                                 // Refresh the table
                                                 this.refresh();
                                             });
@@ -181,12 +181,12 @@ export class App {
                                         text: "Delete App/Solution",
                                         iconSize: 20,
                                         iconType: trash,
-                                        isDisabled: canEdit ? false : true,
+                                        isDisabled: !canEdit,
                                         isSmall: true,
                                         type: Components.ButtonTypes.OutlineDanger,
                                         onClick: () => {
                                             // Display the delete form
-                                            this._forms.delete(item.Id, () => {
+                                            this._forms.delete(item, () => {
                                                 // Refresh the table
                                                 this.refresh();
                                             });

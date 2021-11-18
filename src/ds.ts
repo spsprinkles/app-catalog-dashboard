@@ -1,4 +1,4 @@
-import { Components, List, Types } from "gd-sprest-bs";
+import { Components, List, Types, Web } from "gd-sprest-bs";
 import Strings from "./strings";
 
 // App Item
@@ -25,10 +25,54 @@ export interface IAppItem extends Types.SP.ListItem {
     SharePointAppCategory: string;
 }
 
+// Assessment Item
+export interface IAssessmentItem extends Types.SP.ListItem {
+}
+
+// Configuration
+export interface IConfiguration {
+    appCatalogAdminEmailGroup?: string;
+    tenantAppCatalog?: string;
+}
+
 /**
  * Data Source
  */
 export class DataSource {
+    // Configuration
+    private static _cfg: IConfiguration = null;
+    static get Configuration(): IConfiguration { return this._cfg; }
+    static loadConfiguration(): PromiseLike<void> {
+        // Return a promise
+        return new Promise(resolve => {
+            // Get the current web
+            Web().getFileByServerRelativeUrl(Strings.ConfigUrl).content().execute(
+                // Success
+                file => {
+                    // Convert the string to a json object
+                    let cfg = null;
+                    try { cfg = JSON.parse(String.fromCharCode.apply(null, new Uint8Array(file))); }
+                    catch { cfg = {}; }
+
+                    // Set the configuration
+                    this._cfg = cfg;
+
+                    // Resolve the request
+                    resolve();
+                },
+
+                // Error
+                () => {
+                    // Set the configuration to nothing
+                    this._cfg = {} as any;
+
+                    // Resolve the request
+                    resolve();
+                }
+            );
+        });
+    }
+
     // Status Filters
     private static _statusFilters: Components.ICheckboxGroupItem[] = null;
     static get StatusFilters(): Components.ICheckboxGroupItem[] { return this._statusFilters; }
@@ -77,14 +121,17 @@ export class DataSource {
     static init(): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve, reject) => {
-            // Load the data
-            this.load().then(() => {
-                // Load the status filters
-                this.loadStatusFilters().then(() => {
-                    // Resolve the request
-                    resolve();
-                }, reject);
-            }, reject)
+            // Load the configuration
+            this.loadConfiguration().then(() => {
+                // Load the data
+                this.load().then(() => {
+                    // Load the status filters
+                    this.loadStatusFilters().then(() => {
+                        // Resolve the request
+                        resolve();
+                    }, reject);
+                }, reject)
+            }, reject);
         });
     }
 
