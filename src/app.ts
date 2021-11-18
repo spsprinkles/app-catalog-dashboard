@@ -1,6 +1,10 @@
 import { Dashboard, LoadingDialog } from "dattatable";
 import { Components, ContextInfo } from "gd-sprest-bs";
+import { appIndicator } from "gd-sprest-bs/build/icons/svgs/appIndicator";
+import { chatSquareDots } from "gd-sprest-bs/build/icons/svgs/chatSquareDots";
 import { columnsGap } from "gd-sprest-bs/build/icons/svgs/columnsGap";
+import { pencilSquare } from "gd-sprest-bs/build/icons/svgs/pencilSquare";
+import { trash } from "gd-sprest-bs/build/icons/svgs/trash";
 import { AppForms } from "./itemForms";
 import * as jQuery from "jquery";
 import { DataSource, IAppItem } from "./ds";
@@ -131,7 +135,10 @@ export class App {
                                 buttons: [
                                     {
                                         text: "Edit Properties",
+                                        iconSize: 20,
+                                        iconType: pencilSquare,
                                         isSmall: true,
+                                        type: Components.ButtonTypes.OutlineLight,
                                         onClick: () => {
                                             // Display the edit form
                                             this._forms.edit(item.Id, () => {
@@ -141,9 +148,12 @@ export class App {
                                         }
                                     },
                                     {
-                                        text: "Submit",
+                                        text: "Submit for Review",
+                                        iconSize: 20,
+                                        iconType: appIndicator,
                                         isDisabled: (canEdit && item.DevAppStatus == "In Testing" ? false : true),
                                         isSmall: true,
+                                        type: Components.ButtonTypes.OutlineLight,
                                         onClick: () => {
                                             // Display the submit form
                                             this._forms.submit(item.Id, () => {
@@ -151,7 +161,37 @@ export class App {
                                                 this.refresh();
                                             });
                                         }
-                                    }
+                                    },
+                                    {
+                                        text: "Review this App",
+                                        iconSize: 20,
+                                        iconType: chatSquareDots,
+                                        isDisabled: (item.AuthorId == ContextInfo.userId ? true : (item.DevAppStatus != "In Review" ? true : false)),
+                                        isSmall: true,
+                                        type: Components.ButtonTypes.OutlineLight,
+                                        onClick: () => {
+                                            // Display the review form
+                                            this._forms.review(item.Id, () => {
+                                                // Refresh the table
+                                                this.refresh();
+                                            });
+                                        }
+                                    },
+                                    {
+                                        text: "Delete App/Solution",
+                                        iconSize: 20,
+                                        iconType: trash,
+                                        isDisabled: canEdit ? false : true,
+                                        isSmall: true,
+                                        type: Components.ButtonTypes.OutlineLight,
+                                        onClick: () => {
+                                            // Display the delete form
+                                            this._forms.delete(item.Id, () => {
+                                                // Refresh the table
+                                                this.refresh();
+                                            });
+                                        }
+                                    },
                                 ]
                             });
                         }

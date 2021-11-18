@@ -12,6 +12,11 @@ export class AppForms {
         ItemForm.ListName = Strings.Lists.Apps;
     }
 
+    // Delete form
+    delete(itemId: number, onUpdate: () => void) {
+        // TODO
+    }
+
     // Edit form
     edit(itemId: number, onUpdate: () => void) {
         // Show the item form
@@ -41,6 +46,11 @@ export class AppForms {
                 onUpdate();
             }
         });
+    }
+
+    // Review form
+    review(itemId: number, onUpdate: () => void) {
+        // TODO
     }
 
     // Submit form

@@ -16,6 +16,7 @@ export interface IAppItem extends Types.SP.ListItem {
     AppThumbnailURL: Types.SP.FieldUrlValue;
     AppVersion: string;
     AppVideoURL: Types.SP.FieldUrlValue;
+    AuthorId: number;
     CheckoutUser: { Id: number; Title: string; };
     DevAppStatus: string;
     IsDefaultAppMetadataLocale: boolean;
