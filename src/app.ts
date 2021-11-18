@@ -1,5 +1,5 @@
-import { Dashboard, ItemForm, LoadingDialog } from "dattatable";
-import { Components, ContextInfo, Helper, List } from "gd-sprest-bs";
+import { Dashboard, LoadingDialog } from "dattatable";
+import { Components, ContextInfo } from "gd-sprest-bs";
 import { columnsGap } from "gd-sprest-bs/build/icons/svgs/columnsGap";
 import { AppForms } from "./itemForms";
 import * as jQuery from "jquery";
