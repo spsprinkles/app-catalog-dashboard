@@ -85,7 +85,11 @@ export class App {
                     {
                         className: "ms-2 btn-outline-light",
                         isButton: true,
-                        text: "Refresh"
+                        text: "Refresh",
+                        onClick: () => {
+                            // Refresh the dashboard
+                            this.refresh();
+                        }
                     }
                 ],
             },

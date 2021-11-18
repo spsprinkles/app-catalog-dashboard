@@ -133,7 +133,7 @@ export class AppForms {
             List(Strings.Lists.Assessments).Items().query({
                 Filter: "RelatedAppId eq " + item.Id
             }).execute(items => {
-                let item = items[0];
+                let item = items.results[0] as any;
 
                 // Resolve/Reject the promise
                 item ? resolve(item) : reject();
@@ -166,16 +166,19 @@ export class AppForms {
                         // Return the properties
                         return props;
                     },
-                    onSave: props => {
-                        // Set the associated app id
-                        props["DevAppStatus"] = "In Review";
-
-                        // Return the properties
-                        return props;
-                    },
                     onUpdate: () => {
-                        // Call the update event
-                        onUpdate();
+                        if (item.DevAppStatus != "In Review") {
+                            // Update the status of the item
+                            item.update({
+                                DevAppStatus: "In Review"
+                            }).execute(() => {
+                                // Call the update event
+                                onUpdate();
+                            });
+                        } else {
+                            // Call the update event
+                            onUpdate();
+                        }
                     }
                 });
             },
@@ -202,15 +205,19 @@ export class AppForms {
                     },
                     onSave: props => {
                         // Set the associated app id
-                        props["DevAppStatus"] = "In Review";
                         props["RelatedAppId"] = item.Id;
 
                         // Return the properties
                         return props;
                     },
                     onUpdate: () => {
-                        // Call the update event
-                        onUpdate();
+                        // Update the status of the item
+                        item.update({
+                            DevAppStatus: "In Review"
+                        }).execute(() => {
+                            // Call the update event
+                            onUpdate();
+                        });
                     }
                 });
             });
