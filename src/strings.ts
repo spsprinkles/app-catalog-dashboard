@@ -4,13 +4,16 @@ import { ContextInfo } from "gd-sprest-bs";
  * Global Constants
  */
 
-// Set global path
-export const SourceUrl: string = ContextInfo.webServerRelativeUrl + "/SiteAssets/";
+// Global Path
+let SourceUrl: string = ContextInfo.webServerRelativeUrl + "/SiteAssets/";
 
 // Updates the strings for SPFx
 export const setContext = (context) => {
     // Set the page context
     ContextInfo.setPageContext(context);
+
+    // Update the global path
+    SourceUrl = ContextInfo.webServerRelativeUrl + "/SiteAssets/";
 
     // Update the values
     Strings.ConfigUrl = SourceUrl + "config.json";
