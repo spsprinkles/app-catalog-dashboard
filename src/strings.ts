@@ -4,21 +4,24 @@ import { ContextInfo } from "gd-sprest-bs";
  * Global Constants
  */
 
+// Set global path
+export const SourceUrl: string = ContextInfo.webServerRelativeUrl + "/SiteAssets/";
+
 // Updates the strings for SPFx
 export const setContext = (context) => {
     // Set the page context
     ContextInfo.setPageContext(context);
 
     // Update the values
-    Strings.ConfigUrl = ContextInfo.webServerRelativeUrl + "/SiteAssets/config.json";
-    Strings.SolutionUrl = ContextInfo.webServerRelativeUrl + "/SiteAssets/index.html";
-    Strings.TermsOfUseUrl = ContextInfo.webServerRelativeUrl + "/siteassets/TermsOfUse.html";
+    Strings.ConfigUrl = SourceUrl + "config.json";
+    Strings.SolutionUrl = SourceUrl + "index.html";
+    Strings.TermsOfUseUrl = SourceUrl + "TermsOfUse.html";
 }
 
 // Strings
 const Strings = {
     AppElementId: "app-catalog-dashboard",
-    ConfigUrl: ContextInfo.webServerRelativeUrl + "siteassets/config.json",
+    ConfigUrl: SourceUrl + "config.json",
     GlobalVariable: "AppDashboard",
     Group: "App Developers",
     Lists: {
@@ -27,10 +30,10 @@ const Strings = {
     },
     ProjectName: "App Dashboard",
     ProjectDescription: "App Dashboard for Developers",
-    SolutionAppsCSRUrl: "~site/siteassets/devAppsCSR.js",
-    SolutionAppAssessmentsCSRUrl: "~site/siteassets/devAppAssessmentsCSR.js",
-    SolutionUrl: ContextInfo.webServerRelativeUrl + "/siteassets/index.html",
-    TermsOfUseUrl: ContextInfo.webServerRelativeUrl + "/siteassets/TermsOfUse.html",
+    SolutionAppsCSRUrl: "~site/SiteAssets/devAppsCSR.js",
+    SolutionAppAssessmentsCSRUrl: "~site/SiteAssets/devAppAssessmentsCSR.js",
+    SolutionUrl: SourceUrl + "index.html",
+    TermsOfUseUrl: SourceUrl + "TermsOfUse.html",
     Version: "0.1",
 };
 export default Strings;
