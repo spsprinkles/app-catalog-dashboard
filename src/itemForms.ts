@@ -1,6 +1,5 @@
-import { Components } from ".pnpm/gd-bs@5.2.0/node_modules/gd-bs";
 import { ItemForm, LoadingDialog, Modal } from "dattatable";
-import { ContextInfo, Helper, List, Utility } from "gd-sprest-bs";
+import { Components, ContextInfo, Helper, List, Utility } from "gd-sprest-bs";
 import { DataSource, IAppItem, IAssessmentItem } from "./ds";
 import Strings from "./strings";
 
@@ -292,6 +291,10 @@ export class AppForms {
                     file => {
                         // Get the item id
                         file.ListItemAllFields().execute(item => {
+                            // Call Mike's code to magically extract metadata from sppkg
+
+                            // Save metadata to item
+
                             // Display the edit form
                             this.edit(item.Id, onUpdate);
                         });
