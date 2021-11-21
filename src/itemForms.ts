@@ -1,5 +1,6 @@
 import { ItemForm, LoadingDialog, Modal } from "dattatable";
 import { Components, ContextInfo, Helper, List, Utility } from "gd-sprest-bs";
+import { file, loadAsync } from "jszip";
 import { DataSource, IAppItem, IAssessmentItem } from "./ds";
 import Strings from "./strings";
 
@@ -137,6 +138,79 @@ export class AppForms {
                 // Resolve/Reject the promise
                 item ? resolve(item) : reject();
             }, reject);
+        });
+    }
+
+    // Reads an app package file
+    private readPackage(data): PromiseLike<IAppItem> {
+        // Return a promise
+        return new Promise(resolve => {
+            // Unzip the package
+            loadAsync(data).then(files => {
+                let metadata: IAppItem = {} as any;
+                let imageFound = false;
+
+                // Parse the files
+                files.forEach((path, fileInfo) => {
+                    /** What are we doing here? */
+                    /** Should we convert this to use the doc set dashboard solution? */
+
+                    // See if this is an image
+                    if (fileInfo.name.endsWith(".png") || fileInfo.name.endsWith(".jpg") || fileInfo.name.endsWith(".jpeg") || fileInfo.name.endsWith(".gif")) {
+                        // NOTE: Reading of the file is asynchronous!
+                        fileInfo.async("base64").then(function (content) {
+                            //$get("appIcon").src = "data:image/png;base64," + content;
+                            imageFound = true;
+                        });
+
+                        // Get image in different format for later uploading
+                        fileInfo.async("arraybuffer").then(function (content) {
+                            // Are we storing this somewhere?
+                        });
+
+                        // Check the next file
+                        return;
+                    }
+
+                    // See if this is the app manifest
+                    if (fileInfo.name != "AppManifest.xml") { return; }
+
+                    // Read the file
+                    fileInfo.async("string").then(content => {
+                        var i = content.indexOf("<App");
+                        var oParser = new DOMParser();
+                        var oDOM = oParser.parseFromString(content.substring(i), "text/xml");
+
+                        // Set the title
+                        let elTitle = oDOM.getElementsByTagName("Title")[0];
+                        if (elTitle) { metadata.Title = elTitle.textContent; }
+
+                        // Set the version
+                        let elVersion = oDOM.documentElement.attributes["Version"];
+                        if (elVersion) { metadata.AppVersion = elVersion.value; }
+
+                        // Set the product id
+                        let elProductId = oDOM.documentElement.attributes["ProductID"];
+                        if (elProductId) { metadata.AppProductID = elProductId.value; }
+
+                        // Are we storing this?
+                        var spfxElem = oDOM.documentElement.attributes["IsClientSideSolution"]; //Not for add-ins
+                        var isSPFx = (spfxElem ? spfxElem.value : "false");
+
+                        //Attribute: SharePointMinVersion="16.0.0.0" // 15.0.0.0
+                        //Attribute: SkipFeatureDeployment="true" (not for add-ins)
+
+                        // See if the metadata is valid
+                        if (metadata.Title && metadata.AppVersion && metadata.AppProductID) {
+                            // Update the status
+                            metadata.DevAppStatus = "In Review";
+                        }
+
+                        // Resolve the request
+                        resolve(metadata);
+                    });
+                });
+            });
         });
     }
 
@@ -285,26 +359,39 @@ export class AppForms {
         Helper.ListForm.showFileDialog().then(file => {
             // Ensure this is an spfx package
             if (file.name.toLowerCase().endsWith(".sppkg")) {
-                // Upload the file
-                List(Strings.Lists.Apps).RootFolder().Files().add(file.name, true, file.data).execute(
-                    // Success
-                    file => {
-                        // Get the item id
-                        file.ListItemAllFields().execute(item => {
-                            // Call Mike's code to magically extract metadata from sppkg
+                // Extract the metadata from the package
+                this.readPackage(file.data).then(data => {
+                    // Validate the data
+                    if (data.AppProductID && data.AppVersion) {
+                        // Upload the file
+                        List(Strings.Lists.Apps).RootFolder().Files().add(file.name, true, file.data).execute(
+                            // Success
+                            file => {
+                                // Get the item
+                                file.ListItemAllFields().execute(item => {
+                                    // Update the item
+                                    item.update(data).execute(() => {
+                                        // Save metadata to item
 
-                            // Save metadata to item
+                                        // Display the edit form
+                                        this.edit(item.Id, onUpdate);
+                                    });
+                                });
+                            },
 
-                            // Display the edit form
-                            this.edit(item.Id, onUpdate);
-                        });
-                    },
-
-                    // Error
-                    () => {
-                        // TODO
+                            // Error
+                            () => {
+                                // TODO
+                            }
+                        );
+                    } else {
+                        // Display a modal
+                        Modal.clear();
+                        Modal.setHeader("Package Validation Error");
+                        Modal.setBody("The spfx package is invalid.");
+                        Modal.show();
                     }
-                )
+                });
             } else {
                 // Display a modal
                 Modal.clear();

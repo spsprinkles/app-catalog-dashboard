@@ -40,7 +40,6 @@ export const Configuration = Helper.SPConfig({
                     type: Helper.SPCfgFieldType.Guid,
                     allowDeletion: false,
                     readOnly: true,
-                    showInEditForm: false,
                     showInNewForm: false
                 },
                 {
@@ -48,7 +47,6 @@ export const Configuration = Helper.SPConfig({
                     title: "App Version",
                     type: Helper.SPCfgFieldType.Text,
                     allowDeletion: false,
-                    showInEditForm: false,
                     showInNewForm: false
                 },
                 {
@@ -57,7 +55,6 @@ export const Configuration = Helper.SPConfig({
                     type: Helper.SPCfgFieldType.Boolean,
                     allowDeletion: false,
                     defaultValue: "1",
-                    showInEditForm: false,
                     showInNewForm: false
                 },
                 {
