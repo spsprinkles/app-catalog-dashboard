@@ -1,4 +1,4 @@
-import { Components, List, Types, Web } from "gd-sprest-bs";
+import { Components, Helper, List, Types, Web } from "gd-sprest-bs";
 import Strings from "./strings";
 
 // App Item
@@ -18,6 +18,7 @@ export interface IAppItem extends Types.SP.ListItem {
     AppVideoURL: Types.SP.FieldUrlValue;
     AuthorId: number;
     CheckoutUser: { Id: number; Title: string; };
+    ContentTypeId: string;
     DevAppStatus: string;
     FileLeafRef: string;
     IsDefaultAppMetadataLocale: boolean;
@@ -103,6 +104,62 @@ export class DataSource {
         });
     }
 
+    // Gets the document set item id from the query string
+    private static _docSetItemId: number = 0;
+    static get IsDocSet(): boolean { return this.DocSetItemId > 0; }
+    static get DocSetItemId(): number {
+        // Return a valid value
+        if (this._docSetItemId <= 0) {
+            // Get the id from the querystring
+            let qs = document.location.search.split('?');
+            qs = qs.length > 1 ? qs[1].split('&') : [];
+            for (let i = 0; i < qs.length; i++) {
+                let qsItem = qs[i].split('=');
+                let key = qsItem[0].toLowerCase();
+                let value = qsItem[1];
+
+                // See if this is the "id" key
+                if (key == "id") {
+                    // Return the item
+                    this._docSetItemId = parseInt(value);
+                }
+            }
+        }
+
+        // Return the workspace item id
+        return this._docSetItemId;
+    }
+
+    // Loads the document set item
+    private static _docSetInfo: Helper.IListFormResult = null;
+    static get DocSetInfo(): Helper.IListFormResult { return this._docSetInfo; }
+    static get DocSetItem(): IAppItem { return this._docSetInfo.item as any; }
+    static loadDocSet(): PromiseLike<void> {
+        // Return a promise
+        return new Promise((resolve, reject) => {
+            // Load the list information
+            Components.ListForm.create({
+                listName: Strings.Lists.Apps,
+                itemId: this.DocSetItemId,
+                contentType: "App",
+                query: {
+                    Expand: ["CheckoutUser", "Owners"],
+                    Select: [
+                        "Id", "FileLeafRef", "CheckoutUser/Title", "AppThumbnailURL", "AuthorId",
+                        "OwnersId", "DevAppStatus", 'Title', "AppProductID", "AppVersion", "AppPublisher", "Owners",
+                        "IsAppPackageEnabled", "Owners/Id", "Owners/EMail"
+                    ]
+                }
+            }).then(info => {
+                // Save the info
+                this._docSetInfo = info;
+
+                // Resolve the request
+                resolve();
+            }, reject);
+        });
+    }
+
     // Status Filters
     private static _statusFilters: Components.ICheckboxGroupItem[] = null;
     static get StatusFilters(): Components.ICheckboxGroupItem[] { return this._statusFilters; }
@@ -129,41 +186,32 @@ export class DataSource {
         });
     }
 
-    // Gets the item id from the query string
-    static getItemIdFromQS() {
-        // Get the id from the querystring
-        let qs = document.location.search.split('?');
-        qs = qs.length > 1 ? qs[1].split('&') : [];
-        for (let i = 0; i < qs.length; i++) {
-            let qsItem = qs[i].split('=');
-            let key = qsItem[0];
-            let value = qsItem[1];
-
-            // See if this is the "id" key
-            if (key == "ID") {
-                // Return the item
-                return parseInt(value);
-            }
-        }
-    }
-
     // Initializes the application
     static init(): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve, reject) => {
             // Load the configuration
             this.loadConfiguration().then(() => {
-                // Load the apps
-                this.loadApps().then(() => {
-                    // Load the data
-                    this.load().then(() => {
-                        // Load the status filters
-                        this.loadStatusFilters().then(() => {
-                            // Resolve the request
-                            resolve();
+                // See if this is a document set item
+                if (this.DocSetItemId > 0) {
+                    // Load the document set item
+                    this.loadDocSet().then(() => {
+                        // Resolve the request
+                        resolve();
+                    }, reject);
+                } else {
+                    // Load the apps
+                    this.loadApps().then(() => {
+                        // Load the data
+                        this.load().then(() => {
+                            // Load the status filters
+                            this.loadStatusFilters().then(() => {
+                                // Resolve the request
+                                resolve();
+                            }, reject);
                         }, reject);
-                    }, reject)
-                }, reject);
+                    }, reject);
+                }
             }, reject);
         });
     }
@@ -176,9 +224,10 @@ export class DataSource {
         return new Promise((resolve, reject) => {
             // Load the list items
             List(Strings.Lists.Apps).Items().query({
-                Expand: ["CheckoutUser", "Owners"],
+                Expand: ["CheckoutUser", "Folder", "Owners"],
+                Filter: "ContentType eq 'App'",
                 Select: [
-                    "Id", "FileLeafRef", "CheckoutUser/Title", "AppThumbnailURL", "AuthorId",
+                    "Id", "FileLeafRef", "ContentTypeId", "CheckoutUser/Title", "AppThumbnailURL", "AuthorId",
                     "OwnersId", "DevAppStatus", 'Title', "AppProductID", "AppVersion", "AppPublisher", "Owners",
                     "IsAppPackageEnabled", "Owners/Id", "Owners/EMail"
                 ]

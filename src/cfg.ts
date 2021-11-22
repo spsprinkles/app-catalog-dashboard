@@ -1,4 +1,4 @@
-import { ContextInfo, Helper, SPTypes } from "gd-sprest-bs";
+import { Helper, List, SPTypes } from "gd-sprest-bs";
 import Strings from "./strings";
 
 /**
@@ -9,30 +9,60 @@ export const Configuration = Helper.SPConfig({
     ListCfg: [
         {
             ListInformation: {
-                BaseTemplate: SPTypes.ListTemplateType.DocumentLibrary,
-                Title: Strings.Lists.Apps,
-                Description: "Used by developers to submit their solutions to the App Catalog",
-                ListExperienceOptions: SPTypes.ListExperienceOptions.ClassicExperience,
                 AllowContentTypes: true,
-                ContentTypesEnabled: false,
+                BaseTemplate: SPTypes.ListTemplateType.DocumentLibrary,
+                Description: "Used by developers to submit their solutions to the App Catalog",
+                ContentTypesEnabled: true,
                 DisableGridEditing: true,
                 EnableFolderCreation: false,
                 ExcludeFromOfflineClient: true,
-                NoCrawl: true,
                 ImageUrl: "/_layouts/15/images/itappcatalog.png?rev=47",
+                ListExperienceOptions: SPTypes.ListExperienceOptions.ClassicExperience,
+                NoCrawl: true,
+                Title: Strings.Lists.Apps
             },
-            //Only runs when asset is actually created, not on subsequent runs
-            onCreated: function () {
-                //Add scriptEditor
-                Helper.addScriptEditorWebPart(ContextInfo.webServerRelativeUrl + "/DeveloperApps/Forms/AllItems.aspx", {
-                    title: "Access Notice",
-                    description: "Force page to display in classic mode and shows message",
-                    chromeType: "None",
-                    index: 0,
-                    zone: "Main",
-                    content: 'This page is for admin use only. Access the <a href="../../SitePages/AppDashboard.aspx">App Dashboard</a> for more features.'
-                });
-            },
+            ContentTypes: [
+                {
+                    Name: "App",
+                    Description: "Displayed in the ribbon new item text.",
+                    ParentName: "Document Set",
+                    FieldRefs: [
+                        "FileLeafRef",
+                        "Owners",
+                        "DevAppStatus",
+                        "SharePointAppCategory",
+                        "AppPublisher",
+                        "AppSupportURL",
+                        "AppThumbnailURL",
+                        "AppShortDescription",
+                        "AppDescription",
+                        "AppImageURL1",
+                        "AppImageURL2",
+                        "AppImageURL3",
+                        "AppImageURL4",
+                        "AppImageURL5",
+                        "AppVideoURL",
+                        "IsAppPackageEnabled",
+                        { Name: "AppProductID", ReadOnly: true },
+                        { Name: "AppVersion", ReadOnly: true },
+                        { Name: "IsDefaultAppMetadataLocale", ReadOnly: true }
+                    ],
+                    onCreated: () => {
+                        // Get the list document set home page
+                        List(Strings.Lists.Apps).RootFolder().Folders("Forms").Folders("App").Files("docsethomepage.aspx").execute(page => {
+                            // Add the dashboard webpart
+                            Helper.addContentEditorWebPart(page.ServerRelativeUrl, {
+                                title: "Dashboard",
+                                description: "Displays the custom dashboard.",
+                                frameType: "None",
+                                index: 0,
+                                zone: "WebPartZone_Top",
+                                contentLink: Strings.SolutionUrl
+                            });
+                        });
+                    }
+                }
+            ],
             CustomFields: [
                 {
                     name: "AppProductID",
@@ -187,7 +217,7 @@ export const Configuration = Helper.SPConfig({
             ],
             ViewInformation: [{
                 ViewName: "All Documents",
-                ViewFields: ["DocIcon", "LinkFilename", "AppPublisher", "DevAppStatus", "Modified", "Editor"],
+                ViewFields: ["DocIcon", "LinkFilename", "Modified", "Editor"],
                 ViewQuery: '<OrderBy><FieldRef Name="FileLeafRef" Ascending="TRUE" /></OrderBy>',
                 JSLink: Strings.SolutionAppsCSRUrl,
             }]

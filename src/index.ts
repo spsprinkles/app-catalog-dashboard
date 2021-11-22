@@ -1,6 +1,7 @@
 import { InstallationRequired } from "dattatable";
 import { App } from "./app";
 import { Configuration } from "./cfg";
+import { AppDashboard } from "./dashboard";
 import { DataSource } from "./ds";
 import Strings, { setContext } from "./strings";
 
@@ -17,12 +18,26 @@ const GlobalVariable = {
             setContext(context);
         }
 
+        // Hide the first column of the webpart zones
+        let wpZone: HTMLElement = document.querySelector("#DeltaPlaceHolderMain table > tbody > tr > td");
+        wpZone ? wpZone.style.width = "0%" : null;
+
+        // Make the second column of the webpart zones full width
+        wpZone = document.querySelector("#DeltaPlaceHolderMain table > tbody > tr > td:last-child");
+        wpZone ? wpZone.style.width = "100%" : null;
+
         // Initialize the solution
         DataSource.init().then(
             // Success
             () => {
-                // Create the application
-                new App(el);
+                // See if this is a document set
+                if (DataSource.IsDocSet) {
+                    // Create the application
+                    new App(el);
+                } else {
+                    // Render the dashboard
+                    new AppDashboard(el);
+                }
             },
             // Error
             () => {

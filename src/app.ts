@@ -1,4 +1,4 @@
-import { Dashboard, LoadingDialog } from "dattatable";
+import { LoadingDialog } from "dattatable";
 import { Components, ContextInfo } from "gd-sprest-bs";
 import { appIndicator } from "gd-sprest-bs/build/icons/svgs/appIndicator";
 import { chatSquareDots } from "gd-sprest-bs/build/icons/svgs/chatSquareDots";
@@ -15,7 +15,6 @@ import Strings from "./strings";
  * Main Application
  */
 export class App {
-    private _dashboard: Dashboard = null;
     private _el: HTMLElement = null;
     private _forms: AppForms = null;
 
@@ -24,6 +23,15 @@ export class App {
         // Set the global variables
         this._el = el;
         this._forms = new AppForms();
+
+        // Render the template
+        this._el.classList.add("bs");
+        this._el.innerHTML = `
+            <div id="app-dashboard" class="row">
+                <div id="app-info" class="col-8"></div>
+                <div id="app-actions" class="col-4"></div>
+            </div>
+        `;
 
         // Render the dashboard
         this.render();
@@ -50,282 +58,120 @@ export class App {
 
     // Renders the dashboard
     private render() {
-        // Create the dashboard
-        this._dashboard = new Dashboard({
-            el: this._el,
-            hideHeader: true,
-            useModal: true,
-            filters: {
-                items: [
-                    {
-                        header: "Event Status",
-                        items: DataSource.StatusFilters,
-                        onFilter: (value: string) => {
-                            // Filter the dashboard
-                            this._dashboard.filter(4, value);
-                        },
-                    },
-                ],
-            },
-            navigation: {
-                title: columnsGap(32).outerHTML + '<span class="ms-3">' + Strings.ProjectName + "</span>",
-                items: [
-                    {
-                        className: "btn-outline-light",
-                        isButton: true,
-                        text: "Add/Update App",
-                        onClick: () => {
-                            // Upload the package file
-                            this._forms.upload(() => {
-                                // Refresh the dashboard
-                                this.refresh();
-                            });
-                        }
-                    },
-                    {
-                        className: "ms-2 btn-outline-light",
-                        isButton: true,
-                        text: "Refresh",
-                        onClick: () => {
-                            // Refresh the dashboard
+        // Determine if the user can edit the item
+        let canEdit = (DataSource.DocSetItem["AuthorId"] == ContextInfo.userId ||
+            (DataSource.DocSetItem["OwnersId"] ? DataSource.DocSetItem["OwnersId"].results.indexOf(ContextInfo.userId) != -1 : false));
+
+        // Render the properties
+        Components.ListForm.renderDisplayForm({
+            info: DataSource.DocSetInfo,
+            el: this._el.querySelector("#app-info"),
+            includeFields: [
+                "FileLeafRef",
+                "DevAppStatus",
+                "Owners",
+                "SharePointAppCategory",
+                "AppProductID",
+                "AppVersion",
+                "IsAppPackageEnabled"
+            ]
+        });
+
+        // Render the actions
+        Components.ButtonGroup({
+            el: this._el.querySelector("#app-actions"),
+            isVertical: true,
+            buttons: [
+                {
+                    text: "Edit Properties",
+                    iconSize: 20,
+                    iconType: pencilSquare,
+                    isSmall: true,
+                    type: Components.ButtonTypes.OutlineSecondary,
+                    onClick: () => {
+                        // Display the edit form
+                        this._forms.edit(DataSource.DocSetItem.Id, () => {
+                            // Refresh the table
                             this.refresh();
-                        }
+                        });
                     }
-                ],
-            },
-            footer: {
-                itemsEnd: [
-                    {
-                        text: "v" + Strings.Version,
-                    },
-                ],
-            },
-            table: {
-                rows: DataSource.Items,
-                dtProps: {
-                    dom: 'rt<"row"<"col-sm-4"l><"col-sm-4"i><"col-sm-4"p>>',
-                    columnDefs: [
-                        {
-                            targets: [0],
-                            orderable: false,
-                            searchable: false
-                        }
-                    ],
-                    // Add some classes to the dataTable elements
-                    drawCallback: function () {
-                        jQuery(".table", this._table).removeClass("no-footer");
-                        jQuery(".table", this._table).addClass("tbl-footer");
-                        jQuery(".table", this._table).addClass("table-striped");
-                        jQuery(".table thead th", this._table).addClass("align-middle");
-                        jQuery(".table tbody td", this._table).addClass("align-middle");
-                        jQuery(".dataTables_info", this._table).addClass("text-center");
-                        jQuery(".dataTables_length", this._table).addClass("pt-2");
-                        jQuery(".dataTables_paginate", this._table).addClass("pt-03");
-                    },
-                    // Sort descending by Start Date
-                    order: [[2, "asc"]],
-                    language: {
-                        emptyTable: "No apps were found",
-                    },
                 },
-                columns: [
-                    {
-                        name: "",
-                        title: "Options",
-                        onRenderCell: (el, column, item: IAppItem) => {
-                            let canEdit = (item["AuthorId"] == ContextInfo.userId || (item["OwnersId"] ? item["OwnersId"].results.indexOf(ContextInfo.userId) != -1 : false));
-                            Components.ButtonGroup({
-                                el,
-                                buttons: [
-                                    {
-                                        text: "Edit Properties",
-                                        iconSize: 20,
-                                        iconType: pencilSquare,
-                                        isSmall: true,
-                                        type: Components.ButtonTypes.OutlinePrimary,
-                                        onClick: () => {
-                                            // Display the edit form
-                                            this._forms.edit(item.Id, () => {
-                                                // Refresh the table
-                                                this.refresh();
-                                            });
-                                        }
-                                    },
-                                    {
-                                        text: "Submit for Review",
-                                        iconSize: 20,
-                                        iconType: appIndicator,
-                                        isDisabled: canEdit && item.DevAppStatus != "In Review" ? false : true,
-                                        isSmall: true,
-                                        type: Components.ButtonTypes.OutlinePrimary,
-                                        onClick: () => {
-                                            // Display the submit form
-                                            this._forms.submit(item, () => {
-                                                // Refresh the table
-                                                this.refresh();
-                                            });
-                                        }
-                                    },
-                                    {
-                                        text: "Review this App",
-                                        iconSize: 20,
-                                        iconType: chatSquareDots,
-                                        isDisabled: item.DevAppStatus != "In Review" ? true : !canEdit,
-                                        isSmall: true,
-                                        type: Components.ButtonTypes.OutlinePrimary,
-                                        onClick: () => {
-                                            // Display the review form
-                                            this._forms.review(item, () => {
-                                                // Refresh the table
-                                                this.refresh();
-                                            });
-                                        }
-                                    },
-                                    {
-                                        text: "Delete App/Solution",
-                                        iconSize: 20,
-                                        iconType: trash,
-                                        isDisabled: !canEdit,
-                                        isSmall: true,
-                                        type: Components.ButtonTypes.OutlineDanger,
-                                        onClick: () => {
-                                            // Display the delete form
-                                            this._forms.delete(item, () => {
-                                                // Refresh the table
-                                                this.refresh();
-                                            });
-                                        }
-                                    },
-                                    {
-                                        text: "Deploy",
-                                        iconSize: 20,
-                                        //iconType: trash,
-                                        //isDisabled: !canEdit,
-                                        isSmall: true,
-                                        type: Components.ButtonTypes.OutlineWarning,
-                                        onClick: () => {
-                                            // Deploy the app
-                                            this._forms.deploy(item, () => {
-                                                // Refresh the table
-                                                this.refresh();
-                                            });
-                                        }
-                                    },
-                                    {
-                                        text: "Retract",
-                                        iconSize: 20,
-                                        //iconType: trash,
-                                        //isDisabled: !canEdit,
-                                        isSmall: true,
-                                        type: Components.ButtonTypes.OutlineDanger,
-                                        onClick: () => {
-                                            // Retract the app
-                                            this._forms.retract(item, () => {
-                                                // Refresh the table
-                                                this.refresh();
-                                            });
-                                        }
-                                    }
-                                ]
-                            });
-                        }
-                    },
-                    {
-                        name: "",
-                        title: "Icon",
-                        onRenderCell: (el, column, item: IAppItem) => {
-                            // Ensure a url exists
-                            if (item.AppThumbnailURL && item.AppThumbnailURL.Url) {
-                                // Render the link
-                                el.innerHTML = '<img class="bg-sharepoint" src="' + item.AppThumbnailURL.Url + '" style="width:42px; height:42px;">';
-                            }
-                        }
-                    },
-                    {
-                        name: "Title",
-                        title: "App Title",
-                        onRenderCell: (el, column, item: IAppItem) => {
-                            // See if the item is checked out
-                            if (item.CheckoutUser && item.CheckoutUser.Title) {
-                                // Prepend the image
-                                el.innerHTML = '<img src="/_layouts/15/images/checkoutoverlay.gif" title="Checked Out To: ' + item.CheckoutUser.Title + '" /> ' + el.innerHTML;
-                            }
-                        }
-                    },
-                    {
-                        name: "AppVersion",
-                        title: "Version"
-                    },
-                    {
-                        name: "DevAppStatus",
-                        title: "App Status",
-                        onRenderCell: (el, column, item: IAppItem) => {
-                            let lineBreak = document.createElement("br");
-                            el.appendChild(lineBreak);
-
-                            // See if this app is deployed in the catalog
-                            let app = DataSource.getAppById(item.AppProductID);
-                            if (app) {
-                                // See if it's deployed
-                                if (app.Deployed) {
-                                    // Render a badge
-                                    Components.Badge({
-                                        el,
-                                        content: "Deployed",
-                                        isPill: true,
-                                        type: Components.BadgeTypes.Primary
-                                    });
-                                } else {
-                                    // Render a badge
-                                    Components.Badge({
-                                        el,
-                                        content: "Not Deployed",
-                                        isPill: true,
-                                        type: Components.BadgeTypes.Secondary
-                                    });
-                                }
-                            } else {
-                                // Render a badge
-                                Components.Badge({
-                                    el,
-                                    content: "Not in App Catalog",
-                                    isPill: true,
-                                    type: Components.BadgeTypes.Info
-                                });
-                            }
-                        }
-                    },
-                    {
-                        name: "AppPublisher",
-                        title: "Publisher"
-                    },
-                    {
-                        name: "",
-                        title: "Owners",
-                        onRenderCell: (el, column, item: IAppItem) => {
-                            var owners = item.Owners && item.Owners.results || [];
-
-                            // Parse the owners
-                            var strOwners = [];
-                            owners.forEach(owner => {
-                                // Append the email
-                                strOwners.push(owner.EMail.split("@")[0]);
-                            });
-
-                            // Display the owners
-                            el.innerText = strOwners.join("; ");
-                        }
-                    },
-                    {
-                        name: "",
-                        title: "Enabled",
-                        onRenderCell: (el, column, item: IAppItem) => {
-                            // Set the text
-                            el.innerText = item.IsAppPackageEnabled ? "Yes" : "No";
-                        }
+                {
+                    text: "Submit for Review",
+                    iconSize: 20,
+                    iconType: appIndicator,
+                    isDisabled: canEdit && DataSource.DocSetItem.DevAppStatus != "In Review" ? false : true,
+                    isSmall: true,
+                    type: Components.ButtonTypes.OutlinePrimary,
+                    onClick: () => {
+                        // Display the submit form
+                        this._forms.submit(DataSource.DocSetItem, () => {
+                            // Refresh the table
+                            this.refresh();
+                        });
                     }
-                ]
-            }
+                },
+                {
+                    text: "Review this App",
+                    iconSize: 20,
+                    iconType: chatSquareDots,
+                    isDisabled: DataSource.DocSetItem.DevAppStatus != "In Review" ? true : !canEdit,
+                    isSmall: true,
+                    type: Components.ButtonTypes.OutlinePrimary,
+                    onClick: () => {
+                        // Display the review form
+                        this._forms.review(DataSource.DocSetItem, () => {
+                            // Refresh the table
+                            this.refresh();
+                        });
+                    }
+                },
+                {
+                    text: "Delete App/Solution",
+                    iconSize: 20,
+                    iconType: trash,
+                    isDisabled: !canEdit,
+                    isSmall: true,
+                    type: Components.ButtonTypes.OutlineDanger,
+                    onClick: () => {
+                        // Display the delete form
+                        this._forms.delete(DataSource.DocSetItem, () => {
+                            // Refresh the table
+                            this.refresh();
+                        });
+                    }
+                },
+                {
+                    text: "Deploy",
+                    iconSize: 20,
+                    //iconType: trash,
+                    //isDisabled: !canEdit,
+                    isSmall: true,
+                    type: Components.ButtonTypes.OutlineWarning,
+                    onClick: () => {
+                        // Deploy the app
+                        this._forms.deploy(DataSource.DocSetItem, () => {
+                            // Refresh the table
+                            this.refresh();
+                        });
+                    }
+                },
+                {
+                    text: "Retract",
+                    iconSize: 20,
+                    //iconType: trash,
+                    //isDisabled: !canEdit,
+                    isSmall: true,
+                    type: Components.ButtonTypes.OutlineDanger,
+                    onClick: () => {
+                        // Retract the app
+                        this._forms.retract(DataSource.DocSetItem, () => {
+                            // Refresh the table
+                            this.refresh();
+                        });
+                    }
+                }
+            ]
         });
     }
 }

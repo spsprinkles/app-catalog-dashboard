@@ -159,6 +159,13 @@ export class AppForms {
                 // Update the header
                 el.innerHTML = "New App"
             },
+            onGetListInfo: props => {
+                // Set the content type
+                props.contentType = "App";
+
+                // Return the properties
+                return props;
+            },
             onCreateEditForm: props => {
                 // Exclude fields
                 props.excludeFields = ["DevAppStatus"];
@@ -172,6 +179,7 @@ export class AppForms {
                     }
                 }
 
+                // Return the properties
                 return props;
             },
             onUpdate: () => {
@@ -455,23 +463,52 @@ export class AppForms {
         Helper.ListForm.showFileDialog().then(file => {
             // Ensure this is an spfx package
             if (file.name.toLowerCase().endsWith(".sppkg")) {
+                // Display a loading dialog
+                LoadingDialog.setHeader("Reading Package");
+                LoadingDialog.setBody("Validating the package...");
+                LoadingDialog.show();
+
                 // Extract the metadata from the package
                 this.readPackage(file.data).then(data => {
                     // Validate the data
                     if (data.AppProductID && data.AppVersion && data.Title) {
-                        // Upload the file
-                        List(Strings.Lists.Apps).RootFolder().Files().add(file.name, true, file.data).execute(
-                            // Success
-                            file => {
-                                // Get the item
-                                file.ListItemAllFields().execute(item => {
-                                    // Update the item
-                                    item.update(data).execute(() => {
-                                        // Save metadata to item
+                        // Update the loading dialog
+                        LoadingDialog.setHeader("Creating App Folder");
+                        LoadingDialog.setBody("Creating the app folder...");
 
-                                        // Display the edit form
-                                        this.edit(item.Id, onUpdate);
-                                    });
+                        // Create the document set folder
+                        Helper.createDocSet(data.Title, Strings.Lists.Apps).then(
+                            // Success
+                            item => {
+                                // Update the loading dialog
+                                LoadingDialog.setHeader("Updating Metadata");
+                                LoadingDialog.setBody("Saving the package information...");
+
+                                // Update the metadata
+                                item.update(data).execute(() => {
+                                    // Execute the update event
+                                    onUpdate();
+
+                                    // Update the loading dialog
+                                    LoadingDialog.setHeader("Uploading the Package");
+                                    LoadingDialog.setBody("Uploading the app package...");
+
+                                    // Upload the file
+                                    item.Folder().Files().add(file.name, true, file.data).execute(
+                                        // Success
+                                        file => {
+                                            // Close the loading dialog
+                                            LoadingDialog.hide();
+
+                                            // Display the edit form
+                                            this.edit(item.Id, onUpdate);
+                                        },
+
+                                        // Error
+                                        () => {
+                                            // TODO
+                                        }
+                                    );
                                 });
                             },
 
@@ -481,6 +518,9 @@ export class AppForms {
                             }
                         );
                     } else {
+                        // Close the loading dialog
+                        LoadingDialog.hide();
+
                         // Display a modal
                         Modal.clear();
                         Modal.setHeader("Package Validation Error");
