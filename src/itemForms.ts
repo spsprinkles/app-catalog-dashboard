@@ -166,7 +166,7 @@ export class AppForms {
                 // Update the field
                 props.onControlRendering = (ctrl, field) => {
                     // See if this is a read-only field
-                    if (field.InternalName == "FileLeafRef") {
+                    if (["AppProductID", "AppVersion", "FileLeafRef", "Title"].indexOf(field.InternalName) >= 0) {
                         // Make it read-only
                         ctrl.isReadonly = true;
                     }
@@ -458,7 +458,7 @@ export class AppForms {
                 // Extract the metadata from the package
                 this.readPackage(file.data).then(data => {
                     // Validate the data
-                    if (data.AppProductID && data.AppVersion) {
+                    if (data.AppProductID && data.AppVersion && data.Title) {
                         // Upload the file
                         List(Strings.Lists.Apps).RootFolder().Files().add(file.name, true, file.data).execute(
                             // Success
