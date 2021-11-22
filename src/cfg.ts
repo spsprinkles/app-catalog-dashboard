@@ -39,7 +39,6 @@ export const Configuration = Helper.SPConfig({
                     title: "Product ID",
                     type: Helper.SPCfgFieldType.Guid,
                     allowDeletion: false,
-                    readOnly: true,
                     showInNewForm: false
                 },
                 {

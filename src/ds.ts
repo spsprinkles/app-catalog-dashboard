@@ -19,6 +19,7 @@ export interface IAppItem extends Types.SP.ListItem {
     AuthorId: number;
     CheckoutUser: { Id: number; Title: string; };
     DevAppStatus: string;
+    FileLeafRef: string;
     IsDefaultAppMetadataLocale: boolean;
     IsAppPackageEnabled: boolean;
     Owners: { results: { Id: number; EMail: string; }[] }
@@ -32,7 +33,7 @@ export interface IAssessmentItem extends Types.SP.ListItem {
 // Configuration
 export interface IConfiguration {
     appCatalogAdminEmailGroup?: string;
-    tenantAppCatalog?: string;
+    tenantAppCatalogUrl?: string;
 }
 
 /**
@@ -146,7 +147,7 @@ export class DataSource {
                 Expand: ["CheckoutUser", "Owners"],
                 Select: [
                     "Id", "FileLeafRef", "CheckoutUser/Title", "AppThumbnailURL", "AuthorId",
-                    "OwnersId", "DevAppStatus", 'Title', "AppVersion", "AppPublisher", "Owners",
+                    "OwnersId", "DevAppStatus", 'Title', "AppProductID", "AppVersion", "AppPublisher", "Owners",
                     "IsAppPackageEnabled", "Owners/Id", "Owners/EMail"
                 ]
             }).execute(items => {

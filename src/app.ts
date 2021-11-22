@@ -196,6 +196,36 @@ export class App {
                                             });
                                         }
                                     },
+                                    {
+                                        text: "Deploy",
+                                        iconSize: 20,
+                                        //iconType: trash,
+                                        //isDisabled: !canEdit,
+                                        isSmall: true,
+                                        type: Components.ButtonTypes.OutlineWarning,
+                                        onClick: () => {
+                                            // Deploy the app
+                                            this._forms.deploy(item, () => {
+                                                // Refresh the table
+                                                this.refresh();
+                                            });
+                                        }
+                                    },
+                                    {
+                                        text: "Retract",
+                                        iconSize: 20,
+                                        //iconType: trash,
+                                        //isDisabled: !canEdit,
+                                        isSmall: true,
+                                        type: Components.ButtonTypes.OutlineDanger,
+                                        onClick: () => {
+                                            // Retract the app
+                                            this._forms.retract(item, () => {
+                                                // Refresh the table
+                                                this.refresh();
+                                            });
+                                        }
+                                    }
                                 ]
                             });
                         }

@@ -1,6 +1,6 @@
 import { ItemForm, LoadingDialog, Modal } from "dattatable";
-import { Components, ContextInfo, Helper, List, Utility } from "gd-sprest-bs";
-import { file, loadAsync } from "jszip";
+import { Components, ContextInfo, Helper, List, Utility, Web } from "gd-sprest-bs";
+import { loadAsync } from "jszip";
 import { DataSource, IAppItem, IAssessmentItem } from "./ds";
 import Strings from "./strings";
 
@@ -89,6 +89,62 @@ export class AppForms {
 
         // Show the modal
         Modal.show();
+    }
+
+    // Deploys the solution to the app catalog
+    deploy(item: IAppItem, onUpdate: () => void) {
+        // Show a loading dialog
+        LoadingDialog.setHeader("Uploading Package");
+        LoadingDialog.setBody("Uploading the spfx package to the app tenant catalog.");
+        LoadingDialog.show();
+
+        // Upload the package file
+        item.File().content().execute(content => {
+            // Load the context of the app catalog
+            ContextInfo.getWeb(DataSource.Configuration.tenantAppCatalogUrl).execute(context => {
+                // Upload the file to the app catalog
+                Web(DataSource.Configuration.tenantAppCatalogUrl, { requestDigest: context.GetContextWebInformation.FormDigestValue })
+                    .TenantAppCatalog().add(item.FileLeafRef, true, content).execute(file => {
+                        // Update the dialog
+                        LoadingDialog.setHeader("Deploying the Package");
+                        LoadingDialog.setBody("This will close after the app is deployed.");
+
+                        // Check-in the file
+                        file.checkIn().execute(() => {
+                            // Do we need to do this by default?
+                        });
+
+                        // Get the apps
+                        Web(DataSource.Configuration.tenantAppCatalogUrl, { requestDigest: context.GetContextWebInformation.FormDigestValue })
+                            .TenantAppCatalog().AvailableApps().execute(apps => {
+                                for (let i = 0; i < apps.results.length; i++) {
+                                    let app = apps.results[i];
+
+                                    // See if this is the target app
+                                    if (app.ProductId != item.AppProductID) { continue; }
+
+                                    // See if it's not deployed
+                                    if (app.Deployed != true) {
+                                        // Deploy the app
+                                        app.deploy().execute(() => {
+                                            // Call the update event
+                                            onUpdate();
+
+                                            // App deployed
+                                            LoadingDialog.hide();
+                                        });
+                                    } else {
+                                        // Call the update event
+                                        onUpdate();
+
+                                        // Close the dialog
+                                        LoadingDialog.hide();
+                                    }
+                                }
+                            });
+                    });
+            });
+        });
     }
 
     // Edit form
@@ -211,6 +267,46 @@ export class AppForms {
                     });
                 });
             });
+        });
+    }
+
+    // Retracts the solution to the app catalog
+    retract(item: IAppItem, onUpdate: () => void) {
+        // Show a loading dialog
+        LoadingDialog.setHeader("Retracting the Package");
+        LoadingDialog.setBody("Retracting the spfx package to the app tenant catalog.");
+        LoadingDialog.show();
+
+        // Load the context of the app catalog
+        ContextInfo.getWeb(DataSource.Configuration.tenantAppCatalogUrl).execute(context => {
+            // Get the apps
+            Web(DataSource.Configuration.tenantAppCatalogUrl, { requestDigest: context.GetContextWebInformation.FormDigestValue })
+                .TenantAppCatalog().AvailableApps().execute(apps => {
+                    for (let i = 0; i < apps.results.length; i++) {
+                        let app = apps.results[i];
+
+                        // See if this is the target app
+                        if (app.ProductId != item.AppProductID) { continue; }
+
+                        // See if it's deployed
+                        if (app.Deployed) {
+                            // Retract the app
+                            app.retract().execute(() => {
+                                // Call the update event
+                                onUpdate();
+
+                                // App deployed
+                                LoadingDialog.hide();
+                            });
+                        } else {
+                            // Call the update event
+                            onUpdate();
+
+                            // Close the dialog
+                            LoadingDialog.hide();
+                        }
+                    }
+                });
         });
     }
 
