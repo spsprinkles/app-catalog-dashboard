@@ -40,6 +40,35 @@ export interface IConfiguration {
  * Data Source
  */
 export class DataSource {
+    // Apps
+    private static _apps: Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata[] = null;
+    static get Apps(): Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata[] { return this._apps; }
+    static getAppById(appId: string): Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata {
+        // Parse the apps
+        for (let i = 0; i < this._apps.length; i++) {
+            let app = this._apps[i];
+
+            // See if this is the target app
+            if (app.ProductId == appId) { return app; }
+        }
+
+        // App not found
+        return null;
+    }
+    static loadApps(): PromiseLike<void> {
+        // Return a promise
+        return new Promise((resolve, reject) => {
+            // Load the available apps
+            Web().TenantAppCatalog().AvailableApps().execute(apps => {
+                // Set the apps
+                this._apps = apps.results;
+
+                // Resolve the request
+                resolve();
+            }, reject);
+        });
+    }
+
     // Configuration
     private static _cfg: IConfiguration = null;
     static get Configuration(): IConfiguration { return this._cfg; }
@@ -124,14 +153,17 @@ export class DataSource {
         return new Promise((resolve, reject) => {
             // Load the configuration
             this.loadConfiguration().then(() => {
-                // Load the data
-                this.load().then(() => {
-                    // Load the status filters
-                    this.loadStatusFilters().then(() => {
-                        // Resolve the request
-                        resolve();
-                    }, reject);
-                }, reject)
+                // Load the apps
+                this.loadApps().then(() => {
+                    // Load the data
+                    this.load().then(() => {
+                        // Load the status filters
+                        this.loadStatusFilters().then(() => {
+                            // Resolve the request
+                            resolve();
+                        }, reject);
+                    }, reject)
+                }, reject);
             }, reject);
         });
     }

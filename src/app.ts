@@ -258,7 +258,42 @@ export class App {
                     },
                     {
                         name: "DevAppStatus",
-                        title: "App Status"
+                        title: "App Status",
+                        onRenderCell: (el, column, item: IAppItem) => {
+                            let lineBreak = document.createElement("br");
+                            el.appendChild(lineBreak);
+
+                            // See if this app is deployed in the catalog
+                            let app = DataSource.getAppById(item.AppProductID);
+                            if (app) {
+                                // See if it's deployed
+                                if (app.Deployed) {
+                                    // Render a badge
+                                    Components.Badge({
+                                        el,
+                                        content: "Deployed",
+                                        isPill: true,
+                                        type: Components.BadgeTypes.Primary
+                                    });
+                                } else {
+                                    // Render a badge
+                                    Components.Badge({
+                                        el,
+                                        content: "Not Deployed",
+                                        isPill: true,
+                                        type: Components.BadgeTypes.Secondary
+                                    });
+                                }
+                            } else {
+                                // Render a badge
+                                Components.Badge({
+                                    el,
+                                    content: "Not in App Catalog",
+                                    isPill: true,
+                                    type: Components.BadgeTypes.Info
+                                });
+                            }
+                        }
                     },
                     {
                         name: "AppPublisher",
