@@ -1,5 +1,5 @@
-import { LoadingDialog, Navigation } from "dattatable";
-import { Components, ContextInfo } from "gd-sprest-bs";
+import { LoadingDialog } from "dattatable";
+import { Components, ContextInfo, Types } from "gd-sprest-bs";
 import { appIndicator } from "gd-sprest-bs/build/icons/svgs/appIndicator";
 import { chatSquareDots } from "gd-sprest-bs/build/icons/svgs/chatSquareDots";
 import { pencilSquare } from "gd-sprest-bs/build/icons/svgs/pencilSquare";
@@ -219,11 +219,36 @@ export class App {
 
     // Renders the navigation
     private renderNav() {
+        // Generate the templates
+        let itemsEnd: Components.INavbarItem[] = null;
+        if (DataSource.Templates && DataSource.Templates.length > 0) {
+            // Clear the items
+            itemsEnd = [{
+                className: "btn-outline-light",
+                text: "Templates",
+                isButton: true,
+                items: []
+            }];
+
+            // Parse the templates
+            for (let i = 0; i < DataSource.Templates.length; i++) {
+                let template = DataSource.Templates[i];
+
+                // Add the item
+                itemsEnd[0].items.push({
+                    data: template,
+                    text: template.Name,
+                    onClick: item => { this.uploadTemplate(item.data); }
+                });
+            }
+        }
+
         // Render the navigation
         Components.Navbar({
             el: this._el.querySelector("#app-nav"),
             brand: DataSource.DocSetItem.Title,
             type: Components.NavbarTypes.Primary,
+            itemsEnd,
             items: [
                 {
                     className: "btn-outline-light",
@@ -235,6 +260,37 @@ export class App {
                     }
                 }
             ]
+        });
+    }
+
+    // Method to upload a template
+    private uploadTemplate(file: Types.SP.File) {
+        // Ensure the file data exists
+        if (file == null) { return; }
+
+        // Show a loading dialog
+        LoadingDialog.setHeader("Copying Template");
+        LoadingDialog.setBody("Copying the template to this folder. This dialog will close after it completes.");
+        LoadingDialog.show();
+
+        // Get the file
+        file.content().execute(data => {
+            // Upload the file
+            DataSource.DocSetItem.Folder().Files().add(file.Name, true, data).execute(
+                // Success
+                () => {
+                    // Close the dialog
+                    LoadingDialog.hide();
+
+                    // Refresh the page
+                    window.location.reload();
+                },
+
+                // Error
+                () => {
+                    // TODO
+                }
+            );
         });
     }
 }

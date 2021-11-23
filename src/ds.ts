@@ -1,4 +1,4 @@
-import { Components, Helper, List, Types, Web } from "gd-sprest-bs";
+import { Components, ContextInfo, Helper, List, Types, Web } from "gd-sprest-bs";
 import Strings from "./strings";
 
 // App Item
@@ -34,6 +34,7 @@ export interface IAssessmentItem extends Types.SP.ListItem {
 // Configuration
 export interface IConfiguration {
     appCatalogAdminEmailGroup?: string;
+    templatesLibraryUrl?: string;
     tenantAppCatalogUrl?: string;
 }
 
@@ -87,6 +88,14 @@ export class DataSource {
 
                     // Set the configuration
                     this._cfg = cfg;
+
+                    // See if the templates url exists
+                    if (this._cfg.templatesLibraryUrl) {
+                        // Replace the urls
+                        this._cfg.templatesLibraryUrl = this._cfg.templatesLibraryUrl
+                            .replace("~site/", ContextInfo.webServerRelativeUrl + "/")
+                            .replace("~sitecollection/", ContextInfo.siteServerRelativeUrl + "/");
+                    }
 
                     // Resolve the request
                     resolve();
@@ -194,10 +203,13 @@ export class DataSource {
             this.loadConfiguration().then(() => {
                 // See if this is a document set item
                 if (this.DocSetItemId > 0) {
-                    // Load the document set item
-                    this.loadDocSet().then(() => {
-                        // Resolve the request
-                        resolve();
+                    // Load the templates
+                    this.loadTemplates().then(() => {
+                        // Load the document set item
+                        this.loadDocSet().then(() => {
+                            // Resolve the request
+                            resolve();
+                        }, reject);
                     }, reject);
                 } else {
                     // Load the apps
@@ -238,6 +250,30 @@ export class DataSource {
                 // Resolve the promise
                 resolve();
             });
+        });
+    }
+
+    // Loads the templates
+    private static _templates: Types.SP.File[] = null;
+    static get Templates(): Types.SP.File[] { return this._templates; }
+    static loadTemplates(): PromiseLike<void> {
+        // Return a promise
+        return new Promise((resolve, reject) => {
+            // See if the templates url exists
+            if (this.Configuration.templatesLibraryUrl) {
+                // Load the library
+                Web().getFolderByServerRelativeUrl(this.Configuration.templatesLibraryUrl).Files().execute(files => {
+                    // Save the files
+                    this._templates = files.results.sort((a, b) => {
+                        if (a.Name < b.Name) { return -1; }
+                        if (a.Name > b.Name) { return 1; }
+                        return 0;
+                    });
+
+                    // Resolve the request
+                    resolve();
+                }, reject);
+            }
         });
     }
 }

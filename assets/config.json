@@ -1,4 +1,5 @@
 {
     "appCatalogAdminEmailGroup": "gudatta@microsoft.com",
+    "templatesLibraryUrl": "~site/shared%20documents/templates",
     "tenantAppCatalogUrl": "/sites/appcatalog"
 }
