@@ -167,25 +167,6 @@ export class App {
                         } else {
                             // See if the app is deployed
                             if (app.Deployed) {
-                                // Deploy
-                                tooltips.push({
-                                    content: "Deploys the solution to the tenant app catalog.",
-                                    btnProps: {
-                                        text: "Deploy",
-                                        iconSize: 20,
-                                        //iconType: trash,
-                                        isSmall: true,
-                                        type: Components.ButtonTypes.OutlineWarning,
-                                        onClick: () => {
-                                            // Deploy the app
-                                            this._forms.deploy(DataSource.DocSetItem, () => {
-                                                // Refresh the page
-                                                window.location.reload();
-                                            });
-                                        }
-                                    }
-                                });
-                            } else {
                                 // Retract
                                 tooltips.push({
                                     content: "Retracts the solution from the tenant app catalog.",
@@ -198,6 +179,25 @@ export class App {
                                         onClick: () => {
                                             // Retract the app
                                             this._forms.retract(DataSource.DocSetItem, () => {
+                                                // Refresh the page
+                                                window.location.reload();
+                                            });
+                                        }
+                                    }
+                                });
+                            } else {
+                                // Deploy
+                                tooltips.push({
+                                    content: "Deploys the solution to the tenant app catalog.",
+                                    btnProps: {
+                                        text: "Deploy",
+                                        iconSize: 20,
+                                        //iconType: trash,
+                                        isSmall: true,
+                                        type: Components.ButtonTypes.OutlineWarning,
+                                        onClick: () => {
+                                            // Deploy the app
+                                            this._forms.deploy(DataSource.DocSetItem, () => {
                                                 // Refresh the page
                                                 window.location.reload();
                                             });
