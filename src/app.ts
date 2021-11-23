@@ -71,10 +71,8 @@ export class App {
         // Render a card
         Components.Card({
             el: this._el.querySelector("#app-actions"),
-            header: {
-                content: "Actions"
-            },
             body: [{
+                title: "Actions",
                 onRender: el => {
                     // Render the actions
                     Components.ButtonGroup({
@@ -184,10 +182,8 @@ export class App {
             el: this._el.querySelector("#app-info"),
             cards: [
                 {
-                    header: {
-                        content: "App Information"
-                    },
                     body: [{
+                        title: "App Information",
                         onRender: el => {
                             // Render the properties
                             Components.ListForm.renderDisplayForm({
@@ -196,8 +192,7 @@ export class App {
                                 includeFields: [
                                     "FileLeafRef",
                                     "DevAppStatus",
-                                    "Owners",
-                                    "SharePointAppCategory"
+                                    "Owners"
                                 ]
                             });
                         }
@@ -211,6 +206,7 @@ export class App {
                                 info: DataSource.DocSetInfo,
                                 el,
                                 includeFields: [
+                                    "SharePointAppCategory",
                                     "AppProductID",
                                     "AppVersion",
                                     "IsAppPackageEnabled"
