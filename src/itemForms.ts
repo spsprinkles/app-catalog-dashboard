@@ -343,9 +343,7 @@ export class AppForms {
                     onUpdate: () => {
                         if (item.DevAppStatus != "In Review") {
                             // Update the status of the item
-                            item.update({
-                                DevAppStatus: "In Review"
-                            }).execute(() => {
+                            item.update({ DevAppStatus: "In Review" }).execute(() => {
                                 // Call the update event
                                 onUpdate();
                             });
@@ -386,9 +384,7 @@ export class AppForms {
                     },
                     onUpdate: () => {
                         // Update the status of the item
-                        item.update({
-                            DevAppStatus: "In Review"
-                        }).execute(() => {
+                        item.update({ DevAppStatus: "In Review" }).execute(() => {
                             // Call the update event
                             onUpdate();
                         });
@@ -403,7 +399,7 @@ export class AppForms {
         Modal.clear();
 
         // Set the header
-        Modal.setHeader("Sumit App for Review");
+        Modal.setHeader("Sumbit App for Review");
 
         // Set the body
         Modal.setBody("Are you sure you want to submit this app for review?");
@@ -423,8 +419,15 @@ export class AppForms {
 
                 // Update the status
                 item.update({
-                    DevAppStatus: "In Review"
+                    DevAppStatus: "Submitted for Review"
                 }).execute(() => {
+                    // Parse the developers
+                    let to = DataSource.Configuration.appCatalogAdminEmailGroup ? [DataSource.Configuration.appCatalogAdminEmailGroup] : [];
+                    for (let i = 0; i < DataSource.DevGroup.Users.results.length; i++) {
+                        // Append the email
+                        to.push(DataSource.DevGroup.Users.results[i].Email);
+                    }
+
                     // Get the app owners
                     let cc = [];
                     let owners = item.Owners.results || [];
@@ -435,7 +438,7 @@ export class AppForms {
 
                     // Send an email
                     Utility().sendEmail({
-                        To: [DataSource.Configuration.appCatalogAdminEmailGroup],
+                        To: to,
                         CC: cc,
                         Subject: "App '" + item.Title + "' submitted for review",
                         Body: "App Developers,<br /><br />The '" + item.Title + "' app has been submitted for review by " + ContextInfo.userDisplayName + ". Please take some time to test this app and submit an assessment/review using the App Dashboard."

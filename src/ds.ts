@@ -23,7 +23,8 @@ export interface IAppItem extends Types.SP.ListItem {
     FileLeafRef: string;
     IsDefaultAppMetadataLocale: boolean;
     IsAppPackageEnabled: boolean;
-    Owners: { results: { Id: number; EMail: string; }[] }
+    Owners: { results: { Id: number; EMail: string; }[] };
+    OwnersId: { results: number[] };
     SharePointAppCategory: string;
 }
 
@@ -278,19 +279,19 @@ export class DataSource {
                 this.loadApproverGroup().then(() => {
                     // Load the developers group
                     this.loadDevGroup().then(() => {
-                        // See if this is a document set item
-                        if (this.DocSetItemId > 0) {
-                            // Load the templates
-                            this.loadTemplates().then(() => {
-                                // Load the document set item
-                                this.loadDocSet().then(() => {
-                                    // Resolve the request
-                                    resolve();
+                        // Load the apps
+                        this.loadApps().then(() => {
+                            // See if this is a document set item
+                            if (this.DocSetItemId > 0) {
+                                // Load the templates
+                                this.loadTemplates().then(() => {
+                                    // Load the document set item
+                                    this.loadDocSet().then(() => {
+                                        // Resolve the request
+                                        resolve();
+                                    }, reject);
                                 }, reject);
-                            }, reject);
-                        } else {
-                            // Load the apps
-                            this.loadApps().then(() => {
+                            } else {
                                 // Load the data
                                 this.load().then(() => {
                                     // Load the status filters
@@ -299,8 +300,8 @@ export class DataSource {
                                         resolve();
                                     }, reject);
                                 }, reject);
-                            }, reject);
-                        }
+                            }
+                        }, reject);
                     }, reject);
                 }, reject);
             }, reject);

@@ -1,13 +1,13 @@
 import { LoadingDialog } from "dattatable";
-import { Components, ContextInfo, Types } from "gd-sprest-bs";
+import { Components, Types } from "gd-sprest-bs";
 import { appIndicator } from "gd-sprest-bs/build/icons/svgs/appIndicator";
 import { chatSquareDots } from "gd-sprest-bs/build/icons/svgs/chatSquareDots";
 import { pencilSquare } from "gd-sprest-bs/build/icons/svgs/pencilSquare";
 import { trash } from "gd-sprest-bs/build/icons/svgs/trash";
+import * as Common from "./common";
 import { AppForms } from "./itemForms";
 import { DataSource } from "./ds";
 import Strings from "./strings";
-
 
 /**
  * Main Application
@@ -64,9 +64,7 @@ export class App {
 
     // Renders the dashboard
     private renderActions() {
-        // Determine if the user can edit the item
-        let canEdit = (DataSource.DocSetItem["AuthorId"] == ContextInfo.userId ||
-            (DataSource.DocSetItem["OwnersId"] ? DataSource.DocSetItem["OwnersId"].results.indexOf(ContextInfo.userId) != -1 : false));
+        let canEdit = Common.canEdit(DataSource.DocSetItem);
 
         // Render a card
         Components.Card({
@@ -74,102 +72,144 @@ export class App {
             body: [{
                 title: "Actions",
                 onRender: el => {
-                    // Render the actions
-                    Components.ButtonGroup({
-                        el,
-                        isVertical: true,
-                        buttons: [
-                            {
-                                text: "Edit Properties",
-                                iconSize: 20,
-                                iconType: pencilSquare,
-                                isSmall: true,
-                                type: Components.ButtonTypes.OutlineSecondary,
-                                onClick: () => {
-                                    // Display the edit form
-                                    this._forms.edit(DataSource.DocSetItem.Id, () => {
-                                        // Refresh the table
-                                        this.refresh();
-                                    });
-                                }
-                            },
-                            {
+                    let tooltips: Components.ITooltipProps[] = [];
+
+                    // Edit Properties
+                    tooltips.push({
+                        content: "Displays the edit form to update the app properties.",
+                        btnProps: {
+                            text: "Edit Properties",
+                            iconSize: 20,
+                            iconType: pencilSquare,
+                            isSmall: true,
+                            type: Components.ButtonTypes.OutlineSecondary,
+                            onClick: () => {
+                                // Display the edit form
+                                this._forms.edit(DataSource.DocSetItem.Id, () => {
+                                    // Refresh the page
+                                    window.location.reload();
+                                });
+                            }
+                        }
+                    });
+
+                    // See if this is an owner
+                    if (DataSource.DocSetItem.DevAppStatus == "Draft" && Common.isOwner(DataSource.DocSetItem)) {
+                        // Submit
+                        tooltips.push({
+                            content: "Submit the app for review",
+                            btnProps: {
                                 text: "Submit for Review",
                                 iconSize: 20,
                                 iconType: appIndicator,
-                                isDisabled: canEdit && DataSource.DocSetItem.DevAppStatus != "In Review" ? false : true,
+                                isDisabled: !canEdit,
                                 isSmall: true,
                                 type: Components.ButtonTypes.OutlinePrimary,
                                 onClick: () => {
                                     // Display the submit form
                                     this._forms.submit(DataSource.DocSetItem, () => {
-                                        // Refresh the table
-                                        this.refresh();
+                                        // Refresh the page
+                                        window.location.reload();
                                     });
                                 }
-                            },
-                            {
-                                text: "Review this App",
+                            }
+                        });
+                    }
+
+                    // See if this app is in review and ensure this was not submitted by the user
+                    if ((DataSource.DocSetItem.DevAppStatus == "Submitted for Review" || DataSource.DocSetItem.DevAppStatus == "In Review")
+                        && !Common.isSubmitter(DataSource.DocSetItem)) {
+                        // Review button
+                        tooltips.push({
+                            content: "Start/Continue an assessment of the app.",
+                            btnProps: {
+                                text: "Review",
                                 iconSize: 20,
                                 iconType: chatSquareDots,
-                                isDisabled: DataSource.DocSetItem.DevAppStatus != "In Review" ? true : !canEdit,
+                                isDisabled: !canEdit,
                                 isSmall: true,
                                 type: Components.ButtonTypes.OutlinePrimary,
                                 onClick: () => {
                                     // Display the review form
                                     this._forms.review(DataSource.DocSetItem, () => {
-                                        // Refresh the table
-                                        this.refresh();
-                                    });
-                                }
-                            },
-                            {
-                                text: "Delete App/Solution",
-                                iconSize: 20,
-                                iconType: trash,
-                                isDisabled: !canEdit,
-                                isSmall: true,
-                                type: Components.ButtonTypes.OutlineDanger,
-                                onClick: () => {
-                                    // Display the delete form
-                                    this._forms.delete(DataSource.DocSetItem, () => {
-                                        // Redirect to the dashboard
-                                        window.open(Strings.DashboardUrl, "_self");
-                                    });
-                                }
-                            },
-                            {
-                                text: "Deploy",
-                                iconSize: 20,
-                                //iconType: trash,
-                                //isDisabled: !canEdit,
-                                isSmall: true,
-                                type: Components.ButtonTypes.OutlineWarning,
-                                onClick: () => {
-                                    // Deploy the app
-                                    this._forms.deploy(DataSource.DocSetItem, () => {
-                                        // Refresh the table
-                                        this.refresh();
-                                    });
-                                }
-                            },
-                            {
-                                text: "Retract",
-                                iconSize: 20,
-                                //iconType: trash,
-                                //isDisabled: !canEdit,
-                                isSmall: true,
-                                type: Components.ButtonTypes.OutlineDanger,
-                                onClick: () => {
-                                    // Retract the app
-                                    this._forms.retract(DataSource.DocSetItem, () => {
-                                        // Refresh the table
-                                        this.refresh();
+                                        // Refresh the page
+                                        window.location.reload();
                                     });
                                 }
                             }
-                        ]
-                    });
+                        });
+                    }
+
+                    // Ensure the user is an approver
+                    if (DataSource.IsApprover) {
+                        // See if the app is not in the catalog
+                        let app = DataSource.getAppById(DataSource.DocSetItem.AppProductID);
+                        if (app == null) {
+                            // Delete
+                            tooltips.push({
+                                content: "Deletes the app.",
+                                btnProps: {
+                                    text: "Delete App/Solution",
+                                    iconSize: 20,
+                                    iconType: trash,
+                                    isDisabled: !canEdit,
+                                    isSmall: true,
+                                    type: Components.ButtonTypes.OutlineDanger,
+                                    onClick: () => {
+                                        // Display the delete form
+                                        this._forms.delete(DataSource.DocSetItem, () => {
+                                            // Redirect to the dashboard
+                                            window.open(Strings.DashboardUrl, "_self");
+                                        });
+                                    }
+                                }
+                            })
+                        } else {
+                            // See if the app is deployed
+                            if (app.Deployed) {
+                                // Deploy
+                                tooltips.push({
+                                    content: "Deploys the solution to the tenant app catalog.",
+                                    btnProps: {
+                                        text: "Deploy",
+                                        iconSize: 20,
+                                        //iconType: trash,
+                                        isSmall: true,
+                                        type: Components.ButtonTypes.OutlineWarning,
+                                        onClick: () => {
+                                            // Deploy the app
+                                            this._forms.deploy(DataSource.DocSetItem, () => {
+                                                // Refresh the page
+                                                window.location.reload();
+                                            });
+                                        }
+                                    }
+                                });
+                            } else {
+                                // Retract
+                                tooltips.push({
+                                    content: "Retracts the solution from the tenant app catalog.",
+                                    btnProps: {
+                                        text: "Retract",
+                                        iconSize: 20,
+                                        //iconType: trash,
+                                        isSmall: true,
+                                        type: Components.ButtonTypes.OutlineDanger,
+                                        onClick: () => {
+                                            // Retract the app
+                                            this._forms.retract(DataSource.DocSetItem, () => {
+                                                // Refresh the page
+                                                window.location.reload();
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+                        }
+                    }
+
+                    // Render the actions
+                    Components.TooltipGroup({ el, isVertical: true, tooltips });
                 }
             }]
         });

@@ -4,6 +4,7 @@ import { appIndicator } from "gd-sprest-bs/build/icons/svgs/appIndicator";
 import { chatSquareDots } from "gd-sprest-bs/build/icons/svgs/chatSquareDots";
 import { columnsGap } from "gd-sprest-bs/build/icons/svgs/columnsGap";
 import { pencilSquare } from "gd-sprest-bs/build/icons/svgs/pencilSquare";
+import * as Common from "./common";
 import { AppForms } from "./itemForms";
 import * as jQuery from "jquery";
 import { DataSource, IAppItem } from "./ds";
@@ -132,12 +133,13 @@ export class AppDashboard {
                         name: "",
                         title: "Options",
                         onRenderCell: (el, column, item: IAppItem) => {
-                            // Determine if the user can edit
-                            let canEdit = (item["AuthorId"] == ContextInfo.userId || (item["OwnersId"] ? item["OwnersId"].results.indexOf(ContextInfo.userId) != -1 : false));
+                            let tooltips: Components.ITooltipProps[] = [];
 
-                            // Render the actions
-                            Components.Tooltip({
-                                el,
+                            // Determine if the user can edit
+                            let canEdit = Common.canEdit(item);
+
+                            // Render the view button to redirect the user to the document set dashboard
+                            tooltips.push({
                                 content: "Go to the app dashboard",
                                 btnProps: {
                                     text: "View",
@@ -146,22 +148,14 @@ export class AppDashboard {
                                     isSmall: true,
                                     type: Components.ButtonTypes.OutlinePrimary,
                                     onClick: () => {
-                                        // Set the list url
-                                        let listName = Strings.Lists.Apps.replace(/ /g, '');
-                                        let listUrl = ContextInfo.webAbsoluteUrl + "/" + listName;
-                                        let listUrlFolder = ContextInfo.webServerRelativeUrl + "/" + listName;
-
-                                        // Return the url to the workspace
-                                        let itemUrl = listUrl + "/Forms/App/docsethomepage.aspx?ID=" +
-                                            item.Id + "&FolderCTID=" + item.ContentTypeId + "&RootFolder=" + listUrlFolder + "/" + item.Id;
-
                                         // Redirect to the docset item
-                                        window.open(itemUrl, "_self");
+                                        window.open(Common.generateDocSetUrl(item), "_self");
                                     }
                                 }
                             });
-                            Components.Tooltip({
-                                el,
+
+                            // Render the edit properties button
+                            tooltips.push({
                                 content: "Edit the app properties",
                                 btnProps: {
                                     text: "Edit",
@@ -178,43 +172,58 @@ export class AppDashboard {
                                     }
                                 }
                             });
-                            Components.Tooltip({
-                                el,
-                                content: "Submit the app for review",
-                                btnProps: {
-                                    text: "Submit",
-                                    iconSize: 20,
-                                    iconType: appIndicator,
-                                    isDisabled: canEdit && item.DevAppStatus != "In Review" ? false : true,
-                                    isSmall: true,
-                                    type: Components.ButtonTypes.OutlinePrimary,
-                                    onClick: () => {
-                                        // Display the submit form
-                                        this._forms.submit(item, () => {
-                                            // Refresh the table
-                                            this.refresh();
-                                        });
+
+                            // See if this is an owner
+                            if (item.DevAppStatus == "Draft" && Common.isOwner(item)) {
+                                // Submit button
+                                tooltips.push({
+                                    content: "Submit the app for review",
+                                    btnProps: {
+                                        text: "Submit",
+                                        iconSize: 20,
+                                        iconType: appIndicator,
+                                        isDisabled: !canEdit,
+                                        isSmall: true,
+                                        type: Components.ButtonTypes.OutlinePrimary,
+                                        onClick: () => {
+                                            // Display the submit form
+                                            this._forms.submit(item, () => {
+                                                // Refresh the table
+                                                this.refresh();
+                                            });
+                                        }
                                     }
-                                }
-                            });
-                            Components.Tooltip({
-                                el,
-                                content: "Review the app",
-                                btnProps: {
-                                    text: "Review",
-                                    iconSize: 20,
-                                    iconType: chatSquareDots,
-                                    isDisabled: item.DevAppStatus != "In Review" ? true : !canEdit,
-                                    isSmall: true,
-                                    type: Components.ButtonTypes.OutlinePrimary,
-                                    onClick: () => {
-                                        // Display the review form
-                                        this._forms.review(item, () => {
-                                            // Refresh the table
-                                            this.refresh();
-                                        });
+                                });
+                            }
+
+                            // Ensure this was not submitted by the user
+                            if ((item.DevAppStatus == "Submitted for Review" || item.DevAppStatus == "In Review")
+                                && !Common.isSubmitter(item)) {
+                                // Review button
+                                tooltips.push({
+                                    content: "Start/Continue an assessment of the app.",
+                                    btnProps: {
+                                        text: "Review",
+                                        iconSize: 20,
+                                        iconType: chatSquareDots,
+                                        isDisabled: !canEdit,
+                                        isSmall: true,
+                                        type: Components.ButtonTypes.OutlinePrimary,
+                                        onClick: () => {
+                                            // Display the review form
+                                            this._forms.review(item, () => {
+                                                // Refresh the table
+                                                this.refresh();
+                                            });
+                                        }
                                     }
-                                }
+                                });
+                            }
+
+                            // Render the tooltips
+                            Components.TooltipGroup({
+                                el,
+                                tooltips
                             });
                         }
                     },

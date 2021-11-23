@@ -223,7 +223,7 @@ export const Configuration = Helper.SPConfig({
                     showInEditForm: false,
                     showInNewForm: false,
                     choices: [
-                        "Draft", "Submitted for Review", "Requesting Approval", "Approved", "In Testing", "Deployed", "Retracted"
+                        "Draft", "Submitted for Review", "In Review", "Requesting Approval", "In Testing", "Approved"
                     ]
                 } as Helper.IFieldInfoChoice,
             ],
@@ -512,46 +512,61 @@ export const createSecurityGroups = (): PromiseLike<void> => {
                 });
             }
 
-            // Reset the list permissions
-            resetListPermissions().then(() => {
-                // Get the definitions
-                getPermissionTypes().then(permissions => {
-                    // Get the lists to update
-                    let listApps = Web().Lists(Strings.Lists.Apps);
-                    let listAssessments = Web().Lists(Strings.Lists.Assessments);
+            // Update the group owners
+            let updateOwners = () => {
+                // Return a promise
+                return new Promise((resolve, reject) => {
+                    // Execute against the groups
+                    Helper.Executor([devGroup], group => {
+                        // Set the site owner
+                        return Helper.setGroupOwner(group.Title, approveGroup.Title);
+                    }).then(resolve, reject);
+                });
+            }
 
-                    // Ensure the approver group exists
-                    if (approveGroup) {
-                        // Set the list permissions
-                        listApps.RoleAssignments().addRoleAssignment(approveGroup.Id, permissions[SPTypes.RoleType.WebDesigner]).execute(() => {
-                            // Log
-                            console.log("[Apps List] The approver permission was added successfully.");
-                        });
-                        listAssessments.RoleAssignments().addRoleAssignment(approveGroup.Id, permissions[SPTypes.RoleType.WebDesigner]).execute(() => {
-                            // Log
-                            console.log("[Assessments List] The approver permission was added successfully.");
-                        });
-                    }
+            // Update the group owners
+            updateOwners().then(() => {
+                // Reset the list permissions
+                resetListPermissions().then(() => {
+                    // Get the definitions
+                    getPermissionTypes().then(permissions => {
+                        // Get the lists to update
+                        let listApps = Web().Lists(Strings.Lists.Apps);
+                        let listAssessments = Web().Lists(Strings.Lists.Assessments);
 
-                    // Ensure the dev group exists
-                    if (devGroup) {
-                        // Set the list permissions
-                        listApps.RoleAssignments().addRoleAssignment(devGroup.Id, permissions[SPTypes.RoleType.Contributor]).execute(() => {
-                            // Log
-                            console.log("[Apps List] The dev permission was added successfully.");
-                        });
-                        listAssessments.RoleAssignments().addRoleAssignment(devGroup.Id, permissions[SPTypes.RoleType.Contributor]).execute(() => {
-                            // Log
-                            console.log("[Assessments List] The dev permission was added successfully.");
-                        });
-                    }
+                        // Ensure the approver group exists
+                        if (approveGroup) {
+                            // Set the list permissions
+                            listApps.RoleAssignments().addRoleAssignment(approveGroup.Id, permissions[SPTypes.RoleType.WebDesigner]).execute(() => {
+                                // Log
+                                console.log("[Apps List] The approver permission was added successfully.");
+                            });
+                            listAssessments.RoleAssignments().addRoleAssignment(approveGroup.Id, permissions[SPTypes.RoleType.WebDesigner]).execute(() => {
+                                // Log
+                                console.log("[Assessments List] The approver permission was added successfully.");
+                            });
+                        }
 
-                    // Wait for the app list updates to complete
-                    listApps.done(() => {
-                        // Wait for the assessment list updates to complete
-                        listAssessments.done(() => {
-                            // Resolve the request
-                            resolve();
+                        // Ensure the dev group exists
+                        if (devGroup) {
+                            // Set the list permissions
+                            listApps.RoleAssignments().addRoleAssignment(devGroup.Id, permissions[SPTypes.RoleType.Contributor]).execute(() => {
+                                // Log
+                                console.log("[Apps List] The dev permission was added successfully.");
+                            });
+                            listAssessments.RoleAssignments().addRoleAssignment(devGroup.Id, permissions[SPTypes.RoleType.Contributor]).execute(() => {
+                                // Log
+                                console.log("[Assessments List] The dev permission was added successfully.");
+                            });
+                        }
+
+                        // Wait for the app list updates to complete
+                        listApps.done(() => {
+                            // Wait for the assessment list updates to complete
+                            listAssessments.done(() => {
+                                // Resolve the request
+                                resolve();
+                            });
                         });
                     });
                 });
