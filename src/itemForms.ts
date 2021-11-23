@@ -264,11 +264,8 @@ export class AppForms {
                         //Attribute: SharePointMinVersion="16.0.0.0" // 15.0.0.0
                         //Attribute: SkipFeatureDeployment="true" (not for add-ins)
 
-                        // See if the metadata is valid
-                        if (metadata.Title && metadata.AppVersion && metadata.AppProductID) {
-                            // Update the status
-                            metadata.DevAppStatus = "In Review";
-                        }
+                        // Update the status
+                        metadata.DevAppStatus = "Draft";
 
                         // Resolve the request
                         resolve(metadata);

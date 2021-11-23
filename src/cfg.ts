@@ -29,6 +29,7 @@ export const Configuration = Helper.SPConfig({
                     FieldRefs: [
                         "FileLeafRef",
                         "Owners",
+                        "Sponsor",
                         "DevAppStatus",
                         "SharePointAppCategory",
                         "AppPublisher",
@@ -116,6 +117,18 @@ export const Configuration = Helper.SPConfig({
                     allowDeletion: false,
                     fillInChoice: true
                 } as Helper.IFieldInfoChoice,
+                {
+                    name: "Sponsor",
+                    title: "Sponsor",
+                    type: Helper.SPCfgFieldType.User,
+                    allowDeletion: false,
+                    description: "What government poc is responsible for the application?",
+                    enforceUniqueValues: false,
+                    required: true,
+                    selectionMode: SPTypes.FieldUserSelectionType.PeopleAndGroups,
+                    showField: "ImnName",
+                    sortable: false
+                } as Helper.IFieldInfoUser,
                 {
                     name: "Owners",
                     title: "Owners",
@@ -210,7 +223,7 @@ export const Configuration = Helper.SPConfig({
                     showInEditForm: false,
                     showInNewForm: false,
                     choices: [
-                        "Missing Metadata", "Deleting...", "In Testing", "In Review", "Published"
+                        "Draft", "Submitted for Review", "Requesting Approval", "Approved", "In Testing", "Deployed", "Retracted"
                     ]
                 } as Helper.IFieldInfoChoice,
             ],
