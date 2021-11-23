@@ -34,6 +34,7 @@ export interface IAssessmentItem extends Types.SP.ListItem {
 // Configuration
 export interface IConfiguration {
     appCatalogAdminEmailGroup?: string;
+    helpPageUrl?: string;
     templatesLibraryUrl?: string;
     tenantAppCatalogUrl?: string;
 }
@@ -89,13 +90,15 @@ export class DataSource {
                     // Set the configuration
                     this._cfg = cfg;
 
-                    // See if the templates url exists
-                    if (this._cfg.templatesLibraryUrl) {
-                        // Replace the urls
-                        this._cfg.templatesLibraryUrl = this._cfg.templatesLibraryUrl
-                            .replace("~site/", ContextInfo.webServerRelativeUrl + "/")
+                    // Updates the url
+                    let updateUrl = (url: string) => {
+                        return url.replace("~site/", ContextInfo.webServerRelativeUrl + "/")
                             .replace("~sitecollection/", ContextInfo.siteServerRelativeUrl + "/");
                     }
+
+                    // Replace the urls
+                    this._cfg.helpPageUrl = this._cfg.helpPageUrl ? updateUrl(this._cfg.helpPageUrl) : this._cfg.helpPageUrl;
+                    this._cfg.templatesLibraryUrl = this._cfg.templatesLibraryUrl ? updateUrl(this._cfg.templatesLibraryUrl) : this._cfg.templatesLibraryUrl;
 
                     // Resolve the request
                     resolve();
@@ -273,6 +276,9 @@ export class DataSource {
                     // Resolve the request
                     resolve();
                 }, reject);
+            } else {
+                // Resolve the request
+                resolve();
             }
         });
     }

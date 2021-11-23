@@ -219,7 +219,34 @@ export class App {
 
     // Renders the navigation
     private renderNav() {
-        // Generate the templates
+        // Generate the left side items
+        let items: Components.INavbarItem[] = [
+            {
+                className: "btn-outline-light",
+                isButton: true,
+                text: "To Dashboard",
+                onClick: () => {
+                    // Redirect to the dashboard
+                    window.open(Strings.DashboardUrl, "_self");
+                }
+            }
+        ];
+
+        // See if the help url exists
+        if (DataSource.Configuration.helpPageUrl) {
+            // Add the item
+            items.push({
+                className: "btn-outline-light ms-2",
+                isButton: true,
+                text: "Help",
+                onClick: () => {
+                    // Display in a new tab
+                    window.open(DataSource.Configuration.helpPageUrl, "_blank");
+                }
+            });
+        }
+
+        // Generate the right side items
         let itemsEnd: Components.INavbarItem[] = null;
         if (DataSource.Templates && DataSource.Templates.length > 0) {
             // Clear the items
@@ -248,18 +275,8 @@ export class App {
             el: this._el.querySelector("#app-nav"),
             brand: DataSource.DocSetItem.Title,
             type: Components.NavbarTypes.Primary,
-            itemsEnd,
-            items: [
-                {
-                    className: "btn-outline-light",
-                    isButton: true,
-                    text: "Dashboard",
-                    onClick: () => {
-                        // Redirect to the dashboard
-                        window.open(Strings.DashboardUrl, "_self");
-                    }
-                }
-            ]
+            items,
+            itemsEnd
         });
     }
 

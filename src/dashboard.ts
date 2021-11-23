@@ -138,7 +138,7 @@ export class AppDashboard {
                             // Render the actions
                             Components.Tooltip({
                                 el,
-                                content: "View the app properties",
+                                content: "Go to the app dashboard",
                                 btnProps: {
                                     text: "View",
                                     iconSize: 20,
