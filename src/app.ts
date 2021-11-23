@@ -71,6 +71,9 @@ export class App {
         // Render a card
         Components.Card({
             el: this._el.querySelector("#app-actions"),
+            header: {
+                content: "Actions"
+            },
             body: [{
                 onRender: el => {
                     // Render the actions
@@ -181,6 +184,9 @@ export class App {
             el: this._el.querySelector("#app-info"),
             cards: [
                 {
+                    header: {
+                        content: "App Information"
+                    },
                     body: [{
                         onRender: el => {
                             // Render the properties
@@ -273,7 +279,7 @@ export class App {
         // Render the navigation
         Components.Navbar({
             el: this._el.querySelector("#app-nav"),
-            brand: DataSource.DocSetItem.Title,
+            brand: "App",
             type: Components.NavbarTypes.Primary,
             items,
             itemsEnd
