@@ -154,27 +154,30 @@ export class AppDashboard {
                                 }
                             });
 
-                            // Render the edit properties button
-                            tooltips.push({
-                                content: "Edit the app properties",
-                                btnProps: {
-                                    text: "Edit",
-                                    iconSize: 20,
-                                    iconType: pencilSquare,
-                                    isSmall: true,
-                                    type: Components.ButtonTypes.OutlineSecondary,
-                                    onClick: () => {
-                                        // Display the edit form
-                                        this._forms.edit(item.Id, () => {
-                                            // Refresh the table
-                                            this.refresh();
-                                        });
+                            // See if the user can edit
+                            if (canEdit) {
+                                // Render the edit properties button
+                                tooltips.push({
+                                    content: "Edit the app properties",
+                                    btnProps: {
+                                        text: "Edit",
+                                        iconSize: 20,
+                                        iconType: pencilSquare,
+                                        isSmall: true,
+                                        type: Components.ButtonTypes.OutlineSecondary,
+                                        onClick: () => {
+                                            // Display the edit form
+                                            this._forms.edit(item.Id, () => {
+                                                // Refresh the table
+                                                this.refresh();
+                                            });
+                                        }
                                     }
-                                }
-                            });
+                                });
+                            }
 
                             // See if this is an owner
-                            if (item.DevAppStatus == "Draft" && Common.isOwner(item)) {
+                            if (item.DevAppStatus == "Draft" && canEdit) {
                                 // Submit button
                                 tooltips.push({
                                     content: "Submit the app for review",

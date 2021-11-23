@@ -223,7 +223,7 @@ export const Configuration = Helper.SPConfig({
                     showInEditForm: false,
                     showInNewForm: false,
                     choices: [
-                        "Draft", "Submitted for Review", "In Review", "Requesting Approval", "In Testing", "Approved"
+                        "Draft", "Submitted for Review", "In Review", "Requesting Approval", "Approved"
                     ]
                 } as Helper.IFieldInfoChoice,
             ],
@@ -432,7 +432,7 @@ export const createSecurityGroups = (): PromiseLike<void> => {
 
                         // Create the group
                         Web().SiteGroups().add({
-                            AllowMembersEditMembership: isDevGroup,
+                            AllowMembersEditMembership: true,
                             AllowRequestToJoinLeave: isDevGroup,
                             AutoAcceptRequestToJoinLeave: isDevGroup,
                             Title: groupName,

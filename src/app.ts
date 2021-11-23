@@ -74,24 +74,27 @@ export class App {
                 onRender: el => {
                     let tooltips: Components.ITooltipProps[] = [];
 
-                    // Edit Properties
-                    tooltips.push({
-                        content: "Displays the edit form to update the app properties.",
-                        btnProps: {
-                            text: "Edit Properties",
-                            iconSize: 20,
-                            iconType: pencilSquare,
-                            isSmall: true,
-                            type: Components.ButtonTypes.OutlineSecondary,
-                            onClick: () => {
-                                // Display the edit form
-                                this._forms.edit(DataSource.DocSetItem.Id, () => {
-                                    // Refresh the page
-                                    window.location.reload();
-                                });
+                    // See if the user can edit
+                    if (canEdit) {
+                        // Edit Properties
+                        tooltips.push({
+                            content: "Displays the edit form to update the app properties.",
+                            btnProps: {
+                                text: "Edit Properties",
+                                iconSize: 20,
+                                iconType: pencilSquare,
+                                isSmall: true,
+                                type: Components.ButtonTypes.OutlineSecondary,
+                                onClick: () => {
+                                    // Display the edit form
+                                    this._forms.edit(DataSource.DocSetItem.Id, () => {
+                                        // Refresh the page
+                                        window.location.reload();
+                                    });
+                                }
                             }
-                        }
-                    });
+                        });
+                    }
 
                     // See if this is an owner
                     if (DataSource.DocSetItem.DevAppStatus == "Draft" && Common.isOwner(DataSource.DocSetItem)) {

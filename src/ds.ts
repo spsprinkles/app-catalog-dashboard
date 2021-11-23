@@ -69,7 +69,13 @@ export class DataSource {
 
                 // Resolve the request
                 resolve();
-            }, reject);
+            }, () => {
+                // No access to the tenant app catalog
+                this._apps = [];
+
+                // Resolve the request
+                resolve();
+            });
         });
     }
 

@@ -28,6 +28,6 @@ export function isOwner(item: IAppItem) {
 
 // Determine if the user is a submitter
 export function isSubmitter(item: IAppItem) {
-    // Determine if the user is an owner
+    // Determine if the user submitted the app
     return item.AuthorId == ContextInfo.userId;
 }
