@@ -172,6 +172,76 @@ export class DataSource {
         });
     }
 
+    // Approver Security Group
+    private static _approverGroup: Types.SP.GroupOData = null;
+    static get ApproverGroup(): Types.SP.GroupOData { return this._approverGroup; }
+    static get IsApprover(): boolean {
+        // See if the group doesn't exist
+        if (this.ApproverGroup == null) { return false; }
+
+        // Parse the group
+        for (let i = 0; i < this.ApproverGroup.Users.results.length; i++) {
+            // See if this is the current user
+            if (this.ApproverGroup.Users.results[i].Id == ContextInfo.userId) {
+                // Found
+                return true;
+            }
+        }
+
+        // Return false by default
+        return false;
+    }
+    private static loadApproverGroup(): PromiseLike<void> {
+        // Return a promise
+        return new Promise((resolve, reject) => {
+            // Load the security group
+            Web().SiteGroups().getByName(Strings.Groups.Approvers).query({
+                Expand: ["Users"]
+            }).execute(group => {
+                // Set the group
+                this._approverGroup = group;
+
+                // Resolve the request
+                resolve();
+            }, reject);
+        });
+    }
+
+    // Developer Security Group
+    private static _devGroup: Types.SP.GroupOData = null;
+    static get DevGroup(): Types.SP.GroupOData { return this._devGroup; }
+    static get IsDeveloper(): boolean {
+        // See if the group doesn't exist
+        if (this.DevGroup == null) { return false; }
+
+        // Parse the group
+        for (let i = 0; i < this.DevGroup.Users.results.length; i++) {
+            // See if this is the current user
+            if (this.DevGroup.Users.results[i].Id == ContextInfo.userId) {
+                // Found
+                return true;
+            }
+        }
+
+        // Return false by default
+        return false;
+    }
+    private static loadDevGroup(): PromiseLike<void> {
+        // Return a promise
+        return new Promise((resolve, reject) => {
+            // Load the security group
+            Web().SiteGroups().getByName(Strings.Groups.Developers).query({
+                Expand: ["Users"]
+            }).execute(group => {
+                // Set the group
+                this._devGroup = group;
+
+                // Resolve the request
+                resolve();
+            }, reject);
+        });
+    }
+
     // Status Filters
     private static _statusFilters: Components.ICheckboxGroupItem[] = null;
     static get StatusFilters(): Components.ICheckboxGroupItem[] { return this._statusFilters; }
@@ -204,29 +274,35 @@ export class DataSource {
         return new Promise((resolve, reject) => {
             // Load the configuration
             this.loadConfiguration().then(() => {
-                // See if this is a document set item
-                if (this.DocSetItemId > 0) {
-                    // Load the templates
-                    this.loadTemplates().then(() => {
-                        // Load the document set item
-                        this.loadDocSet().then(() => {
-                            // Resolve the request
-                            resolve();
-                        }, reject);
-                    }, reject);
-                } else {
-                    // Load the apps
-                    this.loadApps().then(() => {
-                        // Load the data
-                        this.load().then(() => {
-                            // Load the status filters
-                            this.loadStatusFilters().then(() => {
-                                // Resolve the request
-                                resolve();
+                // Load the approvers group
+                this.loadApproverGroup().then(() => {
+                    // Load the developers group
+                    this.loadDevGroup().then(() => {
+                        // See if this is a document set item
+                        if (this.DocSetItemId > 0) {
+                            // Load the templates
+                            this.loadTemplates().then(() => {
+                                // Load the document set item
+                                this.loadDocSet().then(() => {
+                                    // Resolve the request
+                                    resolve();
+                                }, reject);
                             }, reject);
-                        }, reject);
+                        } else {
+                            // Load the apps
+                            this.loadApps().then(() => {
+                                // Load the data
+                                this.load().then(() => {
+                                    // Load the status filters
+                                    this.loadStatusFilters().then(() => {
+                                        // Resolve the request
+                                        resolve();
+                                    }, reject);
+                                }, reject);
+                            }, reject);
+                        }
                     }, reject);
-                }
+                }, reject);
             }, reject);
         });
     }
@@ -280,6 +356,35 @@ export class DataSource {
                 // Resolve the request
                 resolve();
             }
+        });
+    }
+
+    // User Agreement
+    private static _userAgreement: string = null;
+    static get UserAgreement(): string { return this._userAgreement; }
+    static loadUserAgreement(): PromiseLike<void> {
+        // Return a promise
+        return new Promise((resolve) => {
+            // Get the current web
+            Web().getFileByServerRelativeUrl(Strings.UserAgreementUrl).content().execute(
+                // Success
+                file => {
+                    // Set the html
+                    this._userAgreement = String.fromCharCode.apply(null, new Uint8Array(file));
+
+                    // Resolve the request
+                    resolve();
+                },
+
+                // Error
+                () => {
+                    // Set the configuration to nothing
+                    this._cfg = {} as any;
+
+                    // Resolve the request
+                    resolve();
+                }
+            );
         });
     }
 }

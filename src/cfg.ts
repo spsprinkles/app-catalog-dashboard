@@ -1,4 +1,4 @@
-import { Helper, List, SPTypes } from "gd-sprest-bs";
+import { ContextInfo, Helper, List, SPTypes, Types, Web } from "gd-sprest-bs";
 import Strings from "./strings";
 
 /**
@@ -395,4 +395,167 @@ Configuration["addToPage"] = (pageUrl: string) => {
             console.log("[" + Strings.ProjectName + "] Error adding the solution to the page.", ex);
         }
     );
+}
+
+// Creates the security groups
+export const createSecurityGroups = (): PromiseLike<void> => {
+    // Return a promise
+    return new Promise((resolve, reject) => {
+        let approveGroup: Types.SP.Group = null;
+        let devGroup: Types.SP.Group = null;
+        let web = Web();
+
+        // Parse the groups to create
+        Helper.Executor([Strings.Groups.Approvers, Strings.Groups.Developers], groupName => {
+            // Return a promise
+            return new Promise((resolve, reject) => {
+                // Get the group
+                web.SiteGroups().getByName(groupName).execute(
+                    // Exists
+                    group => {
+                        // See if this is the approver group
+                        if (group.Title == Strings.Groups.Approvers) {
+                            // Set the approver group
+                            approveGroup = group;
+                        } else {
+                            // Set the dev group
+                            devGroup = group;
+                        }
+
+                        // Resolve the request
+                        resolve(null);
+                    },
+
+                    // Doesn't exist
+                    () => {
+                        let isDevGroup = groupName == Strings.Groups.Developers;
+
+                        // Create the group
+                        Web().SiteGroups().add({
+                            AllowMembersEditMembership: isDevGroup,
+                            AllowRequestToJoinLeave: isDevGroup,
+                            AutoAcceptRequestToJoinLeave: isDevGroup,
+                            Title: groupName,
+                            Description: "Group contains the '" + groupName + "' users.",
+                            OnlyAllowMembersViewMembership: false
+                        }).execute(
+                            // Successful
+                            group => {
+                                // See if this is the approver group
+                                if (isDevGroup) {
+                                    // Set the dev group
+                                    devGroup = group;
+                                } else {
+                                    // Set the approver group
+                                    approveGroup = group;
+                                }
+
+                                // Resolve the request
+                                resolve(null);
+                            },
+
+                            // Error
+                            () => {
+                                // The user is probably not an admin
+                                console.error("Error creating the security group.");
+
+                                // Reject the request
+                                reject();
+                            }
+                        );
+                    }
+                );
+            });
+        }).then(() => {
+            // Gets the role definitions for the permission types
+            let getPermissionTypes = () => {
+                // Return a promise
+                return new Promise(resolve => {
+                    // Get the definitions
+                    Web().RoleDefinitions().execute(roleDefs => {
+                        let roles = {};
+
+                        // Parse the role definitions
+                        for (let i = 0; i < roleDefs.results.length; i++) {
+                            let roleDef = roleDefs.results[i];
+
+                            // Add the role by type
+                            roles[roleDef.RoleTypeKind] = roleDef.Id;
+                        }
+
+                        // Resolve the request
+                        resolve(roles);
+                    });
+                });
+            }
+
+            // Clears the security groups for a list
+            let resetListPermissions = () => {
+                // Return a promise
+                return new Promise(resolve => {
+                    Helper.Executor([Strings.Lists.Apps, Strings.Lists.Assessments], listName => {
+                        // Return a promise
+                        return new Promise(resolve => {
+                            // Get the list
+                            let list = Web().Lists(listName);
+
+                            // Reset the permissions
+                            list.resetRoleInheritance().execute();
+
+                            // Clear the permissions
+                            list.breakRoleInheritance(false, true).execute(true);
+
+                            // Wait for the requests to complete
+                            list.done(resolve);
+                        });
+                    }).then(resolve);
+                });
+            }
+
+            // Reset the list permissions
+            resetListPermissions().then(() => {
+                // Get the definitions
+                getPermissionTypes().then(permissions => {
+                    // Get the lists to update
+                    let listApps = Web().Lists(Strings.Lists.Apps);
+                    let listAssessments = Web().Lists(Strings.Lists.Assessments);
+
+                    // Ensure the approver group exists
+                    if (approveGroup) {
+                        // Set the list permissions
+                        listApps.RoleAssignments().addRoleAssignment(approveGroup.Id, permissions[SPTypes.RoleType.WebDesigner]).execute(() => {
+                            // Log
+                            console.log("[Apps List] The approver permission was added successfully.");
+                        });
+                        listAssessments.RoleAssignments().addRoleAssignment(approveGroup.Id, permissions[SPTypes.RoleType.WebDesigner]).execute(() => {
+                            // Log
+                            console.log("[Assessments List] The approver permission was added successfully.");
+                        });
+                    }
+
+                    // Ensure the dev group exists
+                    if (devGroup) {
+                        // Set the list permissions
+                        listApps.RoleAssignments().addRoleAssignment(devGroup.Id, permissions[SPTypes.RoleType.Contributor]).execute(() => {
+                            // Log
+                            console.log("[Apps List] The dev permission was added successfully.");
+                        });
+                        listAssessments.RoleAssignments().addRoleAssignment(devGroup.Id, permissions[SPTypes.RoleType.Contributor]).execute(() => {
+                            // Log
+                            console.log("[Assessments List] The dev permission was added successfully.");
+                        });
+                    }
+
+                    // Wait for the app list updates to complete
+                    listApps.done(() => {
+                        // Wait for the assessment list updates to complete
+                        listAssessments.done(() => {
+                            // Resolve the request
+                            resolve();
+                        });
+                    });
+                });
+            });
+        });
+    });
 }

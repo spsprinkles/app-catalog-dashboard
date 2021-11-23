@@ -47,7 +47,7 @@ export class TermsOfUse {
                             type: Components.ButtonTypes.OutlineSecondary,
                             onClick: () => {
                                 btn.disable();
-                                Web().SiteGroups(Strings.Group).Users().add({
+                                Web().SiteGroups(Strings.Groups.Approvers).Users().add({
                                     LoginName: userLogin //Format: i:0#.f|membership|{email}
                                 }).execute(obj => {
                                     jQuery("#touRow").slideUp();

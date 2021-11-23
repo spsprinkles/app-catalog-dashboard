@@ -27,7 +27,10 @@ const Strings = {
     ConfigUrl: SourceUrl + "config.json",
     DashboardUrl: SourceUrl + "dashboard.aspx",
     GlobalVariable: "AppDashboard",
-    Group: "App Developers",
+    Groups: {
+        Approvers: "App Approvers",
+        Developers: "App Developers"
+    },
     Lists: {
         Apps: "Developer Apps",
         Assessments: "Dev App Assessments"
@@ -36,6 +39,7 @@ const Strings = {
     ProjectDescription: "App Dashboard for Developers",
     SolutionUrl: SourceUrl + "index.html",
     TermsOfUseUrl: SourceUrl + "TermsOfUse.html",
+    UserAgreementUrl: SourceUrl + "user_agreement.html",
     Version: "0.1",
 };
 export default Strings;
