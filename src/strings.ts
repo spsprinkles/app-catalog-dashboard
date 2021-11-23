@@ -25,6 +25,7 @@ export const setContext = (context) => {
 const Strings = {
     AppElementId: "app-catalog-dashboard",
     ConfigUrl: SourceUrl + "config.json",
+    DashboardUrl: SourceUrl + "dashboard.aspx",
     GlobalVariable: "AppDashboard",
     Group: "App Developers",
     Lists: {
@@ -33,8 +34,6 @@ const Strings = {
     },
     ProjectName: "App Dashboard",
     ProjectDescription: "App Dashboard for Developers",
-    SolutionAppsCSRUrl: "~site/SiteAssets/devAppsCSR.js",
-    SolutionAppAssessmentsCSRUrl: "~site/SiteAssets/devAppAssessmentsCSR.js",
     SolutionUrl: SourceUrl + "index.html",
     TermsOfUseUrl: SourceUrl + "TermsOfUse.html",
     Version: "0.1",

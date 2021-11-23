@@ -4,7 +4,6 @@ import { appIndicator } from "gd-sprest-bs/build/icons/svgs/appIndicator";
 import { chatSquareDots } from "gd-sprest-bs/build/icons/svgs/chatSquareDots";
 import { columnsGap } from "gd-sprest-bs/build/icons/svgs/columnsGap";
 import { pencilSquare } from "gd-sprest-bs/build/icons/svgs/pencilSquare";
-import { trash } from "gd-sprest-bs/build/icons/svgs/trash";
 import { AppForms } from "./itemForms";
 import * as jQuery from "jquery";
 import { DataSource, IAppItem } from "./ds";
@@ -133,120 +132,89 @@ export class AppDashboard {
                         name: "",
                         title: "Options",
                         onRenderCell: (el, column, item: IAppItem) => {
+                            // Determine if the user can edit
                             let canEdit = (item["AuthorId"] == ContextInfo.userId || (item["OwnersId"] ? item["OwnersId"].results.indexOf(ContextInfo.userId) != -1 : false));
-                            Components.ButtonGroup({
+
+                            // Render the actions
+                            Components.Tooltip({
                                 el,
-                                buttons: [
-                                    {
-                                        text: "View",
-                                        iconSize: 20,
-                                        iconType: appIndicator,
-                                        isSmall: true,
-                                        type: Components.ButtonTypes.OutlinePrimary,
-                                        onClick: () => {
-                                            // Set the list url
-                                            let listName = Strings.Lists.Apps.replace(/ /g, '');
-                                            let listUrl = ContextInfo.webAbsoluteUrl + "/" + listName;
-                                            let listUrlFolder = ContextInfo.webServerRelativeUrl + "/" + listName;
+                                content: "View the app properties",
+                                btnProps: {
+                                    text: "View",
+                                    iconSize: 20,
+                                    iconType: appIndicator,
+                                    isSmall: true,
+                                    type: Components.ButtonTypes.OutlinePrimary,
+                                    onClick: () => {
+                                        // Set the list url
+                                        let listName = Strings.Lists.Apps.replace(/ /g, '');
+                                        let listUrl = ContextInfo.webAbsoluteUrl + "/" + listName;
+                                        let listUrlFolder = ContextInfo.webServerRelativeUrl + "/" + listName;
 
-                                            // Return the url to the workspace
-                                            let itemUrl = listUrl + "/Forms/App/docsethomepage.aspx?ID=" +
-                                                item.Id + "&FolderCTID=" + item.ContentTypeId + "&RootFolder=" + listUrlFolder + "/" + item.Id;
+                                        // Return the url to the workspace
+                                        let itemUrl = listUrl + "/Forms/App/docsethomepage.aspx?ID=" +
+                                            item.Id + "&FolderCTID=" + item.ContentTypeId + "&RootFolder=" + listUrlFolder + "/" + item.Id;
 
-                                            // Redirect to the docset item
-                                            window.open(itemUrl, "_self");
-                                        }
-                                    },
-                                    {
-                                        text: "Edit Properties",
-                                        iconSize: 20,
-                                        iconType: pencilSquare,
-                                        isSmall: true,
-                                        type: Components.ButtonTypes.OutlineSecondary,
-                                        onClick: () => {
-                                            // Display the edit form
-                                            this._forms.edit(item.Id, () => {
-                                                // Refresh the table
-                                                this.refresh();
-                                            });
-                                        }
-                                    },
-                                    {
-                                        text: "Submit for Review",
-                                        iconSize: 20,
-                                        iconType: appIndicator,
-                                        isDisabled: canEdit && item.DevAppStatus != "In Review" ? false : true,
-                                        isSmall: true,
-                                        type: Components.ButtonTypes.OutlinePrimary,
-                                        onClick: () => {
-                                            // Display the submit form
-                                            this._forms.submit(item, () => {
-                                                // Refresh the table
-                                                this.refresh();
-                                            });
-                                        }
-                                    },
-                                    {
-                                        text: "Review this App",
-                                        iconSize: 20,
-                                        iconType: chatSquareDots,
-                                        isDisabled: item.DevAppStatus != "In Review" ? true : !canEdit,
-                                        isSmall: true,
-                                        type: Components.ButtonTypes.OutlinePrimary,
-                                        onClick: () => {
-                                            // Display the review form
-                                            this._forms.review(item, () => {
-                                                // Refresh the table
-                                                this.refresh();
-                                            });
-                                        }
-                                    },
-                                    {
-                                        text: "Delete App/Solution",
-                                        iconSize: 20,
-                                        iconType: trash,
-                                        isDisabled: !canEdit,
-                                        isSmall: true,
-                                        type: Components.ButtonTypes.OutlineDanger,
-                                        onClick: () => {
-                                            // Display the delete form
-                                            this._forms.delete(item, () => {
-                                                // Refresh the table
-                                                this.refresh();
-                                            });
-                                        }
-                                    },
-                                    {
-                                        text: "Deploy",
-                                        iconSize: 20,
-                                        //iconType: trash,
-                                        //isDisabled: !canEdit,
-                                        isSmall: true,
-                                        type: Components.ButtonTypes.OutlineWarning,
-                                        onClick: () => {
-                                            // Deploy the app
-                                            this._forms.deploy(item, () => {
-                                                // Refresh the table
-                                                this.refresh();
-                                            });
-                                        }
-                                    },
-                                    {
-                                        text: "Retract",
-                                        iconSize: 20,
-                                        //iconType: trash,
-                                        //isDisabled: !canEdit,
-                                        isSmall: true,
-                                        type: Components.ButtonTypes.OutlineDanger,
-                                        onClick: () => {
-                                            // Retract the app
-                                            this._forms.retract(item, () => {
-                                                // Refresh the table
-                                                this.refresh();
-                                            });
-                                        }
+                                        // Redirect to the docset item
+                                        window.open(itemUrl, "_self");
                                     }
-                                ]
+                                }
+                            });
+                            Components.Tooltip({
+                                el,
+                                content: "Edit the app properties",
+                                btnProps: {
+                                    text: "Edit",
+                                    iconSize: 20,
+                                    iconType: pencilSquare,
+                                    isSmall: true,
+                                    type: Components.ButtonTypes.OutlineSecondary,
+                                    onClick: () => {
+                                        // Display the edit form
+                                        this._forms.edit(item.Id, () => {
+                                            // Refresh the table
+                                            this.refresh();
+                                        });
+                                    }
+                                }
+                            });
+                            Components.Tooltip({
+                                el,
+                                content: "Submit the app for review",
+                                btnProps: {
+                                    text: "Submit",
+                                    iconSize: 20,
+                                    iconType: appIndicator,
+                                    isDisabled: canEdit && item.DevAppStatus != "In Review" ? false : true,
+                                    isSmall: true,
+                                    type: Components.ButtonTypes.OutlinePrimary,
+                                    onClick: () => {
+                                        // Display the submit form
+                                        this._forms.submit(item, () => {
+                                            // Refresh the table
+                                            this.refresh();
+                                        });
+                                    }
+                                }
+                            });
+                            Components.Tooltip({
+                                el,
+                                content: "Review the app",
+                                btnProps: {
+                                    text: "Review",
+                                    iconSize: 20,
+                                    iconType: chatSquareDots,
+                                    isDisabled: item.DevAppStatus != "In Review" ? true : !canEdit,
+                                    isSmall: true,
+                                    type: Components.ButtonTypes.OutlinePrimary,
+                                    onClick: () => {
+                                        // Display the review form
+                                        this._forms.review(item, () => {
+                                            // Refresh the table
+                                            this.refresh();
+                                        });
+                                    }
+                                }
                             });
                         }
                     },

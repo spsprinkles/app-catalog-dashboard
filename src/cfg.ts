@@ -107,7 +107,6 @@ export const Configuration = Helper.SPConfig({
                     allowDeletion: false,
                     description: "The URL to the app icon. The icon should have a width and height of 96 pixels.",
                     format: SPTypes.UrlFormatType.Image,
-                    jslink: Strings.SolutionAppsCSRUrl,
                     required: true
                 } as Helper.IFieldInfoUrl,
                 {
@@ -218,8 +217,7 @@ export const Configuration = Helper.SPConfig({
             ViewInformation: [{
                 ViewName: "All Documents",
                 ViewFields: ["DocIcon", "LinkFilename", "Modified", "Editor"],
-                ViewQuery: '<OrderBy><FieldRef Name="FileLeafRef" Ascending="TRUE" /></OrderBy>',
-                JSLink: Strings.SolutionAppsCSRUrl,
+                ViewQuery: '<OrderBy><FieldRef Name="FileLeafRef" Ascending="TRUE" /></OrderBy>'
             }]
         },
         {
@@ -248,7 +246,6 @@ export const Configuration = Helper.SPConfig({
                     type: Helper.SPCfgFieldType.Lookup,
                     allowDeletion: false,
                     indexed: true,
-                    jslink: Strings.SolutionAppAssessmentsCSRUrl,
                     listName: "Developer Apps",
                     relationshipBehavior: SPTypes.RelationshipDeleteBehaviorType.Cascade,
                     required: true,
