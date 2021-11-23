@@ -22,7 +22,7 @@
   "dependencies": {
     "datatables.net": "^1.11.3",
     "datatables.net-bs5": "^1.11.3",
-    "dattatable": "^1.4.5",
+    "dattatable": "^1.4.8",
     "gd-sprest-bs": "^8.8.2",
     "jquery": "^3.6.0",
     "jszip": "^3.7.1",
@@ -32,7 +32,7 @@
     "@babel/core": "^7.16.0",
     "@babel/preset-env": "^7.16.4",
     "@types/datatables.net": "^1.10.21",
-    "@types/jquery": "^3.5.8",
+    "@types/jquery": "^3.5.9",
     "babel-loader": "^8.2.3",
     "css-loader": "^5.2.7",
     "html-loader": "^2.1.2",
