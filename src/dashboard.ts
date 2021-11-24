@@ -1,8 +1,10 @@
 import { Dashboard, LoadingDialog } from "dattatable";
 import { Components, ContextInfo } from "gd-sprest-bs";
 import { appIndicator } from "gd-sprest-bs/build/icons/svgs/appIndicator";
+import { arrowClockwise } from "gd-sprest-bs/build/icons/svgs/arrowClockwise";
 import { chatSquareDots } from "gd-sprest-bs/build/icons/svgs/chatSquareDots";
 import { columnsGap } from "gd-sprest-bs/build/icons/svgs/columnsGap";
+import { fileEarmarkArrowUp } from "gd-sprest-bs/build/icons/svgs/fileEarmarkArrowUp";
 import { pencilSquare } from "gd-sprest-bs/build/icons/svgs/pencilSquare";
 import * as Common from "./common";
 import { AppForms } from "./itemForms";
@@ -68,34 +70,106 @@ export class AppDashboard {
                 ],
             },
             navigation: {
-                title: columnsGap(32).outerHTML + '<span class="ms-3">' + Strings.ProjectName + "</span>",
-                items: [
+                onRendering: (props) => {
+                    let brandName = document.createElement("div");
+                    brandName.className = "ms-75";
+                    brandName.append(Strings.ProjectName);
+                    let brand = document.createElement("div");
+                    brand.className = "d-flex";
+                    brand.appendChild(columnsGap());
+                    brand.appendChild(brandName);
+                    props.brand = brand;
+                },
+                onRendered: (el) => {
+                    el.querySelector("nav").classList.remove("rounded");
+                    el.querySelector("nav").classList.add("rounded-top");
+                    el.querySelector("nav div.container-fluid").classList.add("ps-3");
+                    el.querySelector("nav div.container-fluid a.navbar-brand").classList.add("pe-none");
+                },
+                onSearchRendered: (el) => {
+                    el.setAttribute("placeholder", "Search this dashboard");
+                },
+                showFilter: false
+            },
+            subNavigation: {
+                itemsEnd: [
                     {
-                        className: "btn-outline-light",
-                        isButton: true,
                         text: "Add/Update App",
-                        onClick: () => {
-                            // Upload the package file
-                            this._forms.upload(() => {
-                                // Refresh the dashboard
-                                this.refresh();
+                        onRender: (el, item) => {
+                            // Clear the existing button
+                            el.innerHTML = "";
+                            // Create a span to wrap the icon in
+                            let span = document.createElement("span");
+                            span.className = "bg-white d-inline-flex ms-2 rounded";
+                            el.appendChild(span);
+    
+                            // Render a tooltip
+                            Components.Tooltip({
+                                el: span,
+                                content: item.text,
+                                btnProps: {
+                                    // Render the icon button
+                                    className: "p-1",
+                                    iconType: fileEarmarkArrowUp,
+                                    iconSize: 24,
+                                    type: Components.ButtonTypes.OutlineSecondary,
+                                    onClick: () => {
+                                        // Upload the package file
+                                        this._forms.upload(() => {
+                                            // Refresh the dashboard
+                                            this.refresh();
+                                        });
+                                    }
+                                },
                             });
                         }
                     },
                     {
-                        className: "ms-2 btn-outline-light",
-                        isButton: true,
                         text: "Refresh",
-                        onClick: () => {
-                            // Refresh the dashboard
-                            this.refresh();
+                        onRender: (el, item) => {
+                            // Clear the existing button
+                            el.innerHTML = "";
+                            // Create a span to wrap the icon in
+                            let span = document.createElement("span");
+                            span.className = "bg-white d-inline-flex ms-2 rounded";
+                            el.appendChild(span);
+    
+                            // Render a tooltip
+                            Components.Tooltip({
+                                el: span,
+                                content: item.text,
+                                btnProps: {
+                                    // Render the icon button
+                                    className: "p-1",
+                                    iconType: arrowClockwise,
+                                    iconSize: 24,
+                                    type: Components.ButtonTypes.OutlineSecondary,
+                                    onClick: () => {
+                                        // Refresh the dashboard
+                                        this.refresh();
+                                    }
+                                },
+                            });
                         }
                     }
                 ],
+                onRendered: (el) => {
+                    let filter = el.querySelector(".filter-icon");
+                    if (filter) {
+                        let filterItem = document.createElement("li");
+                        filterItem.className = "nav-item";
+                        filterItem.appendChild(filter);
+                        let ul = el.querySelector("#navbar_content ul:last-child");
+                        let li = ul.querySelector("li:last-child");
+                        ul.insertBefore(filterItem, li);
+                    }
+                },
+                showFilter: true,
             },
             footer: {
                 itemsEnd: [
                     {
+                        className: "pe-none",
                         text: "v" + Strings.Version,
                     },
                 ],
@@ -111,16 +185,21 @@ export class AppDashboard {
                             searchable: false
                         }
                     ],
+                    createdRow: function (row, data, index) {
+                        jQuery('td', row).addClass('align-middle');
+                    },
                     // Add some classes to the dataTable elements
-                    drawCallback: function () {
-                        jQuery(".table", this._table).removeClass("no-footer");
-                        jQuery(".table", this._table).addClass("tbl-footer");
-                        jQuery(".table", this._table).addClass("table-striped");
-                        jQuery(".table thead th", this._table).addClass("align-middle");
-                        jQuery(".table tbody td", this._table).addClass("align-middle");
-                        jQuery(".dataTables_info", this._table).addClass("text-center");
-                        jQuery(".dataTables_length", this._table).addClass("pt-2");
-                        jQuery(".dataTables_paginate", this._table).addClass("pt-03");
+                    drawCallback: function (settings) {
+                        let api = new jQuery.fn.dataTable.Api(settings) as any;
+                        jQuery(api.context[0].nTable).removeClass('no-footer');
+                        jQuery(api.context[0].nTable).addClass('tbl-footer');
+                        jQuery(api.context[0].nTable).addClass('table-striped');
+                        jQuery(api.context[0].nTableWrapper).find('.dataTables_info').addClass('text-center');
+                        jQuery(api.context[0].nTableWrapper).find('.dataTables_length').addClass('pt-2');
+                        jQuery(api.context[0].nTableWrapper).find('.dataTables_paginate').addClass('pt-03');
+                    },
+                    headerCallback: function (thead, data, start, end, display) {
+                        jQuery('th', thead).addClass('align-middle');
                     },
                     // Sort descending by Start Date
                     order: [[2, "asc"]],
