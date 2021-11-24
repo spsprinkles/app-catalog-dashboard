@@ -111,6 +111,10 @@ window[Strings.GlobalVariable] = GlobalVariable;
 // Get the element and render the app if it is found
 let elApp = document.querySelector("#" + Strings.AppElementId) as HTMLElement;
 if (elApp) {
+    // Remove the extra border spacing on the webpart
+    let contentBox = document.querySelector("#contentBox table.ms-core-tableNoSpace");
+    contentBox ? contentBox.classList.remove("ms-webpartPage-root") : null;
+    
     // Render the application
     GlobalVariable.render(elApp);
 }
