@@ -120,8 +120,8 @@ export class App {
                     }
 
                     // See if this app is in review and ensure this was not submitted by the user
-                    if ((DataSource.DocSetItem.DevAppStatus == "Submitted for Review" || DataSource.DocSetItem.DevAppStatus == "In Review")
-                        && !Common.isSubmitter(DataSource.DocSetItem)) {
+                    if (DataSource.DocSetItem.DevAppStatus.indexOf("Review") > 0 &&
+                        (!Common.isSubmitter(DataSource.DocSetItem) || DataSource.IsApprover)) {
                         // Review button
                         tooltips.push({
                             content: "Start/Continue an assessment of the app.",
@@ -147,6 +147,8 @@ export class App {
                     if (DataSource.IsApprover) {
                         // See if the app is not in the catalog
                         let app = DataSource.getAppById(DataSource.DocSetItem.AppProductID);
+
+                        // See if the app hasn't been deployed
                         if (app == null) {
                             // Delete
                             tooltips.push({
@@ -166,10 +168,34 @@ export class App {
                                         });
                                     }
                                 }
-                            })
-                        } else {
+                            });
+                        }
+
+                        // See if we are requesting approval
+                        if (DataSource.DocSetItem.DevAppStatus == "Requesting Approval") {
+                            // Retract
+                            tooltips.push({
+                                content: "Approves the application for deployment.",
+                                btnProps: {
+                                    text: "Approve",
+                                    iconSize: 20,
+                                    //iconType: trash,
+                                    isSmall: true,
+                                    type: Components.ButtonTypes.OutlineSuccess,
+                                    onClick: () => {
+                                        // Approve the app
+                                        this._forms.approve(DataSource.DocSetItem, () => {
+                                            // Refresh the page
+                                            window.location.reload();
+                                        });
+                                    }
+                                }
+                            });
+                        }
+                        // Else, see if the app is approved
+                        else if (DataSource.DocSetItem.DevAppStatus == "Approved") {
                             // See if the app is deployed
-                            if (app.Deployed) {
+                            if (app == null || app.Deployed) {
                                 // Retract
                                 tooltips.push({
                                     content: "Retracts the solution from the tenant app catalog.",

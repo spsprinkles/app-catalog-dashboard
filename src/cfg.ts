@@ -225,7 +225,7 @@ export const Configuration = Helper.SPConfig({
                     choices: [
                         "Draft", "Submitted for Review", "In Review", "Requesting Approval", "Approved"
                     ]
-                } as Helper.IFieldInfoChoice,
+                } as Helper.IFieldInfoChoice
             ],
             ViewInformation: [{
                 ViewName: "All Documents",
@@ -253,17 +253,6 @@ export const Configuration = Helper.SPConfig({
                 MajorVersionLimit: 50
             },
             CustomFields: [
-                {
-                    name: "RelatedApp",
-                    title: "Related App",
-                    type: Helper.SPCfgFieldType.Lookup,
-                    allowDeletion: false,
-                    indexed: true,
-                    listName: "Developer Apps",
-                    relationshipBehavior: SPTypes.RelationshipDeleteBehaviorType.Cascade,
-                    required: true,
-                    showField: "Title"
-                } as Helper.IFieldInfoLookup,
                 {
                     name: "SupportUrlValid",
                     title: "Support URL",
@@ -336,6 +325,32 @@ export const Configuration = Helper.SPConfig({
                     sortable: false
                 } as Helper.IFieldInfoNote,
                 {
+                    name: "Completed",
+                    title: "Date Completed",
+                    type: Helper.SPCfgFieldType.Date,
+                    allowDeletion: false,
+                    description: "The assessment completion date.",
+                    indexed: true,
+                    displayFormat: SPTypes.DateFormat.DateTime,
+                    showInEditForm: false,
+                    showInNewForm: false,
+                    showInViewForms: false
+                } as Helper.IFieldInfoDate,
+                {
+                    name: "RelatedApp",
+                    title: "Related App",
+                    type: Helper.SPCfgFieldType.Lookup,
+                    allowDeletion: false,
+                    indexed: true,
+                    listName: Strings.Lists.Apps,
+                    relationshipBehavior: SPTypes.RelationshipDeleteBehaviorType.Cascade,
+                    required: true,
+                    showField: "Title",
+                    showInEditForm: false,
+                    showInNewForm: false,
+                    showInViewForms: false
+                } as Helper.IFieldInfoLookup,
+                {
                     name: "ResultResponse",
                     title: "Result Response",
                     type: Helper.SPCfgFieldType.Calculated,
@@ -351,26 +366,10 @@ export const Configuration = Helper.SPConfig({
             ],
             ViewInformation: [{
                 ViewName: "All Items",
-                ViewFields: ["Title", "RelatedApp", "SupportUrlValid", "IconImages", "DescriptionText", "AppTested", "UnresolvedIssues", "ResultResponse", "Editor"],
+                ViewFields: ["Title", "SupportUrlValid", "IconImages", "DescriptionText", "AppTested", "UnresolvedIssues", "ResultResponse", "Editor"],
                 ViewQuery: '<OrderBy><FieldRef Name="ID" Ascending="FALSE" /></OrderBy>'
             }]
         }
-        /*
-        {
-            //List should already be created via the solution package...
-            ListInformation: {
-                BaseTemplate: SPTypes.ListTemplateType.TasksWithTimelineAndHierarchy,
-                Title: "Workflow Tasks",
-                //Description: "Used by developers to submit their assessments of other apps",
-            },
-            //...just need to add this existing content type to the list
-            ContentTypes: [{
-                Name: "Workflow Task (SharePoint 2013)",
-                Description: "Create a SharePoint 2013 Workflow Task",
-                ParentName: "Workflow Task (SharePoint 2013)"
-            }]
-        }
-        */
     ]
 });
 

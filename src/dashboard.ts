@@ -200,8 +200,8 @@ export class AppDashboard {
                             }
 
                             // Ensure this was not submitted by the user
-                            if ((item.DevAppStatus == "Submitted for Review" || item.DevAppStatus == "In Review")
-                                && !Common.isSubmitter(item)) {
+                            if (item.DevAppStatus.indexOf("Review") > 0 &&
+                                (!Common.isSubmitter(item) || DataSource.IsApprover)) {
                                 // Review button
                                 tooltips.push({
                                     content: "Start/Continue an assessment of the app.",

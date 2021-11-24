@@ -30,6 +30,8 @@ export interface IAppItem extends Types.SP.ListItem {
 
 // Assessment Item
 export interface IAssessmentItem extends Types.SP.ListItem {
+    Completed?: string;
+    RelatedAppId: number;
 }
 
 // Configuration
@@ -335,7 +337,7 @@ export class DataSource {
 
                 // Resolve the promise
                 resolve();
-            });
+            }, reject);
         });
     }
 

@@ -11,6 +11,47 @@ export class AppForms {
     // Constructor
     constructor() { }
 
+    // Approve form
+    approve(item: IAppItem, onUpdate: () => void) {
+        // Set the header
+        Modal.setHeader("Approve App/Solution Package");
+
+        // Set the body
+        Modal.setBody("Are you sure you want to approve this app package?");
+
+        // Render the footer
+        Modal.setFooter(Components.Tooltip({
+            content: "This will approve the app and make it available for deployement.",
+            btnProps: {
+                text: "Approve",
+                type: Components.ButtonTypes.OutlineSuccess,
+                onClick: () => {
+                    // Close the modal
+                    Modal.hide();
+
+                    // Show a loading dialog
+                    LoadingDialog.setHeader("Approving the App");
+                    LoadingDialog.setBody("This dialog will close after the app is approved.");
+                    LoadingDialog.show();
+
+                    // Update the item
+                    item.update({
+                        DevAppStatus: "Approved"
+                    }).execute(() => {
+                        // Close the dialog
+                        LoadingDialog.hide();
+
+                        // Execute the update event
+                        onUpdate();
+                    });
+                }
+            }
+        }).el);
+
+        // Show the modal
+        Modal.show();
+    }
+
     // Delete form
     delete(item: IAppItem, onUpdate: () => void) {
         // Set the header
@@ -43,45 +84,29 @@ export class AppForms {
 
                 // See if we are deleting the package
                 if (deleteFl) {
-                    // Get the associated item
-                    this.getAssessmentItem(item).then(
-                        assessmentItem => {
-                            // Delete it
-                            assessmentItem.delete().execute(() => {
-                                // Delete this item
-                                item.delete().execute(() => {
-                                    // Close the dialog
-                                    LoadingDialog.hide();
-
-                                    // Call the update event
-                                    onUpdate();
-                                });
-                            });
-                        },
-
-                        () => {
-                            // Delete this item
-                            item.delete().execute(() => {
-                                // Close the dialog
-                                LoadingDialog.hide();
-
-                                // Call the update event
-                                onUpdate();
-                            });
-                        }
-                    );
-                }
-                // Else, we are disabling the app
-                else {
-                    // Update the item
-                    item.update({
-                        IsAppPackageEnabled: false
-                    }).execute(() => {
+                    // Delete this folder
+                    item.delete().execute(() => {
                         // Close the dialog
                         LoadingDialog.hide();
 
-                        // Execute the update event
+                        // Call the update event
                         onUpdate();
+                    });
+                }
+                // Else, we are disabling the app
+                else {
+                    // Retract the solution
+                    this.retract(item, () => {
+                        // Update the item
+                        item.update({
+                            IsAppPackageEnabled: false
+                        }).execute(() => {
+                            // Close the dialog
+                            LoadingDialog.hide();
+
+                            // Execute the update event
+                            onUpdate();
+                        });
                     });
                 }
             }
@@ -98,51 +123,75 @@ export class AppForms {
         LoadingDialog.setBody("Uploading the spfx package to the app tenant catalog.");
         LoadingDialog.show();
 
-        // Upload the package file
-        item.File().content().execute(content => {
-            // Load the context of the app catalog
-            ContextInfo.getWeb(DataSource.Configuration.tenantAppCatalogUrl).execute(context => {
-                // Upload the file to the app catalog
-                Web(DataSource.Configuration.tenantAppCatalogUrl, { requestDigest: context.GetContextWebInformation.FormDigestValue })
-                    .TenantAppCatalog().add(item.FileLeafRef, true, content).execute(file => {
-                        // Update the dialog
-                        LoadingDialog.setHeader("Deploying the Package");
-                        LoadingDialog.setBody("This will close after the app is deployed.");
+        // Get the package file
+        DataSource.DocSetItem.Folder().Files().execute(files => {
+            let appFile = null;
 
-                        // Check-in the file
-                        file.checkIn().execute(() => {
-                            // Do we need to do this by default?
-                        });
+            // Find the package file
+            for (let i = 0; i < files.results.length; i++) {
+                let file = files.results[i];
 
-                        // Get the apps
-                        Web(DataSource.Configuration.tenantAppCatalogUrl, { requestDigest: context.GetContextWebInformation.FormDigestValue })
-                            .TenantAppCatalog().AvailableApps().execute(apps => {
-                                for (let i = 0; i < apps.results.length; i++) {
-                                    let app = apps.results[i];
+                // See if this is the package
+                if (file.Name.endsWith(".sppkg")) {
+                    // Set the file
+                    appFile = file;
+                    break;
+                }
+            }
 
-                                    // See if this is the target app
-                                    if (app.ProductId != item.AppProductID) { continue; }
+            // Ensure a file exists
+            if (appFile == null) {
+                // This shouldn't happen
+                LoadingDialog.hide();
+                return;
+            }
 
-                                    // See if it's not deployed
-                                    if (app.Deployed != true) {
-                                        // Deploy the app
-                                        app.deploy().execute(() => {
+            // Upload the package file
+            appFile.content().execute(content => {
+                // Load the context of the app catalog
+                ContextInfo.getWeb(DataSource.Configuration.tenantAppCatalogUrl).execute(context => {
+                    // Upload the file to the app catalog
+                    Web(DataSource.Configuration.tenantAppCatalogUrl, { requestDigest: context.GetContextWebInformation.FormDigestValue })
+                        .TenantAppCatalog().add(item.FileLeafRef, true, content).execute(file => {
+                            // Update the dialog
+                            LoadingDialog.setHeader("Deploying the Package");
+                            LoadingDialog.setBody("This will close after the app is deployed.");
+
+                            // Check-in the file
+                            file.checkIn().execute(() => {
+                                // Do we need to do this by default?
+                            });
+
+                            // Get the apps
+                            Web(DataSource.Configuration.tenantAppCatalogUrl, { requestDigest: context.GetContextWebInformation.FormDigestValue })
+                                .TenantAppCatalog().AvailableApps().execute(apps => {
+                                    for (let i = 0; i < apps.results.length; i++) {
+                                        let app = apps.results[i];
+
+                                        // See if this is the target app
+                                        if (app.ProductId != item.AppProductID) { continue; }
+
+                                        // See if it's not deployed
+                                        if (app.Deployed != true) {
+                                            // Deploy the app
+                                            app.deploy().execute(() => {
+                                                // Call the update event
+                                                onUpdate();
+
+                                                // App deployed
+                                                LoadingDialog.hide();
+                                            });
+                                        } else {
                                             // Call the update event
                                             onUpdate();
 
-                                            // App deployed
+                                            // Close the dialog
                                             LoadingDialog.hide();
-                                        });
-                                    } else {
-                                        // Call the update event
-                                        onUpdate();
-
-                                        // Close the dialog
-                                        LoadingDialog.hide();
+                                        }
                                     }
-                                }
-                            });
-                    });
+                                });
+                        });
+                });
             });
         });
     }
@@ -197,10 +246,20 @@ export class AppForms {
             List(Strings.Lists.Assessments).Items().query({
                 Filter: "RelatedAppId eq " + item.Id
             }).execute(items => {
-                let item = items.results[0] as any;
+                // Parse the results
+                for (let i = 0; i < items.results.length; i++) {
+                    let item: IAssessmentItem = items.results[i] as any;
 
-                // Resolve/Reject the promise
-                item ? resolve(item) : reject();
+                    // See if this is not completed
+                    if (item.Completed == null) {
+                        // Resolve the request
+                        resolve(item);
+                        return;
+                    }
+                }
+
+                // Not found
+                resolve(null);
             }, reject);
         });
     }
@@ -321,48 +380,57 @@ export class AppForms {
         ItemForm.ListName = Strings.Lists.Assessments;
 
         // Get the assessment item
-        this.getAssessmentItem(item).then(
-            // Exsists
-            assessmentItem => {
+        this.getAssessmentItem(item).then(assessment => {
+            // See if an item exists
+            if (assessment) {
+                let completeFl = false;
+
                 // Show the edit form
                 ItemForm.edit({
-                    itemId: assessmentItem.Id,
-                    onCreateEditForm: props => {
-                        // Update the field controls
-                        props.onControlRendering = (ctrl, field) => {
-                            // See if this is the app field
-                            if (field.InternalName == "RelatedApp") {
-                                // Make the field readonly
-                                ctrl.isReadonly = true;
+                    itemId: assessment.Id,
+                    onSetFooter: el => {
+                        // Render a completed button
+                        let tooltip = Components.Tooltip({
+                            el,
+                            content: "Completes the review of the app.",
+                            btnProps: {
+                                text: "Complete Review",
+                                type: Components.ButtonTypes.OutlineSuccess,
+                                onClick: () => {
+                                    // Set the flag
+                                    completeFl = true;
+
+                                    // Disable the button
+                                    tooltip.button.disable();
+                                }
                             }
+                        })
+                    },
+                    onSave: (props: IAssessmentItem) => {
+                        // See if we are completing the assessment
+                        if (completeFl) {
+                            // Update the props
+                            props.Completed = new Date(Date.now()) as any;
                         }
 
                         // Return the properties
                         return props;
                     },
                     onUpdate: () => {
-                        if (item.DevAppStatus != "In Review") {
-                            // Update the status of the item
-                            item.update({ DevAppStatus: "In Review" }).execute(() => {
-                                // Call the update event
-                                onUpdate();
-                            });
+                        // See if we are updating the status
+                        if (completeFl) {
+                            // Update the status
+                            item.update({ DevAppStatus: "Requesting Approval" }).execute(onUpdate);
                         } else {
                             // Call the update event
                             onUpdate();
                         }
                     }
                 });
-            },
-
-            // Doesn't exist
-            () => {
+            } else {
                 // Show the new form
                 ItemForm.create({
                     onCreateEditForm: props => {
-                        // Exclude the related app id
-                        props.excludeFields = ["RelatedApp"];
-
                         // Update the default title
                         props.onControlRendering = ((ctrl, field) => {
                             // See if this is the title field
@@ -375,22 +443,25 @@ export class AppForms {
                         // Return the properties
                         return props;
                     },
-                    onSave: props => {
-                        // Set the associated app id
-                        props["RelatedAppId"] = item.Id;
+                    onSave: (props: IAssessmentItem) => {
+                        // Set the item id
+                        props.RelatedAppId = item.Id;
+
+                        // Update the status of the current item
+                        if (item.DevAppStatus == "Submitted for Review") {
+                            // Update the status
+                            item.update({
+                                DevAppStatus: "In Review"
+                            }).execute(onUpdate);
+                        }
 
                         // Return the properties
                         return props;
                     },
-                    onUpdate: () => {
-                        // Update the status of the item
-                        item.update({ DevAppStatus: "In Review" }).execute(() => {
-                            // Call the update event
-                            onUpdate();
-                        });
-                    }
+                    onUpdate
                 });
-            });
+            }
+        });
     }
 
     // Submit form
@@ -399,7 +470,7 @@ export class AppForms {
         Modal.clear();
 
         // Set the header
-        Modal.setHeader("Sumbit App for Review");
+        Modal.setHeader("Submit App for Review");
 
         // Set the body
         Modal.setBody("Are you sure you want to submit this app for review?");

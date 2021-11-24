@@ -2,9 +2,9 @@ import { ContextInfo } from "gd-sprest-bs";
 import { IAppItem } from "./ds";
 import Strings from "./strings";
 
-// Determine if the user can edit the item
+// Determines if the user can edit the item
 export function canEdit(item: IAppItem) {
-    // Determine if the user is the author or owner
+    // The user is the author or owner
     return isOwner(item) || isSubmitter(item);
 }
 
@@ -20,13 +20,13 @@ export function generateDocSetUrl(item: IAppItem) {
         item.Id + "&FolderCTID=" + item.ContentTypeId + "&RootFolder=" + listUrlFolder + "/" + item.Id;
 }
 
-// Determine if the user is an owner
+// Determines if the user is an owner
 export function isOwner(item: IAppItem) {
     // Determine if the user is an owner
     return item.OwnersId ? item.OwnersId.results.indexOf(ContextInfo.userId) != -1 : false;
 }
 
-// Determine if the user is a submitter
+// Determines if the user is a submitter
 export function isSubmitter(item: IAppItem) {
     // Determine if the user submitted the app
     return item.AuthorId == ContextInfo.userId;
