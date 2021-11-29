@@ -187,6 +187,7 @@ export class DataSource {
     // Approver Security Group
     private static _approverGroup: Types.SP.GroupOData = null;
     static get ApproverGroup(): Types.SP.GroupOData { return this._approverGroup; }
+    static get ApproverUrl(): string { return ContextInfo.webServerRelativeUrl + "/_layouts/15/people.aspx?MembershipGroupId=" + this._approverGroup.Id; }
     static get IsApprover(): boolean {
         // See if the group doesn't exist
         if (this.ApproverGroup == null) { return false; }
@@ -222,6 +223,7 @@ export class DataSource {
     // Developer Security Group
     private static _devGroup: Types.SP.GroupOData = null;
     static get DevGroup(): Types.SP.GroupOData { return this._devGroup; }
+    static get DevUrl(): string { return ContextInfo.webServerRelativeUrl + "/_layouts/15/people.aspx?MembershipGroupId=" + this._devGroup.Id; }
     static get IsDeveloper(): boolean {
         // See if the group doesn't exist
         if (this.DevGroup == null) { return false; }
