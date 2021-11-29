@@ -264,6 +264,23 @@ export class AppForms {
         });
     }
 
+    // Last Assessment form
+    lastAssessment(item: IAppItem) {
+        // Set the list name
+        ItemForm.ListName = Strings.Lists.Assessments;
+
+        // Get the assessment item
+        this.getAssessmentItem(item).then(assessment => {
+            // See if an item exists
+            if (assessment) {
+                // Show the edit form
+                ItemForm.view({
+                    itemId: assessment.Id,
+                });
+            }
+        });
+    }
+
     // Reads an app package file
     private readPackage(data): PromiseLike<IAppItem> {
         // Return a promise

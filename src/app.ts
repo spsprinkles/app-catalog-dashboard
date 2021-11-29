@@ -171,6 +171,22 @@ export class App {
                             });
                         }
 
+                        // Assessment button
+                        tooltips.push({
+                            content: "View the last assessment of the app.",
+                            btnProps: {
+                                text: "Assessment",
+                                iconSize: 20,
+                                iconType: chatSquareDots,
+                                isSmall: true,
+                                type: Components.ButtonTypes.OutlinePrimary,
+                                onClick: () => {
+                                    // Display the last assessment
+                                    this._forms.lastAssessment(DataSource.DocSetItem);
+                                }
+                            }
+                        });
+
                         // See if we are requesting approval
                         if (DataSource.DocSetItem.DevAppStatus == "Requesting Approval") {
                             // Retract
