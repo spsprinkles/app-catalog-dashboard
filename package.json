@@ -22,8 +22,8 @@
   "dependencies": {
     "datatables.net": "^1.11.3",
     "datatables.net-bs5": "^1.11.3",
-    "dattatable": "^1.4.8",
-    "gd-sprest-bs": "^8.8.3",
+    "dattatable": "^1.5.0",
+    "gd-sprest-bs": "^8.8.5",
     "jquery": "^3.6.0",
     "jszip": "^3.7.1",
     "moment": "^2.29.1"
@@ -43,7 +43,7 @@
     "ts-loader": "^9.2.6",
     "typescript": "^4.5.2",
     "url-loader": "^4.1.1",
-    "webpack": "^5.64.3",
+    "webpack": "^5.64.4",
     "webpack-cli": "^4.9.1"
   }
 }

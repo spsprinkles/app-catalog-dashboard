@@ -81,8 +81,6 @@ export class AppDashboard {
                     props.brand = brand;
                 },
                 onRendered: (el) => {
-                    el.querySelector("nav").classList.remove("rounded");
-                    el.querySelector("nav").classList.add("rounded-top");
                     el.querySelector("nav div.container-fluid").classList.add("ps-3");
                     el.querySelector("nav div.container-fluid a.navbar-brand").classList.add("pe-none");
                 },
