@@ -97,7 +97,7 @@ export class App {
                     }
 
                     // See if this is an owner
-                    if (DataSource.DocSetItem.DevAppStatus == "Draft" && Common.isOwner(DataSource.DocSetItem)) {
+                    if ((DataSource.DocSetItem.DevAppStatus == "Draft" || DataSource.DocSetItem.DevAppStatus == "Requires Attention") && Common.isOwner(DataSource.DocSetItem)) {
                         // Submit
                         tooltips.push({
                             content: "Submit the app for review",
@@ -123,24 +123,43 @@ export class App {
                     if (DataSource.DocSetItem.DevAppStatus.indexOf("Review") > 0 &&
                         (!Common.isSubmitter(DataSource.DocSetItem) || DataSource.IsApprover)) {
                         // Review button
-                        tooltips.push({
-                            content: "Start/Continue an assessment of the app.",
-                            btnProps: {
-                                text: "Review",
-                                iconSize: 20,
-                                iconType: chatSquareDots,
-                                isDisabled: !canEdit,
-                                isSmall: true,
-                                type: Components.ButtonTypes.OutlinePrimary,
-                                onClick: () => {
-                                    // Display the review form
-                                    this._forms.review(DataSource.DocSetItem, () => {
-                                        // Refresh the page
-                                        window.location.reload();
-                                    });
+                        tooltips.push(
+                            {
+                                content: "Start/Continue an assessment of the app.",
+                                btnProps: {
+                                    text: "Review",
+                                    iconSize: 20,
+                                    iconType: chatSquareDots,
+                                    isDisabled: !canEdit,
+                                    isSmall: true,
+                                    type: Components.ButtonTypes.OutlinePrimary,
+                                    onClick: () => {
+                                        // Display the review form
+                                        this._forms.review(DataSource.DocSetItem, () => {
+                                            // Refresh the page
+                                            window.location.reload();
+                                        });
+                                    }
+                                }
+                            },
+                            {
+                                content: "Sends the request back to the developer(s).",
+                                btnProps: {
+                                    text: "Reject",
+                                    iconSize: 20,
+                                    iconType: chatSquareDots,
+                                    isSmall: true,
+                                    type: Components.ButtonTypes.OutlineDanger,
+                                    onClick: () => {
+                                        // Display the reject form
+                                        this._forms.reject(DataSource.DocSetItem, () => {
+                                            // Refresh the page
+                                            window.location.reload();
+                                        });
+                                    }
                                 }
                             }
-                        });
+                        );
                     }
 
                     // Ensure the user is an approver

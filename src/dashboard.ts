@@ -1,5 +1,5 @@
 import { Dashboard, LoadingDialog } from "dattatable";
-import { Components, ContextInfo } from "gd-sprest-bs";
+import { Components } from "gd-sprest-bs";
 import { appIndicator } from "gd-sprest-bs/build/icons/svgs/appIndicator";
 import { arrowClockwise } from "gd-sprest-bs/build/icons/svgs/arrowClockwise";
 import { chatSquareDots } from "gd-sprest-bs/build/icons/svgs/chatSquareDots";
@@ -52,6 +52,36 @@ export class AppDashboard {
 
     // Renders the dashboard
     private render() {
+        // See if this is an approver
+        let navLinks: Components.INavbarItem[] = null;
+        if (DataSource.IsApprover) {
+            // Set the admin buttons
+            navLinks = [{
+                text: "Admin",
+                items: [
+                    {
+                        text: "Manage Dev Group",
+                        onClick: () => {
+                            // Show the group in a new tab
+                        }
+                    },
+                    {
+                        text: "Manage Approver Group",
+                        onClick: () => {
+                            // Show the group in a new tab
+                        }
+                    },
+                    {
+                        text: "Manage App",
+                        onClick: () => {
+                            // Show the install modal
+                            DataSource.InstallRequired(true);
+                        }
+                    }
+                ]
+            }];
+        }
+
         // Create the dashboard
         this._dashboard = new Dashboard({
             el: this._el,
@@ -70,6 +100,7 @@ export class AppDashboard {
                 ],
             },
             navigation: {
+                itemsEnd: navLinks,
                 onRendering: (props) => {
                     let brandName = document.createElement("div");
                     brandName.className = "ms-75";
@@ -100,7 +131,7 @@ export class AppDashboard {
                             let span = document.createElement("span");
                             span.className = "bg-white d-inline-flex ms-2 rounded";
                             el.appendChild(span);
-    
+
                             // Render a tooltip
                             Components.Tooltip({
                                 el: span,
@@ -131,7 +162,7 @@ export class AppDashboard {
                             let span = document.createElement("span");
                             span.className = "bg-white d-inline-flex ms-2 rounded";
                             el.appendChild(span);
-    
+
                             // Render a tooltip
                             Components.Tooltip({
                                 el: span,
@@ -254,7 +285,7 @@ export class AppDashboard {
                             }
 
                             // See if this is an owner
-                            if (item.DevAppStatus == "Draft" && canEdit) {
+                            if ((item.DevAppStatus == "Draft" || item.DevAppStatus == "Requires Attention") && canEdit) {
                                 // Submit button
                                 tooltips.push({
                                     content: "Submit the app for review",
@@ -294,6 +325,25 @@ export class AppDashboard {
                                             this._forms.review(item, () => {
                                                 // Refresh the table
                                                 this.refresh();
+                                            });
+                                        }
+                                    }
+                                });
+
+                                // Reject button
+                                tooltips.push({
+                                    content: "Sends the request back to the developer(s).",
+                                    btnProps: {
+                                        text: "Reject",
+                                        iconSize: 20,
+                                        iconType: chatSquareDots,
+                                        isSmall: true,
+                                        type: Components.ButtonTypes.OutlineDanger,
+                                        onClick: () => {
+                                            // Display the reject form
+                                            this._forms.reject(item, () => {
+                                                // Refresh the page
+                                                window.location.reload();
                                             });
                                         }
                                     }

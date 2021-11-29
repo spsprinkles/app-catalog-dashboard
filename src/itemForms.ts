@@ -351,6 +351,101 @@ export class AppForms {
         });
     }
 
+    // Reject form
+    reject(item: IAppItem, onUpdate: () => void) {
+        // Clear the modal
+        Modal.clear();
+
+        // Set the header
+        Modal.setHeader("Reject App");
+
+        // Set the body
+        Modal.setBody("Are you sure you want to send this back to the developer?");
+
+        // Create the form
+        let form = Components.Form({
+            el: Modal.BodyElement,
+            controls: [
+                {
+                    name: "Reason",
+                    label: "Reason",
+                    errorMessage: "A reason is required to reject the app request.",
+                    required: true,
+                    type: Components.FormControlTypes.TextArea
+                }
+            ]
+        });
+
+        // Set the footer
+        Modal.setFooter(Components.Button({
+            text: "Reject",
+            type: Components.ButtonTypes.OutlineDanger,
+            onClick: () => {
+                // Ensure the form is valid
+                if (form.isValid()) {
+                    let comments = form.getValues()["Reason"];
+
+                    // Close the modal
+                    Modal.hide();
+
+                    // Show a loading dialog
+                    LoadingDialog.setHeader("Rejecting Request");
+                    LoadingDialog.setBody("This dialog will close after the app is sent back to the developer.");
+                    LoadingDialog.show();
+
+                    // Update the status
+                    item.update({
+                        AppComments: comments,
+                        DevAppStatus: "Requires Attention"
+                    }).execute(() => {
+                        // Parse the developers
+                        let cc = [];
+                        for (let i = 0; i < DataSource.DevGroup.Users.results.length; i++) {
+                            // Append the email
+                            cc.push(DataSource.DevGroup.Users.results[i].Email);
+                        }
+
+                        // Get the app owners
+                        let to = [];
+                        let owners = item.Owners && item.Owners.results ? item.Owners.results : [];
+                        for (let i = 0; i < owners.length; i++) {
+                            // Append the email
+                            to.push(owners[i].EMail);
+                        }
+
+                        // Ensure owners exist
+                        if (to.length > 0) {
+                            // Send an email
+                            Utility().sendEmail({
+                                To: to,
+                                CC: cc,
+                                Subject: "App '" + item.Title + "' Sent Back",
+                                Body: "App Developers,<br /><br />The '" + item.Title + "' app has been sent back based on the comments below." +
+                                    ContextInfo.userDisplayName +
+                                    ".<br /><br />" + comments
+                            }).execute(() => {
+                                // Call the update event
+                                onUpdate();
+
+                                // Close the loading dialog
+                                LoadingDialog.hide();
+                            });
+                        } else {
+                            // Call the update event
+                            onUpdate();
+
+                            // Close the loading dialog
+                            LoadingDialog.hide();
+                        }
+                    });
+                }
+            }
+        }).el);
+
+        // Show the modal
+        Modal.show();
+    }
+
     // Retracts the solution to the app catalog
     retract(item: IAppItem, onUpdate: () => void) {
         // Show a loading dialog
@@ -524,19 +619,28 @@ export class AppForms {
                         cc.push(owners[i].EMail);
                     }
 
-                    // Send an email
-                    Utility().sendEmail({
-                        To: to,
-                        CC: cc,
-                        Subject: "App '" + item.Title + "' submitted for review",
-                        Body: "App Developers,<br /><br />The '" + item.Title + "' app has been submitted for review by " + ContextInfo.userDisplayName + ". Please take some time to test this app and submit an assessment/review using the App Dashboard."
-                    }).execute(() => {
+                    // Ensure owners exist
+                    if (to.length > 0) {
+                        // Send an email
+                        Utility().sendEmail({
+                            To: to,
+                            CC: cc,
+                            Subject: "App '" + item.Title + "' submitted for review",
+                            Body: "App Developers,<br /><br />The '" + item.Title + "' app has been submitted for review by " + ContextInfo.userDisplayName + ". Please take some time to test this app and submit an assessment/review using the App Dashboard."
+                        }).execute(() => {
+                            // Call the update event
+                            onUpdate();
+
+                            // Close the loading dialog
+                            LoadingDialog.hide();
+                        });
+                    } else {
                         // Call the update event
                         onUpdate();
 
                         // Close the loading dialog
                         LoadingDialog.hide();
-                    });
+                    }
                 });
             }
         }).el);

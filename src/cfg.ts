@@ -213,6 +213,16 @@ export const Configuration = Helper.SPConfig({
                     defaultValue: "1"
                 },
                 {
+                    name: "AppComments",
+                    title: "Comments",
+                    type: Helper.SPCfgFieldType.Note,
+                    allowDeletion: false,
+                    noteType: SPTypes.FieldNoteType.TextOnly,
+                    showInEditForm: false,
+                    showInNewForm: false,
+                    showInViewForms: false
+                } as Helper.IFieldInfoNote,
+                {
                     name: "DevAppStatus",
                     title: "App Status",
                     type: Helper.SPCfgFieldType.Choice,
@@ -223,7 +233,7 @@ export const Configuration = Helper.SPConfig({
                     showInEditForm: false,
                     showInNewForm: false,
                     choices: [
-                        "Draft", "Submitted for Review", "In Review", "Requesting Approval", "Approved"
+                        "Draft", "Submitted for Review", "In Review", "Requesting Approval", "Requires Attention", "Approved"
                     ]
                 } as Helper.IFieldInfoChoice
             ],

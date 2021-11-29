@@ -1,8 +1,11 @@
+import { InstallationRequired, LoadingDialog } from "dattatable";
 import { Components, ContextInfo, Helper, List, Types, Web } from "gd-sprest-bs";
+import { Configuration, createSecurityGroups } from "./cfg";
 import Strings from "./strings";
 
 // App Item
 export interface IAppItem extends Types.SP.ListItem {
+    AppComments?: string;
     AppDescription: string;
     AppImageURL1: Types.SP.FieldUrlValue;
     AppImageURL2: Types.SP.FieldUrlValue;
@@ -251,32 +254,6 @@ export class DataSource {
         });
     }
 
-    // Status Filters
-    private static _statusFilters: Components.ICheckboxGroupItem[] = null;
-    static get StatusFilters(): Components.ICheckboxGroupItem[] { return this._statusFilters; }
-    static loadStatusFilters(): PromiseLike<Components.ICheckboxGroupItem[]> {
-        // Return a promise
-        return new Promise((resolve, reject) => {
-            // Get the status field
-            List(Strings.Lists.Apps).Fields("DevAppStatus").execute((fld: Types.SP.FieldChoice) => {
-                let items: Components.ICheckboxGroupItem[] = [];
-
-                // Parse the choices
-                for (let i = 0; i < fld.Choices.results.length; i++) {
-                    // Add an item
-                    items.push({
-                        label: fld.Choices.results[i],
-                        type: Components.CheckboxGroupTypes.Switch
-                    });
-                }
-
-                // Set the filters and resolve the promise
-                this._statusFilters = items;
-                resolve(items);
-            }, reject);
-        });
-    }
-
     // Initializes the application
     static init(): PromiseLike<void> {
         // Return a promise
@@ -316,6 +293,62 @@ export class DataSource {
         });
     }
 
+    // Sees if an install is required and displays a dialog
+    static InstallRequired(showFl: boolean = false) {
+        // See if an install is required
+        InstallationRequired.requiresInstall(Configuration).then(installFl => {
+            let errors: Components.IListGroupItem[] = [];
+
+            // See if the security groups exist
+            if (DataSource.ApproverGroup == null || DataSource.DevGroup == null) {
+                // Add an error
+                errors.push({
+                    content: "Security groups are not installed."
+                });
+            }
+
+            // See if an installation is required
+            if ((installFl || errors.length > 0) || showFl) {
+                // Show the installation dialog
+                InstallationRequired.showDialog({
+                    errors,
+                    onFooterRendered: el => {
+                        // See if a custom error exists
+                        if (errors.length > 0) {
+                            // Add the custom install button
+                            Components.Tooltip({
+                                el,
+                                content: "Creates the security groups.",
+                                type: Components.ButtonTypes.OutlinePrimary,
+                                btnProps: {
+                                    text: "Security",
+                                    onClick: () => {
+                                        // Show a loading dialog
+                                        LoadingDialog.setHeader("Security Groups");
+                                        LoadingDialog.setBody("Creating the security groups. This dialog will close after it completes.");
+                                        LoadingDialog.show();
+
+                                        // Create the security groups
+                                        createSecurityGroups().then(() => {
+                                            // Close the dialog
+                                            LoadingDialog.hide();
+
+                                            // Refresh the page
+                                            window.location.reload();
+                                        });
+                                    }
+                                }
+                            });
+                        }
+                    }
+                });
+            } else {
+                // Log
+                console.error("[" + Strings.ProjectName + "] Error initializing the solution.");
+            }
+        });
+    }
+
     // Loads the list data
     private static _items: IAppItem[] = null;
     static get Items(): IAppItem[] { return this._items; }
@@ -337,6 +370,32 @@ export class DataSource {
 
                 // Resolve the promise
                 resolve();
+            }, reject);
+        });
+    }
+
+    // Status Filters
+    private static _statusFilters: Components.ICheckboxGroupItem[] = null;
+    static get StatusFilters(): Components.ICheckboxGroupItem[] { return this._statusFilters; }
+    static loadStatusFilters(): PromiseLike<Components.ICheckboxGroupItem[]> {
+        // Return a promise
+        return new Promise((resolve, reject) => {
+            // Get the status field
+            List(Strings.Lists.Apps).Fields("DevAppStatus").execute((fld: Types.SP.FieldChoice) => {
+                let items: Components.ICheckboxGroupItem[] = [];
+
+                // Parse the choices
+                for (let i = 0; i < fld.Choices.results.length; i++) {
+                    // Add an item
+                    items.push({
+                        label: fld.Choices.results[i],
+                        type: Components.CheckboxGroupTypes.Switch
+                    });
+                }
+
+                // Set the filters and resolve the promise
+                this._statusFilters = items;
+                resolve(items);
             }, reject);
         });
     }
