@@ -150,46 +150,49 @@ export class AppForms {
             appFile.content().execute(content => {
                 // Load the context of the app catalog
                 ContextInfo.getWeb(DataSource.Configuration.tenantAppCatalogUrl).execute(context => {
+                    let requestDigest = context.GetContextWebInformation.FormDigestValue;
+
                     // Upload the file to the app catalog
-                    Web(DataSource.Configuration.tenantAppCatalogUrl, { requestDigest: context.GetContextWebInformation.FormDigestValue })
+                    Web(DataSource.Configuration.tenantAppCatalogUrl, { requestDigest })
                         .TenantAppCatalog().add(item.FileLeafRef, true, content).execute(file => {
                             // Update the dialog
                             LoadingDialog.setHeader("Deploying the Package");
                             LoadingDialog.setBody("This will close after the app is deployed.");
 
-                            // Check-in the file
-                            file.checkIn().execute(() => {
-                                // Do we need to do this by default?
-                            });
+                            // Get the app item
+                            file.ListItemAllFields().execute(appItem => {
+                                // Update the metadata
+                                this.updateApp(item, appItem.Id, requestDigest).then(() => {
+                                    // Get the apps
+                                    Web(DataSource.Configuration.tenantAppCatalogUrl, { requestDigest })
+                                        .TenantAppCatalog().AvailableApps().execute(apps => {
+                                            for (let i = 0; i < apps.results.length; i++) {
+                                                let app = apps.results[i];
 
-                            // Get the apps
-                            Web(DataSource.Configuration.tenantAppCatalogUrl, { requestDigest: context.GetContextWebInformation.FormDigestValue })
-                                .TenantAppCatalog().AvailableApps().execute(apps => {
-                                    for (let i = 0; i < apps.results.length; i++) {
-                                        let app = apps.results[i];
+                                                // See if this is the target app
+                                                if (app.ProductId != item.AppProductID) { continue; }
 
-                                        // See if this is the target app
-                                        if (app.ProductId != item.AppProductID) { continue; }
+                                                // See if it's not deployed
+                                                if (app.Deployed != true) {
+                                                    // Deploy the app
+                                                    app.deploy().execute(() => {
+                                                        // Call the update event
+                                                        onUpdate();
 
-                                        // See if it's not deployed
-                                        if (app.Deployed != true) {
-                                            // Deploy the app
-                                            app.deploy().execute(() => {
-                                                // Call the update event
-                                                onUpdate();
+                                                        // App deployed
+                                                        LoadingDialog.hide();
+                                                    });
+                                                } else {
+                                                    // Call the update event
+                                                    onUpdate();
 
-                                                // App deployed
-                                                LoadingDialog.hide();
-                                            });
-                                        } else {
-                                            // Call the update event
-                                            onUpdate();
-
-                                            // Close the dialog
-                                            LoadingDialog.hide();
-                                        }
-                                    }
+                                                    // Close the dialog
+                                                    LoadingDialog.hide();
+                                                }
+                                            }
+                                        });
                                 });
+                            });
                         });
                 });
             });
@@ -661,6 +664,29 @@ export class AppForms {
 
         // Show the modal
         Modal.show();
+    }
+
+    // Updates the app metadata
+    updateApp(item: IAppItem, appItemId: number, requestDigest: string): PromiseLike<void> {
+        // Return a promise
+        return new Promise(resolve => {
+            // Update the app item
+            Web(DataSource.Configuration.tenantAppCatalogUrl, { requestDigest }).Lists("Apps for SharePoint").Items(appItemId).update({
+                AppDescription: item.AppDescription,
+                AppImageURL1: item.AppImageURL1,
+                AppImageURL2: item.AppImageURL2,
+                AppImageURL3: item.AppImageURL3,
+                AppImageURL4: item.AppImageURL4,
+                AppImageURL5: item.AppImageURL5,
+                AppShortDescription: item.AppShortDescription,
+                AppSupportURL: item.AppSupportURL,
+                AppThumbnailURL: item.AppThumbnailURL,
+                AppVideoURL: item.AppVideoURL
+            }).execute(() => {
+                // Resolve the request
+                resolve();
+            })
+        });
     }
 
     // Upload form
