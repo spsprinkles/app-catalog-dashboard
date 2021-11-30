@@ -232,12 +232,12 @@ export class AppDashboard {
                         let api = new jQuery.fn.dataTable.Api(settings) as any;
                         let div = api.table().container() as HTMLDivElement;
                         let table = api.table().node() as HTMLTableElement;
-                        jQuery(div).find('.dataTables_info').addClass('text-center');
-                        jQuery(div).find('.dataTables_length').addClass('pt-2');
-                        jQuery(div).find('.dataTables_paginate').addClass('pt-03');
-                        jQuery(table).removeClass('no-footer');
-                        jQuery(table).addClass('tbl-footer');
-                        jQuery(table).addClass('table-striped');
+                        div.querySelector(".dataTables_info").classList.add("text-center");
+                        div.querySelector(".dataTables_length").classList.add("pt-2");
+                        div.querySelector(".dataTables_paginate").classList.add("pt-03");
+                        table.classList.remove("no-footer");
+                        table.classList.add("tbl-footer");
+                        table.classList.add("table-striped");
                     },
                     headerCallback: function (thead, data, start, end, display) {
                         jQuery('th', thead).addClass('align-middle');
