@@ -97,7 +97,7 @@ export class App {
                     }
 
                     // See if this is an owner
-                    if ((DataSource.DocSetItem.DevAppStatus == "Draft" || DataSource.DocSetItem.DevAppStatus == "Requires Attention") && Common.isOwner(DataSource.DocSetItem)) {
+                    if ((DataSource.DocSetItem.DevAppStatus == "Draft" || DataSource.DocSetItem.DevAppStatus == "Requires Attention") && Common.canEdit(DataSource.DocSetItem)) {
                         // Submit
                         tooltips.push({
                             content: "Submit the app for review",
