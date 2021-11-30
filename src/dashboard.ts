@@ -230,12 +230,14 @@ export class AppDashboard {
                     // Add some classes to the dataTable elements
                     drawCallback: function (settings) {
                         let api = new jQuery.fn.dataTable.Api(settings) as any;
-                        jQuery(api.context[0].nTable).removeClass('no-footer');
-                        jQuery(api.context[0].nTable).addClass('tbl-footer');
-                        jQuery(api.context[0].nTable).addClass('table-striped');
-                        jQuery(api.context[0].nTableWrapper).find('.dataTables_info').addClass('text-center');
-                        jQuery(api.context[0].nTableWrapper).find('.dataTables_length').addClass('pt-2');
-                        jQuery(api.context[0].nTableWrapper).find('.dataTables_paginate').addClass('pt-03');
+                        let div = api.table().container() as HTMLDivElement;
+                        let table = api.table().node() as HTMLTableElement;
+                        jQuery(div).find('.dataTables_info').addClass('text-center');
+                        jQuery(div).find('.dataTables_length').addClass('pt-2');
+                        jQuery(div).find('.dataTables_paginate').addClass('pt-03');
+                        jQuery(table).removeClass('no-footer');
+                        jQuery(table).addClass('tbl-footer');
+                        jQuery(table).addClass('table-striped');
                     },
                     headerCallback: function (thead, data, start, end, display) {
                         jQuery('th', thead).addClass('align-middle');
