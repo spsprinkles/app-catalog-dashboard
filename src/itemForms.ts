@@ -496,10 +496,21 @@ export class AppForms {
             // See if an item exists
             if (assessment) {
                 let completeFl = false;
+                let alert: Components.IAlert = null;
 
                 // Show the edit form
                 ItemForm.edit({
                     itemId: assessment.Id,
+                    onSetHeader: el => {
+                        // Render an alert
+                        alert = Components.Alert({
+                            el,
+                            content: "You still need to update the item to complete the assessment."
+                        });
+
+                        // Hide it by default
+                        alert.hide();
+                    },
                     onSetFooter: el => {
                         // Render a completed button
                         let tooltip = Components.Tooltip({
@@ -514,6 +525,9 @@ export class AppForms {
 
                                     // Disable the button
                                     tooltip.button.disable();
+
+                                    // Show the alert
+                                    alert.show();
                                 }
                             }
                         })
