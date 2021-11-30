@@ -57,6 +57,7 @@ export class AppDashboard {
         if (DataSource.IsApprover) {
             // Set the admin buttons
             navLinks = [{
+                className: "me-2",
                 text: "Admin",
                 items: [
                     {

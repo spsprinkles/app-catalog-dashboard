@@ -316,7 +316,7 @@ export class DataSource {
                     errors,
                     onFooterRendered: el => {
                         // See if a custom error exists
-                        if (errors.length > 0) {
+                        if (errors.length > 0 || showFl) {
                             // Add the custom install button
                             Components.Tooltip({
                                 el,
