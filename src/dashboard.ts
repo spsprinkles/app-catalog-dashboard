@@ -5,6 +5,7 @@ import { arrowClockwise } from "gd-sprest-bs/build/icons/svgs/arrowClockwise";
 import { chatSquareDots } from "gd-sprest-bs/build/icons/svgs/chatSquareDots";
 import { columnsGap } from "gd-sprest-bs/build/icons/svgs/columnsGap";
 import { fileEarmarkArrowUp } from "gd-sprest-bs/build/icons/svgs/fileEarmarkArrowUp";
+import { gearWideConnected } from "gd-sprest-bs/build/icons/svgs/gearWideConnected";
 import { pencilSquare } from "gd-sprest-bs/build/icons/svgs/pencilSquare";
 import * as Common from "./common";
 import { AppForms } from "./itemForms";
@@ -57,8 +58,11 @@ export class AppDashboard {
         if (DataSource.IsApprover) {
             // Set the admin buttons
             navLinks = [{
-                className: "me-2",
-                text: "Admin",
+                className: "btn-outline-light me-2 pt-1",
+                text: "Settings",
+                iconSize: 24,
+                iconType: gearWideConnected,
+                isButton: true,
                 items: [
                     {
                         text: "Manage Dev Group",
@@ -75,13 +79,16 @@ export class AppDashboard {
                         }
                     },
                     {
-                        text: "Manage App",
+                        text: "Manage App Config",
                         onClick: () => {
                             // Show the install modal
                             DataSource.InstallRequired(true);
                         }
                     }
-                ]
+                ],
+                onRender: (el, item) => {
+                    el.querySelector("svg").classList.add("me-1");
+                }
             }];
         }
 
@@ -418,6 +425,7 @@ export class AppDashboard {
                                 // Render a badge
                                 Components.Badge({
                                     el,
+                                    className: "text-dark",
                                     content: "Not in App Catalog",
                                     isPill: true,
                                     type: Components.BadgeTypes.Info
