@@ -42,7 +42,7 @@ export interface IConfiguration {
     appCatalogAdminEmailGroup?: string;
     helpPageUrl?: string;
     templatesLibraryUrl?: string;
-    tenantAppCatalogUrl?: string;
+    appCatalogUrl?: string;
 }
 
 /**

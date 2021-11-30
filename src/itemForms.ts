@@ -149,11 +149,11 @@ export class AppForms {
             // Upload the package file
             appFile.content().execute(content => {
                 // Load the context of the app catalog
-                ContextInfo.getWeb(DataSource.Configuration.tenantAppCatalogUrl).execute(context => {
+                ContextInfo.getWeb(DataSource.Configuration.appCatalogUrl).execute(context => {
                     let requestDigest = context.GetContextWebInformation.FormDigestValue;
 
                     // Upload the file to the app catalog
-                    Web(DataSource.Configuration.tenantAppCatalogUrl, { requestDigest })
+                    Web(DataSource.Configuration.appCatalogUrl, { requestDigest })
                         .TenantAppCatalog().add(item.FileLeafRef, true, content).execute(file => {
                             // Update the dialog
                             LoadingDialog.setHeader("Deploying the Package");
@@ -164,7 +164,7 @@ export class AppForms {
                                 // Update the metadata
                                 this.updateApp(item, appItem.Id, requestDigest).then(() => {
                                     // Get the apps
-                                    Web(DataSource.Configuration.tenantAppCatalogUrl, { requestDigest })
+                                    Web(DataSource.Configuration.appCatalogUrl, { requestDigest })
                                         .TenantAppCatalog().AvailableApps().execute(apps => {
                                             for (let i = 0; i < apps.results.length; i++) {
                                                 let app = apps.results[i];
@@ -457,9 +457,9 @@ export class AppForms {
         LoadingDialog.show();
 
         // Load the context of the app catalog
-        ContextInfo.getWeb(DataSource.Configuration.tenantAppCatalogUrl).execute(context => {
+        ContextInfo.getWeb(DataSource.Configuration.appCatalogUrl).execute(context => {
             // Get the apps
-            Web(DataSource.Configuration.tenantAppCatalogUrl, { requestDigest: context.GetContextWebInformation.FormDigestValue })
+            Web(DataSource.Configuration.appCatalogUrl, { requestDigest: context.GetContextWebInformation.FormDigestValue })
                 .TenantAppCatalog().AvailableApps().execute(apps => {
                     for (let i = 0; i < apps.results.length; i++) {
                         let app = apps.results[i];
@@ -671,7 +671,7 @@ export class AppForms {
         // Return a promise
         return new Promise(resolve => {
             // Update the app item
-            Web(DataSource.Configuration.tenantAppCatalogUrl, { requestDigest }).Lists("Apps for SharePoint").Items(appItemId).update({
+            Web(DataSource.Configuration.appCatalogUrl, { requestDigest }).Lists("Apps for SharePoint").Items(appItemId).update({
                 AppDescription: item.AppDescription,
                 AppImageURL1: item.AppImageURL1,
                 AppImageURL2: item.AppImageURL2,
