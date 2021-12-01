@@ -162,10 +162,57 @@ export class App {
                         );
                     }
 
+                    // See if the site app catalog exists
+                    if (DataSource.SiteCollectionAppCatalogExists) {
+                        // See if the app is not in the site app catalog
+                        let app = DataSource.getSiteCollectionAppById(DataSource.DocSetItem.AppProductID);
+
+                        // See if the app is deployed
+                        if (app && app.Deployed) {
+                            // Retract
+                            tooltips.push({
+                                content: "Retracts the solution from the site app catalog.",
+                                btnProps: {
+                                    text: "Retract from Site Catalog",
+                                    iconSize: 20,
+                                    //iconType: trash,
+                                    isSmall: true,
+                                    type: Components.ButtonTypes.OutlineDanger,
+                                    onClick: () => {
+                                        // Retract the app
+                                        this._forms.retract(DataSource.DocSetItem, false, () => {
+                                            // Refresh the page
+                                            window.location.reload();
+                                        });
+                                    }
+                                }
+                            });
+                        } else {
+                            // Deploy
+                            tooltips.push({
+                                content: "Deploys the solution to the site app catalog.",
+                                btnProps: {
+                                    text: "Deploy to Site Catalog",
+                                    iconSize: 20,
+                                    //iconType: trash,
+                                    isSmall: true,
+                                    type: Components.ButtonTypes.OutlineWarning,
+                                    onClick: () => {
+                                        // Deploy the app
+                                        this._forms.deploy(DataSource.DocSetItem, false, () => {
+                                            // Refresh the page
+                                            window.location.reload();
+                                        });
+                                    }
+                                }
+                            });
+                        }
+                    }
+
                     // Ensure the user is an approver
                     if (DataSource.IsApprover) {
-                        // See if the app is not in the catalog
-                        let app = DataSource.getAppById(DataSource.DocSetItem.AppProductID);
+                        // See if the app is not in the tenant app catalog
+                        let app = DataSource.getTenantAppById(DataSource.DocSetItem.AppProductID);
 
                         // See if the app hasn't been deployed
                         if (app == null) {
@@ -230,19 +277,19 @@ export class App {
                         // Else, see if the app is approved
                         else if (DataSource.DocSetItem.DevAppStatus == "Approved") {
                             // See if the app is deployed
-                            if (app == null || app.Deployed) {
+                            if (app && app.Deployed) {
                                 // Retract
                                 tooltips.push({
                                     content: "Retracts the solution from the tenant app catalog.",
                                     btnProps: {
-                                        text: "Retract",
+                                        text: "Retract from Tenant",
                                         iconSize: 20,
                                         //iconType: trash,
                                         isSmall: true,
                                         type: Components.ButtonTypes.OutlineDanger,
                                         onClick: () => {
                                             // Retract the app
-                                            this._forms.retract(DataSource.DocSetItem, () => {
+                                            this._forms.retract(DataSource.DocSetItem, true, () => {
                                                 // Refresh the page
                                                 window.location.reload();
                                             });
@@ -254,14 +301,14 @@ export class App {
                                 tooltips.push({
                                     content: "Deploys the solution to the tenant app catalog.",
                                     btnProps: {
-                                        text: "Deploy",
+                                        text: "Deploy to Tenant",
                                         iconSize: 20,
                                         //iconType: trash,
                                         isSmall: true,
                                         type: Components.ButtonTypes.OutlineWarning,
                                         onClick: () => {
                                             // Deploy the app
-                                            this._forms.deploy(DataSource.DocSetItem, () => {
+                                            this._forms.deploy(DataSource.DocSetItem, true, () => {
                                                 // Refresh the page
                                                 window.location.reload();
                                             });

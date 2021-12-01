@@ -399,18 +399,19 @@ export class AppDashboard {
                         name: "DevAppStatus",
                         title: "App Status",
                         onRenderCell: (el, column, item: IAppItem) => {
-                            let lineBreak = document.createElement("br");
-                            el.appendChild(lineBreak);
+                            // See if the site app catalog exists
+                            if (DataSource.SiteCollectionAppCatalogExists) {
+                                // Append a new line
+                                let lineBreak = document.createElement("br");
+                                el.appendChild(lineBreak);
 
-                            // See if this app is deployed in the catalog
-                            let app = DataSource.getAppById(item.AppProductID);
-                            if (app) {
                                 // See if it's deployed
-                                if (app.Deployed) {
+                                let app = DataSource.getSiteCollectionAppById(item.AppProductID);
+                                if (app) {
                                     // Render a badge
                                     Components.Badge({
                                         el,
-                                        content: "Deployed",
+                                        content: "Deployed to Site Catalog",
                                         isPill: true,
                                         type: Components.BadgeTypes.Primary
                                     });
@@ -418,7 +419,35 @@ export class AppDashboard {
                                     // Render a badge
                                     Components.Badge({
                                         el,
-                                        content: "Not Deployed",
+                                        className: "text-dark",
+                                        content: "Not in Site Catalog",
+                                        isPill: true,
+                                        type: Components.BadgeTypes.Secondary
+                                    });
+                                }
+                            }
+
+                            // Append a new line
+                            let lineBreak = document.createElement("br");
+                            el.appendChild(lineBreak);
+
+                            // See if this app is deployed in the tenant app catalog
+                            let app = DataSource.getTenantAppById(item.AppProductID);
+                            if (app) {
+                                // See if it's deployed
+                                if (app.Deployed) {
+                                    // Render a badge
+                                    Components.Badge({
+                                        el,
+                                        content: "Deployed to Tenant Catalog",
+                                        isPill: true,
+                                        type: Components.BadgeTypes.Primary
+                                    });
+                                } else {
+                                    // Render a badge
+                                    Components.Badge({
+                                        el,
+                                        content: "Not Deployed to Tenant Catalog",
                                         isPill: true,
                                         type: Components.BadgeTypes.Secondary
                                     });
@@ -428,7 +457,7 @@ export class AppDashboard {
                                 Components.Badge({
                                     el,
                                     className: "text-dark",
-                                    content: "Not in App Catalog",
+                                    content: "Not in Tenant App Catalog",
                                     isPill: true,
                                     type: Components.BadgeTypes.Info
                                 });

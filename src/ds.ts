@@ -1,7 +1,29 @@
 import { InstallationRequired, LoadingDialog } from "dattatable";
-import { Components, ContextInfo, Helper, List, Types, Web } from "gd-sprest-bs";
+import { Components, ContextInfo, Helper, List, SPTypes, Types, Web } from "gd-sprest-bs";
 import { Configuration, createSecurityGroups } from "./cfg";
 import Strings from "./strings";
+
+// App Catalog Item
+export interface IAppCatalogItem extends Types.SP.ListItem {
+    AppDescription: string;
+    AppImageURL1: Types.SP.FieldUrlValue;
+    AppImageURL2: Types.SP.FieldUrlValue;
+    AppImageURL3: Types.SP.FieldUrlValue;
+    AppImageURL4: Types.SP.FieldUrlValue;
+    AppImageURL5: Types.SP.FieldUrlValue;
+    AppProductID: string;
+    AppPublisher: string;
+    AppShortDescription: string;
+    AppSupportURL: Types.SP.FieldUrlValue;
+    AppThumbnailURL: Types.SP.FieldUrlValue;
+    AppVersion: string;
+    AppVideoURL: Types.SP.FieldUrlValue;
+    AuthorId: number;
+    CheckoutUser: { Id: number; Title: string; };
+    FileLeafRef: string;
+    IsDefaultAppMetadataLocale: boolean;
+    IsAppPackageEnabled: boolean;
+}
 
 // App Item
 export interface IAppItem extends Types.SP.ListItem {
@@ -40,50 +62,16 @@ export interface IAssessmentItem extends Types.SP.ListItem {
 // Configuration
 export interface IConfiguration {
     appCatalogAdminEmailGroup?: string;
+    appCatalogUrl?: string;
     helpPageUrl?: string;
     templatesLibraryUrl?: string;
-    appCatalogUrl?: string;
+    tenantAppCatalogUrl?: string;
 }
 
 /**
  * Data Source
  */
 export class DataSource {
-    // Apps
-    private static _apps: Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata[] = null;
-    static get Apps(): Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata[] { return this._apps; }
-    static getAppById(appId: string): Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata {
-        // Parse the apps
-        for (let i = 0; i < this._apps.length; i++) {
-            let app = this._apps[i];
-
-            // See if this is the target app
-            if (app.ProductId == appId) { return app; }
-        }
-
-        // App not found
-        return null;
-    }
-    static loadApps(): PromiseLike<void> {
-        // Return a promise
-        return new Promise((resolve, reject) => {
-            // Load the available apps
-            Web().TenantAppCatalog().AvailableApps().execute(apps => {
-                // Set the apps
-                this._apps = apps.results;
-
-                // Resolve the request
-                resolve();
-            }, () => {
-                // No access to the tenant app catalog
-                this._apps = [];
-
-                // Resolve the request
-                resolve();
-            });
-        });
-    }
-
     // Configuration
     private static _cfg: IConfiguration = null;
     static get Configuration(): IConfiguration { return this._cfg; }
@@ -169,9 +157,7 @@ export class DataSource {
                 query: {
                     Expand: ["CheckoutUser", "Owners"],
                     Select: [
-                        "Id", "FileLeafRef", "CheckoutUser/Title", "AppThumbnailURL", "AuthorId",
-                        "OwnersId", "DevAppStatus", 'Title', "AppProductID", "AppVersion", "AppPublisher", "Owners",
-                        "IsAppPackageEnabled", "Owners/Id", "Owners/EMail"
+                        "*", "Id", "FileLeafRef", "ContentTypeId", "CheckoutUser/Title", "Owners/Id", "Owners/EMail"
                     ]
                 }
             }).then(info => {
@@ -266,28 +252,31 @@ export class DataSource {
                 this.loadApproverGroup().then(() => {
                     // Load the developers group
                     this.loadDevGroup().then(() => {
-                        // Load the apps
-                        this.loadApps().then(() => {
-                            // See if this is a document set item
-                            if (this.DocSetItemId > 0) {
-                                // Load the templates
-                                this.loadTemplates().then(() => {
-                                    // Load the document set item
-                                    this.loadDocSet().then(() => {
-                                        // Resolve the request
-                                        resolve();
+                        // Load the site collection apps
+                        this.loadSiteCollectionApps().then(() => {
+                            // Load the tenant apps
+                            this.loadTenantApps().then(() => {
+                                // See if this is a document set item
+                                if (this.DocSetItemId > 0) {
+                                    // Load the templates
+                                    this.loadTemplates().then(() => {
+                                        // Load the document set item
+                                        this.loadDocSet().then(() => {
+                                            // Resolve the request
+                                            resolve();
+                                        }, reject);
                                     }, reject);
-                                }, reject);
-                            } else {
-                                // Load the data
-                                this.load().then(() => {
-                                    // Load the status filters
-                                    this.loadStatusFilters().then(() => {
-                                        // Resolve the request
-                                        resolve();
+                                } else {
+                                    // Load the data
+                                    this.load().then(() => {
+                                        // Load the status filters
+                                        this.loadStatusFilters().then(() => {
+                                            // Resolve the request
+                                            resolve();
+                                        }, reject);
                                     }, reject);
-                                }, reject);
-                            }
+                                }
+                            }, reject);
                         }, reject);
                     }, reject);
                 }, reject);
@@ -362,9 +351,7 @@ export class DataSource {
                 Expand: ["CheckoutUser", "Folder", "Owners"],
                 Filter: "ContentType eq 'App'",
                 Select: [
-                    "Id", "FileLeafRef", "ContentTypeId", "CheckoutUser/Title", "AppThumbnailURL", "AuthorId",
-                    "OwnersId", "DevAppStatus", 'Title', "AppProductID", "AppVersion", "AppPublisher", "Owners",
-                    "IsAppPackageEnabled", "Owners/Id", "Owners/EMail"
+                    "*", "Id", "FileLeafRef", "ContentTypeId", "CheckoutUser/Title", "Owners/Id", "Owners/EMail"
                 ]
             }).execute(items => {
                 // Set the items
@@ -426,6 +413,86 @@ export class DataSource {
                 // Resolve the request
                 resolve();
             }
+        });
+    }
+
+    // Site Collection Apps
+    private static _siteCollectionApps: Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata[] = null;
+    static get SiteCollectionAppCatalogExists(): boolean { return this._siteCollectionApps != null; }
+    static get SiteCollectionApps(): Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata[] { return this._siteCollectionApps; }
+    static getSiteCollectionAppById(appId: string): Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata {
+        // Parse the apps
+        for (let i = 0; i < this._siteCollectionApps.length; i++) {
+            let app = this._siteCollectionApps[i];
+
+            // See if this is the target app
+            if (app.ProductId == appId) { return app; }
+        }
+
+        // App not found
+        return null;
+    }
+    static loadSiteCollectionApps(): PromiseLike<void> {
+        // Return a promise
+        return new Promise((resolve) => {
+            // See if the app catalog is defined
+            if (this.Configuration.appCatalogUrl) {
+                // Get the app catalog list items
+                Web(this.Configuration.appCatalogUrl).SiteCollectionAppCatalog().AvailableApps().execute(
+                    // Success
+                    apps => {
+                        // Set the app items
+                        this._siteCollectionApps = apps.results;
+
+                        // Resolve the request
+                        resolve();
+                    },
+
+                    // Error
+                    () => {
+                        // Resolve the request
+                        resolve();
+                    }
+                );
+            } else {
+                // Resolve the request
+                resolve();
+            }
+        });
+    }
+
+    // Tenant Apps
+    private static _tenantApps: Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata[] = null;
+    static get TenantApps(): Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata[] { return this._tenantApps; }
+    static getTenantAppById(appId: string): Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata {
+        // Parse the apps
+        for (let i = 0; i < this._tenantApps.length; i++) {
+            let app = this._tenantApps[i];
+
+            // See if this is the target app
+            if (app.ProductId == appId) { return app; }
+        }
+
+        // App not found
+        return null;
+    }
+    static loadTenantApps(): PromiseLike<void> {
+        // Return a promise
+        return new Promise((resolve, reject) => {
+            // Load the available apps
+            Web().TenantAppCatalog().AvailableApps().execute(apps => {
+                // Set the apps
+                this._tenantApps = apps.results;
+
+                // Resolve the request
+                resolve();
+            }, () => {
+                // No access to the tenant app catalog
+                this._tenantApps = [];
+
+                // Resolve the request
+                resolve();
+            });
         });
     }
 

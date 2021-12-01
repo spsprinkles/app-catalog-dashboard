@@ -1,5 +1,5 @@
 import { ItemForm, LoadingDialog, Modal } from "dattatable";
-import { Components, ContextInfo, Helper, List, Utility, Web } from "gd-sprest-bs";
+import { Components, ContextInfo, Helper, List, SPTypes, Types, Utility, Web } from "gd-sprest-bs";
 import { loadAsync } from "jszip";
 import { DataSource, IAppItem, IAssessmentItem } from "./ds";
 import Strings from "./strings";
@@ -95,17 +95,20 @@ export class AppForms {
                 }
                 // Else, we are disabling the app
                 else {
-                    // Retract the solution
-                    this.retract(item, () => {
-                        // Update the item
-                        item.update({
-                            IsAppPackageEnabled: false
-                        }).execute(() => {
-                            // Close the dialog
-                            LoadingDialog.hide();
+                    // Retract the solution from the site catalog
+                    this.retract(item, false, () => {
+                        // Retract the solution from the tenant
+                        this.retract(item, true, () => {
+                            // Update the item
+                            item.update({
+                                IsAppPackageEnabled: false
+                            }).execute(() => {
+                                // Close the dialog
+                                LoadingDialog.hide();
 
-                            // Execute the update event
-                            onUpdate();
+                                // Execute the update event
+                                onUpdate();
+                            });
                         });
                     });
                 }
@@ -117,10 +120,10 @@ export class AppForms {
     }
 
     // Deploys the solution to the app catalog
-    deploy(item: IAppItem, onUpdate: () => void) {
+    deploy(item: IAppItem, tenantFl: boolean, onUpdate: () => void) {
         // Show a loading dialog
         LoadingDialog.setHeader("Uploading Package");
-        LoadingDialog.setBody("Uploading the spfx package to the app tenant catalog.");
+        LoadingDialog.setBody("Uploading the spfx package to the app catalog.");
         LoadingDialog.show();
 
         // Get the package file
@@ -148,52 +151,46 @@ export class AppForms {
 
             // Upload the package file
             appFile.content().execute(content => {
+                let catalogUrl = tenantFl ? DataSource.Configuration.tenantAppCatalogUrl : DataSource.Configuration.appCatalogUrl;
+
                 // Load the context of the app catalog
-                ContextInfo.getWeb(DataSource.Configuration.appCatalogUrl).execute(context => {
+                ContextInfo.getWeb(catalogUrl).execute(context => {
                     let requestDigest = context.GetContextWebInformation.FormDigestValue;
 
                     // Upload the file to the app catalog
-                    Web(DataSource.Configuration.appCatalogUrl, { requestDigest })
-                        .TenantAppCatalog().add(item.FileLeafRef, true, content).execute(file => {
-                            // Update the dialog
-                            LoadingDialog.setHeader("Deploying the Package");
-                            LoadingDialog.setBody("This will close after the app is deployed.");
+                    let web = Web(catalogUrl, { requestDigest });
+                    (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog()).add(item.FileLeafRef, true, content).execute(file => {
+                        // Update the dialog
+                        LoadingDialog.setHeader("Deploying the Package");
+                        LoadingDialog.setBody("This will close after the app is deployed.");
 
-                            // Get the app item
-                            file.ListItemAllFields().execute(appItem => {
-                                // Update the metadata
-                                this.updateApp(item, appItem.Id, requestDigest).then(() => {
-                                    // Get the apps
-                                    Web(DataSource.Configuration.appCatalogUrl, { requestDigest })
-                                        .TenantAppCatalog().AvailableApps().execute(apps => {
-                                            for (let i = 0; i < apps.results.length; i++) {
-                                                let app = apps.results[i];
+                        // Get the app item
+                        file.ListItemAllFields().execute(appItem => {
+                            // Update the metadata
+                            this.updateApp(item, appItem.Id, tenantFl, catalogUrl, requestDigest).then(() => {
+                                // Get the app catalog
+                                let web = Web(catalogUrl, { requestDigest });
+                                let appCatalog = (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog());
 
-                                                // See if this is the target app
-                                                if (app.ProductId != item.AppProductID) { continue; }
+                                // Deploy the app
+                                appCatalog.AvailableApps(item.AppProductID).deploy().execute(app => {
+                                    // Call the update event
+                                    onUpdate();
 
-                                                // See if it's not deployed
-                                                if (app.Deployed != true) {
-                                                    // Deploy the app
-                                                    app.deploy().execute(() => {
-                                                        // Call the update event
-                                                        onUpdate();
+                                    // App deployed
+                                    LoadingDialog.hide();
+                                }, () => {
+                                    // Error deploying the app
+                                    // TODO - Show an error
+                                    // Call the update event
+                                    onUpdate();
 
-                                                        // App deployed
-                                                        LoadingDialog.hide();
-                                                    });
-                                                } else {
-                                                    // Call the update event
-                                                    onUpdate();
-
-                                                    // Close the dialog
-                                                    LoadingDialog.hide();
-                                                }
-                                            }
-                                        });
+                                    // App deployed
+                                    LoadingDialog.hide();
                                 });
                             });
                         });
+                    });
                 });
             });
         });
@@ -450,31 +447,49 @@ export class AppForms {
     }
 
     // Retracts the solution to the app catalog
-    retract(item: IAppItem, onUpdate: () => void) {
+    retract(item: IAppItem, tenantFl: boolean, onUpdate: () => void) {
         // Show a loading dialog
         LoadingDialog.setHeader("Retracting the Package");
-        LoadingDialog.setBody("Retracting the spfx package to the app tenant catalog.");
+        LoadingDialog.setBody("Retracting the spfx package to the app catalog.");
         LoadingDialog.show();
 
         // Load the context of the app catalog
-        ContextInfo.getWeb(DataSource.Configuration.appCatalogUrl).execute(context => {
-            // Get the apps
-            Web(DataSource.Configuration.appCatalogUrl, { requestDigest: context.GetContextWebInformation.FormDigestValue })
-                .TenantAppCatalog().AvailableApps().execute(apps => {
+        let catalogUrl = tenantFl ? DataSource.Configuration.tenantAppCatalogUrl : DataSource.Configuration.appCatalogUrl;
+        ContextInfo.getWeb(catalogUrl).execute(context => {
+            // Load the apps
+            let web = Web(catalogUrl, { requestDigest: context.GetContextWebInformation.FormDigestValue });
+            (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog()).AvailableApps(item.AppProductID).execute(app => {
+                // See if it's deployed
+                if (app.Deployed) {
+                    // Retract the app
+                    app.retract().execute(() => {
+                        // Call the update event
+                        onUpdate();
+
+                        // App deployed
+                        LoadingDialog.hide();
+                    });
+                } else {
+                    // Call the update event
+                    onUpdate();
+
+                    // Close the dialog
+                    LoadingDialog.hide();
+                }
+            }, () => {
+                // Get the apps
+                (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog()).AvailableApps().execute(apps => {
                     for (let i = 0; i < apps.results.length; i++) {
                         let app = apps.results[i];
-
-                        // See if this is the target app
                         if (app.ProductId != item.AppProductID) { continue; }
 
-                        // See if it's deployed
                         if (app.Deployed) {
-                            // Retract the app
+                            // Retact the app
                             app.retract().execute(() => {
                                 // Call the update event
                                 onUpdate();
 
-                                // App deployed
+                                // Close the dialog
                                 LoadingDialog.hide();
                             });
                         } else {
@@ -486,6 +501,7 @@ export class AppForms {
                         }
                     }
                 });
+            });
         });
     }
 
@@ -667,25 +683,36 @@ export class AppForms {
     }
 
     // Updates the app metadata
-    updateApp(item: IAppItem, appItemId: number, requestDigest: string): PromiseLike<void> {
+    updateApp(item: IAppItem, appItemId: number, tenantFl: boolean, catalogUrl: string, requestDigest: string): PromiseLike<void> {
         // Return a promise
         return new Promise(resolve => {
-            // Update the app item
-            Web(DataSource.Configuration.appCatalogUrl, { requestDigest }).Lists("Apps for SharePoint").Items(appItemId).update({
-                AppDescription: item.AppDescription,
-                AppImageURL1: item.AppImageURL1,
-                AppImageURL2: item.AppImageURL2,
-                AppImageURL3: item.AppImageURL3,
-                AppImageURL4: item.AppImageURL4,
-                AppImageURL5: item.AppImageURL5,
-                AppShortDescription: item.AppShortDescription,
-                AppSupportURL: item.AppSupportURL,
-                AppThumbnailURL: item.AppThumbnailURL,
-                AppVideoURL: item.AppVideoURL
-            }).execute(() => {
-                // Resolve the request
-                resolve();
-            })
+            // Get the app catalog
+            Web(catalogUrl, { requestDigest }).Lists().query({
+                Filter: "BaseTemplate eq " + (tenantFl ? 330 : SPTypes.ListTemplateType.AppCatalog)
+            }).execute(lists => {
+                // Ensure the app catalog was found
+                let list: Types.SP.List = lists.results[0] as any;
+                if (list) {
+                    // Update the metadata
+                    list.Items(appItemId).update({
+                        AppDescription: item.AppDescription,
+                        AppImageURL1: item.AppImageURL1,
+                        AppImageURL2: item.AppImageURL2,
+                        AppImageURL3: item.AppImageURL3,
+                        AppImageURL4: item.AppImageURL4,
+                        AppImageURL5: item.AppImageURL5,
+                        AppShortDescription: item.AppShortDescription,
+                        AppSupportURL: item.AppSupportURL,
+                        AppVideoURL: item.AppVideoURL
+                    }).execute(() => {
+                        // Resolve the request
+                        resolve();
+                    });
+                } else {
+                    // Resolve the request
+                    resolve();
+                }
+            });
         });
     }
 

@@ -1,6 +1,7 @@
 {
     "appCatalogAdminEmailGroup": "gudatta@microsoft.com",
-    "appCatalogUrl": "/sites/appcatalog",
+    "appCatalogUrl": "/sites/demo",
     "helpPageUrl": "~site/SitePages/Help.aspx",
-    "templatesLibraryUrl": "~site/shared%20documents/templates"
+    "templatesLibraryUrl": "~site/shared%20documents/templates",
+    "tenantAppCatalogUrl": "/sites/appcatalog"
 }
