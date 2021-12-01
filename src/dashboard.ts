@@ -286,7 +286,7 @@ export class AppDashboard {
                     },
                     {
                         name: "DevAppStatus",
-                        title: "App Status",
+                        title: "Status",
                         onRenderCell: (el, column, item: IAppItem) => {
                             // See if the site app catalog exists
                             if (DataSource.SiteCollectionAppCatalogExists) {
@@ -385,7 +385,7 @@ export class AppDashboard {
 
                             // Render the view button to redirect the user to the document set dashboard
                             tooltips.push({
-                                content: "Go to the app dashboard",
+                                content: "View app details",
                                 btnProps: {
                                     text: "View",
                                     className: "p-1",
@@ -405,7 +405,7 @@ export class AppDashboard {
                             if (canEdit) {
                                 // Render the edit properties button
                                 tooltips.push({
-                                    content: "Edit the app properties",
+                                    content: "Edit app properties",
                                     btnProps: {
                                         text: "Edit",
                                         className: "p-1",
@@ -429,7 +429,7 @@ export class AppDashboard {
                             if ((item.DevAppStatus == "Draft" || item.DevAppStatus == "Requires Attention") && canEdit) {
                                 // Submit button
                                 tooltips.push({
-                                    content: "Submit the app for review",
+                                    content: "Submit app for review",
                                     btnProps: {
                                         text: "Submit",
                                         className: "p-1",
@@ -455,7 +455,7 @@ export class AppDashboard {
                                 (!Common.isSubmitter(item) || DataSource.IsApprover)) {
                                 // Review button
                                 tooltips.push({
-                                    content: "Start/Continue an assessment of the app.",
+                                    content: "Start/Continue an app assessment",
                                     btnProps: {
                                         text: "Review",
                                         className: "p-1",
@@ -477,7 +477,7 @@ export class AppDashboard {
 
                                 // Reject button
                                 tooltips.push({
-                                    content: "Sends the request back to the developer(s).",
+                                    content: "Send the app back to the developer(s)",
                                     btnProps: {
                                         text: "Reject",
                                         className: "p-1",
