@@ -320,12 +320,18 @@ export class App {
                     }
 
                     // Render the actions
-                    Components.TooltipGroup({
+                    let ttg = Components.TooltipGroup({
                         el,
+                        className: "w-50",
                         isVertical: true,
+                        tooltipOptions: {
+                            maxWidth: "200px"
+                        },
                         tooltipPlacement: Components.TooltipPlacements.Right,
                         tooltips
                     });
+                    // Fix weird alignment issue
+                    (ttg.el.querySelector("button:first-child") as HTMLButtonElement).style.marginLeft = "-1px";
                 }
             }]
         });
