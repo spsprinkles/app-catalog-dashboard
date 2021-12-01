@@ -458,49 +458,21 @@ export class AppForms {
         ContextInfo.getWeb(catalogUrl).execute(context => {
             // Load the apps
             let web = Web(catalogUrl, { requestDigest: context.GetContextWebInformation.FormDigestValue });
-            (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog()).AvailableApps(item.AppProductID).execute(app => {
-                // See if it's deployed
-                if (app.Deployed) {
-                    // Retract the app
-                    app.retract().execute(() => {
-                        // Call the update event
-                        onUpdate();
+            (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog()).AvailableApps(item.AppProductID).retract().execute(() => {
+                // Call the update event
+                onUpdate();
 
-                        // App deployed
-                        LoadingDialog.hide();
-                    });
-                } else {
-                    // Call the update event
-                    onUpdate();
-
-                    // Close the dialog
-                    LoadingDialog.hide();
-                }
+                // Close the dialog
+                LoadingDialog.hide();
             }, () => {
-                // Get the apps
-                (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog()).AvailableApps().execute(apps => {
-                    for (let i = 0; i < apps.results.length; i++) {
-                        let app = apps.results[i];
-                        if (app.ProductId != item.AppProductID) { continue; }
+                // This shouldn't happen
+                // The app was already checked to be deployed
 
-                        if (app.Deployed) {
-                            // Retact the app
-                            app.retract().execute(() => {
-                                // Call the update event
-                                onUpdate();
+                // Call the update event
+                onUpdate();
 
-                                // Close the dialog
-                                LoadingDialog.hide();
-                            });
-                        } else {
-                            // Call the update event
-                            onUpdate();
-
-                            // Close the dialog
-                            LoadingDialog.hide();
-                        }
-                    }
-                });
+                // Close the dialog
+                LoadingDialog.hide();
             });
         });
     }
