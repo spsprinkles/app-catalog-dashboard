@@ -162,8 +162,8 @@ export class App {
                         );
                     }
 
-                    // See if the site app catalog exists
-                    if (DataSource.SiteCollectionAppCatalogExists) {
+                    // Ensure we are not in a draft state, and see if the site app catalog exists
+                    if (DataSource.DocSetItem.DevAppStatus != "Draft" && DataSource.SiteCollectionAppCatalogExists) {
                         // See if the app is not in the site app catalog
                         let app = DataSource.getSiteCollectionAppById(DataSource.DocSetItem.AppProductID);
 
