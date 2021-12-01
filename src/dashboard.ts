@@ -60,6 +60,7 @@ export class AppDashboard {
             navLinks = [{
                 className: "btn-outline-light me-2 pt-1",
                 text: "Settings",
+                iconClassName: "me-1",
                 iconSize: 24,
                 iconType: gearWideConnected,
                 isButton: true,
@@ -85,10 +86,7 @@ export class AppDashboard {
                             DataSource.InstallRequired(true);
                         }
                     }
-                ],
-                onRender: (el, item) => {
-                    el.querySelector("svg").classList.add("me-1");
-                }
+                ]
             }];
         }
 
@@ -111,6 +109,7 @@ export class AppDashboard {
             },
             navigation: {
                 itemsEnd: navLinks,
+                // Add the branding icon & text
                 onRendering: (props) => {
                     let brandName = document.createElement("div");
                     brandName.className = "ms-75";
@@ -121,6 +120,7 @@ export class AppDashboard {
                     brand.appendChild(brandName);
                     props.brand = brand;
                 },
+                // Adjust the brand alignment
                 onRendered: (el) => {
                     el.querySelector("nav div.container-fluid").classList.add("ps-3");
                     el.querySelector("nav div.container-fluid a.navbar-brand").classList.add("pe-none");
@@ -192,6 +192,7 @@ export class AppDashboard {
                         }
                     }
                 ],
+                // Move the filter icon in front of the last icon
                 onRendered: (el) => {
                     let filter = el.querySelector(".filter-icon");
                     if (filter) {
@@ -219,7 +220,7 @@ export class AppDashboard {
                     dom: 'rt<"row"<"col-sm-4"l><"col-sm-4"i><"col-sm-4"p>>',
                     columnDefs: [
                         {
-                            targets: [0],
+                            targets: [0, 7],
                             orderable: false,
                             searchable: false
                         }
@@ -243,132 +244,12 @@ export class AppDashboard {
                         jQuery('th', thead).addClass('align-middle');
                     },
                     // Sort descending by Start Date
-                    order: [[2, "asc"]],
+                    order: [[1, "asc"]],
                     language: {
                         emptyTable: "No apps were found",
                     },
                 },
                 columns: [
-                    {
-                        name: "",
-                        title: "Options",
-                        onRenderCell: (el, column, item: IAppItem) => {
-                            let tooltips: Components.ITooltipProps[] = [];
-
-                            // Determine if the user can edit
-                            let canEdit = Common.canEdit(item);
-
-                            // Render the view button to redirect the user to the document set dashboard
-                            tooltips.push({
-                                content: "Go to the app dashboard",
-                                btnProps: {
-                                    text: "View",
-                                    iconSize: 20,
-                                    iconType: appIndicator,
-                                    isSmall: true,
-                                    type: Components.ButtonTypes.OutlinePrimary,
-                                    onClick: () => {
-                                        // Redirect to the docset item
-                                        window.open(Common.generateDocSetUrl(item), "_self");
-                                    }
-                                }
-                            });
-
-                            // See if the user can edit
-                            if (canEdit) {
-                                // Render the edit properties button
-                                tooltips.push({
-                                    content: "Edit the app properties",
-                                    btnProps: {
-                                        text: "Edit",
-                                        iconSize: 20,
-                                        iconType: pencilSquare,
-                                        isSmall: true,
-                                        type: Components.ButtonTypes.OutlineSecondary,
-                                        onClick: () => {
-                                            // Display the edit form
-                                            this._forms.edit(item.Id, () => {
-                                                // Refresh the table
-                                                this.refresh();
-                                            });
-                                        }
-                                    }
-                                });
-                            }
-
-                            // See if this is an owner
-                            if ((item.DevAppStatus == "Draft" || item.DevAppStatus == "Requires Attention") && canEdit) {
-                                // Submit button
-                                tooltips.push({
-                                    content: "Submit the app for review",
-                                    btnProps: {
-                                        text: "Submit",
-                                        iconSize: 20,
-                                        iconType: appIndicator,
-                                        isDisabled: !canEdit,
-                                        isSmall: true,
-                                        type: Components.ButtonTypes.OutlinePrimary,
-                                        onClick: () => {
-                                            // Display the submit form
-                                            this._forms.submit(item, () => {
-                                                // Refresh the table
-                                                this.refresh();
-                                            });
-                                        }
-                                    }
-                                });
-                            }
-
-                            // Ensure this was not submitted by the user
-                            if (item.DevAppStatus.indexOf("Review") > 0 &&
-                                (!Common.isSubmitter(item) || DataSource.IsApprover)) {
-                                // Review button
-                                tooltips.push({
-                                    content: "Start/Continue an assessment of the app.",
-                                    btnProps: {
-                                        text: "Review",
-                                        iconSize: 20,
-                                        iconType: chatSquareDots,
-                                        isDisabled: !canEdit,
-                                        isSmall: true,
-                                        type: Components.ButtonTypes.OutlinePrimary,
-                                        onClick: () => {
-                                            // Display the review form
-                                            this._forms.review(item, () => {
-                                                // Refresh the table
-                                                this.refresh();
-                                            });
-                                        }
-                                    }
-                                });
-
-                                // Reject button
-                                tooltips.push({
-                                    content: "Sends the request back to the developer(s).",
-                                    btnProps: {
-                                        text: "Reject",
-                                        iconSize: 20,
-                                        iconType: chatSquareDots,
-                                        isSmall: true,
-                                        type: Components.ButtonTypes.OutlineDanger,
-                                        onClick: () => {
-                                            // Display the reject form
-                                            this._forms.reject(item, () => {
-                                                // Refresh the page
-                                                window.location.reload();
-                                            });
-                                        }
-                                    }
-                                });
-                            }
-
-                            // Render the tooltips
-                            Components.TooltipGroup({
-                                el,
-                                tooltips
-                            });
-                        }
-                    },
                     {
                         name: "",
                         title: "Icon",
@@ -382,7 +263,7 @@ export class AppDashboard {
                     },
                     {
                         name: "Title",
-                        title: "App Title",
+                        title: "App Name",
                         onRenderCell: (el, column, item: IAppItem) => {
                             // See if the item is checked out
                             if (item.CheckoutUser && item.CheckoutUser.Title) {
@@ -394,6 +275,14 @@ export class AppDashboard {
                     {
                         name: "AppVersion",
                         title: "Version"
+                    },
+                    {
+                        name: "",
+                        title: "Enabled",
+                        onRenderCell: (el, column, item: IAppItem) => {
+                            // Set the text
+                            el.innerText = item.IsAppPackageEnabled ? "Yes" : "No";
+                        }
                     },
                     {
                         name: "DevAppStatus",
@@ -419,7 +308,6 @@ export class AppDashboard {
                                     // Render a badge
                                     Components.Badge({
                                         el,
-                                        className: "text-dark",
                                         content: "Not in Site Catalog",
                                         isPill: true,
                                         type: Components.BadgeTypes.Secondary
@@ -487,10 +375,133 @@ export class AppDashboard {
                     },
                     {
                         name: "",
-                        title: "Enabled",
+                        title: "Actions",
+                        className: "text-end",
                         onRenderCell: (el, column, item: IAppItem) => {
-                            // Set the text
-                            el.innerText = item.IsAppPackageEnabled ? "Yes" : "No";
+                            let tooltips: Components.ITooltipProps[] = [];
+
+                            // Determine if the user can edit
+                            let canEdit = Common.canEdit(item);
+
+                            // Render the view button to redirect the user to the document set dashboard
+                            tooltips.push({
+                                content: "Go to the app dashboard",
+                                btnProps: {
+                                    text: "View",
+                                    className: "p-1",
+                                    iconClassName: "me-1",
+                                    iconSize: 20,
+                                    iconType: appIndicator,
+                                    isSmall: true,
+                                    type: Components.ButtonTypes.OutlinePrimary,
+                                    onClick: () => {
+                                        // Redirect to the docset item
+                                        window.open(Common.generateDocSetUrl(item), "_self");
+                                    }
+                                }
+                            });
+
+                            // See if the user can edit
+                            if (canEdit) {
+                                // Render the edit properties button
+                                tooltips.push({
+                                    content: "Edit the app properties",
+                                    btnProps: {
+                                        text: "Edit",
+                                        className: "p-1",
+                                        iconClassName: "me-1",
+                                        iconSize: 20,
+                                        iconType: pencilSquare,
+                                        isSmall: true,
+                                        type: Components.ButtonTypes.OutlineSecondary,
+                                        onClick: () => {
+                                            // Display the edit form
+                                            this._forms.edit(item.Id, () => {
+                                                // Refresh the table
+                                                this.refresh();
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+
+                            // See if this is an owner
+                            if ((item.DevAppStatus == "Draft" || item.DevAppStatus == "Requires Attention") && canEdit) {
+                                // Submit button
+                                tooltips.push({
+                                    content: "Submit the app for review",
+                                    btnProps: {
+                                        text: "Submit",
+                                        className: "p-1",
+                                        iconClassName: "me-1",
+                                        iconSize: 20,
+                                        iconType: appIndicator,
+                                        isDisabled: !canEdit,
+                                        isSmall: true,
+                                        type: Components.ButtonTypes.OutlinePrimary,
+                                        onClick: () => {
+                                            // Display the submit form
+                                            this._forms.submit(item, () => {
+                                                // Refresh the table
+                                                this.refresh();
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+
+                            // Ensure this was not submitted by the user
+                            if (item.DevAppStatus.indexOf("Review") > 0 &&
+                                (!Common.isSubmitter(item) || DataSource.IsApprover)) {
+                                // Review button
+                                tooltips.push({
+                                    content: "Start/Continue an assessment of the app.",
+                                    btnProps: {
+                                        text: "Review",
+                                        className: "p-1",
+                                        iconClassName: "me-1",
+                                        iconSize: 20,
+                                        iconType: chatSquareDots,
+                                        isDisabled: !canEdit,
+                                        isSmall: true,
+                                        type: Components.ButtonTypes.OutlinePrimary,
+                                        onClick: () => {
+                                            // Display the review form
+                                            this._forms.review(item, () => {
+                                                // Refresh the table
+                                                this.refresh();
+                                            });
+                                        }
+                                    }
+                                });
+
+                                // Reject button
+                                tooltips.push({
+                                    content: "Sends the request back to the developer(s).",
+                                    btnProps: {
+                                        text: "Reject",
+                                        className: "p-1",
+                                        iconClassName: "me-1",
+                                        iconSize: 20,
+                                        iconType: chatSquareDots,
+                                        isSmall: true,
+                                        type: Components.ButtonTypes.OutlineDanger,
+                                        onClick: () => {
+                                            // Display the reject form
+                                            this._forms.reject(item, () => {
+                                                // Refresh the page
+                                                window.location.reload();
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+
+                            // Render the tooltips
+                            Components.TooltipGroup({
+                                el,
+                                tooltips
+                            });
                         }
                     }
                 ]
