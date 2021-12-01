@@ -30,7 +30,7 @@ const GlobalVariable = {
         DataSource.init().then(
             // Success
             () => {
-                // Ensure the user is an approver or developer
+                // Ensure the user is not an approver or developer
                 if (!DataSource.IsApprover && !DataSource.IsDeveloper) {
                     // Show the user agreement
                     new UserAgreement();
@@ -46,8 +46,14 @@ const GlobalVariable = {
             },
             // Error
             () => {
-                // See if an install is required
-                DataSource.InstallRequired();
+                // Ensure the user is not an approver or developer
+                if (!DataSource.IsApprover && !DataSource.IsDeveloper) {
+                    // Show the user agreement
+                    new UserAgreement();
+                } else {
+                    // See if an install is required
+                    DataSource.InstallRequired();
+                }
             }
         );
     }
