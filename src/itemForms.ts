@@ -198,7 +198,8 @@ export class AppForms {
 
     // Edit form
     edit(itemId: number, onUpdate: () => void) {
-        // Set the list name
+        // Set the form properties
+        ItemForm.AutoClose = false;
         ItemForm.ListName = Strings.Lists.Apps;
 
         // Show the item form
@@ -239,12 +240,13 @@ export class AppForms {
     }
 
     // Method to get the assessment item associated with the app
-    private getAssessmentItem(item: IAppItem): PromiseLike<IAssessmentItem> {
+    private getAssessmentItem(item: IAppItem, lastFl: boolean = false): PromiseLike<IAssessmentItem> {
         // Return a promise
         return new Promise((resolve, reject) => {
             // Get the assoicated item
             List(Strings.Lists.Assessments).Items().query({
-                Filter: "RelatedAppId eq " + item.Id
+                Filter: "RelatedAppId eq " + item.Id,
+                OrderBy: ["Completed desc"]
             }).execute(items => {
                 // Parse the results
                 for (let i = 0; i < items.results.length; i++) {
@@ -253,6 +255,11 @@ export class AppForms {
                     // See if this is not completed
                     if (item.Completed == null) {
                         // Resolve the request
+                        resolve(item);
+                        return;
+                    }
+                    // Else, see if we are viewing the last assessment
+                    else if (lastFl) {
                         resolve(item);
                         return;
                     }
@@ -267,10 +274,11 @@ export class AppForms {
     // Last Assessment form
     lastAssessment(item: IAppItem) {
         // Set the list name
+        ItemForm.AutoClose = false;
         ItemForm.ListName = Strings.Lists.Assessments;
 
         // Get the assessment item
-        this.getAssessmentItem(item).then(assessment => {
+        this.getAssessmentItem(item, true).then(assessment => {
             // See if an item exists
             if (assessment) {
                 // Show the edit form
@@ -479,7 +487,8 @@ export class AppForms {
 
     // Review form
     review(item: IAppItem, onUpdate: () => void) {
-        // Set the list name
+        // Set the form properties
+        ItemForm.AutoClose = false;
         ItemForm.ListName = Strings.Lists.Assessments;
 
         // Get the assessment item
