@@ -320,7 +320,12 @@ export class App {
                     }
 
                     // Render the actions
-                    Components.TooltipGroup({ el, isVertical: true, tooltips });
+                    Components.TooltipGroup({
+                        el,
+                        isVertical: true,
+                        tooltipPlacement: Components.TooltipPlacements.Right,
+                        tooltips
+                    });
                 }
             }]
         });

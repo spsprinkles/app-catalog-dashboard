@@ -660,7 +660,7 @@ export class AppForms {
         return new Promise(resolve => {
             // Get the app catalog
             Web(catalogUrl, { requestDigest }).Lists().query({
-                Filter: "BaseTemplate eq " + (tenantFl ? 330 : SPTypes.ListTemplateType.AppCatalog)
+                Filter: "BaseTemplate eq " + (tenantFl ? SPTypes.ListTemplateType.TenantAppCatalog : SPTypes.ListTemplateType.AppCatalog)
             }).execute(lists => {
                 // Ensure the app catalog was found
                 let list: Types.SP.List = lists.results[0] as any;
