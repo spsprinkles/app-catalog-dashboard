@@ -361,7 +361,11 @@ export class App {
             el: this._el.querySelector("#app-docs"),
             listName: Strings.Lists.Apps,
             docSetId: DataSource.DocSetItemId,
-            templatesUrl: DataSource.Configuration.templatesLibraryUrl
+            templatesUrl: DataSource.Configuration.templatesLibraryUrl,
+            onNavigationRendering: props => {
+                // Update the sub-nav title
+                props.brand = "Documents"
+            }
         });
     }
 
