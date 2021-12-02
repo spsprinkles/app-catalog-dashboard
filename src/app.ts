@@ -362,10 +362,6 @@ export class App {
             listName: Strings.Lists.Apps,
             docSetId: DataSource.DocSetItemId,
             templatesUrl: DataSource.Configuration.templatesLibraryUrl,
-            onNavigationRendering: props => {
-                // Update the sub-nav title
-                props.brand = "Documents"
-            },
             onActionsRendered: (el, col, file) => {
                 // Hide the properties button
                 el.querySelector(".btn-actions-properties").parentElement.classList.add("d-none");
@@ -375,6 +371,13 @@ export class App {
                     // Hide the delete button
                     el.querySelector(".btn-actions-delete").parentElement.classList.add("d-none");
                 }
+            },
+            onNavigationRendered: (nav) => {
+                nav.el.querySelector(".navbar-brand").classList.add("pe-none");
+            },
+            onNavigationRendering: props => {
+                // Update the sub-nav title
+                props.brand = "App Documents";
             }
         });
     }
@@ -447,7 +450,7 @@ export class App {
         let crumb = Components.Breadcrumb({
             el: this._el,
             items: [
-                { text: "App Dashboard", href: Strings.DashboardUrl },
+                { text: "App Dashboard", href: Strings.DashboardUrl, className: "pe-auto" },
                 { text: DataSource.DocSetItem.Title, href: "#", isActive: true }
             ]
         });
@@ -455,9 +458,6 @@ export class App {
         // Update the breadcrumb divider to use a bootstrap icon
         let caret = caretRightFill(18, 18).outerHTML.replaceAll("\"", "'").replaceAll("<", "%3C").replaceAll(">", "%3E").replaceAll("\n", "").replaceAll("  ", " ").replace("currentColor", "%23fff");
         crumb.el.setAttribute("style", "--bs-breadcrumb-divider: url(\"data:image/svg+xml," + caret + "\");");
-
-        // Enable the link back to the app dashboard
-        crumb.el.querySelector(".breadcrumb-item a").classList.add("pe-auto");
 
         // Render the navigation
         let elNavDocs: HTMLElement = null;
