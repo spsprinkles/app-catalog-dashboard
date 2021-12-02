@@ -416,7 +416,7 @@ export class App {
         // See if the help url exists
         if (DataSource.Configuration.helpPageUrl) {
             // Add the item
-            itemsEnd.push({
+            itemsEnd = [{
                 className: "btn-outline-light ms-2 ps-1 pt-1",
                 iconSize: 24,
                 iconType: questionLg,
@@ -426,7 +426,7 @@ export class App {
                     // Display in a new tab
                     window.open(DataSource.Configuration.helpPageUrl, "_blank");
                 }
-            });
+            }];
         }
 
         // Render a breadcrumb for the nav brand
