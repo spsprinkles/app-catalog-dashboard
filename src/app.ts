@@ -1,4 +1,4 @@
-import { LoadingDialog } from "dattatable";
+import { Documents, LoadingDialog } from "dattatable";
 import { Components, Types } from "gd-sprest-bs";
 import { appIndicator } from "gd-sprest-bs/build/icons/svgs/appIndicator";
 import { caretRightFill } from "gd-sprest-bs/build/icons/svgs/caretRightFill";
@@ -31,6 +31,7 @@ export class App {
             <div id="app-dashboard" class="row">
                 <div id="app-nav" class="col-12"></div>
                 <div id="app-info" class="col-12"></div>
+                <div id="app-docs" class="col-12 d-none"></div>
             </div>
         `.trim();
 
@@ -39,9 +40,12 @@ export class App {
 
         // Render the info
         this.renderInfo();
-        
+
         // Render the actions
         this.renderActions();
+
+        // Render the documents
+        this.renderDocuments();
     }
 
     // Refreshes the dashboard
@@ -350,6 +354,17 @@ export class App {
         });
     }
 
+    // Renders the documents
+    private renderDocuments() {
+        // Render the documents
+        new Documents({
+            el: this._el.querySelector("#app-docs"),
+            listName: Strings.Lists.Apps,
+            docSetId: DataSource.DocSetItemId,
+            templatesUrl: DataSource.Configuration.templatesLibraryUrl
+        });
+    }
+
     // Renders the information
     private renderInfo() {
         // Render a card
@@ -447,21 +462,56 @@ export class App {
                 { text: DataSource.DocSetItem.Title, href: "#", isActive: true }
             ]
         });
-        
+
         // Update the breadcrumb divider to use a bootstrap icon
         let caret = caretRightFill(18, 18).outerHTML.replaceAll("\"", "'").replaceAll("<", "%3C").replaceAll(">", "%3E").replaceAll("\n", "").replaceAll("  ", " ").replace("currentColor", "%23fff");
         crumb.el.setAttribute("style", "--bs-breadcrumb-divider: url(\"data:image/svg+xml," + caret + "\");");
-        
+
         // Enable the link back to the app dashboard
         crumb.el.querySelector(".breadcrumb-item a").classList.add("pe-auto");
 
         // Render the navigation
+        let elNavDocs: HTMLElement = null;
+        let elNavInfo: HTMLElement = null;
         let nav = Components.Navbar({
             el: this._el.querySelector("#app-nav"),
             brand: crumb.el,
             className: "bg-sharepoint rounded-top",
             type: Components.NavbarTypes.Primary,
-            itemsEnd
+            itemsEnd,
+            items: [
+                {
+                    className: "btn-outline-light ms-2 ps-1 pt-1",
+                    classNameItem: "d-none",
+                    text: "Info",
+                    isButton: true,
+                    onRender: el => { elNavInfo = el; },
+                    onClick: () => {
+                        // Show the info
+                        this._el.querySelector("#app-info").classList.remove("d-none");
+                        elNavInfo.classList.add("d-none");
+
+                        // Hide the documents
+                        this._el.querySelector("#app-docs").classList.add("d-none");
+                        elNavDocs.classList.remove("d-none");
+                    }
+                },
+                {
+                    className: "btn-outline-light ms-2 ps-1 pt-1",
+                    text: "Documents",
+                    isButton: true,
+                    onRender: el => { elNavDocs = el; },
+                    onClick: () => {
+                        // Show the documents
+                        this._el.querySelector("#app-docs").classList.remove("d-none");
+                        elNavDocs.classList.add("d-none");
+
+                        // Hide the info
+                        this._el.querySelector("#app-info").classList.add("d-none");
+                        elNavInfo.classList.remove("d-none");
+                    }
+                }
+            ]
         });
 
         // Adjust the nav alignment
