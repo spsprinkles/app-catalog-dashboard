@@ -3,7 +3,6 @@ import { Components, Types } from "gd-sprest-bs";
 import { appIndicator } from "gd-sprest-bs/build/icons/svgs/appIndicator";
 import { caretRightFill } from "gd-sprest-bs/build/icons/svgs/caretRightFill";
 import { chatSquareDots } from "gd-sprest-bs/build/icons/svgs/chatSquareDots";
-import { fileEarmarkMedical } from "gd-sprest-bs/build/icons/svgs/fileEarmarkMedical";
 import { pencilSquare } from "gd-sprest-bs/build/icons/svgs/pencilSquare";
 import { questionLg } from "gd-sprest-bs/build/icons/svgs/questionLg";
 import { trash } from "gd-sprest-bs/build/icons/svgs/trash";
@@ -456,8 +455,7 @@ export class App {
         });
 
         // Update the breadcrumb divider to use a bootstrap icon
-        let caret = caretRightFill(18, 18).outerHTML.replaceAll("\"", "'").replaceAll("<", "%3C").replaceAll(">", "%3E").replaceAll("\n", "").replaceAll("  ", " ").replace("currentColor", "%23fff");
-        crumb.el.setAttribute("style", "--bs-breadcrumb-divider: url(\"data:image/svg+xml," + caret + "\");");
+        crumb.el.setAttribute("style", "--bs-breadcrumb-divider: " + Common.generateEmbeddedSVG(caretRightFill(18, 18)).replace("currentColor", "%23fff"));
 
         // Render the navigation
         let elNavDocs: HTMLElement = null;
