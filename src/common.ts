@@ -20,6 +20,11 @@ export function generateDocSetUrl(item: IAppItem) {
         item.Id + "&FolderCTID=" + item.ContentTypeId + "&RootFolder=" + listUrlFolder + "/" + item.Id;
 }
 
+// Generates an embedded SVG image to embed in a style tag
+export function generateEmbeddedSVG(svg: SVGElement) {
+    return "url(\"data:image/svg+xml," + (svg.outerHTML as any).replaceAll("\"", "'").replaceAll("<", "%3C").replaceAll(">", "%3E").replaceAll("\n", "").replaceAll("  ", " ") + "\");";
+}
+
 // Determines if the user is an owner
 export function isOwner(item: IAppItem) {
     // Determine if the user is an owner

@@ -3,7 +3,8 @@ import { Components, Types } from "gd-sprest-bs";
 import { appIndicator } from "gd-sprest-bs/build/icons/svgs/appIndicator";
 import { caretRightFill } from "gd-sprest-bs/build/icons/svgs/caretRightFill";
 import { chatSquareDots } from "gd-sprest-bs/build/icons/svgs/chatSquareDots";
-import { fileEarmarkMedical } from "gd-sprest-bs/build/icons/svgs/fileEarmarkMedical";
+import { folderSymlink } from "gd-sprest-bs/build/icons/svgs/folderSymlink";
+import { layoutTextWindow } from "gd-sprest-bs/build/icons/svgs/layoutTextWindow";
 import { pencilSquare } from "gd-sprest-bs/build/icons/svgs/pencilSquare";
 import { questionLg } from "gd-sprest-bs/build/icons/svgs/questionLg";
 import { trash } from "gd-sprest-bs/build/icons/svgs/trash";
@@ -362,10 +363,6 @@ export class App {
             listName: Strings.Lists.Apps,
             docSetId: DataSource.DocSetItemId,
             templatesUrl: DataSource.Configuration.templatesLibraryUrl,
-            onNavigationRendering: props => {
-                // Update the sub-nav title
-                props.brand = "Documents"
-            },
             onActionsRendered: (el, col, file) => {
                 // Hide the properties button
                 el.querySelector(".btn-actions-properties").parentElement.classList.add("d-none");
@@ -375,6 +372,13 @@ export class App {
                     // Hide the delete button
                     el.querySelector(".btn-actions-delete").parentElement.classList.add("d-none");
                 }
+            },
+            onNavigationRendered: (nav) => {
+                nav.el.querySelector(".navbar-brand").classList.add("pe-none");
+            },
+            onNavigationRendering: props => {
+                // Update the sub-nav title
+                props.brand = "App Documents";
             }
         });
     }
@@ -425,12 +429,52 @@ export class App {
 
     // Renders the navigation
     private renderNav() {
-        let itemsEnd: Components.INavbarItem[] = null;
+        let elNavDocs: HTMLElement = null;
+        let elNavInfo: HTMLElement = null;
+        let itemsEnd: Components.INavbarItem[] = [
+            {
+                className: "btn-outline-light ms-2 ps-2 pt-1",
+                classNameItem: "d-none",
+                iconClassName: "me-1",
+                iconSize: 24,
+                iconType: layoutTextWindow,
+                isButton: true,
+                text: "App Details",
+                onRender: el => { elNavInfo = el; },
+                onClick: () => {
+                    // Show the info
+                    this._el.querySelector("#app-info").classList.remove("d-none");
+                    elNavInfo.classList.add("d-none");
+
+                    // Hide the documents
+                    this._el.querySelector("#app-docs").classList.add("d-none");
+                    elNavDocs.classList.remove("d-none");
+                }
+            },
+            {
+                className: "btn-outline-light ms-2 ps-2 pt-1",
+                iconClassName: "me-1",
+                iconSize: 24,
+                iconType: folderSymlink,
+                isButton: true,
+                text: "Documents",
+                onRender: el => { elNavDocs = el; },
+                onClick: () => {
+                    // Show the documents
+                    this._el.querySelector("#app-docs").classList.remove("d-none");
+                    elNavDocs.classList.add("d-none");
+
+                    // Hide the info
+                    this._el.querySelector("#app-info").classList.add("d-none");
+                    elNavInfo.classList.remove("d-none");
+                }
+            }
+        ];
 
         // See if the help url exists
         if (DataSource.Configuration.helpPageUrl) {
             // Add the item
-            itemsEnd = [{
+            itemsEnd.push({
                 className: "btn-outline-light ms-2 ps-1 pt-1",
                 iconSize: 24,
                 iconType: questionLg,
@@ -440,67 +484,28 @@ export class App {
                     // Display in a new tab
                     window.open(DataSource.Configuration.helpPageUrl, "_blank");
                 }
-            }];
+            });
         }
 
         // Render a breadcrumb for the nav brand
         let crumb = Components.Breadcrumb({
             el: this._el,
             items: [
-                { text: "App Dashboard", href: Strings.DashboardUrl },
+                { text: "App Dashboard", href: Strings.DashboardUrl, className: "pe-auto" },
                 { text: DataSource.DocSetItem.Title, href: "#", isActive: true }
             ]
         });
 
         // Update the breadcrumb divider to use a bootstrap icon
-        let caret = caretRightFill(18, 18).outerHTML.replaceAll("\"", "'").replaceAll("<", "%3C").replaceAll(">", "%3E").replaceAll("\n", "").replaceAll("  ", " ").replace("currentColor", "%23fff");
-        crumb.el.setAttribute("style", "--bs-breadcrumb-divider: url(\"data:image/svg+xml," + caret + "\");");
-
-        // Enable the link back to the app dashboard
-        crumb.el.querySelector(".breadcrumb-item a").classList.add("pe-auto");
+        crumb.el.setAttribute("style", "--bs-breadcrumb-divider: " + Common.generateEmbeddedSVG(caretRightFill(18, 18)).replace("currentColor", "%23fff"));
 
         // Render the navigation
-        let elNavDocs: HTMLElement = null;
-        let elNavInfo: HTMLElement = null;
         let nav = Components.Navbar({
             el: this._el.querySelector("#app-nav"),
             brand: crumb.el,
             className: "bg-sharepoint rounded-top",
             type: Components.NavbarTypes.Primary,
-            itemsEnd,
-            items: [
-                {
-                    className: "btn-outline-light ms-2 ps-1 pt-1",
-                    classNameItem: "d-none",
-                    text: "Info",
-                    isButton: true,
-                    onRender: el => { elNavInfo = el; },
-                    onClick: () => {
-                        // Show the info
-                        this._el.querySelector("#app-info").classList.remove("d-none");
-                        elNavInfo.classList.add("d-none");
-
-                        // Hide the documents
-                        this._el.querySelector("#app-docs").classList.add("d-none");
-                        elNavDocs.classList.remove("d-none");
-                    }
-                },
-                {
-                    className: "btn-outline-light ms-2 ps-1 pt-1",
-                    text: "Documents",
-                    isButton: true,
-                    onRender: el => { elNavDocs = el; },
-                    onClick: () => {
-                        // Show the documents
-                        this._el.querySelector("#app-docs").classList.remove("d-none");
-                        elNavDocs.classList.add("d-none");
-
-                        // Hide the info
-                        this._el.querySelector("#app-info").classList.add("d-none");
-                        elNavInfo.classList.remove("d-none");
-                    }
-                }
-            ]
+            itemsEnd
         });
 
         // Adjust the nav alignment

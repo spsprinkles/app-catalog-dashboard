@@ -6,6 +6,7 @@ import { chatSquareDots } from "gd-sprest-bs/build/icons/svgs/chatSquareDots";
 import { columnsGap } from "gd-sprest-bs/build/icons/svgs/columnsGap";
 import { fileEarmarkArrowUp } from "gd-sprest-bs/build/icons/svgs/fileEarmarkArrowUp";
 import { gearWideConnected } from "gd-sprest-bs/build/icons/svgs/gearWideConnected";
+import { layoutTextWindow } from "gd-sprest-bs/build/icons/svgs/layoutTextWindow";
 import { pencilSquare } from "gd-sprest-bs/build/icons/svgs/pencilSquare";
 import * as Common from "./common";
 import { AppForms } from "./itemForms";
@@ -387,11 +388,11 @@ export class AppDashboard {
                             tooltips.push({
                                 content: "View app details",
                                 btnProps: {
-                                    text: "View",
+                                    text: "Details",
                                     className: "p-1",
                                     iconClassName: "me-1",
                                     iconSize: 20,
-                                    iconType: appIndicator,
+                                    iconType: layoutTextWindow,
                                     isSmall: true,
                                     type: Components.ButtonTypes.OutlinePrimary,
                                     onClick: () => {
