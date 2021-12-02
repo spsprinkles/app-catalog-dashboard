@@ -1,8 +1,11 @@
 import { LoadingDialog } from "dattatable";
 import { Components, Types } from "gd-sprest-bs";
 import { appIndicator } from "gd-sprest-bs/build/icons/svgs/appIndicator";
+import { caretRightFill } from "gd-sprest-bs/build/icons/svgs/caretRightFill";
 import { chatSquareDots } from "gd-sprest-bs/build/icons/svgs/chatSquareDots";
+import { fileEarmarkMedical } from "gd-sprest-bs/build/icons/svgs/fileEarmarkMedical";
 import { pencilSquare } from "gd-sprest-bs/build/icons/svgs/pencilSquare";
+import { questionLg } from "gd-sprest-bs/build/icons/svgs/questionLg";
 import { trash } from "gd-sprest-bs/build/icons/svgs/trash";
 import * as Common from "./common";
 import { AppForms } from "./itemForms";
@@ -27,19 +30,18 @@ export class App {
         this._el.innerHTML = `
             <div id="app-dashboard" class="row">
                 <div id="app-nav" class="col-12"></div>
-                <div id="app-info" class="col-8"></div>
-                <div id="app-actions" class="col-4"></div>
+                <div id="app-info" class="col-12"></div>
             </div>
         `.trim();
-
-        // Render the actions
-        this.renderActions();
 
         // Render the navigation
         this.renderNav();
 
         // Render the info
         this.renderInfo();
+        
+        // Render the actions
+        this.renderActions();
     }
 
     // Refreshes the dashboard
@@ -68,7 +70,7 @@ export class App {
 
         // Render a card
         Components.Card({
-            el: this._el.querySelector("#app-actions"),
+            el: this._el.querySelector("#app-info .card-group"),
             body: [{
                 title: "Actions",
                 onRender: el => {
@@ -81,6 +83,7 @@ export class App {
                             content: "Displays the edit form to update the app properties.",
                             btnProps: {
                                 text: "Edit Properties",
+                                iconClassName: "me-1",
                                 iconSize: 20,
                                 iconType: pencilSquare,
                                 isSmall: true,
@@ -103,6 +106,7 @@ export class App {
                             content: "Submit the app for review",
                             btnProps: {
                                 text: "Submit for Review",
+                                iconClassName: "me-1",
                                 iconSize: 20,
                                 iconType: appIndicator,
                                 isDisabled: !canEdit,
@@ -128,6 +132,7 @@ export class App {
                                 content: "Start/Continue an assessment of the app.",
                                 btnProps: {
                                     text: "Review",
+                                    iconClassName: "me-1",
                                     iconSize: 20,
                                     iconType: chatSquareDots,
                                     isDisabled: !canEdit,
@@ -146,6 +151,7 @@ export class App {
                                 content: "Sends the request back to the developer(s).",
                                 btnProps: {
                                     text: "Reject",
+                                    iconClassName: "me-1",
                                     iconSize: 20,
                                     iconType: chatSquareDots,
                                     isSmall: true,
@@ -174,6 +180,7 @@ export class App {
                                 content: "Retracts the solution from the site app catalog.",
                                 btnProps: {
                                     text: "Retract from Site Catalog",
+                                    iconClassName: "me-1",
                                     iconSize: 20,
                                     //iconType: trash,
                                     isSmall: true,
@@ -193,6 +200,7 @@ export class App {
                                 content: "Deploys the solution to the site app catalog.",
                                 btnProps: {
                                     text: "Deploy to Site Catalog",
+                                    iconClassName: "me-1",
                                     iconSize: 20,
                                     //iconType: trash,
                                     isSmall: true,
@@ -221,6 +229,7 @@ export class App {
                                 content: "Deletes the app.",
                                 btnProps: {
                                     text: "Delete App/Solution",
+                                    iconClassName: "me-1",
                                     iconSize: 20,
                                     iconType: trash,
                                     isDisabled: !canEdit,
@@ -242,6 +251,7 @@ export class App {
                             content: "View the last assessment of the app.",
                             btnProps: {
                                 text: "Assessment",
+                                iconClassName: "me-1",
                                 iconSize: 20,
                                 iconType: chatSquareDots,
                                 isSmall: true,
@@ -260,6 +270,7 @@ export class App {
                                 content: "Approves the application for deployment.",
                                 btnProps: {
                                     text: "Approve",
+                                    iconClassName: "me-1",
                                     iconSize: 20,
                                     //iconType: trash,
                                     isSmall: true,
@@ -283,6 +294,7 @@ export class App {
                                     content: "Retracts the solution from the tenant app catalog.",
                                     btnProps: {
                                         text: "Retract from Tenant",
+                                        iconClassName: "me-1",
                                         iconSize: 20,
                                         //iconType: trash,
                                         isSmall: true,
@@ -302,6 +314,7 @@ export class App {
                                     content: "Deploys the solution to the tenant app catalog.",
                                     btnProps: {
                                         text: "Deploy to Tenant",
+                                        iconClassName: "me-1",
                                         iconSize: 20,
                                         //iconType: trash,
                                         isSmall: true,
@@ -345,7 +358,7 @@ export class App {
             cards: [
                 {
                     body: [{
-                        title: "App Information",
+                        title: "App Details",
                         onRender: el => {
                             // Render the properties
                             Components.ListForm.renderDisplayForm({
@@ -383,41 +396,17 @@ export class App {
 
     // Renders the navigation
     private renderNav() {
-        // Generate the left side items
-        let items: Components.INavbarItem[] = [
-            {
-                className: "btn-outline-light",
-                isButton: true,
-                text: "To Dashboard",
-                onClick: () => {
-                    // Redirect to the dashboard
-                    window.open(Strings.DashboardUrl, "_self");
-                }
-            }
-        ];
-
-        // See if the help url exists
-        if (DataSource.Configuration.helpPageUrl) {
-            // Add the item
-            items.push({
-                className: "btn-outline-light ms-2",
-                isButton: true,
-                text: "Help",
-                onClick: () => {
-                    // Display in a new tab
-                    window.open(DataSource.Configuration.helpPageUrl, "_blank");
-                }
-            });
-        }
-
-        // Generate the right side items
+        // Generate the nav items
         let itemsEnd: Components.INavbarItem[] = null;
         if (DataSource.Templates && DataSource.Templates.length > 0) {
             // Clear the items
             itemsEnd = [{
-                className: "btn-outline-light",
-                text: "Templates",
+                className: "btn-outline-light ms-2 ps-1 pt-1",
+                iconClassName: "me-1",
+                iconSize: 24,
+                iconType: fileEarmarkMedical,
                 isButton: true,
+                text: "Templates",
                 items: []
             }];
 
@@ -434,14 +423,53 @@ export class App {
             }
         }
 
+        // See if the help url exists
+        if (DataSource.Configuration.helpPageUrl) {
+            // Add the item
+            itemsEnd.push({
+                className: "btn-outline-light ms-2 ps-1 pt-1",
+                iconSize: 24,
+                iconType: questionLg,
+                isButton: true,
+                text: "Help",
+                onClick: () => {
+                    // Display in a new tab
+                    window.open(DataSource.Configuration.helpPageUrl, "_blank");
+                }
+            });
+        }
+
+        // Render a breadcrumb for the nav brand
+        let crumb = Components.Breadcrumb({
+            el: this._el,
+            items: [
+                { text: "App Dashboard", href: Strings.DashboardUrl },
+                { text: DataSource.DocSetItem.Title, href: "#", isActive: true }
+            ]
+        });
+        
+        // Update the breadcrumb divider to use a bootstrap icon
+        let caret = caretRightFill(20, 20).outerHTML.replaceAll("\"", "'").replaceAll("<", "%3C").replaceAll(">", "%3E").replaceAll("\n", "").replaceAll("  ", " ").replace("currentColor", "%23fff");
+        crumb.el.setAttribute("style", "--bs-breadcrumb-divider: url(\"data:image/svg+xml," + caret + "\");");
+        
+        // Enable the link back to the app dashboard
+        crumb.el.querySelector(".breadcrumb-item a").classList.add("pe-auto");
+
         // Render the navigation
-        Components.Navbar({
+        let nav = Components.Navbar({
             el: this._el.querySelector("#app-nav"),
-            brand: "App",
+            brand: crumb.el,
+            className: "bg-sharepoint rounded-top",
             type: Components.NavbarTypes.Primary,
-            items,
             itemsEnd
         });
+        
+        // Adjust the nav alignment
+        nav.el.querySelector("nav div.container-fluid").classList.add("pe-2");
+        nav.el.querySelector("nav div.container-fluid").classList.add("ps-3");
+
+        // Disable the link on the root nav brand
+        nav.el.querySelector("nav div.container-fluid a.navbar-brand").classList.add("pe-none");
     }
 
     // Method to upload a template
