@@ -1,3 +1,26 @@
+.bs {
+    .breadcrumb {
+        margin-bottom: 0;
+    }
+    .breadcrumb-item.active, .breadcrumb-item:first-child > a {
+        color: #fff;
+    }
+    .breadcrumb-item:first-child > a:hover, .breadcrumb-item:first-child > a:focus {
+        color: #dee2e6;
+    }
+    .breadcrumb-item:first-child > a:active {
+        color: #000;
+    }
+    .breadcrumb-item+.breadcrumb-item::before {
+        padding-top: 0.2rem;
+    }
+    .card-group>.card:not(:first-child) {
+        border-top-right-radius: 0;
+    }
+    .card-group>.card:not(:last-child) {
+        border-top-left-radius: 0;
+    }
+  }
 /* Remove the extra top padding on the content row */
 #contentRow {
     padding-top: 0 !important;
