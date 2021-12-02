@@ -365,6 +365,16 @@ export class App {
             onNavigationRendering: props => {
                 // Update the sub-nav title
                 props.brand = "Documents"
+            },
+            onActionsRendered: (el, col, file) => {
+                // Hide the properties button
+                el.querySelector(".btn-actions-properties").parentElement.classList.add("d-none");
+
+                // See if this is a package file
+                if (file.ServerRelativeUrl.endsWith(".sppkg")) {
+                    // Hide the delete button
+                    el.querySelector(".btn-actions-delete").parentElement.classList.add("d-none");
+                }
             }
         });
     }
