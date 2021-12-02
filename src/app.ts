@@ -411,32 +411,7 @@ export class App {
 
     // Renders the navigation
     private renderNav() {
-        // Generate the nav items
         let itemsEnd: Components.INavbarItem[] = null;
-        if (DataSource.Templates && DataSource.Templates.length > 0) {
-            // Clear the items
-            itemsEnd = [{
-                className: "btn-outline-light ms-2 ps-1 pt-1",
-                iconClassName: "me-1",
-                iconSize: 24,
-                iconType: fileEarmarkMedical,
-                isButton: true,
-                text: "Templates",
-                items: []
-            }];
-
-            // Parse the templates
-            for (let i = 0; i < DataSource.Templates.length; i++) {
-                let template = DataSource.Templates[i];
-
-                // Add the item
-                itemsEnd[0].items.push({
-                    data: template,
-                    text: template.Name,
-                    onClick: item => { this.uploadTemplate(item.data); }
-                });
-            }
-        }
 
         // See if the help url exists
         if (DataSource.Configuration.helpPageUrl) {

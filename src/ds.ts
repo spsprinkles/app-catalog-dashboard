@@ -258,13 +258,10 @@ export class DataSource {
                             this.loadTenantApps().then(() => {
                                 // See if this is a document set item
                                 if (this.DocSetItemId > 0) {
-                                    // Load the templates
-                                    this.loadTemplates().then(() => {
-                                        // Load the document set item
-                                        this.loadDocSet().then(() => {
-                                            // Resolve the request
-                                            resolve();
-                                        }, reject);
+                                    // Load the document set item
+                                    this.loadDocSet().then(() => {
+                                        // Resolve the request
+                                        resolve();
                                     }, reject);
                                 } else {
                                     // Load the data
@@ -386,33 +383,6 @@ export class DataSource {
                 this._statusFilters = items;
                 resolve(items);
             }, reject);
-        });
-    }
-
-    // Loads the templates
-    private static _templates: Types.SP.File[] = null;
-    static get Templates(): Types.SP.File[] { return this._templates; }
-    static loadTemplates(): PromiseLike<void> {
-        // Return a promise
-        return new Promise((resolve, reject) => {
-            // See if the templates url exists
-            if (this.Configuration.templatesLibraryUrl) {
-                // Load the library
-                Web().getFolderByServerRelativeUrl(this.Configuration.templatesLibraryUrl).Files().execute(files => {
-                    // Save the files
-                    this._templates = files.results.sort((a, b) => {
-                        if (a.Name < b.Name) { return -1; }
-                        if (a.Name > b.Name) { return 1; }
-                        return 0;
-                    });
-
-                    // Resolve the request
-                    resolve();
-                }, reject);
-            } else {
-                // Resolve the request
-                resolve();
-            }
         });
     }
 
