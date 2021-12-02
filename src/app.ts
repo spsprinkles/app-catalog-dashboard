@@ -369,16 +369,58 @@ export class App {
 
                 // See if this is a package file
                 if (file.ServerRelativeUrl.endsWith(".sppkg")) {
-                    // Hide the delete button
-                    el.querySelector(".btn-actions-delete").parentElement.classList.add("d-none");
+                    // Disable the delete button
+                    el.querySelector(".btn-actions-delete").setAttribute("disabled", "");
+                    el.querySelector(".btn-actions-delete").parentElement.classList.add("pe-none");
                 }
             },
             onNavigationRendered: (nav) => {
+                // Disable the default nav brand link
                 nav.el.querySelector(".navbar-brand").classList.add("pe-none");
+
+                // Fix the Templates dropdown offset value
+                (nav.el.querySelector("ul:last-child li:first-child a") as any)._tippy.setProps({ offset: [0,4] });
             },
             onNavigationRendering: props => {
                 // Update the sub-nav title
                 props.brand = "App Documents";
+            },
+            table: {
+                columns: [
+                    {
+                        name: "Type",
+                        title: "Type",
+                    },
+                    {
+                        name: "Name",
+                        title: "Name"
+                    },
+                    {
+                        name: "FileSize",
+                        title: "File Size"
+                    },
+                    {
+                        name: "Created",
+                        title: "Created"
+                    },
+                    {
+                        name: "Author",
+                        title: "Created By"
+                    },
+                    {
+                        name: "Modified",
+                        title: "Modified"
+                    },
+                    {
+                        name: "ModifiedBy",
+                        title: "Modified By"
+                    },
+                    {
+                        className: "text-end text-nowrap",
+                        name: "Actions",
+                        title: ""
+                    }
+                ]
             }
         });
     }
