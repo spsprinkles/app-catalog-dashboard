@@ -449,7 +449,7 @@ export class App {
         });
         
         // Update the breadcrumb divider to use a bootstrap icon
-        let caret = caretRightFill(20, 20).outerHTML.replaceAll("\"", "'").replaceAll("<", "%3C").replaceAll(">", "%3E").replaceAll("\n", "").replaceAll("  ", " ").replace("currentColor", "%23fff");
+        let caret = caretRightFill(18, 18).outerHTML.replaceAll("\"", "'").replaceAll("<", "%3C").replaceAll(">", "%3E").replaceAll("\n", "").replaceAll("  ", " ").replace("currentColor", "%23fff");
         crumb.el.setAttribute("style", "--bs-breadcrumb-divider: url(\"data:image/svg+xml," + caret + "\");");
         
         // Enable the link back to the app dashboard
@@ -463,7 +463,7 @@ export class App {
             type: Components.NavbarTypes.Primary,
             itemsEnd
         });
-        
+
         // Adjust the nav alignment
         nav.el.querySelector("nav div.container-fluid").classList.add("pe-2");
         nav.el.querySelector("nav div.container-fluid").classList.add("ps-3");
