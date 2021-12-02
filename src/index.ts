@@ -69,6 +69,10 @@ if (elApp) {
     let contentBox = document.querySelector("#contentBox table.ms-core-tableNoSpace");
     contentBox ? contentBox.classList.remove("ms-webpartPage-root") : null;
 
+    // Hide the page title if it exists
+    let pageTitle = document.querySelector("#pageTitle");
+    pageTitle ? pageTitle.setAttribute("style", "display:none;") : null;
+
     // Render the application
     GlobalVariable.render(elApp);
 }
