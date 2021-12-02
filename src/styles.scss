@@ -18,6 +18,10 @@
     .breadcrumb-item+.breadcrumb-item::before {
         padding-top: 0.15rem;
     }
+    .card {
+        border-top: 0;
+        border-width: 3px;
+    }
     .card-group>.card:not(:first-child) {
         border-top-right-radius: 0;
     }
@@ -25,6 +29,12 @@
         border-top-left-radius: 0;
     }
   }
+#app-docs nav.navbar {
+    background-color: rgba(0, 0, 0, 0.05) !important;
+    border: 3px solid #dee2e6;
+    border-radius: 0 0 0.25rem 0.25rem;
+    border-top: 0;
+}
 /* Remove the extra top padding on the content row */
 #contentRow {
     padding-top: 0 !important;
