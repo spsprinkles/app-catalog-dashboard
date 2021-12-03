@@ -364,9 +364,6 @@ export class App {
             docSetId: DataSource.DocSetItemId,
             templatesUrl: DataSource.Configuration.templatesLibraryUrl,
             onActionsRendered: (el, col, file) => {
-                // Hide the properties button
-                el.querySelector(".btn-actions-properties").parentElement.classList.add("d-none");
-
                 // See if this is a package file
                 if (file.ServerRelativeUrl.endsWith(".sppkg")) {
                     // Disable the view & delete button
@@ -379,43 +376,6 @@ export class App {
             onNavigationRendering: props => {
                 // Clear the subNav brand
                 props.brand = "";
-            },
-            table: {
-                columns: [
-                    {
-                        name: "Type",
-                        title: "Type",
-                    },
-                    {
-                        name: "Name",
-                        title: "Name"
-                    },
-                    {
-                        name: "FileSize",
-                        title: "File Size"
-                    },
-                    {
-                        name: "Created",
-                        title: "Created"
-                    },
-                    {
-                        name: "Author",
-                        title: "Created By"
-                    },
-                    {
-                        name: "Modified",
-                        title: "Modified"
-                    },
-                    {
-                        name: "ModifiedBy",
-                        title: "Modified By"
-                    },
-                    {
-                        className: "text-end text-nowrap",
-                        name: "Actions",
-                        title: ""
-                    }
-                ]
             }
         });
     }
