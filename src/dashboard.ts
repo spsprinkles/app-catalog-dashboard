@@ -70,14 +70,14 @@ export class AppDashboard {
                         text: "Manage Dev Group",
                         onClick: () => {
                             // Show the group in a new tab
-                            window.open(DataSource.ApproverUrl, "_blank");
+                            window.open(DataSource.DevUrl, "_blank");
                         }
                     },
                     {
                         text: "Manage Approver Group",
                         onClick: () => {
                             // Show the group in a new tab
-                            window.open(DataSource.DevUrl, "_blank");
+                            window.open(DataSource.ApproverUrl, "_blank");
                         }
                     },
                     {

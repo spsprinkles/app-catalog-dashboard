@@ -39,6 +39,7 @@ export class UserAgreement {
 
         // Set the options
         Modal.setAutoClose(false);
+        Modal.setCloseButtonVisibility(false);
         Modal.setScrollable(true);
         Modal.setType(Components.ModalTypes.Large)
 

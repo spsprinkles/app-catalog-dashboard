@@ -22,7 +22,7 @@
   "dependencies": {
     "datatables.net": "^1.11.3",
     "datatables.net-bs5": "^1.11.3",
-    "dattatable": "^1.5.5",
+    "dattatable": "^1.5.6",
     "gd-sprest-bs": "^8.9.9",
     "jquery": "^3.6.0",
     "jszip": "^3.7.1",
