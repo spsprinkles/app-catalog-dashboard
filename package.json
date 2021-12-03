@@ -13,7 +13,7 @@
     "url": "git+https://github.com/spsprinkles/app-catalog-dashboard.git"
   },
   "keywords": [],
-  "author": "Michael Vasiloff",
+  "author": "Michael Vasiloff, Dade Register, Gunjan Datta",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/spsprinkles/app-catalog-dashboard/issues"
@@ -23,7 +23,7 @@
     "datatables.net": "^1.11.3",
     "datatables.net-bs5": "^1.11.3",
     "dattatable": "^1.5.6",
-    "gd-sprest-bs": "^8.9.9",
+    "gd-sprest-bs": "^9.0.0",
     "jquery": "^3.6.0",
     "jszip": "^3.7.1",
     "moment": "^2.29.1"
