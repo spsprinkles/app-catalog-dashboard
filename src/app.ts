@@ -378,7 +378,7 @@ export class App {
             },
             onNavigationRendered: (nav) => {
                 // Fix the Templates dropdown offset value
-                (nav.el.querySelector("ul:last-child li:first-child a") as any)._tippy.setProps({ offset: [0,4] });
+                (nav.el.querySelector("ul:last-child li:first-child a") as any)._tippy.setProps({ offset: [0, 4] });
             },
             onNavigationRendering: props => {
                 // Clear the subNav brand
@@ -491,13 +491,12 @@ export class App {
                     this._el.querySelector("#app-docs").classList.add("d-none");
                     elNavDocs.classList.remove("d-none");
 
-                    crumb.remove();
-                    crumb.remove();
-                    crumb.add({
+                    // Set the bread crumb
+                    crumb.setItems([{
                         text: DataSource.DocSetItem.Title,
                         href: "#",
                         isActive: true
-                    });
+                    }]);
                 }
             },
             {
@@ -519,7 +518,8 @@ export class App {
 
                     crumb.setItems([
                         { text: "App Dashboard", href: Strings.DashboardUrl, className: "pe-auto" },
-                        { text: DataSource.DocSetItem.Title, className: "pe-auto", href: "#", onClick: () => {
+                        {
+                            text: DataSource.DocSetItem.Title, className: "pe-auto", href: "#", onClick: () => {
                                 // Show the info
                                 this._el.querySelector("#app-info").classList.remove("d-none");
                                 elNavInfo.classList.add("d-none");
@@ -528,13 +528,12 @@ export class App {
                                 this._el.querySelector("#app-docs").classList.add("d-none");
                                 elNavDocs.classList.remove("d-none");
 
-                                crumb.remove();
-                                crumb.remove();
-                                crumb.add({
+                                // Set the bread crumb
+                                crumb.setItems([{
                                     text: DataSource.DocSetItem.Title,
                                     href: "#",
                                     isActive: true
-                                });
+                                }]);
                             }
                         },
                         { text: item.text, href: "#", isActive: true }
@@ -570,7 +569,7 @@ export class App {
 
         // Update the breadcrumb divider to use a bootstrap icon
         crumb.el.setAttribute("style", "--bs-breadcrumb-divider: " + Common.generateEmbeddedSVG(caretRightFill(18, 18)).replace("currentColor", "%23fff"));
-        
+
         // Render the navigation
         let nav = Components.Navbar({
             el: this._el.querySelector("#app-nav"),
