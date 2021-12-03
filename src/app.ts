@@ -586,35 +586,4 @@ export class App {
         // Disable the link on the root nav brand
         nav.el.querySelector("nav div.container-fluid a.navbar-brand").classList.add("pe-none");
     }
-
-    // Method to upload a template
-    private uploadTemplate(file: Types.SP.File) {
-        // Ensure the file data exists
-        if (file == null) { return; }
-
-        // Show a loading dialog
-        LoadingDialog.setHeader("Copying Template");
-        LoadingDialog.setBody("Copying the template to this folder. This dialog will close after it completes.");
-        LoadingDialog.show();
-
-        // Get the file
-        file.content().execute(data => {
-            // Upload the file
-            DataSource.DocSetItem.Folder().Files().add(file.Name, true, data).execute(
-                // Success
-                () => {
-                    // Close the dialog
-                    LoadingDialog.hide();
-
-                    // Refresh the page
-                    window.location.reload();
-                },
-
-                // Error
-                () => {
-                    // TODO
-                }
-            );
-        });
-    }
 }
