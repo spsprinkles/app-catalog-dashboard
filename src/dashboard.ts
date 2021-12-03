@@ -112,13 +112,11 @@ export class AppDashboard {
                 itemsEnd: navLinks,
                 // Add the branding icon & text
                 onRendering: (props) => {
-                    let brandName = document.createElement("div");
-                    brandName.className = "ms-75";
-                    brandName.append(Strings.ProjectName);
                     let brand = document.createElement("div");
                     brand.className = "d-flex";
                     brand.appendChild(columnsGap());
-                    brand.appendChild(brandName);
+                    brand.append(Strings.ProjectName);
+                    brand.querySelector("svg").classList.add("me-75");
                     props.brand = brand;
                 },
                 // Adjust the brand alignment
