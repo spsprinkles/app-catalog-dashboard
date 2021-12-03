@@ -2,15 +2,15 @@
     .breadcrumb {
         margin-bottom: 0;
     }
-    .breadcrumb-item.active, .breadcrumb-item:first-child > a {
+    .breadcrumb-item.active, .breadcrumb-item > a {
         color: #fff;
         text-decoration: none;
     }
-    .breadcrumb-item:first-child > a:hover, .breadcrumb-item:first-child > a:focus {
+    .breadcrumb-item > a:hover, .breadcrumb-item > a:focus {
         color: #dee2e6;
         text-decoration: underline;
     }
-    .breadcrumb-item:first-child > a:active {
+    .breadcrumb-item > a:active {
         color: #333333;
         font-weight: 500;
         text-decoration: underline;
