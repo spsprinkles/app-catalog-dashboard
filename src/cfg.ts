@@ -23,6 +23,13 @@ export const Configuration = Helper.SPConfig({
             },
             ContentTypes: [
                 {
+                    Name: "Document",
+                    FieldRefs: [
+                        "FileLeafRef",
+                        "Title"
+                    ]
+                },
+                {
                     Name: "App",
                     Description: "Displayed in the ribbon new item text.",
                     ParentName: "Document Set",
