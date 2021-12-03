@@ -376,10 +376,6 @@ export class App {
                     });
                 }
             },
-            onNavigationRendered: (nav) => {
-                // Fix the Templates dropdown offset value
-                (nav.el.querySelector("ul:last-child li:first-child a") as any)._tippy.setProps({ offset: [0,4] });
-            },
             onNavigationRendering: props => {
                 // Clear the subNav brand
                 props.brand = "";
