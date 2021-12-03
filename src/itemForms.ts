@@ -84,13 +84,16 @@ export class AppForms {
 
                 // See if we are deleting the package
                 if (deleteFl) {
-                    // Delete this folder
-                    item.delete().execute(() => {
-                        // Close the dialog
-                        LoadingDialog.hide();
+                    // Delete the assessments w/ this app
+                    this.deleteAssessments(item).then(() => {
+                        // Delete this folder
+                        item.delete().execute(() => {
+                            // Close the dialog
+                            LoadingDialog.hide();
 
-                        // Call the update event
-                        onUpdate();
+                            // Call the update event
+                            onUpdate();
+                        });
                     });
                 }
                 // Else, we are disabling the app
@@ -117,6 +120,29 @@ export class AppForms {
 
         // Show the modal
         Modal.show();
+    }
+
+    // Method to delete the assessments associated with the app
+    private deleteAssessments(item: IAppItem): PromiseLike<void> {
+        // Return a promise
+        return new Promise((resolve, reject) => {
+            // Get the assoicated item
+            List(Strings.Lists.Assessments).Items().query({
+                Filter: "RelatedAppId eq " + item.Id
+            }).execute(items => {
+                // Parse the items
+                Helper.Executor(items.results, item => {
+                    // Return a promise
+                    return new Promise(resolve => {
+                        // Delete the item
+                        item.delete().execute(() => { resolve(null); });
+                    });
+                }).then(() => {
+                    // Resolve the request
+                    resolve();
+                });
+            }, reject);
+        });
     }
 
     // Deploys the solution to the app catalog
