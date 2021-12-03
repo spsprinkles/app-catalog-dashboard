@@ -369,21 +369,20 @@ export class App {
 
                 // See if this is a package file
                 if (file.ServerRelativeUrl.endsWith(".sppkg")) {
-                    // Disable the delete button
-                    el.querySelector(".btn-actions-delete").setAttribute("disabled", "");
-                    el.querySelector(".btn-actions-delete").parentElement.classList.add("pe-none");
+                    // Disable the view & delete button
+                    el.querySelectorAll(".btn-actions-view, .btn-actions-delete").forEach((el: HTMLElement) => {
+                        el.setAttribute("disabled", "");
+                        el.parentElement.classList.add("pe-none");
+                    });
                 }
             },
             onNavigationRendered: (nav) => {
-                // Disable the default nav brand link
-                nav.el.querySelector(".navbar-brand").classList.add("pe-none");
-
                 // Fix the Templates dropdown offset value
                 (nav.el.querySelector("ul:last-child li:first-child a") as any)._tippy.setProps({ offset: [0,4] });
             },
             onNavigationRendering: props => {
-                // Update the sub-nav title
-                props.brand = "App Documents";
+                // Clear the subNav brand
+                props.brand = "";
             },
             table: {
                 columns: [
@@ -491,6 +490,14 @@ export class App {
                     // Hide the documents
                     this._el.querySelector("#app-docs").classList.add("d-none");
                     elNavDocs.classList.remove("d-none");
+
+                    crumb.remove();
+                    crumb.remove();
+                    crumb.add({
+                        text: DataSource.DocSetItem.Title,
+                        href: "#",
+                        isActive: true
+                    });
                 }
             },
             {
@@ -501,7 +508,7 @@ export class App {
                 isButton: true,
                 text: "Documents",
                 onRender: el => { elNavDocs = el; },
-                onClick: () => {
+                onClick: (item) => {
                     // Show the documents
                     this._el.querySelector("#app-docs").classList.remove("d-none");
                     elNavDocs.classList.add("d-none");
@@ -509,6 +516,29 @@ export class App {
                     // Hide the info
                     this._el.querySelector("#app-info").classList.add("d-none");
                     elNavInfo.classList.remove("d-none");
+
+                    crumb.setItems([
+                        { text: "App Dashboard", href: Strings.DashboardUrl, className: "pe-auto" },
+                        { text: DataSource.DocSetItem.Title, className: "pe-auto", href: "#", onClick: () => {
+                                // Show the info
+                                this._el.querySelector("#app-info").classList.remove("d-none");
+                                elNavInfo.classList.add("d-none");
+
+                                // Hide the documents
+                                this._el.querySelector("#app-docs").classList.add("d-none");
+                                elNavDocs.classList.remove("d-none");
+
+                                crumb.remove();
+                                crumb.remove();
+                                crumb.add({
+                                    text: DataSource.DocSetItem.Title,
+                                    href: "#",
+                                    isActive: true
+                                });
+                            }
+                        },
+                        { text: item.text, href: "#", isActive: true }
+                    ]);
                 }
             }
         ];
@@ -540,7 +570,7 @@ export class App {
 
         // Update the breadcrumb divider to use a bootstrap icon
         crumb.el.setAttribute("style", "--bs-breadcrumb-divider: " + Common.generateEmbeddedSVG(caretRightFill(18, 18)).replace("currentColor", "%23fff"));
-
+        
         // Render the navigation
         let nav = Components.Navbar({
             el: this._el.querySelector("#app-nav"),
@@ -551,7 +581,7 @@ export class App {
         });
 
         // Adjust the nav alignment
-        nav.el.querySelector("nav div.container-fluid").classList.add("pe-2");
+        nav.el.querySelector("nav div.container-fluid").classList.add("pe-75");
         nav.el.querySelector("nav div.container-fluid").classList.add("ps-3");
 
         // Disable the link on the root nav brand
