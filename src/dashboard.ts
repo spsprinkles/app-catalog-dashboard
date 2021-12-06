@@ -8,6 +8,7 @@ import { fileEarmarkArrowUp } from "gd-sprest-bs/build/icons/svgs/fileEarmarkArr
 import { gearWideConnected } from "gd-sprest-bs/build/icons/svgs/gearWideConnected";
 import { layoutTextWindow } from "gd-sprest-bs/build/icons/svgs/layoutTextWindow";
 import { pencilSquare } from "gd-sprest-bs/build/icons/svgs/pencilSquare";
+import { questionLg } from "gd-sprest-bs/build/icons/svgs/questionLg";
 import * as Common from "./common";
 import { AppForms } from "./itemForms";
 import * as jQuery from "jquery";
@@ -59,7 +60,7 @@ export class AppDashboard {
         if (DataSource.IsApprover) {
             // Set the admin buttons
             navLinks = [{
-                className: "btn-outline-light me-2 pt-1",
+                className: "btn-outline-light ms-2 pt-1",
                 text: "Settings",
                 iconClassName: "me-1",
                 iconSize: 24,
@@ -67,10 +68,10 @@ export class AppDashboard {
                 isButton: true,
                 items: [
                     {
-                        text: "Manage Dev Group",
+                        text: "Manage App Configuration",
                         onClick: () => {
-                            // Show the group in a new tab
-                            window.open(DataSource.DevUrl, "_blank");
+                            // Show the install modal
+                            DataSource.InstallRequired(true);
                         }
                     },
                     {
@@ -81,14 +82,30 @@ export class AppDashboard {
                         }
                     },
                     {
-                        text: "Manage App Config",
+                        text: "Manage Developer Group",
                         onClick: () => {
-                            // Show the install modal
-                            DataSource.InstallRequired(true);
+                            // Show the group in a new tab
+                            window.open(DataSource.DevUrl, "_blank");
                         }
                     }
                 ]
             }];
+        }
+
+        // See if the help url exists
+        if (DataSource.Configuration.helpPageUrl) {
+            // Add the item
+            navLinks.push({
+                className: "btn-outline-light mx-2 ps-1 pt-1",
+                iconSize: 24,
+                iconType: questionLg,
+                isButton: true,
+                text: "Help",
+                onClick: () => {
+                    // Display in a new tab
+                    window.open(DataSource.Configuration.helpPageUrl, "_blank");
+                }
+            });
         }
 
         // Create the dashboard
