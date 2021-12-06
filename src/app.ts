@@ -373,6 +373,10 @@ export class App {
                     });
                 }
             },
+            onNavigationRendered: (nav) => {
+                // Update the upload button tooltip
+                (nav.el.querySelector("#navbar_content ul:last-child li:last-child button") as any)._tippy.setContent("Upload Document");
+            },
             onNavigationRendering: props => {
                 // Clear the subNav brand
                 props.brand = "";
