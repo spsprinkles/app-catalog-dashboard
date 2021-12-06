@@ -326,6 +326,22 @@ export class AppForms {
                     itemId: assessment.Id,
                 });
             }
+            else {
+                // Show 'assessment not found' modal
+                Modal.clear();
+                Modal.setHeader("Assessment not found")
+                Modal.setBody("Unable to find an assessment for app '" + DataSource.DocSetItem.Title + "'.")
+                let close = Components.Button({
+                    el: document.createElement("div"),
+                    text: "Close",
+                    type: Components.ButtonTypes.OutlineSecondary,
+                    onClick: () => {
+                        Modal.hide();
+                    }
+                });
+                Modal.setFooter(close.el);
+                Modal.show();
+            }
         });
     }
 
