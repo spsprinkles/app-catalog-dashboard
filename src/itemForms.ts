@@ -231,9 +231,23 @@ export class AppForms {
         // Show the item form
         ItemForm.edit({
             itemId,
+            onSetFooter: el => {
+                // Add a cancel button if form is in a modal
+                if (ItemForm.UseModal) {
+                    Components.Button({
+                        el,
+                        text: "Cancel",
+                        type: Components.ButtonTypes.OutlineSecondary,
+                        onClick: () => {
+                            Modal.hide();
+                        }
+                    });
+                }
+            },
             onSetHeader: el => {
                 // Update the header
-                el.innerHTML = "New App"
+                el.className = "h5 m-0";
+                el.innerHTML = "App Details";
             },
             onGetListInfo: props => {
                 // Set the content type
