@@ -434,7 +434,7 @@ export class App {
         let elNavInfo: HTMLElement = null;
         let itemsEnd: Components.INavbarItem[] = [
             {
-                className: "navbar-expand btn-outline-light ms-2 ps-2 pt-1",
+                className: "btn-outline-light ms-2 ps-2 pt-1",
                 classNameItem: "d-none",
                 iconClassName: "me-1",
                 iconSize: 24,
@@ -543,7 +543,7 @@ export class App {
         let nav = Components.Navbar({
             el: this._el.querySelector("#app-nav"),
             brand: crumb.el,
-            className: "bg-sharepoint rounded-top",
+            className: "navbar-expand bg-sharepoint rounded-top",
             type: Components.NavbarTypes.Primary,
             itemsEnd
         });
