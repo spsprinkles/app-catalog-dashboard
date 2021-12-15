@@ -231,6 +231,7 @@ export class AppForms {
         // Show the item form
         ItemForm.edit({
             itemId,
+            webUrl: Strings.SourceUrl,
             onSetFooter: el => {
                 // Add a cancel button if form is in a modal
                 if (ItemForm.UseModal) {
@@ -324,6 +325,7 @@ export class AppForms {
                 // Show the edit form
                 ItemForm.view({
                     itemId: assessment.Id,
+                    webUrl: Strings.SourceUrl
                 });
             }
             else {
@@ -557,6 +559,7 @@ export class AppForms {
                 // Show the edit form
                 ItemForm.edit({
                     itemId: assessment.Id,
+                    webUrl: Strings.SourceUrl,
                     onSetHeader: el => {
                         // Render an alert
                         alert = Components.Alert({
@@ -612,6 +615,7 @@ export class AppForms {
             } else {
                 // Show the new form
                 ItemForm.create({
+                    webUrl: Strings.SourceUrl,
                     onCreateEditForm: props => {
                         // Update the default title
                         props.onControlRendering = ((ctrl, field) => {
