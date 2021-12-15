@@ -1,0 +1,18 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "app-catalog-manager-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/appCatalogManager/AppCatalogManagerWebPart.js",
+          "manifest": "./src/webparts/appCatalogManager/AppCatalogManagerWebPart.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {},
+  "localizedResources": {
+    "AppCatalogManagerWebPartStrings": "lib/webparts/appCatalogManager/loc/{locale}.js"
+  }
+}

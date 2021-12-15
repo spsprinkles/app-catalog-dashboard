@@ -4,9 +4,11 @@
   "description": "Management of apps in tenant app catalog.",
   "main": "src/index.ts",
   "scripts": {
-    "all": "npm run build && npm run prod",
-    "build": "webpack --mode=development",
-    "prod": "webpack --mode=production"
+    "all": "npm run clean && npm run build && npm run prod && npm run spfx",
+    "build": "webpack --mode development",
+    "clean": "node ./clean.js",
+    "prod": "webpack --mode production",
+    "spfx": "cd spfx && npm run package"
   },
   "repository": {
     "type": "git",
@@ -22,28 +24,28 @@
   "dependencies": {
     "datatables.net": "^1.11.3",
     "datatables.net-bs5": "^1.11.3",
-    "dattatable": "^1.5.7",
+    "dattatable": "^1.6.0",
     "gd-sprest-bs": "^9.0.0",
     "jquery": "^3.6.0",
     "jszip": "^3.7.1",
     "moment": "^2.29.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.16.0",
-    "@babel/preset-env": "^7.16.4",
+    "@babel/core": "^7.16.5",
+    "@babel/preset-env": "^7.16.5",
     "@types/datatables.net": "^1.10.21",
-    "@types/jquery": "^3.5.9",
+    "@types/jquery": "^3.5.10",
     "babel-loader": "^8.2.3",
-    "css-loader": "^5.2.7",
-    "html-loader": "^2.1.2",
+    "css-loader": "^6.5.1",
+    "html-loader": "^3.0.1",
     "moment-locales-webpack-plugin": "^1.2.0",
-    "node-sass": "^6.0.1",
-    "sass-loader": "^12.3.0",
+    "node-sass": "^7.0.0",
+    "sass-loader": "^12.4.0",
     "style-loader": "^3.3.1",
     "ts-loader": "^9.2.6",
-    "typescript": "^4.5.2",
+    "typescript": "^4.5.4",
     "url-loader": "^4.1.1",
-    "webpack": "^5.64.4",
+    "webpack": "^5.65.0",
     "webpack-cli": "^4.9.1"
   }
 }

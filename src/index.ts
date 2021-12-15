@@ -11,11 +11,11 @@ import "./styles.scss";
 // Create the global variable for this solution
 const GlobalVariable = {
     Configuration,
-    render: (el: HTMLElement, context?) => {
+    render: (el: HTMLElement, context?, sourceUrl?: string) => {
         // See if the page context exists
         if (context) {
             // Set the context
-            setContext(context);
+            setContext(context, sourceUrl);
         }
 
         // Hide the first column of the webpart zones
@@ -35,8 +35,8 @@ const GlobalVariable = {
                     // Show the user agreement
                     new UserAgreement();
                 }
-                // Else, see if this is a document set
-                else if (DataSource.IsDocSet) {
+                // Else, see if this is a document set and we are not in teams
+                else if (!Strings.IsTeams && DataSource.IsDocSet) {
                     // Create the application
                     new App(el);
                 } else {

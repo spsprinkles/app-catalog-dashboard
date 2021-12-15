@@ -1,4 +1,4 @@
-import { Documents, LoadingDialog } from "dattatable";
+import { Documents, Modal, LoadingDialog } from "dattatable";
 import { Components, Types } from "gd-sprest-bs";
 import { appIndicator } from "gd-sprest-bs/build/icons/svgs/appIndicator";
 import { caretRightFill } from "gd-sprest-bs/build/icons/svgs/caretRightFill";
@@ -434,7 +434,7 @@ export class App {
         let elNavInfo: HTMLElement = null;
         let itemsEnd: Components.INavbarItem[] = [
             {
-                className: "btn-outline-light ms-2 ps-2 pt-1",
+                className: "navbar-expand btn-outline-light ms-2 ps-2 pt-1",
                 classNameItem: "d-none",
                 iconClassName: "me-1",
                 iconSize: 24,
@@ -479,7 +479,8 @@ export class App {
 
                     crumb.setItems([
                         { text: "App Dashboard", href: Strings.DashboardUrl, className: "pe-auto" },
-                        { text: DataSource.DocSetItem.Title, className: "pe-auto", href: "#", onClick: () => {
+                        {
+                            text: DataSource.DocSetItem.Title, className: "pe-auto", href: "#", onClick: () => {
                                 // Show the info
                                 this._el.querySelector("#app-info").classList.remove("d-none");
                                 elNavInfo.classList.add("d-none");
@@ -523,14 +524,21 @@ export class App {
         let crumb = Components.Breadcrumb({
             el: this._el,
             items: [
-                { text: "App Dashboard", href: Strings.DashboardUrl, className: "pe-auto" },
+                {
+                    text: "App Dashboard",
+                    className: "pe-auto",
+                    onClick: () => {
+                        // Close the modal
+                        Modal.hide();
+                    }
+                },
                 { text: DataSource.DocSetItem.Title, href: "#", isActive: true }
             ]
         });
 
         // Update the breadcrumb divider to use a bootstrap icon
         crumb.el.setAttribute("style", "--bs-breadcrumb-divider: " + Common.generateEmbeddedSVG(caretRightFill(18, 18)).replace("currentColor", "%23fff"));
-        
+
         // Render the navigation
         let nav = Components.Navbar({
             el: this._el.querySelector("#app-nav"),

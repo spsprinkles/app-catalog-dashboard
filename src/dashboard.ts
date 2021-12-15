@@ -1,4 +1,4 @@
-import { Dashboard, LoadingDialog } from "dattatable";
+import { Dashboard, LoadingDialog, Modal } from "dattatable";
 import { Components } from "gd-sprest-bs";
 import { appIndicator } from "gd-sprest-bs/build/icons/svgs/appIndicator";
 import { arrowClockwise } from "gd-sprest-bs/build/icons/svgs/arrowClockwise";
@@ -9,12 +9,12 @@ import { gearWideConnected } from "gd-sprest-bs/build/icons/svgs/gearWideConnect
 import { layoutTextWindow } from "gd-sprest-bs/build/icons/svgs/layoutTextWindow";
 import { pencilSquare } from "gd-sprest-bs/build/icons/svgs/pencilSquare";
 import { questionLg } from "gd-sprest-bs/build/icons/svgs/questionLg";
+import { App } from "./app";
 import * as Common from "./common";
 import { AppForms } from "./itemForms";
 import * as jQuery from "jquery";
 import { DataSource, IAppItem } from "./ds";
 import Strings from "./strings";
-
 
 /**
  * Dashboard
@@ -129,6 +129,10 @@ export class AppDashboard {
                 itemsEnd: navLinks,
                 // Add the branding icon & text
                 onRendering: (props) => {
+                    // Set the class names
+                    props.className = "navbar-expand";
+
+                    // Set the brand
                     let brand = document.createElement("div");
                     brand.className = "d-flex";
                     brand.appendChild(columnsGap());
@@ -411,8 +415,31 @@ export class AppDashboard {
                                     isSmall: true,
                                     type: Components.ButtonTypes.OutlinePrimary,
                                     onClick: () => {
-                                        // Redirect to the docset item
-                                        window.open(Common.generateDocSetUrl(item), "_self");
+                                        // Show a loading dialog
+                                        LoadingDialog.setHeader("Loading Application Information");
+                                        LoadingDialog.setBody("This will close after the data is loaded...");
+                                        LoadingDialog.show();
+
+                                        // Load the doc set item
+                                        DataSource.loadDocSet(item.Id).then(() => {
+                                            // Display the app in a modal
+                                            Modal.clear();
+
+                                            // Set the header
+                                            Modal.setHeader("Application Information");
+
+                                            // Set the type
+                                            Modal.setType(Components.ModalTypes.Full);
+
+                                            // Set the body
+                                            new App(Modal.BodyElement);
+
+                                            // Hide the loading dialog
+                                            LoadingDialog.hide();
+
+                                            // Show the modal
+                                            Modal.show();
+                                        });
                                     }
                                 }
                             });

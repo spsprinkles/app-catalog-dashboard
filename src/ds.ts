@@ -79,7 +79,7 @@ export class DataSource {
         // Return a promise
         return new Promise(resolve => {
             // Get the current web
-            Web().getFileByServerRelativeUrl(Strings.ConfigUrl).content().execute(
+            Web(Strings.SourceUrl).getFileByServerRelativeUrl(Strings.ConfigUrl).content().execute(
                 // Success
                 file => {
                     // Convert the string to a json object
@@ -146,14 +146,15 @@ export class DataSource {
     private static _docSetInfo: Helper.IListFormResult = null;
     static get DocSetInfo(): Helper.IListFormResult { return this._docSetInfo; }
     static get DocSetItem(): IAppItem { return this._docSetInfo.item as any; }
-    static loadDocSet(): PromiseLike<void> {
+    static loadDocSet(id?: number): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve, reject) => {
             // Load the list information
             Components.ListForm.create({
                 listName: Strings.Lists.Apps,
-                itemId: this.DocSetItemId,
+                itemId: id || this.DocSetItemId,
                 contentType: "App",
+                webUrl: Strings.SourceUrl,
                 query: {
                     Expand: ["CheckoutUser", "Owners"],
                     Select: [
@@ -194,7 +195,7 @@ export class DataSource {
         // Return a promise
         return new Promise((resolve, reject) => {
             // Load the security group
-            Web().SiteGroups().getByName(Strings.Groups.Approvers).query({
+            Web(Strings.SourceUrl).SiteGroups().getByName(Strings.Groups.Approvers).query({
                 Expand: ["Users"]
             }).execute(group => {
                 // Set the group
@@ -230,7 +231,7 @@ export class DataSource {
         // Return a promise
         return new Promise((resolve, reject) => {
             // Load the security group
-            Web().SiteGroups().getByName(Strings.Groups.Developers).query({
+            Web(Strings.SourceUrl).SiteGroups().getByName(Strings.Groups.Developers).query({
                 Expand: ["Users"]
             }).execute(group => {
                 // Set the group
@@ -256,8 +257,8 @@ export class DataSource {
                         this.loadSiteCollectionApps().then(() => {
                             // Load the tenant apps
                             this.loadTenantApps().then(() => {
-                                // See if this is a document set item
-                                if (this.DocSetItemId > 0) {
+                                // See if this is a document set item and not teams
+                                if (!Strings.IsTeams && this.DocSetItemId > 0) {
                                     // Load the document set item
                                     this.loadDocSet().then(() => {
                                         // Resolve the request
@@ -344,7 +345,7 @@ export class DataSource {
         // Return a promise
         return new Promise((resolve, reject) => {
             // Load the list items
-            List(Strings.Lists.Apps).Items().query({
+            Web(Strings.SourceUrl).Lists(Strings.Lists.Apps).Items().query({
                 Expand: ["CheckoutUser", "Folder", "Owners"],
                 Filter: "ContentType eq 'App'",
                 Select: [
@@ -367,7 +368,7 @@ export class DataSource {
         // Return a promise
         return new Promise((resolve, reject) => {
             // Get the status field
-            List(Strings.Lists.Apps).Fields("DevAppStatus").execute((fld: Types.SP.FieldChoice) => {
+            Web(Strings.SourceUrl).Lists(Strings.Lists.Apps).Fields("DevAppStatus").execute((fld: Types.SP.FieldChoice) => {
                 let items: Components.ICheckboxGroupItem[] = [];
 
                 // Parse the choices
@@ -450,7 +451,7 @@ export class DataSource {
         // Return a promise
         return new Promise((resolve, reject) => {
             // Load the available apps
-            Web().TenantAppCatalog().AvailableApps().execute(apps => {
+            Web(Strings.SourceUrl).TenantAppCatalog().AvailableApps().execute(apps => {
                 // Set the apps
                 this._tenantApps = apps.results;
 
@@ -473,7 +474,7 @@ export class DataSource {
         // Return a promise
         return new Promise((resolve) => {
             // Get the current web
-            Web().getFileByServerRelativeUrl(Strings.UserAgreementUrl).content().execute(
+            Web(Strings.SourceUrl).getFileByServerRelativeUrl(Strings.UserAgreementUrl).content().execute(
                 // Success
                 file => {
                     // Set the html
