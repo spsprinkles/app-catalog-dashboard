@@ -30,6 +30,11 @@ const GlobalVariable = {
         DataSource.init().then(
             // Success
             () => {
+                // Create the app elements
+                el.innerHTML = "<div id='apps'></div><div id='app-details' style='display: none;'></div>";
+                let elApps = el.querySelector("#apps") as HTMLElement;
+                let elAppDetails = el.querySelector("#app-details") as HTMLElement;
+
                 // Ensure the user is not an approver or developer
                 if (!DataSource.IsApprover && !DataSource.IsDeveloper) {
                     // Show the user agreement
@@ -38,10 +43,10 @@ const GlobalVariable = {
                 // Else, see if this is a document set and we are not in teams
                 else if (!Strings.IsTeams && DataSource.IsDocSet) {
                     // Create the application
-                    new App(el);
+                    new App(elAppDetails);
                 } else {
                     // Render the dashboard
-                    new AppDashboard(el);
+                    new AppDashboard(elApps, elAppDetails);
                 }
             },
             // Error

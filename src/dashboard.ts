@@ -22,12 +22,14 @@ import Strings from "./strings";
 export class AppDashboard {
     private _dashboard: Dashboard = null;
     private _el: HTMLElement = null;
+    private _elAppDetails: HTMLElement = null;
     private _forms: AppForms = null;
 
     // Constructor
-    constructor(el: HTMLElement) {
+    constructor(el: HTMLElement, elAppDetails: HTMLElement) {
         // Set the global variables
         this._el = el;
+        this._elAppDetails = elAppDetails;
         this._forms = new AppForms();
 
         // Render the dashboard
@@ -416,33 +418,30 @@ export class AppDashboard {
                                     type: Components.ButtonTypes.OutlinePrimary,
                                     onClick: () => {
                                         // Redirect to the docset item
-                                        window.open(Common.generateDocSetUrl(item), "_self");
+                                        //window.open(Common.generateDocSetUrl(item), "_self");
 
-                                        /* // Show a loading dialog
+                                        // Show a loading dialog
                                         LoadingDialog.setHeader("Loading Application Information");
                                         LoadingDialog.setBody("This will close after the data is loaded...");
                                         LoadingDialog.show();
 
                                         // Load the doc set item
                                         DataSource.loadDocSet(item.Id).then(() => {
-                                            // Display the app in a modal
-                                            Modal.clear();
-
-                                            // Set the header
-                                            Modal.setHeader("Application Information");
-
-                                            // Set the type
-                                            Modal.setType(Components.ModalTypes.Full);
+                                            // Clear the details
+                                            while (this._elAppDetails.firstChild) { this._elAppDetails.removeChild(this._elAppDetails.firstChild); }
 
                                             // Set the body
-                                            new App(Modal.BodyElement);
+                                            new App(this._elAppDetails, this._el);
+
+                                            // Hide the apps
+                                            this._el.style.display = "none";
+
+                                            // Show the details
+                                            this._elAppDetails.style.display = "";
 
                                             // Hide the loading dialog
                                             LoadingDialog.hide();
-
-                                            // Show the modal
-                                            Modal.show();
-                                        }); */
+                                        });
                                     }
                                 }
                             });

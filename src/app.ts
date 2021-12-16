@@ -1,5 +1,5 @@
-import { Documents, Modal, LoadingDialog } from "dattatable";
-import { Components, Types } from "gd-sprest-bs";
+import { Documents, LoadingDialog } from "dattatable";
+import { Components } from "gd-sprest-bs";
 import { appIndicator } from "gd-sprest-bs/build/icons/svgs/appIndicator";
 import { caretRightFill } from "gd-sprest-bs/build/icons/svgs/caretRightFill";
 import { chatSquareDots } from "gd-sprest-bs/build/icons/svgs/chatSquareDots";
@@ -18,12 +18,14 @@ import Strings from "./strings";
  */
 export class App {
     private _el: HTMLElement = null;
+    private _elDashboard: HTMLElement = null;
     private _forms: AppForms = null;
 
     // Constructor
-    constructor(el: HTMLElement) {
+    constructor(el: HTMLElement, elDashboard?: HTMLElement) {
         // Set the global variables
         this._el = el;
+        this._elDashboard = elDashboard;
         this._forms = new AppForms();
 
         // Render the template
@@ -47,6 +49,21 @@ export class App {
 
         // Render the documents
         this.renderDocuments();
+    }
+
+    // Redirects to the dashboard
+    private redirectToDashboard() {
+        // See if the parent element exists
+        if (this._elDashboard) {
+            // Hide the details
+            this._el.style.display = "none";
+
+            // Show the dashboard
+            this._elDashboard.style.display = "";
+        } else {
+            // Redirect to the dashboard
+            window.open(Strings.DashboardUrl, "_self");
+        }
     }
 
     // Refreshes the dashboard
@@ -363,6 +380,7 @@ export class App {
             listName: Strings.Lists.Apps,
             docSetId: DataSource.DocSetItemId,
             templatesUrl: DataSource.Configuration.templatesLibraryUrl,
+            webUrl: Strings.SourceUrl,
             onActionsRendered: (el, col, file) => {
                 // See if this is a package file
                 if (file.ServerRelativeUrl.endsWith(".sppkg")) {
@@ -478,7 +496,15 @@ export class App {
                     elNavInfo.classList.remove("d-none");
 
                     crumb.setItems([
-                        { text: "App Dashboard", href: Strings.DashboardUrl, className: "pe-auto" },
+                        //{ text: "App Dashboard", href: Strings.DashboardUrl, className: "pe-auto" },
+                        {
+                            text: "App Dashboard",
+                            className: "pe-auto",
+                            onClick: () => {
+                                // Redirect to the app dashboard
+                                this.redirectToDashboard();
+                            }
+                        },
                         {
                             text: DataSource.DocSetItem.Title, className: "pe-auto", href: "#", onClick: () => {
                                 // Show the info
@@ -524,15 +550,15 @@ export class App {
         let crumb = Components.Breadcrumb({
             el: this._el,
             items: [
-                /* {
+                {
                     text: "App Dashboard",
                     className: "pe-auto",
                     onClick: () => {
-                        // Close the modal
-                        Modal.hide();
+                        // Redirect to the app dashboard
+                        this.redirectToDashboard();
                     }
-                }, */
-                { text: "App Dashboard", href: Strings.DashboardUrl, className: "pe-auto" },
+                },
+                //{ text: "App Dashboard", href: Strings.DashboardUrl, className: "pe-auto" },
                 { text: DataSource.DocSetItem.Title, href: "#", isActive: true }
             ]
         });
