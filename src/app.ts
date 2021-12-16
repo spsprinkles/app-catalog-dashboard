@@ -524,14 +524,15 @@ export class App {
         let crumb = Components.Breadcrumb({
             el: this._el,
             items: [
-                {
+                /* {
                     text: "App Dashboard",
                     className: "pe-auto",
                     onClick: () => {
                         // Close the modal
                         Modal.hide();
                     }
-                },
+                }, */
+                { text: "App Dashboard", href: Strings.DashboardUrl, className: "pe-auto" },
                 { text: DataSource.DocSetItem.Title, href: "#", isActive: true }
             ]
         });

@@ -415,7 +415,10 @@ export class AppDashboard {
                                     isSmall: true,
                                     type: Components.ButtonTypes.OutlinePrimary,
                                     onClick: () => {
-                                        // Show a loading dialog
+                                        // Redirect to the docset item
+                                        window.open(Common.generateDocSetUrl(item), "_self");
+
+                                        /* // Show a loading dialog
                                         LoadingDialog.setHeader("Loading Application Information");
                                         LoadingDialog.setBody("This will close after the data is loaded...");
                                         LoadingDialog.show();
@@ -439,7 +442,7 @@ export class AppDashboard {
 
                                             // Show the modal
                                             Modal.show();
-                                        });
+                                        }); */
                                     }
                                 }
                             });
