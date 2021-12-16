@@ -28,12 +28,14 @@
     .card-group>.card:not(:last-child) {
         border-top-left-radius: 0;
     }
-  }
-#app-docs nav.navbar {
-    background-color: rgba(0, 0, 0, 0.05) !important;
-    border: 3px solid #dee2e6;
-    border-radius: 0 0 0.25rem 0.25rem;
-    border-top: 0;
+}
+#app-docs, #sub-navigation {
+    nav.navbar {
+        background-color: rgba(0, 0, 0, 0.05) !important;
+        border: 3px solid #dee2e6;
+        border-radius: 0 0 0.25rem 0.25rem;
+        border-top: 0;
+    }
 }
 /* Remove the extra top padding on the content row */
 #contentRow {

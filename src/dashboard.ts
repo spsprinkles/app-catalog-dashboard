@@ -130,7 +130,7 @@ export class AppDashboard {
                 // Add the branding icon & text
                 onRendering: (props) => {
                     // Set the class names
-                    props.className = "navbar-expand";
+                    props.className = "bg-sharepoint navbar-expand rounded-top";
 
                     // Set the brand
                     let brand = document.createElement("div");
