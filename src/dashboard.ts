@@ -58,10 +58,10 @@ export class AppDashboard {
     // Renders the dashboard
     private render() {
         // See if this is an approver
-        let navLinks: Components.INavbarItem[] = null;
+        let navLinks: Components.INavbarItem[] = [];
         if (DataSource.IsApprover) {
             // Set the admin buttons
-            navLinks = [{
+            navLinks.push({
                 className: "btn-outline-light ms-2 pt-1",
                 text: "Settings",
                 iconClassName: "me-1",
@@ -91,7 +91,7 @@ export class AppDashboard {
                         }
                     }
                 ]
-            }];
+            });
         }
 
         // See if the help url exists
