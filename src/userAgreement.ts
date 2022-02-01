@@ -44,20 +44,21 @@ export class UserAgreement {
         Modal.setType(Components.ModalTypes.Large)
 
         // Set the header and body
-        Modal.setHeader("User Agreement");
-        Modal.setBody(DataSource.UserAgreement || "User agreement has not been identified by the client.");
+        Modal.setHeader("Developer Agreement");
+        Modal.setBody(DataSource.UserAgreement || "Developer agreement has not been identified by the client");
 
         // Set the footer
         Modal.setFooter(Components.Tooltip({
-            content: "Clicking 'Agree' will allow you to add an app.",
+            content: "Clicking 'Agree' will allow you to continue",
             btnProps: {
                 text: "Agree",
-                type: Components.ButtonTypes.OutlineDanger,
+                type: Components.ButtonTypes.OutlinePrimary,
                 onClick: () => {
                     // Add the user to the group
                     this.addUserToGroup();
                 }
-            }
+            },
+            placement: Components.TooltipPlacements.Left
         }).el);
 
         // Show the modal
