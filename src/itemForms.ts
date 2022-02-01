@@ -229,37 +229,32 @@ export class AppForms {
         LoadingDialog.setBody("Syncing the app to Teams.");
         LoadingDialog.show();
 
-        // Get the package file
-        DataSource.DocSetItem.Folder().Files().execute(files => {
-            let catalogUrl = DataSource.Configuration.tenantAppCatalogUrl;
+        // Load the context of the app catalog
+        ContextInfo.getWeb(DataSource.Configuration.tenantAppCatalogUrl).execute(context => {
+            let requestDigest = context.GetContextWebInformation.FormDigestValue;
 
-            // Load the context of the app catalog
-            ContextInfo.getWeb(catalogUrl).execute(context => {
-                let requestDigest = context.GetContextWebInformation.FormDigestValue;
+            // Sync the app with Teams
+            Web(DataSource.Configuration.tenantAppCatalogUrl, { requestDigest }).TenantAppCatalog().syncSolutionToTeams(item.Id).execute(
+                // Success
+                () => {
+                    // Call the update event
+                    onUpdate();
 
-                // Sync the app with Teams
-                Web(catalogUrl, { requestDigest }).TenantAppCatalog().syncSolutionToTeams(item.Id).execute(
-                    // Success
-                    () => {
-                        // Call the update event
-                        onUpdate();
+                    // App deployed
+                    LoadingDialog.hide();
+                },
 
-                        // App deployed
-                        LoadingDialog.hide();
-                    },
+                // Error
+                () => {
+                    // Error deploying the app
+                    // TODO - Show an error
+                    // Call the update event
+                    onUpdate();
 
-                    // Error
-                    () => {
-                        // Error deploying the app
-                        // TODO - Show an error
-                        // Call the update event
-                        onUpdate();
-
-                        // App deployed
-                        LoadingDialog.hide();
-                    }
-                );
-            });
+                    // App deployed
+                    LoadingDialog.hide();
+                }
+            );
         });
     }
 

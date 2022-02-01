@@ -1,5 +1,5 @@
 import { Documents, LoadingDialog } from "dattatable";
-import { Components } from "gd-sprest-bs";
+import { Components, ContextInfo, Web } from "gd-sprest-bs";
 import { appIndicator } from "gd-sprest-bs/build/icons/svgs/appIndicator";
 import { caretRightFill } from "gd-sprest-bs/build/icons/svgs/caretRightFill";
 import { chatSquareDots } from "gd-sprest-bs/build/icons/svgs/chatSquareDots";
@@ -332,13 +332,16 @@ export class App {
                                 });
 
                                 // Add a sync to Teams button
+                                let btnTeams: Components.IButton = null;
                                 tooltips.push({
                                     content: "Deploys the solution to Teams.",
                                     btnProps: {
+                                        assignTo: btn => { btnTeams = btn; },
                                         text: "Deploy to Teams",
                                         iconClassName: "me-1",
                                         iconSize: 20,
                                         //iconType: trash,
+                                        isDisabled: true,
                                         isSmall: true,
                                         type: Components.ButtonTypes.OutlineWarning,
                                         onClick: () => {
@@ -349,6 +352,21 @@ export class App {
                                             });
                                         }
                                     }
+                                });
+
+                                // Load the context of the app catalog
+                                ContextInfo.getWeb(DataSource.Configuration.tenantAppCatalogUrl).execute(context => {
+                                    let requestDigest = context.GetContextWebInformation.FormDigestValue;
+                                    let web = Web(DataSource.Configuration.tenantAppCatalogUrl, { requestDigest });
+
+                                    // Ensure this app can be deployed to the tenant
+                                    web.TenantAppCatalog().solutionContainsTeamsComponent(app.ID).execute((resp: any) => {
+                                        // See if we can deploy this app to teams
+                                        if (resp.SolutionContainsTeamsComponent) {
+                                            // Enable the button
+                                            btnTeams.enable();
+                                        }
+                                    });
                                 });
                             } else {
                                 // Deploy
