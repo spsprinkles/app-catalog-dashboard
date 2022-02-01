@@ -330,6 +330,26 @@ export class App {
                                         }
                                     }
                                 });
+
+                                // Add a sync to Teams button
+                                tooltips.push({
+                                    content: "Deploys the solution to Teams.",
+                                    btnProps: {
+                                        text: "Deploy to Teams",
+                                        iconClassName: "me-1",
+                                        iconSize: 20,
+                                        //iconType: trash,
+                                        isSmall: true,
+                                        type: Components.ButtonTypes.OutlineWarning,
+                                        onClick: () => {
+                                            // Deploy the app
+                                            this._forms.deployToTeams(DataSource.DocSetItem, () => {
+                                                // Refresh the page
+                                                window.location.reload();
+                                            });
+                                        }
+                                    }
+                                });
                             } else {
                                 // Deploy
                                 tooltips.push({

@@ -222,6 +222,47 @@ export class AppForms {
         });
     }
 
+    // Deploys the solution to teams
+    deployToTeams(item: IAppItem, onUpdate: () => void) {
+        // Show a loading dialog
+        LoadingDialog.setHeader("Deploying to Teams");
+        LoadingDialog.setBody("Syncing the app to Teams.");
+        LoadingDialog.show();
+
+        // Get the package file
+        DataSource.DocSetItem.Folder().Files().execute(files => {
+            let catalogUrl = DataSource.Configuration.tenantAppCatalogUrl;
+
+            // Load the context of the app catalog
+            ContextInfo.getWeb(catalogUrl).execute(context => {
+                let requestDigest = context.GetContextWebInformation.FormDigestValue;
+
+                // Sync the app with Teams
+                Web(catalogUrl, { requestDigest }).TenantAppCatalog().syncSolutionToTeams(item.Id).execute(
+                    // Success
+                    () => {
+                        // Call the update event
+                        onUpdate();
+
+                        // App deployed
+                        LoadingDialog.hide();
+                    },
+
+                    // Error
+                    () => {
+                        // Error deploying the app
+                        // TODO - Show an error
+                        // Call the update event
+                        onUpdate();
+
+                        // App deployed
+                        LoadingDialog.hide();
+                    }
+                );
+            });
+        });
+    }
+
     // Edit form
     edit(itemId: number, onUpdate: () => void) {
         // Set the form properties
