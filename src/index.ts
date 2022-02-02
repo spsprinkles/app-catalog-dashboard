@@ -35,8 +35,13 @@ const GlobalVariable = {
                 let elApps = el.querySelector("#apps") as HTMLElement;
                 let elAppDetails = el.querySelector("#app-details") as HTMLElement;
 
+                // Ensure the security groups exist
+                if (DataSource.ApproverGroup == null || DataSource.DevGroup == null) {
+                    // See if an install is required
+                    DataSource.InstallRequired();
+                }
                 // Ensure the user is not an approver or developer
-                if (DataSource.ApproverGroup != null && !DataSource.IsApprover && DataSource.DevGroup != null && !DataSource.IsDeveloper) {
+                if (!DataSource.IsApprover && !DataSource.IsDeveloper) {
                     // Show the user agreement
                     new UserAgreement();
                 }
