@@ -36,7 +36,7 @@ const GlobalVariable = {
                 let elAppDetails = el.querySelector("#app-details") as HTMLElement;
 
                 // Ensure the user is not an approver or developer
-                if (!DataSource.IsApprover && !DataSource.IsDeveloper) {
+                if (DataSource.ApproverGroup != null && !DataSource.IsApprover && DataSource.DevGroup != null && !DataSource.IsDeveloper) {
                     // Show the user agreement
                     new UserAgreement();
                 }
