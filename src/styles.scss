@@ -41,3 +41,27 @@
 #contentRow {
     padding-top: 0 !important;
 }
+/* Extend the Comments pane full width in a modern page */
+#CommentsWrapper > div:first-child {
+    max-width: none;
+    width: 100%;
+    div[data-sp-feature-tag="Comments"] {
+        max-width: none;
+        padding: 0 24px 20px;
+    }
+    div[data-sp-feature-tag="Comments"]::before {
+        margin: 10px 0 0 0;
+    }
+}
+/* Extend the WebPart full width in a modern page */
+#spPageCanvasContent div.CanvasZone > div:first-child {
+    max-width: none;
+    div.ControlZone {
+        margin: 24px 0 0 0;
+        padding: 0;
+    }
+}
+/* Hide the page title in a modern page */
+div.webPartContainer {
+    display: none;
+}
