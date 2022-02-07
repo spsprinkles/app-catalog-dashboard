@@ -403,8 +403,10 @@ export class App {
                         tooltipPlacement: Components.TooltipPlacements.Right,
                         tooltips
                     });
+
                     // Fix weird alignment issue
-                    (ttg.el.querySelector("button:first-child") as HTMLButtonElement).style.marginLeft = "-1px";
+                    let elButton = ttg.el.querySelector("button:first-child") as HTMLButtonElement;
+                    elButton ? elButton.style.marginLeft = "-1px" : null;
                 }
             }]
         });
