@@ -409,6 +409,7 @@ export class AppDashboard {
                             tooltips.push({
                                 content: "View app details",
                                 btnProps: {
+                                    data: item,
                                     text: "Details",
                                     className: "p-1",
                                     iconClassName: "me-1",
@@ -431,7 +432,7 @@ export class AppDashboard {
                                             while (this._elAppDetails.firstChild) { this._elAppDetails.removeChild(this._elAppDetails.firstChild); }
 
                                             // Set the body
-                                            new App(this._elAppDetails, this._el);
+                                            new App(this._elAppDetails, this._el, item.Id);
 
                                             // Hide the apps
                                             this._el.style.display = "none";

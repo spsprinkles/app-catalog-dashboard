@@ -22,7 +22,7 @@ export class App {
     private _forms: AppForms = null;
 
     // Constructor
-    constructor(el: HTMLElement, elDashboard?: HTMLElement) {
+    constructor(el: HTMLElement, elDashboard?: HTMLElement, docSetId?: number) {
         // Set the global variables
         this._el = el;
         this._elDashboard = elDashboard;
@@ -48,7 +48,7 @@ export class App {
         this.renderActions();
 
         // Render the documents
-        this.renderDocuments();
+        this.renderDocuments(docSetId);
     }
 
     // Redirects to the dashboard
@@ -413,7 +413,7 @@ export class App {
     }
 
     // Renders the documents
-    private renderDocuments() {
+    private renderDocuments(docSetId?: number) {
         // Render the documents
         new Documents({
             el: this._el.querySelector("#app-docs"),
