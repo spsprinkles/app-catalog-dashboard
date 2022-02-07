@@ -413,12 +413,12 @@ export class App {
     }
 
     // Renders the documents
-    private renderDocuments(docSetId?: number) {
+    private renderDocuments(docSetId: number = DataSource.DocSetItemId) {
         // Render the documents
         new Documents({
             el: this._el.querySelector("#app-docs"),
             listName: Strings.Lists.Apps,
-            docSetId: DataSource.DocSetItemId,
+            docSetId,
             templatesUrl: DataSource.Configuration.templatesLibraryUrl,
             webUrl: Strings.SourceUrl,
             onActionsRendered: (el, col, file) => {
