@@ -98,8 +98,8 @@ export class App {
                 onRender: el => {
                     let tooltips: Components.ITooltipProps[] = [];
 
-                    // See if the user can edit
-                    if (canEdit) {
+                    // See if we can edit and hasn't been submitted
+                    if (canEdit && (DataSource.DocSetItem.DevAppStatus == "Draft" || DataSource.DocSetItem.DevAppStatus == "Requires Attention")) {
                         // Edit Properties
                         tooltips.push({
                             content: "Displays the edit form to update the app properties.",
@@ -119,10 +119,7 @@ export class App {
                                 }
                             }
                         });
-                    }
 
-                    // See if this is an owner
-                    if ((DataSource.DocSetItem.DevAppStatus == "Draft" || DataSource.DocSetItem.DevAppStatus == "Requires Attention") && Common.canEdit(DataSource.DocSetItem)) {
                         // Submit
                         tooltips.push({
                             content: "Submit the app for review",
