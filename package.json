@@ -25,13 +25,13 @@
     "datatables.net": "^1.11.4",
     "datatables.net-bs5": "^1.11.4",
     "dattatable": "^1.6.4",
-    "gd-sprest-bs": "^9.0.6",
+    "gd-sprest-bs": "^9.0.9",
     "jquery": "^3.6.0",
     "jszip": "^3.7.1",
     "moment": "^2.29.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.16.12",
+    "@babel/core": "^7.17.2",
     "@babel/preset-env": "^7.16.11",
     "@types/datatables.net": "^1.10.21",
     "@types/jquery": "^3.5.13",

@@ -304,6 +304,12 @@ export class AppForms {
                         // Make it read-only
                         ctrl.isReadonly = true;
                     }
+
+                    // See if this is a url field
+                    if (field.InternalName.indexOf("URL") > 0) {
+                        // Hide the description field
+                        (ctrl as Components.IFormControlUrlProps).showDescription = false;
+                    }
                 }
 
                 // Return the properties
