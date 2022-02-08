@@ -253,27 +253,30 @@ export class DataSource {
                 this.loadApproverGroup().then(() => {
                     // Load the developers group
                     this.loadDevGroup().then(() => {
-                        // Load the site collection apps
-                        this.loadSiteCollectionApps().then(() => {
-                            // Load the tenant apps
-                            this.loadTenantApps().then(() => {
-                                // See if this is a document set item and not teams
-                                if (!Strings.IsTeams && this.DocSetItemId > 0) {
-                                    // Load the document set item
-                                    this.loadDocSet().then(() => {
-                                        // Resolve the request
-                                        resolve();
-                                    }, reject);
-                                } else {
-                                    // Load the data
-                                    this.load().then(() => {
-                                        // Load the status filters
-                                        this.loadStatusFilters().then(() => {
+                        // Load the owners group
+                        this.loadOwnerGroup().then(() => {
+                            // Load the site collection apps
+                            this.loadSiteCollectionApps().then(() => {
+                                // Load the tenant apps
+                                this.loadTenantApps().then(() => {
+                                    // See if this is a document set item and not teams
+                                    if (!Strings.IsTeams && this.DocSetItemId > 0) {
+                                        // Load the document set item
+                                        this.loadDocSet().then(() => {
                                             // Resolve the request
                                             resolve();
                                         }, reject);
-                                    }, reject);
-                                }
+                                    } else {
+                                        // Load the data
+                                        this.load().then(() => {
+                                            // Load the status filters
+                                            this.loadStatusFilters().then(() => {
+                                                // Resolve the request
+                                                resolve();
+                                            }, reject);
+                                        }, reject);
+                                    }
+                                }, reject);
                             }, reject);
                         }, reject);
                     }, reject);
@@ -493,6 +496,41 @@ export class DataSource {
                     resolve();
                 }
             );
+        });
+    }
+
+    // Owner Security Group
+    private static _ownerGroup: Types.SP.GroupOData = null;
+    static get OwnerGroup(): Types.SP.GroupOData { return this._ownerGroup; }
+    static get IsOwner(): boolean {
+        // See if the group doesn't exist
+        if (this.OwnerGroup == null) { return false; }
+
+        // Parse the group
+        for (let i = 0; i < this.OwnerGroup.Users.results.length; i++) {
+            // See if this is the current user
+            if (this.OwnerGroup.Users.results[i].Id == ContextInfo.userId) {
+                // Found
+                return true;
+            }
+        }
+
+        // Return false by default
+        return false;
+    }
+    private static loadOwnerGroup(): PromiseLike<void> {
+        // Return a promise
+        return new Promise((resolve) => {
+            // Load the security group
+            Web(Strings.SourceUrl).AssociatedOwnerGroup().query({
+                Expand: ["Users"]
+            }).execute(group => {
+                // Set the group
+                this._ownerGroup = group;
+
+                // Resolve the request
+                resolve();
+            }, resolve as any);
         });
     }
 }

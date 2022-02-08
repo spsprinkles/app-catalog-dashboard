@@ -57,9 +57,9 @@ export class AppDashboard {
 
     // Renders the dashboard
     private render() {
-        // See if this is an approver
+        // See if this is an owner
         let navLinks: Components.INavbarItem[] = [];
-        if (DataSource.IsApprover) {
+        if (DataSource.IsOwner) {
             // Set the admin buttons
             navLinks.push({
                 className: "btn-outline-light ms-2 pt-1",
