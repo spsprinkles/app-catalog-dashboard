@@ -820,6 +820,9 @@ export class AppForms {
                                 LoadingDialog.setHeader("Updating Metadata");
                                 LoadingDialog.setBody("Saving the package information...");
 
+                                // Default the owner to the current user
+                                data["OwnersId"] = { results: [ContextInfo.userId] } as any;
+
                                 // Update the metadata
                                 item.update(data).execute(() => {
                                     // Execute the update event
