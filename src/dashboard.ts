@@ -299,14 +299,6 @@ export class AppDashboard {
                         title: "Version"
                     },
                     {
-                        name: "",
-                        title: "Enabled",
-                        onRenderCell: (el, column, item: IAppItem) => {
-                            // Set the text
-                            el.innerText = item.IsAppPackageEnabled ? "Yes" : "No";
-                        }
-                    },
-                    {
                         name: "DevAppStatus",
                         title: "Status",
                         onRenderCell: (el, column, item: IAppItem) => {

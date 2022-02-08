@@ -475,8 +475,7 @@ export class App {
                                 includeFields: [
                                     "SharePointAppCategory",
                                     "AppProductID",
-                                    "AppVersion",
-                                    "IsAppPackageEnabled"
+                                    "AppVersion"
                                 ]
                             });
                         }
