@@ -242,7 +242,7 @@ export class AppDashboard {
                     dom: 'rt<"row"<"col-sm-4"l><"col-sm-4"i><"col-sm-4"p>>',
                     columnDefs: [
                         {
-                            targets: [0, 7],
+                            targets: [0, 6],
                             orderable: false,
                             searchable: false
                         }
