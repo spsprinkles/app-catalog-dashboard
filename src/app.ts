@@ -188,7 +188,7 @@ export class App {
                     }
 
                     // Ensure we are not in a draft state, and see if the site app catalog exists
-                    if (DataSource.DocSetItem.DevAppStatus != "Draft" && DataSource.SiteCollectionAppCatalogExists) {
+                    if (DataSource.IsSiteAppCatalogOwner && DataSource.DocSetItem.DevAppStatus != "Draft" && DataSource.SiteCollectionAppCatalogExists) {
                         // See if the app is not in the site app catalog
                         let app = DataSource.getSiteCollectionAppById(DataSource.DocSetItem.AppProductID);
 
@@ -304,88 +304,92 @@ export class App {
                                 }
                             });
                         }
-                        // Else, see if the app is approved
-                        else if (DataSource.DocSetItem.DevAppStatus == "Approved") {
-                            // See if the app is deployed
-                            if (app && app.Deployed) {
-                                // Retract
-                                tooltips.push({
-                                    content: "Retracts the solution from the tenant app catalog.",
-                                    btnProps: {
-                                        text: "Retract from Tenant",
-                                        iconClassName: "me-1",
-                                        iconSize: 20,
-                                        //iconType: trash,
-                                        isSmall: true,
-                                        type: Components.ButtonTypes.OutlineDanger,
-                                        onClick: () => {
-                                            // Retract the app
-                                            this._forms.retract(DataSource.DocSetItem, true, () => {
-                                                // Refresh the page
-                                                window.location.reload();
-                                            });
-                                        }
+                    }
+
+                    // See if this is a tenant app catalog and the app is approved
+                    if (DataSource.IsTenantAppCatalogOwner && DataSource.DocSetItem.DevAppStatus == "Approved") {
+                        // See if the app is not in the tenant app catalog
+                        let app = DataSource.getTenantAppById(DataSource.DocSetItem.AppProductID);
+
+                        // See if the app is deployed
+                        if (app && app.Deployed) {
+                            // Retract
+                            tooltips.push({
+                                content: "Retracts the solution from the tenant app catalog.",
+                                btnProps: {
+                                    text: "Retract from Tenant",
+                                    iconClassName: "me-1",
+                                    iconSize: 20,
+                                    //iconType: trash,
+                                    isSmall: true,
+                                    type: Components.ButtonTypes.OutlineDanger,
+                                    onClick: () => {
+                                        // Retract the app
+                                        this._forms.retract(DataSource.DocSetItem, true, () => {
+                                            // Refresh the page
+                                            window.location.reload();
+                                        });
+                                    }
+                                }
+                            });
+
+                            // Add a sync to Teams button
+                            let btnTeams: Components.IButton = null;
+                            tooltips.push({
+                                content: "Deploys the solution to Teams.",
+                                btnProps: {
+                                    assignTo: btn => { btnTeams = btn; },
+                                    text: "Deploy to Teams",
+                                    iconClassName: "me-1",
+                                    iconSize: 20,
+                                    //iconType: trash,
+                                    isDisabled: true,
+                                    isSmall: true,
+                                    type: Components.ButtonTypes.OutlineWarning,
+                                    onClick: () => {
+                                        // Deploy the app
+                                        this._forms.deployToTeams(DataSource.DocSetItem, () => {
+                                            // Refresh the page
+                                            window.location.reload();
+                                        });
+                                    }
+                                }
+                            });
+
+                            // Load the context of the app catalog
+                            ContextInfo.getWeb(DataSource.Configuration.tenantAppCatalogUrl).execute(context => {
+                                let requestDigest = context.GetContextWebInformation.FormDigestValue;
+                                let web = Web(DataSource.Configuration.tenantAppCatalogUrl, { requestDigest });
+
+                                // Ensure this app can be deployed to the tenant
+                                web.TenantAppCatalog().solutionContainsTeamsComponent(app.ID).execute((resp: any) => {
+                                    // See if we can deploy this app to teams
+                                    if (resp.SolutionContainsTeamsComponent) {
+                                        // Enable the button
+                                        btnTeams.enable();
                                     }
                                 });
-
-                                // Add a sync to Teams button
-                                let btnTeams: Components.IButton = null;
-                                tooltips.push({
-                                    content: "Deploys the solution to Teams.",
-                                    btnProps: {
-                                        assignTo: btn => { btnTeams = btn; },
-                                        text: "Deploy to Teams",
-                                        iconClassName: "me-1",
-                                        iconSize: 20,
-                                        //iconType: trash,
-                                        isDisabled: true,
-                                        isSmall: true,
-                                        type: Components.ButtonTypes.OutlineWarning,
-                                        onClick: () => {
-                                            // Deploy the app
-                                            this._forms.deployToTeams(DataSource.DocSetItem, () => {
-                                                // Refresh the page
-                                                window.location.reload();
-                                            });
-                                        }
+                            });
+                        } else {
+                            // Deploy
+                            tooltips.push({
+                                content: "Deploys the solution to the tenant app catalog.",
+                                btnProps: {
+                                    text: "Deploy to Tenant",
+                                    iconClassName: "me-1",
+                                    iconSize: 20,
+                                    //iconType: trash,
+                                    isSmall: true,
+                                    type: Components.ButtonTypes.OutlineWarning,
+                                    onClick: () => {
+                                        // Deploy the app
+                                        this._forms.deploy(DataSource.DocSetItem, true, () => {
+                                            // Refresh the page
+                                            window.location.reload();
+                                        });
                                     }
-                                });
-
-                                // Load the context of the app catalog
-                                ContextInfo.getWeb(DataSource.Configuration.tenantAppCatalogUrl).execute(context => {
-                                    let requestDigest = context.GetContextWebInformation.FormDigestValue;
-                                    let web = Web(DataSource.Configuration.tenantAppCatalogUrl, { requestDigest });
-
-                                    // Ensure this app can be deployed to the tenant
-                                    web.TenantAppCatalog().solutionContainsTeamsComponent(app.ID).execute((resp: any) => {
-                                        // See if we can deploy this app to teams
-                                        if (resp.SolutionContainsTeamsComponent) {
-                                            // Enable the button
-                                            btnTeams.enable();
-                                        }
-                                    });
-                                });
-                            } else {
-                                // Deploy
-                                tooltips.push({
-                                    content: "Deploys the solution to the tenant app catalog.",
-                                    btnProps: {
-                                        text: "Deploy to Tenant",
-                                        iconClassName: "me-1",
-                                        iconSize: 20,
-                                        //iconType: trash,
-                                        isSmall: true,
-                                        type: Components.ButtonTypes.OutlineWarning,
-                                        onClick: () => {
-                                            // Deploy the app
-                                            this._forms.deploy(DataSource.DocSetItem, true, () => {
-                                                // Refresh the page
-                                                window.location.reload();
-                                            });
-                                        }
-                                    }
-                                });
-                            }
+                                }
+                            });
                         }
                     }
 
