@@ -414,7 +414,7 @@ export class DataSource {
             // See if the app catalog is defined
             if (this.Configuration.appCatalogUrl) {
                 // Ensure the user is an owner of the site
-                Web(Strings.SourceUrl).AssociatedOwnerGroup().Users().getById(ContextInfo.userId).execute(user => {
+                Web(this.Configuration.appCatalogUrl).AssociatedOwnerGroup().Users().getById(ContextInfo.userId).execute(user => {
                     // Ensure the user is an owner
                     if (user && user.Id > 0) {
                         // Set the flag
@@ -475,14 +475,14 @@ export class DataSource {
             // See if the app catalog is defined
             if (this.Configuration.appCatalogUrl) {
                 // Ensure the user is an owner of the site
-                Web(Strings.SourceUrl).AssociatedOwnerGroup().Users().getById(ContextInfo.userId).execute(user => {
+                Web(this.Configuration.appCatalogUrl).AssociatedOwnerGroup().Users().getById(ContextInfo.userId).execute(user => {
                     // Ensure the user is an owner
                     if (user && user.Id > 0) {
                         // Set the flag
                         this._isTenantAppCatalogOwner = true;
 
                         // Load the available apps
-                        Web(Strings.SourceUrl).TenantAppCatalog().AvailableApps().execute(apps => {
+                        Web(this.Configuration.appCatalogUrl).TenantAppCatalog().AvailableApps().execute(apps => {
                             // Set the apps
                             this._tenantApps = apps.results;
 
