@@ -24,7 +24,7 @@
   "dependencies": {
     "datatables.net": "^1.11.4",
     "datatables.net-bs5": "^1.11.4",
-    "dattatable": "^1.6.3",
+    "dattatable": "^1.6.4",
     "gd-sprest-bs": "^9.0.6",
     "jquery": "^3.6.0",
     "jszip": "^3.7.1",
@@ -36,7 +36,7 @@
     "@types/datatables.net": "^1.10.21",
     "@types/jquery": "^3.5.13",
     "babel-loader": "^8.2.3",
-    "css-loader": "^6.5.1",
+    "css-loader": "^6.6.0",
     "html-loader": "^3.1.0",
     "moment-locales-webpack-plugin": "^1.2.0",
     "node-sass": "^7.0.1",
