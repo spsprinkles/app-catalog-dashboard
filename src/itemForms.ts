@@ -295,7 +295,7 @@ export class AppForms {
             },
             onCreateEditForm: props => {
                 // Exclude fields
-                props.excludeFields = ["DevAppStatus"];
+                props.excludeFields = ["DevAppStatus", "IsAppPackageEnabled", "IsDefaultAppMetadataLocale"];
 
                 // Update the field
                 props.onControlRendering = (ctrl, field) => {

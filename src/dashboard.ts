@@ -42,7 +42,7 @@ export class AppDashboard {
         LoadingDialog.setHeader("Refreshing the Data");
         LoadingDialog.setBody("This will close after the data is loaded.");
 
-        // Load the events
+        // Load the apps
         DataSource.init().then(() => {
             // Clear the element
             while (this._el.firstChild) { this._el.removeChild(this._el.firstChild); }
@@ -118,7 +118,7 @@ export class AppDashboard {
             filters: {
                 items: [
                     {
-                        header: "Event Status",
+                        header: "App Status",
                         items: DataSource.StatusFilters,
                         onFilter: (value: string) => {
                             // Filter the dashboard
@@ -242,7 +242,7 @@ export class AppDashboard {
                     dom: 'rt<"row"<"col-sm-4"l><"col-sm-4"i><"col-sm-4"p>>',
                     columnDefs: [
                         {
-                            targets: [0, 7],
+                            targets: [0, 6],
                             orderable: false,
                             searchable: false
                         }
@@ -297,14 +297,6 @@ export class AppDashboard {
                     {
                         name: "AppVersion",
                         title: "Version"
-                    },
-                    {
-                        name: "",
-                        title: "Enabled",
-                        onRenderCell: (el, column, item: IAppItem) => {
-                            // Set the text
-                            el.innerText = item.IsAppPackageEnabled ? "Yes" : "No";
-                        }
                     },
                     {
                         name: "DevAppStatus",

@@ -472,8 +472,7 @@ export class App {
                                 includeFields: [
                                     "SharePointAppCategory",
                                     "AppProductID",
-                                    "AppVersion",
-                                    "IsAppPackageEnabled"
+                                    "AppVersion"
                                 ]
                             });
                         }
@@ -533,10 +532,10 @@ export class App {
                     elNavInfo.classList.remove("d-none");
 
                     crumb.setItems([
-                        //{ text: "App Dashboard", href: Strings.DashboardUrl, className: "pe-auto" },
                         {
                             text: "App Dashboard",
                             className: "pe-auto",
+                            href: "#",
                             onClick: () => {
                                 // Redirect to the app dashboard
                                 this.redirectToDashboard();
@@ -590,6 +589,7 @@ export class App {
                 {
                     text: "App Dashboard",
                     className: "pe-auto",
+                    href: "#",
                     onClick: () => {
                         // Redirect to the app dashboard
                         this.redirectToDashboard();
