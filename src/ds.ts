@@ -391,6 +391,8 @@ export class DataSource {
     }
 
     // Site Collection Apps
+    private static _isSiteAppCatalogOwner = false;
+    static get IsSiteAppCatalogOwner(): boolean { return this._isSiteAppCatalogOwner; }
     private static _siteCollectionApps: Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata[] = null;
     static get SiteCollectionAppCatalogExists(): boolean { return this._siteCollectionApps != null; }
     static get SiteCollectionApps(): Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata[] { return this._siteCollectionApps; }
@@ -411,24 +413,39 @@ export class DataSource {
         return new Promise((resolve) => {
             // See if the app catalog is defined
             if (this.Configuration.appCatalogUrl) {
-                // Get the app catalog list items
-                Web(this.Configuration.appCatalogUrl).SiteCollectionAppCatalog().AvailableApps().execute(
-                    // Success
-                    apps => {
-                        // Set the app items
-                        this._siteCollectionApps = apps.results;
+                // Ensure the user is an owner of the site
+                Web(Strings.SourceUrl).AssociatedOwnerGroup().Users().getById(ContextInfo.userId).execute(user => {
+                    // Ensure the user is an owner
+                    if (user && user.Id > 0) {
+                        // Set the flag
+                        this._isSiteAppCatalogOwner = true;
 
-                        // Resolve the request
-                        resolve();
-                    },
+                        // Load the available apps
+                        Web(this.Configuration.appCatalogUrl).SiteCollectionAppCatalog().AvailableApps().execute(apps => {
+                            // Set the apps
+                            this._siteCollectionApps = apps.results;
 
-                    // Error
-                    () => {
-                        // Resolve the request
-                        resolve();
+                            // Resolve the request
+                            resolve();
+                        }, () => {
+                            // No access to the tenant app catalog
+                            this._siteCollectionApps = [];
+
+                            // Resolve the request
+                            resolve();
+                        });
                     }
-                );
+                }, () => {
+                    // Default the tenant apps
+                    this._siteCollectionApps = [];
+
+                    // Resolve the request
+                    resolve();
+                });
             } else {
+                // Default the tenant apps
+                this._siteCollectionApps = [];
+
                 // Resolve the request
                 resolve();
             }
@@ -436,6 +453,8 @@ export class DataSource {
     }
 
     // Tenant Apps
+    private static _isTenantAppCatalogOwner = false;
+    static get IsTenantAppCatalogOwner(): boolean { return this._isTenantAppCatalogOwner; }
     private static _tenantApps: Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata[] = null;
     static get TenantApps(): Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata[] { return this._tenantApps; }
     static getTenantAppById(appId: string): Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata {
@@ -453,20 +472,44 @@ export class DataSource {
     static loadTenantApps(): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve, reject) => {
-            // Load the available apps
-            Web(Strings.SourceUrl).TenantAppCatalog().AvailableApps().execute(apps => {
-                // Set the apps
-                this._tenantApps = apps.results;
+            // See if the app catalog is defined
+            if (this.Configuration.appCatalogUrl) {
+                // Ensure the user is an owner of the site
+                Web(Strings.SourceUrl).AssociatedOwnerGroup().Users().getById(ContextInfo.userId).execute(user => {
+                    // Ensure the user is an owner
+                    if (user && user.Id > 0) {
+                        // Set the flag
+                        this._isTenantAppCatalogOwner = true;
 
-                // Resolve the request
-                resolve();
-            }, () => {
-                // No access to the tenant app catalog
+                        // Load the available apps
+                        Web(Strings.SourceUrl).TenantAppCatalog().AvailableApps().execute(apps => {
+                            // Set the apps
+                            this._tenantApps = apps.results;
+
+                            // Resolve the request
+                            resolve();
+                        }, () => {
+                            // No access to the tenant app catalog
+                            this._tenantApps = [];
+
+                            // Resolve the request
+                            resolve();
+                        });
+                    }
+                }, () => {
+                    // Default the tenant apps
+                    this._tenantApps = [];
+
+                    // Resolve the request
+                    resolve();
+                });
+            } else {
+                // Default the tenant apps
                 this._tenantApps = [];
 
                 // Resolve the request
                 resolve();
-            });
+            }
         });
     }
 
