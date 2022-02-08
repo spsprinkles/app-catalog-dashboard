@@ -1,4 +1,4 @@
-import { ContextInfo } from "gd-sprest-bs";
+import { ContextInfo, Helper } from "gd-sprest-bs";
 
 /**
  * Global Constants
@@ -13,6 +13,9 @@ export const setContext = (context, sourceUrl?: string) => {
     // Set the page context
     SPFxContext = context;
     ContextInfo.setPageContext(SPFxContext.pageContext);
+
+    // Load the default scripts
+    Helper.loadSPCore();
 
     // Set the teams flag
     Strings.IsTeams = SPFxContext.sdks.microsoftTeams ? true : false;
