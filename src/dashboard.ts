@@ -42,7 +42,7 @@ export class AppDashboard {
         LoadingDialog.setHeader("Refreshing the Data");
         LoadingDialog.setBody("This will close after the data is loaded.");
 
-        // Load the events
+        // Load the apps
         DataSource.init().then(() => {
             // Clear the element
             while (this._el.firstChild) { this._el.removeChild(this._el.firstChild); }
@@ -118,7 +118,7 @@ export class AppDashboard {
             filters: {
                 items: [
                     {
-                        header: "Event Status",
+                        header: "App Status",
                         items: DataSource.StatusFilters,
                         onFilter: (value: string) => {
                             // Filter the dashboard
