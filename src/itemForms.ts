@@ -300,9 +300,31 @@ export class AppForms {
                 // Update the field
                 props.onControlRendering = (ctrl, field) => {
                     // See if this is a read-only field
-                    if (["AppProductID", "AppVersion", "FileLeafRef", "Title"].indexOf(field.InternalName) >= 0) {
+                    if (["AppAPIPermissions", "AppProductID", "AppVersion", "FileLeafRef", "Title"].indexOf(field.InternalName) >= 0) {
                         // Make it read-only
                         ctrl.isReadonly = true;
+                    }
+
+                    // See if this is the permissions justification
+                    if (field.InternalName == "AppPermissionsJustification") {
+                        // Add validation
+                        ctrl.onValidate = (ctrl, results) => {
+                            // See if permissions exist
+                            let apiPermissions = ItemForm.EditForm.getItem()["AppAPIPermissions"];
+                            if (apiPermissions) {
+                                // Set the flag
+                                results.isValid = (results.value || "").trim().length > 0;
+
+                                // Set the error message
+                                results.invalidMessage = "A justification is required if API permissions exist.";
+                            } else {
+                                // It's valid
+                                results.isValid = true;
+                            }
+
+                            // Return the results
+                            return results;
+                        }
                     }
 
                     // See if this is a url field
@@ -436,6 +458,10 @@ export class AppForms {
                         // Set the version
                         let elVersion = oDOM.documentElement.attributes["Version"];
                         if (elVersion) { metadata.AppVersion = elVersion.value; }
+
+                        // Set the permissions
+                        let elPermissions = oDOM.documentElement.querySelector("WebApiPermissionRequests");
+                        if (elPermissions) { metadata.AppAPIPermissions = elPermissions.innerHTML; }
 
                         // Set the product id
                         let elProductId = oDOM.documentElement.attributes["ProductID"];
@@ -827,7 +853,7 @@ export class AppForms {
                                 LoadingDialog.setBody("Saving the package information...");
 
                                 // Default the owner to the current user
-                                data["OwnersId"] = { results: [ContextInfo.userId] } as any;
+                                data["AppDevelopersId"] = { results: [ContextInfo.userId] } as any;
 
                                 // Update the metadata
                                 item.update(data).execute(() => {

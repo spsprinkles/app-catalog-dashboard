@@ -162,7 +162,7 @@ export class DataSource {
                 query: {
                     Expand: ["CheckoutUser", "Owners"],
                     Select: [
-                        "*", "Id", "FileLeafRef", "ContentTypeId", "CheckoutUser/Title", "Owners/Id", "Owners/EMail"
+                        "*", "Id", "FileLeafRef", "ContentTypeId", "CheckoutUser/Title", "AppDevelopers/Id", "AppDevelopers/EMail"
                     ]
                 }
             }).then(info => {
@@ -353,10 +353,10 @@ export class DataSource {
         return new Promise((resolve, reject) => {
             // Load the list items
             Web(Strings.SourceUrl).Lists(Strings.Lists.Apps).Items().query({
-                Expand: ["CheckoutUser", "Folder", "Owners"],
+                Expand: ["AppDevelopers", "CheckoutUser", "Folder"],
                 Filter: "ContentType eq 'App'",
                 Select: [
-                    "*", "Id", "FileLeafRef", "ContentTypeId", "CheckoutUser/Title", "Owners/Id", "Owners/EMail"
+                    "*", "Id", "FileLeafRef", "ContentTypeId", "AppDevelopers/Id", "AppDevelopers/EMail", "CheckoutUser/Title"
                 ]
             }).execute(items => {
                 // Set the items
@@ -375,7 +375,7 @@ export class DataSource {
         // Return a promise
         return new Promise((resolve, reject) => {
             // Get the status field
-            Web(Strings.SourceUrl).Lists(Strings.Lists.Apps).Fields("DevAppStatus").execute((fld: Types.SP.FieldChoice) => {
+            Web(Strings.SourceUrl).Lists(Strings.Lists.Apps).Fields("AppStatus").execute((fld: Types.SP.FieldChoice) => {
                 let items: Components.ICheckboxGroupItem[] = [];
 
                 // Parse the choices

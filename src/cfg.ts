@@ -38,11 +38,11 @@ export const Configuration = Helper.SPConfig({
                         { Name: "AppStatus", ReadOnly: true },
                         { Name: "AppProductID", ReadOnly: true },
                         { Name: "AppVersion", ReadOnly: true },
-                        { Name: "AppAPIPermissions", ReadOnly: true },
                         "AppPublisher",
                         "AppDevelopers",
                         "AppDescription",
                         "AppJustification",
+                        { Name: "AppAPIPermissions", ReadOnly: true },
                         "AppPermissionsJustification"
                     ],
                     onCreated: () => {
@@ -105,9 +105,8 @@ export const Configuration = Helper.SPConfig({
                     name: "AppPermissionsJustification",
                     title: "Permissions Justification",
                     type: Helper.SPCfgFieldType.Note,
-                    description: "A meaningful description of the application purpose and what a user can expect from it.",
-                    allowDeletion: false,
-                    required: true
+                    description: "The justification for the web api permissions being requested.",
+                    allowDeletion: false
                 },
                 {
                     name: "AppPublisher",
@@ -136,9 +135,9 @@ export const Configuration = Helper.SPConfig({
                     name: "AppAPIPermissions",
                     title: "API Permission",
                     type: Helper.SPCfgFieldType.Note,
-                    description: "A meaningful description of the application purpose and what a user can expect from it.",
+                    description: "The web api permission requests for the application.",
                     allowDeletion: false,
-                    required: true
+                    showInNewForm: false
                 },
                 {
                     name: "AppProductID",
