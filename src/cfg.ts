@@ -35,25 +35,15 @@ export const Configuration = Helper.SPConfig({
                     ParentName: "Document Set",
                     FieldRefs: [
                         "FileLeafRef",
+                        { Name: "AppStatus", ReadOnly: true },
                         { Name: "AppProductID", ReadOnly: true },
                         { Name: "AppVersion", ReadOnly: true },
-                        "DevAppStatus",
-                        "SharePointAppCategory",
+                        { Name: "AppAPIPermissions", ReadOnly: true },
                         "AppPublisher",
-                        "AppShortDescription",
+                        "AppDevelopers",
                         "AppDescription",
-                        "Owners",
-                        "Sponsor",
-                        "AppSupportURL",
-                        "AppThumbnailURL",
-                        "AppImageURL1",
-                        "AppImageURL2",
-                        "AppImageURL3",
-                        "AppImageURL4",
-                        "AppImageURL5",
-                        "AppVideoURL",
-                        "IsAppPackageEnabled",
-                        { Name: "IsDefaultAppMetadataLocale", ReadOnly: true }
+                        "AppJustification",
+                        "AppPermissionsJustification"
                     ],
                     onCreated: () => {
                         // Get the list document set home page
@@ -73,6 +63,84 @@ export const Configuration = Helper.SPConfig({
             ],
             CustomFields: [
                 {
+                    name: "AppComments",
+                    title: "Comments",
+                    type: Helper.SPCfgFieldType.Note,
+                    allowDeletion: false,
+                    noteType: SPTypes.FieldNoteType.TextOnly,
+                    showInEditForm: false,
+                    showInNewForm: false,
+                    showInViewForms: false
+                } as Helper.IFieldInfoNote,
+                {
+                    name: "AppDescription",
+                    title: "Description",
+                    type: Helper.SPCfgFieldType.Note,
+                    description: "A meaningful description of the application purpose and what a user can expect from it.",
+                    allowDeletion: false,
+                    required: true
+                },
+                {
+                    name: "AppDevelopers",
+                    title: "Developers",
+                    type: Helper.SPCfgFieldType.User,
+                    allowDeletion: false,
+                    description: "The developer poc(s) of the application.",
+                    enforceUniqueValues: false,
+                    multi: true,
+                    required: true,
+                    selectionMode: SPTypes.FieldUserSelectionType.PeopleAndGroups,
+                    showField: "ImnName",
+                    sortable: false
+                } as Helper.IFieldInfoUser,
+                {
+                    name: "AppJustification",
+                    title: "Justification",
+                    type: Helper.SPCfgFieldType.Note,
+                    description: "A meaningful description of the application purpose and what a user can expect from it.",
+                    allowDeletion: false,
+                    required: true
+                },
+                {
+                    name: "AppPermissionsJustification",
+                    title: "Permissions Justification",
+                    type: Helper.SPCfgFieldType.Note,
+                    description: "A meaningful description of the application purpose and what a user can expect from it.",
+                    allowDeletion: false,
+                    required: true
+                },
+                {
+                    name: "AppPublisher",
+                    title: "App Owner",
+                    type: Helper.SPCfgFieldType.Text,
+                    description: "The organization/unit responsible for the application.",
+                    allowDeletion: false,
+                    required: true
+                },
+                {
+                    name: "AppStatus",
+                    title: "App Status",
+                    type: Helper.SPCfgFieldType.Choice,
+                    allowDeletion: false,
+                    defaultValue: "Missing Metadata",
+                    format: SPTypes.ChoiceFormatType.Dropdown,
+                    required: true,
+                    showInEditForm: false,
+                    showInNewForm: false,
+                    choices: [
+                        "Draft", "Submitted for Review", "In Review", "Requesting Approval", "Requires Attention", "Approved"
+                    ]
+                } as Helper.IFieldInfoChoice,
+                /** Fields extracted from the SPFx package */
+                {
+                    name: "AppAPIPermissions",
+                    title: "API Permission",
+                    type: Helper.SPCfgFieldType.Note,
+                    description: "A meaningful description of the application purpose and what a user can expect from it.",
+                    allowDeletion: false,
+                    required: true
+                },
+                {
                     name: "AppProductID",
                     title: "Product ID",
                     type: Helper.SPCfgFieldType.Guid,
@@ -86,83 +154,7 @@ export const Configuration = Helper.SPConfig({
                     allowDeletion: false,
                     showInNewForm: false
                 },
-                {
-                    name: "IsDefaultAppMetadataLocale",
-                    title: "Default Metadata Language",
-                    type: Helper.SPCfgFieldType.Boolean,
-                    allowDeletion: false,
-                    defaultValue: "1",
-                    showInNewForm: false
-                },
-                {
-                    name: "AppShortDescription",
-                    title: "Short Description",
-                    type: Helper.SPCfgFieldType.Text,
-                    allowDeletion: false,
-                    required: true
-                },
-                {
-                    name: "AppDescription",
-                    title: "Description",
-                    type: Helper.SPCfgFieldType.Note,
-                    allowDeletion: false,
-                    required: true
-                },
-                {
-                    name: "AppThumbnailURL",
-                    title: "Icon URL",
-                    type: Helper.SPCfgFieldType.Url,
-                    allowDeletion: false,
-                    description: "The URL to the app icon. The icon should have a width and height of 96 pixels.",
-                    format: SPTypes.UrlFormatType.Image,
-                    required: true
-                } as Helper.IFieldInfoUrl,
-                {
-                    name: "SharePointAppCategory",
-                    title: "Category",
-                    type: Helper.SPCfgFieldType.Choice,
-                    allowDeletion: false,
-                    fillInChoice: true
-                } as Helper.IFieldInfoChoice,
-                {
-                    name: "Sponsor",
-                    title: "Sponsor",
-                    type: Helper.SPCfgFieldType.User,
-                    allowDeletion: false,
-                    description: "What government poc is responsible for the application?",
-                    enforceUniqueValues: false,
-                    required: true,
-                    selectionMode: SPTypes.FieldUserSelectionType.PeopleAndGroups,
-                    showField: "ImnName",
-                    sortable: false
-                } as Helper.IFieldInfoUser,
-                {
-                    name: "Owners",
-                    title: "Owners",
-                    type: Helper.SPCfgFieldType.User,
-                    allowDeletion: false,
-                    description: "Who is allowed to make updates to this app?",
-                    enforceUniqueValues: false,
-                    multi: true,
-                    required: true,
-                    selectionMode: SPTypes.FieldUserSelectionType.PeopleAndGroups,
-                    showField: "ImnName",
-                    sortable: false
-                } as Helper.IFieldInfoUser,
-                {
-                    name: "AppPublisher",
-                    title: "Publisher",
-                    type: Helper.SPCfgFieldType.Text,
-                    allowDeletion: false,
-                    required: true
-                },
-                {
-                    name: "AppSupportURL",
-                    title: "Support URL",
-                    type: Helper.SPCfgFieldType.Url,
-                    allowDeletion: false,
-                    required: true
-                } as Helper.IFieldInfoUrl,
+                /** Fields required by the app catalog */
                 {
                     name: "AppImageURL1",
                     title: "Image URL 1",
@@ -206,12 +198,45 @@ export const Configuration = Helper.SPConfig({
                     format: SPTypes.UrlFormatType.Image,
                 } as Helper.IFieldInfoUrl,
                 {
+                    name: "AppSupportURL",
+                    title: "Support URL",
+                    type: Helper.SPCfgFieldType.Url,
+                    allowDeletion: false,
+                    required: true
+                } as Helper.IFieldInfoUrl,
+                {
+                    name: "AppThumbnailURL",
+                    title: "Icon URL",
+                    type: Helper.SPCfgFieldType.Url,
+                    allowDeletion: false,
+                    description: "The URL to the app icon. The icon should have a width and height of 96 pixels.",
+                    format: SPTypes.UrlFormatType.Image,
+                    required: true
+                } as Helper.IFieldInfoUrl,
+                {
                     name: "AppVideoURL",
                     title: "Video URL",
                     type: Helper.SPCfgFieldType.Url,
                     allowDeletion: false,
                     description: "A URL to a video file or web page with an embedded video."
                 } as Helper.IFieldInfoUrl,
+                /** Fields to remove */
+                {
+                    name: "AppShortDescription",
+                    title: "Short Description",
+                    type: Helper.SPCfgFieldType.Text,
+                    description: "A short description of the application.",
+                    allowDeletion: false,
+                    required: true
+                },
+                {
+                    name: "IsDefaultAppMetadataLocale",
+                    title: "Default Metadata Language",
+                    type: Helper.SPCfgFieldType.Boolean,
+                    allowDeletion: false,
+                    defaultValue: "1",
+                    showInNewForm: false
+                },
                 {
                     name: "IsAppPackageEnabled",
                     title: "Enabled",
@@ -220,29 +245,12 @@ export const Configuration = Helper.SPConfig({
                     defaultValue: "1"
                 },
                 {
-                    name: "AppComments",
-                    title: "Comments",
-                    type: Helper.SPCfgFieldType.Note,
-                    allowDeletion: false,
-                    noteType: SPTypes.FieldNoteType.TextOnly,
-                    showInEditForm: false,
-                    showInNewForm: false,
-                    showInViewForms: false
-                } as Helper.IFieldInfoNote,
-                {
-                    name: "DevAppStatus",
-                    title: "App Status",
+                    name: "SharePointAppCategory",
+                    title: "Category",
                     type: Helper.SPCfgFieldType.Choice,
                     allowDeletion: false,
-                    defaultValue: "Missing Metadata",
-                    format: SPTypes.ChoiceFormatType.Dropdown,
-                    required: true,
-                    showInEditForm: false,
-                    showInNewForm: false,
-                    choices: [
-                        "Draft", "Submitted for Review", "In Review", "Requesting Approval", "Requires Attention", "Approved"
-                    ]
-                } as Helper.IFieldInfoChoice
+                    fillInChoice: true
+                } as Helper.IFieldInfoChoice,
             ],
             ViewInformation: [{
                 ViewName: "All Documents",
