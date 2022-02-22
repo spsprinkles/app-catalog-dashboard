@@ -451,7 +451,6 @@ export class App {
             cards: [
                 {
                     body: [{
-                        title: "App Details",
                         onRender: el => {
                             // Render the properties
                             Components.ListForm.renderDisplayForm({
@@ -460,7 +459,8 @@ export class App {
                                 includeFields: [
                                     "FileLeafRef",
                                     "AppStatus",
-                                    "AppDevelopers"
+                                    "AppDevelopers",
+                                    "AppVersion"
                                 ]
                             });
                         }
@@ -474,9 +474,8 @@ export class App {
                                 info: DataSource.DocSetInfo,
                                 el,
                                 includeFields: [
-                                    "SharePointAppCategory",
                                     "AppProductID",
-                                    "AppVersion"
+                                    "AppAPIPermissions"
                                 ]
                             });
                         }

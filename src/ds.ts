@@ -160,9 +160,9 @@ export class DataSource {
                 contentType: "App",
                 webUrl: Strings.SourceUrl,
                 query: {
-                    Expand: ["CheckoutUser", "Owners"],
+                    Expand: ["AppDevelopers", "CheckoutUser"],
                     Select: [
-                        "*", "Id", "FileLeafRef", "ContentTypeId", "CheckoutUser/Title", "AppDevelopers/Id", "AppDevelopers/EMail"
+                        "*", "Id", "FileLeafRef", "ContentTypeId", "AppDevelopers/Id", "AppDevelopers/EMail", "CheckoutUser/Title"
                     ]
                 }
             }).then(info => {
