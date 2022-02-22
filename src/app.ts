@@ -99,7 +99,7 @@ export class App {
                     let tooltips: Components.ITooltipProps[] = [];
 
                     // See if we can edit and hasn't been submitted
-                    if (canEdit && (DataSource.DocSetItem.DevAppStatus == "Draft" || DataSource.DocSetItem.DevAppStatus == "Requires Attention")) {
+                    if (canEdit && (DataSource.DocSetItem.AppStatus == "Draft" || DataSource.DocSetItem.AppStatus == "Requires Attention")) {
                         // Edit Properties
                         tooltips.push({
                             content: "Displays the edit form to update the app properties.",
@@ -143,7 +143,7 @@ export class App {
                     }
 
                     // See if this app is in review and ensure this was not submitted by the user
-                    if (DataSource.DocSetItem.DevAppStatus.indexOf("Review") > 0 &&
+                    if (DataSource.DocSetItem.AppStatus.indexOf("Review") > 0 &&
                         (!Common.isSubmitter(DataSource.DocSetItem) || DataSource.IsApprover)) {
                         // Review button
                         tooltips.push(
@@ -188,7 +188,7 @@ export class App {
                     }
 
                     // Ensure we are not in a draft state, and see if the site app catalog exists
-                    if (DataSource.IsSiteAppCatalogOwner && DataSource.DocSetItem.DevAppStatus != "Draft" && DataSource.SiteCollectionAppCatalogExists) {
+                    if (DataSource.IsSiteAppCatalogOwner && DataSource.DocSetItem.AppStatus != "Draft" && DataSource.SiteCollectionAppCatalogExists) {
                         // See if the app is not in the site app catalog
                         let app = DataSource.getSiteCollectionAppById(DataSource.DocSetItem.AppProductID);
 
@@ -283,7 +283,7 @@ export class App {
                         });
 
                         // See if we are requesting approval
-                        if (DataSource.DocSetItem.DevAppStatus == "Requesting Approval") {
+                        if (DataSource.DocSetItem.AppStatus == "Requesting Approval") {
                             // Retract
                             tooltips.push({
                                 content: "Approves the application for deployment.",
@@ -307,7 +307,7 @@ export class App {
                     }
 
                     // See if this is a tenant app catalog and the app is approved
-                    if (DataSource.IsTenantAppCatalogOwner && DataSource.DocSetItem.DevAppStatus == "Approved") {
+                    if (DataSource.IsTenantAppCatalogOwner && DataSource.DocSetItem.AppStatus == "Approved") {
                         // See if the app is not in the tenant app catalog
                         let app = DataSource.getTenantAppById(DataSource.DocSetItem.AppProductID);
 
@@ -459,8 +459,8 @@ export class App {
                                 el,
                                 includeFields: [
                                     "FileLeafRef",
-                                    "DevAppStatus",
-                                    "Owners"
+                                    "AppStatus",
+                                    "AppDevelopers"
                                 ]
                             });
                         }

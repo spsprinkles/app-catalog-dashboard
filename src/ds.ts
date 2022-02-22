@@ -27,29 +27,33 @@ export interface IAppCatalogItem extends Types.SP.ListItem {
 
 // App Item
 export interface IAppItem extends Types.SP.ListItem {
+    AppAPIPermissions?: string;
     AppComments?: string;
     AppDescription: string;
+    AppDevelopers: { results: { Id: number; EMail: string; }[] };
+    AppDevelopersId: { results: number[] };
+    AppJustification: string;
+    AppPermissionsJustification: string;
+    AppProductID: string;
+    AppPublisher: string;
+    AppStatus: string;
+    AppVersion: string;
+    AuthorId: number;
+    FileLeafRef: string;
+
     AppImageURL1: Types.SP.FieldUrlValue;
     AppImageURL2: Types.SP.FieldUrlValue;
     AppImageURL3: Types.SP.FieldUrlValue;
     AppImageURL4: Types.SP.FieldUrlValue;
     AppImageURL5: Types.SP.FieldUrlValue;
-    AppProductID: string;
-    AppPublisher: string;
     AppShortDescription: string;
     AppSupportURL: Types.SP.FieldUrlValue;
     AppThumbnailURL: Types.SP.FieldUrlValue;
-    AppVersion: string;
     AppVideoURL: Types.SP.FieldUrlValue;
-    AuthorId: number;
     CheckoutUser: { Id: number; Title: string; };
     ContentTypeId: string;
-    DevAppStatus: string;
-    FileLeafRef: string;
     IsDefaultAppMetadataLocale: boolean;
     IsAppPackageEnabled: boolean;
-    Owners: { results: { Id: number; EMail: string; }[] };
-    OwnersId: { results: number[] };
     SharePointAppCategory: string;
 }
 

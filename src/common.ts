@@ -28,7 +28,7 @@ export function generateEmbeddedSVG(svg: SVGElement) {
 // Determines if the user is an owner
 export function isOwner(item: IAppItem) {
     // Determine if the user is an owner
-    return item.OwnersId ? item.OwnersId.results.indexOf(ContextInfo.userId) != -1 : false;
+    return item.AppDevelopersId ? item.AppDevelopersId.results.indexOf(ContextInfo.userId) != -1 : false;
 }
 
 // Determines if the user is a submitter

@@ -372,9 +372,9 @@ export class AppDashboard {
                     },
                     {
                         name: "",
-                        title: "Owners",
+                        title: "AppDevelopers",
                         onRenderCell: (el, column, item: IAppItem) => {
-                            var owners = item.Owners && item.Owners.results || [];
+                            var owners = item.AppDevelopers && item.AppDevelopers.results || [];
 
                             // Parse the owners
                             var strOwners = [];
@@ -464,7 +464,7 @@ export class AppDashboard {
                             }
 
                             // See if this is an owner
-                            if ((item.DevAppStatus == "Draft" || item.DevAppStatus == "Requires Attention") && canEdit) {
+                            if ((item.AppStatus == "Draft" || item.AppStatus == "Requires Attention") && canEdit) {
                                 // Submit button
                                 tooltips.push({
                                     content: "Submit app for review",
@@ -489,7 +489,7 @@ export class AppDashboard {
                             }
 
                             // Ensure this was not submitted by the user
-                            if (item.DevAppStatus.indexOf("Review") > 0 &&
+                            if (item.AppStatus.indexOf("Review") > 0 &&
                                 (!Common.isSubmitter(item) || DataSource.IsApprover)) {
                                 // Review button
                                 tooltips.push({

@@ -449,7 +449,7 @@ export class AppForms {
                         //Attribute: SkipFeatureDeployment="true" (not for add-ins)
 
                         // Update the status
-                        metadata.DevAppStatus = "Draft";
+                        metadata.AppStatus = "Draft";
 
                         // Resolve the request
                         resolve(metadata);
@@ -513,9 +513,9 @@ export class AppForms {
                             cc.push(DataSource.DevGroup.Users.results[i].Email);
                         }
 
-                        // Get the app owners
+                        // Get the app developers
                         let to = [];
-                        let owners = item.Owners && item.Owners.results ? item.Owners.results : [];
+                        let owners = item.AppDevelopers && item.AppDevelopers.results ? item.AppDevelopers.results : [];
                         for (let i = 0; i < owners.length; i++) {
                             // Append the email
                             to.push(owners[i].EMail);
@@ -676,7 +676,7 @@ export class AppForms {
                         props.RelatedAppId = item.Id;
 
                         // Update the status of the current item
-                        if (item.DevAppStatus == "Submitted for Review") {
+                        if (item.AppStatus == "Submitted for Review") {
                             // Update the status
                             item.update({
                                 DevAppStatus: "In Review"
@@ -727,9 +727,9 @@ export class AppForms {
                         to.push(DataSource.DevGroup.Users.results[i].Email);
                     }
 
-                    // Get the app owners
+                    // Get the app developers
                     let cc = [];
-                    let owners = item.Owners.results || [];
+                    let owners = item.AppDevelopers.results || [];
                     for (let i = 0; i < owners.length; i++) {
                         // Append the email
                         cc.push(owners[i].EMail);
