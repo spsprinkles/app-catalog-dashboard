@@ -57,8 +57,24 @@ export class AppForms {
         // Set the header
         Modal.setHeader("Approve App/Solution Package for Testing");
 
+        // Get the checklist
+        let elChecklist = document.createElement("ul");
+        let checklist = DataSource.Configuration.approvalChecklist || [];
+        if (checklist.length > 0) {
+            // Parse the items
+            for (let i = 0; i < checklist.length; i++) {
+                // Append the item
+                let elItem = document.createElement("li");
+                elItem.innerHTML = checklist[i];
+                elChecklist.appendChild(elItem);
+            }
+        }
+
         // Set the body
-        Modal.setBody("Are you sure you want to approve this app package for testing?");
+        let elBody = document.createElement("div");
+        elBody.innerHTML = "<p>Are you sure you want to approve this app package for testing?</p>"
+        elBody.appendChild(elChecklist);
+        Modal.setBody(elBody);
 
         // Render the footer
         Modal.setFooter(Components.Tooltip({
@@ -767,8 +783,24 @@ export class AppForms {
         // Set the header
         Modal.setHeader("Submit App for Approval");
 
+        // Get the checklist
+        let elChecklist = document.createElement("ul");
+        let checklist = DataSource.Configuration.submitChecklist || [];
+        if (checklist.length > 0) {
+            // Parse the items
+            for (let i = 0; i < checklist.length; i++) {
+                // Append the item
+                let elItem = document.createElement("li");
+                elItem.innerHTML = checklist[i];
+                elChecklist.appendChild(elItem);
+            }
+        }
+
         // Set the body
-        Modal.setBody("Are you sure you want to submit this app for approval?");
+        let elBody = document.createElement("div");
+        elBody.innerHTML = "<p>Are you sure you want to submit this app for approval?</p>"
+        elBody.appendChild(elChecklist);
+        Modal.setBody(elBody);
 
         // Set the footer
         Modal.setFooter(Components.Button({

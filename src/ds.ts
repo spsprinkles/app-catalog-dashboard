@@ -67,7 +67,9 @@ export interface IAssessmentItem extends Types.SP.ListItem {
 export interface IConfiguration {
     appCatalogAdminEmailGroup?: string;
     appCatalogUrl?: string;
+    approvalChecklist?: string[];
     helpPageUrl?: string;
+    submitChecklist?: string[];
     templatesLibraryUrl?: string;
     tenantAppCatalogUrl?: string;
 }

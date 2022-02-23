@@ -3,5 +3,21 @@
     "appCatalogUrl": "/sites/demo",
     "helpPageUrl": "~site/SitePages/Help.aspx",
     "templatesLibraryUrl": "~site/shared%20documents/templates",
-    "tenantAppCatalogUrl": "/sites/appcatalog"
+    "tenantAppCatalogUrl": "/sites/appcatalog",
+    "submitChecklist": [
+        "Application name is not generic and meaningful.",
+        "Application description is meaningful and gives a clear description of what the application purpose.",
+        "Justification for the application is descriptive.",
+        "Justification for custom API permissions is filled out, if needed.",
+        "App manifest is filled out correctly"
+    ],
+    "approvalChecklist": [
+        "Validation of the application name and description.",
+        "Reviewed the justification of the application.",
+        "Reviewed the justification of the application permissions.",
+        "Validation of unit/organization.",
+        "App manifest file submitted.",
+        "App source code submitted.",
+        "Validation of the application manifest content."
+    ]
 }
