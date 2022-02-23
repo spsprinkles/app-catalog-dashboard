@@ -247,6 +247,30 @@ export class DataSource {
         });
     }
 
+    // Loads the app test site
+    static loadTestSite(item: IAppItem): PromiseLike<Types.SP.Web> {
+        // Return a promise
+        return new Promise((resolve, reject) => {
+            // Get the url to the test site
+            let url = [this.Configuration.appCatalogUrl, item.AppProductID].join('/');
+
+            // Get the web
+            Web(url).execute(
+                // Success
+                web => {
+                    // Resolve the request
+                    resolve(web);
+                },
+
+                // Error
+                () => {
+                    // Site doesn't exist
+                    reject();
+                }
+            );
+        });
+    }
+
     // Initializes the application
     static init(): PromiseLike<void> {
         // Return a promise

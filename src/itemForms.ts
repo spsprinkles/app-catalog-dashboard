@@ -11,17 +11,58 @@ export class AppForms {
     // Constructor
     constructor() { }
 
-    // Approve form
-    approve(item: IAppItem, onUpdate: () => void) {
+    // Approve for deployment form
+    approveForDeployment(item: IAppItem, onUpdate: () => void) {
         // Set the header
-        Modal.setHeader("Approve App/Solution Package");
+        Modal.setHeader("Approve App/Solution Package for Deployment");
 
         // Set the body
-        Modal.setBody("Are you sure you want to approve this app package?");
+        Modal.setBody("Are you sure you want to approve this app package for deployment?");
 
         // Render the footer
         Modal.setFooter(Components.Tooltip({
             content: "This will approve the app and make it available for deployement.",
+            btnProps: {
+                text: "Approve",
+                type: Components.ButtonTypes.OutlineSuccess,
+                onClick: () => {
+                    // Close the modal
+                    Modal.hide();
+
+                    // Show a loading dialog
+                    LoadingDialog.setHeader("Approving the App");
+                    LoadingDialog.setBody("This dialog will close after the app is approved.");
+                    LoadingDialog.show();
+
+                    // Update the item
+                    item.update({
+                        AppStatus: "Approved"
+                    }).execute(() => {
+                        // Close the dialog
+                        LoadingDialog.hide();
+
+                        // Execute the update event
+                        onUpdate();
+                    });
+                }
+            }
+        }).el);
+
+        // Show the modal
+        Modal.show();
+    }
+
+    // Approve for testing form
+    approveForTesting(item: IAppItem, onUpdate: () => void) {
+        // Set the header
+        Modal.setHeader("Approve App/Solution Package for Testing");
+
+        // Set the body
+        Modal.setBody("Are you sure you want to approve this app package for testing?");
+
+        // Render the footer
+        Modal.setFooter(Components.Tooltip({
+            content: "This will approve the app and make it available for testing.",
             btnProps: {
                 text: "Approve",
                 type: Components.ButtonTypes.OutlineSuccess,
