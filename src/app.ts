@@ -573,6 +573,9 @@ export class App {
             // Render the info
             this.renderInfo();
 
+            // Render the actions
+            this.renderActions();
+
             // Hide the dialog
             LoadingDialog.hide();
         });
