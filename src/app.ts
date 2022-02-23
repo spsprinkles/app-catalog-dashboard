@@ -51,6 +51,498 @@ export class App {
         this.renderDocuments(docSetId);
     }
 
+    // Loads the actions available for the user
+    private loadActions(): PromiseLike<Components.ITooltipProps[]> {
+        let canEdit = Common.canEdit(DataSource.DocSetItem);
+        let tooltips: Components.ITooltipProps[] = [];
+
+        // Return a promise
+        return new Promise((resolve) => {
+            /**
+             * Approver Buttons
+             */
+
+            // Ensure the user is an approver
+            if (DataSource.IsApprover) {
+                // See if the app is not in the tenant app catalog
+                let app = DataSource.getTenantAppById(DataSource.DocSetItem.AppProductID);
+
+                // See if the app hasn't been deployed
+                if (app == null) {
+                    // Delete
+                    tooltips.push({
+                        content: "Deletes the app.",
+                        btnProps: {
+                            text: "Delete App/Solution",
+                            iconClassName: "me-1",
+                            iconSize: 20,
+                            iconType: trash,
+                            isDisabled: !canEdit,
+                            isSmall: true,
+                            type: Components.ButtonTypes.OutlineDanger,
+                            onClick: () => {
+                                // Display the delete form
+                                this._forms.delete(DataSource.DocSetItem, () => {
+                                    // Redirect to the dashboard
+                                    window.open(Strings.DashboardUrl, "_self");
+                                });
+                            }
+                        }
+                    });
+                }
+
+                // Assessment button
+                tooltips.push({
+                    content: "View the last assessment of the app.",
+                    btnProps: {
+                        text: "Assessment",
+                        iconClassName: "me-1",
+                        iconSize: 20,
+                        iconType: chatSquareDots,
+                        isSmall: true,
+                        type: Components.ButtonTypes.OutlinePrimary,
+                        onClick: () => {
+                            // Display the last assessment
+                            this._forms.lastAssessment(DataSource.DocSetItem);
+                        }
+                    }
+                });
+
+                // See if we are requesting approval
+                if (DataSource.DocSetItem.AppStatus == "Pending Approval") {
+                    // Retract
+                    tooltips.push({
+                        content: "Approves the application for deployment.",
+                        btnProps: {
+                            text: "Approve",
+                            iconClassName: "me-1",
+                            iconSize: 20,
+                            //iconType: trash,
+                            isSmall: true,
+                            type: Components.ButtonTypes.OutlineSuccess,
+                            onClick: () => {
+                                // Approve the app
+                                this._forms.approveForDeployment(DataSource.DocSetItem, () => {
+                                    // Refresh the page
+                                    this.refresh();
+                                });
+                            }
+                        }
+                    });
+                }
+            }
+
+            /**
+             * Draft or Rejected State
+             */
+
+            // See if we can edit and hasn't been submitted
+            if (canEdit && (DataSource.DocSetItem.AppStatus == "Draft" || DataSource.DocSetItem.AppStatus == "Rejected")) {
+                // Edit Properties
+                tooltips.push({
+                    content: "Displays the edit form to update the app properties.",
+                    btnProps: {
+                        text: "Edit Properties",
+                        iconClassName: "me-1",
+                        iconSize: 20,
+                        iconType: pencilSquare,
+                        isSmall: true,
+                        type: Components.ButtonTypes.OutlineSecondary,
+                        onClick: () => {
+                            // Display the edit form
+                            this._forms.edit(DataSource.DocSetItem.Id, () => {
+                                // Refresh the page
+                                this.refresh();
+                            });
+                        }
+                    }
+                });
+
+                // Submit
+                tooltips.push({
+                    content: "Submits the app for approval",
+                    btnProps: {
+                        text: "Submit for Review",
+                        iconClassName: "me-1",
+                        iconSize: 20,
+                        iconType: appIndicator,
+                        isDisabled: !canEdit,
+                        isSmall: true,
+                        type: Components.ButtonTypes.OutlinePrimary,
+                        onClick: () => {
+                            // Display the submit form
+                            this._forms.submit(DataSource.DocSetItem, () => {
+                                // Refresh the page
+                                this.refresh();
+                            });
+                        }
+                    }
+                });
+
+                // Resolve the request
+                resolve(tooltips);
+            }
+
+            /**
+             * Submitted State
+             */
+
+            // See if this app is submitted
+            if (DataSource.DocSetItem.AppStatus == "Submitted" && DataSource.IsApprover) {
+                // Review button
+                tooltips.push(
+                    {
+                        content: "Approves the app for testing.",
+                        btnProps: {
+                            text: "Approve",
+                            iconClassName: "me-1",
+                            iconSize: 20,
+                            iconType: chatSquareDots,
+                            isDisabled: !canEdit,
+                            isSmall: true,
+                            type: Components.ButtonTypes.OutlinePrimary,
+                            onClick: () => {
+                                // Display the approval form
+                                this._forms.approveForTesting(DataSource.DocSetItem, () => {
+                                    // Refresh the page
+                                    this.refresh();
+                                });
+                            }
+                        }
+                    },
+                    {
+                        content: "Sends the request back to the developer(s).",
+                        btnProps: {
+                            text: "Reject",
+                            iconClassName: "me-1",
+                            iconSize: 20,
+                            iconType: chatSquareDots,
+                            isSmall: true,
+                            type: Components.ButtonTypes.OutlineDanger,
+                            onClick: () => {
+                                // Display the reject form
+                                this._forms.reject(DataSource.DocSetItem, () => {
+                                    // Refresh the page
+                                    this.refresh();
+                                });
+                            }
+                        }
+                    }
+                );
+
+                // Resolve the request
+                resolve(tooltips);
+            }
+
+            /**
+             * In Testing State
+             */
+
+            // See if this app is in testing
+            if (DataSource.DocSetItem.AppStatus == "In Testing") {
+                // See if a test site exists
+                DataSource.loadTestSite(DataSource.DocSetItem).then(
+                    // Test site exists
+                    web => {
+                        // View the test site button
+                        tooltips.push(
+                            {
+                                content: "Views the test site.",
+                                btnProps: {
+                                    text: "View Test Site",
+                                    iconClassName: "me-1",
+                                    iconSize: 20,
+                                    iconType: chatSquareDots,
+                                    isSmall: true,
+                                    type: Components.ButtonTypes.OutlinePrimary,
+                                    onClick: () => {
+                                        // Open the test site in a new tab
+                                        window.open(web.Url, "_blank");
+                                    }
+                                }
+                            },
+                            {
+                                content: "Completes the testing and submits the approval for deployment.",
+                                btnProps: {
+                                    text: "Testing Complete",
+                                    iconClassName: "me-1",
+                                    iconSize: 20,
+                                    iconType: chatSquareDots,
+                                    isDisabled: !canEdit,
+                                    isSmall: true,
+                                    type: Components.ButtonTypes.OutlinePrimary,
+                                    onClick: () => {
+                                        // Display the review form
+                                        this._forms.review(DataSource.DocSetItem, () => {
+                                            // Refresh the page
+                                            this.refresh();
+                                        });
+                                    }
+                                }
+                            }
+                        );
+
+                        // See if this is the developer
+                        if (DataSource.IsApprover) {
+                            // Complete test button
+                            tooltips.push(
+                                {
+                                    content: "Sends the request back to the developer(s).",
+                                    btnProps: {
+                                        text: "Reject",
+                                        iconClassName: "me-1",
+                                        iconSize: 20,
+                                        iconType: chatSquareDots,
+                                        isSmall: true,
+                                        type: Components.ButtonTypes.OutlineDanger,
+                                        onClick: () => {
+                                            // Display the reject form
+                                            this._forms.reject(DataSource.DocSetItem, () => {
+                                                // Refresh the page
+                                                this.refresh();
+                                            });
+                                        }
+                                    }
+                                }
+                            );
+                        }
+
+                        // Resolve the request
+                        resolve(tooltips);
+                    },
+
+                    // Test site doesn't exist
+                    () => {
+                        // See if this is the approver
+                        if (DataSource.IsApprover) {
+                            // Review button
+                            tooltips.push(
+                                {
+                                    content: "Creates the test site for the app.",
+                                    btnProps: {
+                                        text: "Create Test Site",
+                                        iconClassName: "me-1",
+                                        iconSize: 20,
+                                        iconType: chatSquareDots,
+                                        isDisabled: !canEdit,
+                                        isSmall: true,
+                                        type: Components.ButtonTypes.OutlinePrimary,
+                                        onClick: () => {
+                                            // Display the create test site form
+                                            this._forms.createTestSite(DataSource.DocSetItem, () => {
+                                                // Refresh the page
+                                                this.refresh();
+                                            });
+                                        }
+                                    }
+                                }
+                            );
+                        }
+
+                        // Resolve the request
+                        resolve(tooltips);
+                    }
+                );
+            }
+
+            /**
+             * Pending Approval State
+             */
+
+            // See if this app is in review and ensure this was not submitted by the user
+            if (DataSource.DocSetItem.AppStatus == "Pending Approval" && DataSource.IsApprover) {
+                // Review button
+                tooltips.push(
+                    {
+                        content: "Start/Continue an assessment of the app.",
+                        btnProps: {
+                            text: "Review",
+                            iconClassName: "me-1",
+                            iconSize: 20,
+                            iconType: chatSquareDots,
+                            isDisabled: !canEdit,
+                            isSmall: true,
+                            type: Components.ButtonTypes.OutlinePrimary,
+                            onClick: () => {
+                                // Display the review form
+                                this._forms.review(DataSource.DocSetItem, () => {
+                                    // Refresh the page
+                                    this.refresh();
+                                });
+                            }
+                        }
+                    },
+                    {
+                        content: "Sends the request back to the developer(s).",
+                        btnProps: {
+                            text: "Reject",
+                            iconClassName: "me-1",
+                            iconSize: 20,
+                            iconType: chatSquareDots,
+                            isSmall: true,
+                            type: Components.ButtonTypes.OutlineDanger,
+                            onClick: () => {
+                                // Display the reject form
+                                this._forms.reject(DataSource.DocSetItem, () => {
+                                    // Refresh the page
+                                    this.refresh();
+                                });
+                            }
+                        }
+                    }
+                );
+
+                // Resolve the request
+                resolve(tooltips);
+            }
+
+            /**
+             * Approved State
+             */
+
+            // See if this is a tenant app catalog and the app is approved
+            if (DataSource.IsTenantAppCatalogOwner && DataSource.DocSetItem.AppStatus == "Approved") {
+                // See if the app is not in the tenant app catalog
+                let app = DataSource.getTenantAppById(DataSource.DocSetItem.AppProductID);
+
+                // See if the app is deployed
+                if (app && app.Deployed) {
+                    // Retract
+                    tooltips.push({
+                        content: "Retracts the solution from the tenant app catalog.",
+                        btnProps: {
+                            text: "Retract from Tenant",
+                            iconClassName: "me-1",
+                            iconSize: 20,
+                            //iconType: trash,
+                            isSmall: true,
+                            type: Components.ButtonTypes.OutlineDanger,
+                            onClick: () => {
+                                // Retract the app
+                                this._forms.retract(DataSource.DocSetItem, true, () => {
+                                    // Refresh the page
+                                    this.refresh();
+                                });
+                            }
+                        }
+                    });
+
+                    // Load the context of the app catalog
+                    ContextInfo.getWeb(DataSource.Configuration.tenantAppCatalogUrl).execute(context => {
+                        let requestDigest = context.GetContextWebInformation.FormDigestValue;
+                        let web = Web(DataSource.Configuration.tenantAppCatalogUrl, { requestDigest });
+
+                        // Ensure this app can be deployed to the tenant
+                        web.TenantAppCatalog().solutionContainsTeamsComponent(app.ID).execute((resp: any) => {
+                            // See if we can deploy this app to teams
+                            if (resp.SolutionContainsTeamsComponent) {
+                                // Add the deploy to teams button
+                                tooltips.push({
+                                    content: "Deploys the solution to Teams.",
+                                    btnProps: {
+                                        text: "Deploy to Teams",
+                                        iconClassName: "me-1",
+                                        iconSize: 20,
+                                        //iconType: trash,
+                                        isDisabled: true,
+                                        isSmall: true,
+                                        type: Components.ButtonTypes.OutlineWarning,
+                                        onClick: () => {
+                                            // Deploy the app
+                                            this._forms.deployToTeams(DataSource.DocSetItem, () => {
+                                                // Refresh the page
+                                                this.refresh();
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+
+                            // Resolve the request
+                            resolve(tooltips);
+                        });
+                    });
+                } else {
+                    // Deploy
+                    tooltips.push({
+                        content: "Deploys the solution to the tenant app catalog.",
+                        btnProps: {
+                            text: "Deploy to Tenant",
+                            iconClassName: "me-1",
+                            iconSize: 20,
+                            //iconType: trash,
+                            isSmall: true,
+                            type: Components.ButtonTypes.OutlineWarning,
+                            onClick: () => {
+                                // Deploy the app
+                                this._forms.deploy(DataSource.DocSetItem, true, () => {
+                                    // Refresh the page
+                                    this.refresh();
+                                });
+                            }
+                        }
+                    });
+
+                    // Resolve the request
+                    resolve(tooltips);
+                }
+            }
+
+            /**
+             * Other - Not sure if we need these or not
+             */
+
+            // Ensure we are not in a draft state, and see if the site app catalog exists
+            if (DataSource.IsSiteAppCatalogOwner && DataSource.DocSetItem.AppStatus != "Draft" && DataSource.SiteCollectionAppCatalogExists) {
+                // See if the app is not in the site app catalog
+                let app = DataSource.getSiteCollectionAppById(DataSource.DocSetItem.AppProductID);
+
+                // See if the app is deployed
+                if (app && app.Deployed) {
+                    // Retract
+                    tooltips.push({
+                        content: "Retracts the solution from the site app catalog.",
+                        btnProps: {
+                            text: "Retract from Site Catalog",
+                            iconClassName: "me-1",
+                            iconSize: 20,
+                            //iconType: trash,
+                            isSmall: true,
+                            type: Components.ButtonTypes.OutlineDanger,
+                            onClick: () => {
+                                // Retract the app
+                                this._forms.retract(DataSource.DocSetItem, false, () => {
+                                    // Refresh the page
+                                    this.refresh();
+                                });
+                            }
+                        }
+                    });
+                } else {
+                    // Deploy
+                    tooltips.push({
+                        content: "Deploys the solution to the site app catalog.",
+                        btnProps: {
+                            text: "Deploy to Site Catalog",
+                            iconClassName: "me-1",
+                            iconSize: 20,
+                            //iconType: trash,
+                            isSmall: true,
+                            type: Components.ButtonTypes.OutlineWarning,
+                            onClick: () => {
+                                // Deploy the app
+                                this._forms.deploy(DataSource.DocSetItem, false, () => {
+                                    // Refresh the page
+                                    this.refresh();
+                                });
+                            }
+                        }
+                    });
+                }
+            }
+        });
+    }
+
     // Redirects to the dashboard
     private redirectToDashboard() {
         // See if the parent element exists
@@ -88,468 +580,32 @@ export class App {
 
     // Renders the dashboard
     private renderActions() {
-        let canEdit = Common.canEdit(DataSource.DocSetItem);
-
-        // Render a card
-        Components.Card({
-            el: this._el.querySelector("#app-info .card-group"),
-            body: [{
-                title: "Actions",
-                onRender: el => {
-                    let tooltips: Components.ITooltipProps[] = [];
-
-                    // See if we can edit and hasn't been submitted
-                    if (canEdit && (DataSource.DocSetItem.AppStatus == "Draft" || DataSource.DocSetItem.AppStatus == "Rejected")) {
-                        // Edit Properties
-                        tooltips.push({
-                            content: "Displays the edit form to update the app properties.",
-                            btnProps: {
-                                text: "Edit Properties",
-                                iconClassName: "me-1",
-                                iconSize: 20,
-                                iconType: pencilSquare,
-                                isSmall: true,
-                                type: Components.ButtonTypes.OutlineSecondary,
-                                onClick: () => {
-                                    // Display the edit form
-                                    this._forms.edit(DataSource.DocSetItem.Id, () => {
-                                        // Refresh the page
-                                        window.location.reload();
-                                    });
-                                }
-                            }
+        // Load the actions
+        this.loadActions().then(tooltips => {
+            // Render a card
+            Components.Card({
+                el: this._el.querySelector("#app-info .card-group"),
+                body: [{
+                    title: "Actions",
+                    onRender: el => {
+                        // Render the actions
+                        let ttg = Components.TooltipGroup({
+                            el,
+                            className: "w-50",
+                            isVertical: true,
+                            tooltipOptions: {
+                                maxWidth: "200px"
+                            },
+                            tooltipPlacement: Components.TooltipPlacements.Right,
+                            tooltips
                         });
 
-                        // Submit
-                        tooltips.push({
-                            content: "Submits the app for approval",
-                            btnProps: {
-                                text: "Submit for Review",
-                                iconClassName: "me-1",
-                                iconSize: 20,
-                                iconType: appIndicator,
-                                isDisabled: !canEdit,
-                                isSmall: true,
-                                type: Components.ButtonTypes.OutlinePrimary,
-                                onClick: () => {
-                                    // Display the submit form
-                                    this._forms.submit(DataSource.DocSetItem, () => {
-                                        // Refresh the page
-                                        window.location.reload();
-                                    });
-                                }
-                            }
-                        });
+                        // Fix weird alignment issue
+                        let elButton = ttg.el.querySelector("button:first-child") as HTMLButtonElement;
+                        elButton ? elButton.style.marginLeft = "-1px" : null;
                     }
-
-                    // See if this app is submitted
-                    if (DataSource.DocSetItem.AppStatus == "Submitted" && DataSource.IsApprover) {
-                        // Review button
-                        tooltips.push(
-                            {
-                                content: "Approves the app for testing.",
-                                btnProps: {
-                                    text: "Approve",
-                                    iconClassName: "me-1",
-                                    iconSize: 20,
-                                    iconType: chatSquareDots,
-                                    isDisabled: !canEdit,
-                                    isSmall: true,
-                                    type: Components.ButtonTypes.OutlinePrimary,
-                                    onClick: () => {
-                                        // Display the approval form
-                                        this._forms.approveForTesting(DataSource.DocSetItem, () => {
-                                            // Refresh the page
-                                            window.location.reload();
-                                        });
-                                    }
-                                }
-                            },
-                            {
-                                content: "Sends the request back to the developer(s).",
-                                btnProps: {
-                                    text: "Reject",
-                                    iconClassName: "me-1",
-                                    iconSize: 20,
-                                    iconType: chatSquareDots,
-                                    isSmall: true,
-                                    type: Components.ButtonTypes.OutlineDanger,
-                                    onClick: () => {
-                                        // Display the reject form
-                                        this._forms.reject(DataSource.DocSetItem, () => {
-                                            // Refresh the page
-                                            window.location.reload();
-                                        });
-                                    }
-                                }
-                            }
-                        );
-                    }
-
-                    // See if this app is in testing
-                    if (DataSource.DocSetItem.AppStatus.indexOf("In Testing") > 0) {
-                        // See if a test site exists
-                        DataSource.loadTestSite(DataSource.DocSetItem).then(
-                            // Test site exists
-                            web => {
-                                // View the test site button
-                                tooltips.push(
-                                    {
-                                        content: "Views the test site.",
-                                        btnProps: {
-                                            text: "View Test Site",
-                                            iconClassName: "me-1",
-                                            iconSize: 20,
-                                            iconType: chatSquareDots,
-                                            isSmall: true,
-                                            type: Components.ButtonTypes.OutlinePrimary,
-                                            onClick: () => {
-                                                // Open the test site in a new tab
-                                                window.open(web.Url, "_blank");
-                                            }
-                                        }
-                                    },
-                                    {
-                                        content: "Completes the testing and submits the approval for deployment.",
-                                        btnProps: {
-                                            text: "Testing Complete",
-                                            iconClassName: "me-1",
-                                            iconSize: 20,
-                                            iconType: chatSquareDots,
-                                            isDisabled: !canEdit,
-                                            isSmall: true,
-                                            type: Components.ButtonTypes.OutlinePrimary,
-                                            onClick: () => {
-                                                // Display the review form
-                                                this._forms.review(DataSource.DocSetItem, () => {
-                                                    // Refresh the page
-                                                    window.location.reload();
-                                                });
-                                            }
-                                        }
-                                    }
-                                );
-
-                                // See if this is the developer
-                                if (DataSource.IsApprover) {
-                                    // Complete test button
-                                    tooltips.push(
-                                        {
-                                            content: "Sends the request back to the developer(s).",
-                                            btnProps: {
-                                                text: "Reject",
-                                                iconClassName: "me-1",
-                                                iconSize: 20,
-                                                iconType: chatSquareDots,
-                                                isSmall: true,
-                                                type: Components.ButtonTypes.OutlineDanger,
-                                                onClick: () => {
-                                                    // Display the reject form
-                                                    this._forms.reject(DataSource.DocSetItem, () => {
-                                                        // Refresh the page
-                                                        window.location.reload();
-                                                    });
-                                                }
-                                            }
-                                        }
-                                    );
-                                }
-                            },
-
-                            // Test site doesn't exist
-                            () => {
-                                // See if this is the approver
-                                if (DataSource.IsApprover) {
-                                    // Review button
-                                    tooltips.push(
-                                        {
-                                            content: "Creates the test site for the app.",
-                                            btnProps: {
-                                                text: "Create Test Site",
-                                                iconClassName: "me-1",
-                                                iconSize: 20,
-                                                iconType: chatSquareDots,
-                                                isDisabled: !canEdit,
-                                                isSmall: true,
-                                                type: Components.ButtonTypes.OutlinePrimary,
-                                                onClick: () => {
-                                                    // TODO
-                                                }
-                                            }
-                                        }
-                                    );
-                                }
-                            }
-                        );
-                    }
-
-                    // See if this app is in review and ensure this was not submitted by the user
-                    if (DataSource.DocSetItem.AppStatus.indexOf("Pending Approval") > 0 && DataSource.IsApprover) {
-                        // Review button
-                        tooltips.push(
-                            {
-                                content: "Start/Continue an assessment of the app.",
-                                btnProps: {
-                                    text: "Review",
-                                    iconClassName: "me-1",
-                                    iconSize: 20,
-                                    iconType: chatSquareDots,
-                                    isDisabled: !canEdit,
-                                    isSmall: true,
-                                    type: Components.ButtonTypes.OutlinePrimary,
-                                    onClick: () => {
-                                        // Display the review form
-                                        this._forms.review(DataSource.DocSetItem, () => {
-                                            // Refresh the page
-                                            window.location.reload();
-                                        });
-                                    }
-                                }
-                            },
-                            {
-                                content: "Sends the request back to the developer(s).",
-                                btnProps: {
-                                    text: "Reject",
-                                    iconClassName: "me-1",
-                                    iconSize: 20,
-                                    iconType: chatSquareDots,
-                                    isSmall: true,
-                                    type: Components.ButtonTypes.OutlineDanger,
-                                    onClick: () => {
-                                        // Display the reject form
-                                        this._forms.reject(DataSource.DocSetItem, () => {
-                                            // Refresh the page
-                                            window.location.reload();
-                                        });
-                                    }
-                                }
-                            }
-                        );
-                    }
-
-                    // Ensure we are not in a draft state, and see if the site app catalog exists
-                    if (DataSource.IsSiteAppCatalogOwner && DataSource.DocSetItem.AppStatus != "Draft" && DataSource.SiteCollectionAppCatalogExists) {
-                        // See if the app is not in the site app catalog
-                        let app = DataSource.getSiteCollectionAppById(DataSource.DocSetItem.AppProductID);
-
-                        // See if the app is deployed
-                        if (app && app.Deployed) {
-                            // Retract
-                            tooltips.push({
-                                content: "Retracts the solution from the site app catalog.",
-                                btnProps: {
-                                    text: "Retract from Site Catalog",
-                                    iconClassName: "me-1",
-                                    iconSize: 20,
-                                    //iconType: trash,
-                                    isSmall: true,
-                                    type: Components.ButtonTypes.OutlineDanger,
-                                    onClick: () => {
-                                        // Retract the app
-                                        this._forms.retract(DataSource.DocSetItem, false, () => {
-                                            // Refresh the page
-                                            window.location.reload();
-                                        });
-                                    }
-                                }
-                            });
-                        } else {
-                            // Deploy
-                            tooltips.push({
-                                content: "Deploys the solution to the site app catalog.",
-                                btnProps: {
-                                    text: "Deploy to Site Catalog",
-                                    iconClassName: "me-1",
-                                    iconSize: 20,
-                                    //iconType: trash,
-                                    isSmall: true,
-                                    type: Components.ButtonTypes.OutlineWarning,
-                                    onClick: () => {
-                                        // Deploy the app
-                                        this._forms.deploy(DataSource.DocSetItem, false, () => {
-                                            // Refresh the page
-                                            window.location.reload();
-                                        });
-                                    }
-                                }
-                            });
-                        }
-                    }
-
-                    // Ensure the user is an approver
-                    if (DataSource.IsApprover) {
-                        // See if the app is not in the tenant app catalog
-                        let app = DataSource.getTenantAppById(DataSource.DocSetItem.AppProductID);
-
-                        // See if the app hasn't been deployed
-                        if (app == null) {
-                            // Delete
-                            tooltips.push({
-                                content: "Deletes the app.",
-                                btnProps: {
-                                    text: "Delete App/Solution",
-                                    iconClassName: "me-1",
-                                    iconSize: 20,
-                                    iconType: trash,
-                                    isDisabled: !canEdit,
-                                    isSmall: true,
-                                    type: Components.ButtonTypes.OutlineDanger,
-                                    onClick: () => {
-                                        // Display the delete form
-                                        this._forms.delete(DataSource.DocSetItem, () => {
-                                            // Redirect to the dashboard
-                                            window.open(Strings.DashboardUrl, "_self");
-                                        });
-                                    }
-                                }
-                            });
-                        }
-
-                        // Assessment button
-                        tooltips.push({
-                            content: "View the last assessment of the app.",
-                            btnProps: {
-                                text: "Assessment",
-                                iconClassName: "me-1",
-                                iconSize: 20,
-                                iconType: chatSquareDots,
-                                isSmall: true,
-                                type: Components.ButtonTypes.OutlinePrimary,
-                                onClick: () => {
-                                    // Display the last assessment
-                                    this._forms.lastAssessment(DataSource.DocSetItem);
-                                }
-                            }
-                        });
-
-                        // See if we are requesting approval
-                        if (DataSource.DocSetItem.AppStatus == "Pending Approval") {
-                            // Retract
-                            tooltips.push({
-                                content: "Approves the application for deployment.",
-                                btnProps: {
-                                    text: "Approve",
-                                    iconClassName: "me-1",
-                                    iconSize: 20,
-                                    //iconType: trash,
-                                    isSmall: true,
-                                    type: Components.ButtonTypes.OutlineSuccess,
-                                    onClick: () => {
-                                        // Approve the app
-                                        this._forms.approveForDeployment(DataSource.DocSetItem, () => {
-                                            // Refresh the page
-                                            window.location.reload();
-                                        });
-                                    }
-                                }
-                            });
-                        }
-                    }
-
-                    // See if this is a tenant app catalog and the app is approved
-                    if (DataSource.IsTenantAppCatalogOwner && DataSource.DocSetItem.AppStatus == "Approved") {
-                        // See if the app is not in the tenant app catalog
-                        let app = DataSource.getTenantAppById(DataSource.DocSetItem.AppProductID);
-
-                        // See if the app is deployed
-                        if (app && app.Deployed) {
-                            // Retract
-                            tooltips.push({
-                                content: "Retracts the solution from the tenant app catalog.",
-                                btnProps: {
-                                    text: "Retract from Tenant",
-                                    iconClassName: "me-1",
-                                    iconSize: 20,
-                                    //iconType: trash,
-                                    isSmall: true,
-                                    type: Components.ButtonTypes.OutlineDanger,
-                                    onClick: () => {
-                                        // Retract the app
-                                        this._forms.retract(DataSource.DocSetItem, true, () => {
-                                            // Refresh the page
-                                            window.location.reload();
-                                        });
-                                    }
-                                }
-                            });
-
-                            // Add a sync to Teams button
-                            let btnTeams: Components.IButton = null;
-                            tooltips.push({
-                                content: "Deploys the solution to Teams.",
-                                btnProps: {
-                                    assignTo: btn => { btnTeams = btn; },
-                                    text: "Deploy to Teams",
-                                    iconClassName: "me-1",
-                                    iconSize: 20,
-                                    //iconType: trash,
-                                    isDisabled: true,
-                                    isSmall: true,
-                                    type: Components.ButtonTypes.OutlineWarning,
-                                    onClick: () => {
-                                        // Deploy the app
-                                        this._forms.deployToTeams(DataSource.DocSetItem, () => {
-                                            // Refresh the page
-                                            window.location.reload();
-                                        });
-                                    }
-                                }
-                            });
-
-                            // Load the context of the app catalog
-                            ContextInfo.getWeb(DataSource.Configuration.tenantAppCatalogUrl).execute(context => {
-                                let requestDigest = context.GetContextWebInformation.FormDigestValue;
-                                let web = Web(DataSource.Configuration.tenantAppCatalogUrl, { requestDigest });
-
-                                // Ensure this app can be deployed to the tenant
-                                web.TenantAppCatalog().solutionContainsTeamsComponent(app.ID).execute((resp: any) => {
-                                    // See if we can deploy this app to teams
-                                    if (resp.SolutionContainsTeamsComponent) {
-                                        // Enable the button
-                                        btnTeams.enable();
-                                    }
-                                });
-                            });
-                        } else {
-                            // Deploy
-                            tooltips.push({
-                                content: "Deploys the solution to the tenant app catalog.",
-                                btnProps: {
-                                    text: "Deploy to Tenant",
-                                    iconClassName: "me-1",
-                                    iconSize: 20,
-                                    //iconType: trash,
-                                    isSmall: true,
-                                    type: Components.ButtonTypes.OutlineWarning,
-                                    onClick: () => {
-                                        // Deploy the app
-                                        this._forms.deploy(DataSource.DocSetItem, true, () => {
-                                            // Refresh the page
-                                            window.location.reload();
-                                        });
-                                    }
-                                }
-                            });
-                        }
-                    }
-
-                    // Render the actions
-                    let ttg = Components.TooltipGroup({
-                        el,
-                        className: "w-50",
-                        isVertical: true,
-                        tooltipOptions: {
-                            maxWidth: "200px"
-                        },
-                        tooltipPlacement: Components.TooltipPlacements.Right,
-                        tooltips
-                    });
-
-                    // Fix weird alignment issue
-                    let elButton = ttg.el.querySelector("button:first-child") as HTMLButtonElement;
-                    elButton ? elButton.style.marginLeft = "-1px" : null;
-                }
-            }]
+                }]
+            });
         });
     }
 

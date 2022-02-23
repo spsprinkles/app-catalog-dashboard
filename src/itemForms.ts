@@ -72,7 +72,8 @@ export class AppForms {
 
         // Set the body
         let elBody = document.createElement("div");
-        elBody.innerHTML = "<p>Are you sure you want to approve this app package for testing?</p>"
+        elBody.innerHTML = "<p>Are you sure you want to approve this app package for testing?" +
+            (checklist.length > 0 ? " Review the following checklist before approving the app." : "") + "</p>";
         elBody.appendChild(elChecklist);
         Modal.setBody(elBody);
 
@@ -93,7 +94,7 @@ export class AppForms {
 
                     // Update the item
                     item.update({
-                        AppStatus: "Approved"
+                        AppStatus: "In Testing"
                     }).execute(() => {
                         // Close the dialog
                         LoadingDialog.hide();
@@ -102,6 +103,125 @@ export class AppForms {
                         onUpdate();
                     });
                 }
+            }
+        }).el);
+
+        // Show the modal
+        Modal.show();
+    }
+
+    // Creates the test site for the application
+    createTestSite(item: IAppItem, onUpdate: () => void) {
+        // Set the header
+        Modal.setHeader("Create Test Site");
+
+        // Set the body
+        Modal.setBody("Are you sure you want to create the test site for this application?");
+
+        // Render the footer
+        Modal.setFooter(Components.Button({
+            text: "Create Site",
+            type: Components.ButtonTypes.OutlineSuccess,
+            onClick: () => {
+                // Close the modal
+                Modal.hide();
+
+                // Show a loading dialog
+                LoadingDialog.setHeader("Deploying the Application");
+                LoadingDialog.setBody("Adding the application to the test site collection app catalog.");
+                LoadingDialog.show();
+
+                // Deploy the solution
+                this.deploy(item, false, () => {
+                    // Update the loading dialog
+                    LoadingDialog.setHeader("Creating the Test Site");
+                    LoadingDialog.setBody("Creating the sub-web for testing the application.");
+                    LoadingDialog.show();
+
+                    // Load the context of the app catalog
+                    ContextInfo.getWeb(DataSource.Configuration.appCatalogUrl).execute(context => {
+                        let requestDigest = context.GetContextWebInformation.FormDigestValue;
+
+                        // Create the test site
+                        Web(DataSource.Configuration.appCatalogUrl, { requestDigest }).WebInfos().add({
+                            Description: "The test site for the " + item.Title + " application.",
+                            Title: item.Title,
+                            Url: item.AppProductID,
+                            WebTemplate: SPTypes.WebTemplateType.Site
+                        }).execute(
+                            // Success
+                            web => {
+                                // Update the loading dialog
+                                LoadingDialog.setHeader("Installing the App");
+                                LoadingDialog.setBody("Installing the application to the test site.");
+
+                                // Install the application to the test site
+                                Web(web.ServerRelativeUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(item.AppProductID).install().execute(
+                                    // Success
+                                    () => {
+                                        // Update the loading dialog
+                                        LoadingDialog.setHeader("Sending Email Notifications");
+                                        LoadingDialog.setBody("Everything is done. Sending an email to the developer poc(s).");
+
+                                        // Get the app developers
+                                        let to = [];
+                                        let pocs = item.AppDevelopers && item.AppDevelopers.results ? item.AppDevelopers.results : [];
+                                        for (let i = 0; i < pocs.length; i++) {
+                                            // Append the email
+                                            to.push(pocs[i].EMail);
+                                        }
+
+                                        // Ensure emails exist
+                                        if (to.length > 0) {
+                                            // Send an email
+                                            Utility().sendEmail({
+                                                To: to,
+                                                Subject: "Test Site Created",
+                                                Body: "<p>App Developers,</p><br />" +
+                                                    "<p>The '" + item.Title + "' app test site has been created.</p>"
+                                            }).execute(() => {
+                                                // Close the dialog
+                                                LoadingDialog.hide();
+
+                                                // Execute the update event
+                                                onUpdate();
+                                            });
+                                        } else {
+                                            // Close the dialog
+                                            LoadingDialog.hide();
+
+                                            // Execute the update event
+                                            onUpdate();
+                                        }
+                                    },
+
+                                    // Error
+                                    () => {
+                                        // Hide the loading dialog
+                                        LoadingDialog.hide();
+
+                                        // Error creating the site
+                                        Modal.clear();
+                                        Modal.setHeader("Error Deploying Application");
+                                        Modal.setBody("There was an error deploying the application to the test site.");
+                                        Modal.show();
+                                    }
+                                )
+                            },
+                            // Error
+                            () => {
+                                // Hide the loading dialog
+                                LoadingDialog.hide();
+
+                                // Error creating the site
+                                Modal.clear();
+                                Modal.setHeader("Error Creating Test Site");
+                                Modal.setBody("There was an error creating the test site.");
+                                Modal.show();
+                            }
+                        );
+                    });
+                });
             }
         }).el);
 
@@ -257,19 +377,19 @@ export class AppForms {
 
                                 // Deploy the app
                                 appCatalog.AvailableApps(item.AppProductID).deploy().execute(app => {
+                                    // Hide the dialog
+                                    LoadingDialog.hide();
+
                                     // Call the update event
                                     onUpdate();
-
-                                    // App deployed
-                                    LoadingDialog.hide();
                                 }, () => {
+                                    // Hide the dialog
+                                    LoadingDialog.hide();
+
                                     // Error deploying the app
                                     // TODO - Show an error
                                     // Call the update event
                                     onUpdate();
-
-                                    // App deployed
-                                    LoadingDialog.hide();
                                 });
                             });
                         });
@@ -294,22 +414,22 @@ export class AppForms {
             Web(DataSource.Configuration.tenantAppCatalogUrl, { requestDigest }).TenantAppCatalog().syncSolutionToTeams(item.Id).execute(
                 // Success
                 () => {
+                    // Hide the dialog
+                    LoadingDialog.hide();
+
                     // Call the update event
                     onUpdate();
-
-                    // App deployed
-                    LoadingDialog.hide();
                 },
 
                 // Error
                 () => {
+                    // Hide the dialog
+                    LoadingDialog.hide();
+
                     // Error deploying the app
                     // TODO - Show an error
                     // Call the update event
                     onUpdate();
-
-                    // App deployed
-                    LoadingDialog.hide();
                 }
             );
         });
@@ -798,7 +918,8 @@ export class AppForms {
 
         // Set the body
         let elBody = document.createElement("div");
-        elBody.innerHTML = "<p>Are you sure you want to submit this app for approval?</p>"
+        elBody.innerHTML = "<p>Are you sure you want to submit this app for approval?" +
+            (checklist.length > 0 ? " Review the following checklist before approving the app." : "") + "</p>";
         elBody.appendChild(elChecklist);
         Modal.setBody(elBody);
 
