@@ -143,7 +143,7 @@ export class App {
                     }
 
                     // See if this app is submitted
-                    if (DataSource.DocSetItem.AppStatus.indexOf("Submitted") > 0 && DataSource.IsApprover) {
+                    if (DataSource.DocSetItem.AppStatus == "Submitted" && DataSource.IsApprover) {
                         // Review button
                         tooltips.push(
                             {
