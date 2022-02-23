@@ -95,7 +95,7 @@ export class App {
                 tooltips.push({
                     content: "View the last assessment of the app.",
                     btnProps: {
-                        text: "Assessment",
+                        text: "Last Assessment",
                         iconClassName: "me-1",
                         iconSize: 20,
                         iconType: chatSquareDots,
