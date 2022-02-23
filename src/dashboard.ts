@@ -299,7 +299,7 @@ export class AppDashboard {
                         title: "Version"
                     },
                     {
-                        name: "DevAppStatus",
+                        name: "AppStatus",
                         title: "Status",
                         onRenderCell: (el, column, item: IAppItem) => {
                             // See if the site app catalog exists

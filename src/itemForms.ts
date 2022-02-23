@@ -36,7 +36,7 @@ export class AppForms {
 
                     // Update the item
                     item.update({
-                        DevAppStatus: "Approved"
+                        AppStatus: "Approved"
                     }).execute(() => {
                         // Close the dialog
                         LoadingDialog.hide();
@@ -295,7 +295,7 @@ export class AppForms {
             },
             onCreateEditForm: props => {
                 // Exclude fields
-                props.excludeFields = ["AppVideoURL", "DevAppStatus", "IsAppPackageEnabled", "IsDefaultAppMetadataLocale"];
+                props.excludeFields = ["AppVideoURL", "AppStatus", "IsAppPackageEnabled", "IsDefaultAppMetadataLocale"];
 
                 // Update the field
                 props.onControlRendering = (ctrl, field) => {
@@ -530,7 +530,7 @@ export class AppForms {
                     // Update the status
                     item.update({
                         AppComments: comments,
-                        DevAppStatus: "Requires Attention"
+                        AppStatus: "Requires Attention"
                     }).execute(() => {
                         // Parse the developers
                         let cc = [];
@@ -673,7 +673,7 @@ export class AppForms {
                         // See if we are updating the status
                         if (completeFl) {
                             // Update the status
-                            item.update({ DevAppStatus: "Requesting Approval" }).execute(onUpdate);
+                            item.update({ AppStatus: "Requesting Approval" }).execute(onUpdate);
                         } else {
                             // Call the update event
                             onUpdate();
@@ -702,10 +702,10 @@ export class AppForms {
                         props.RelatedAppId = item.Id;
 
                         // Update the status of the current item
-                        if (item.AppStatus == "Submitted for Review") {
+                        if (item.AppStatus == "Submitted") {
                             // Update the status
                             item.update({
-                                DevAppStatus: "In Review"
+                                AppStatus: "In Review"
                             }).execute(onUpdate);
                         }
 
@@ -724,10 +724,10 @@ export class AppForms {
         Modal.clear();
 
         // Set the header
-        Modal.setHeader("Submit App for Review");
+        Modal.setHeader("Submit App for Approval");
 
         // Set the body
-        Modal.setBody("Are you sure you want to submit this app for review?");
+        Modal.setBody("Are you sure you want to submit this app for approval?");
 
         // Set the footer
         Modal.setFooter(Components.Button({
@@ -739,12 +739,12 @@ export class AppForms {
 
                 // Show a loading dialog
                 LoadingDialog.setHeader("Updating App Submission");
-                LoadingDialog.setBody("This dialog will close after the app submission is updated.");
+                LoadingDialog.setBody("This dialog will close after the app submission is completed.");
                 LoadingDialog.show();
 
                 // Update the status
                 item.update({
-                    DevAppStatus: "Submitted for Review"
+                    AppStatus: "Submitted"
                 }).execute(() => {
                     // Parse the developers
                     let to = DataSource.Configuration.appCatalogAdminEmailGroup ? [DataSource.Configuration.appCatalogAdminEmailGroup] : [];
@@ -767,8 +767,8 @@ export class AppForms {
                         Utility().sendEmail({
                             To: to,
                             CC: cc,
-                            Subject: "App '" + item.Title + "' submitted for review",
-                            Body: "App Developers,<br /><br />The '" + item.Title + "' app has been submitted for review by " + ContextInfo.userDisplayName + ". Please take some time to test this app and submit an assessment/review using the App Dashboard."
+                            Subject: "App '" + item.Title + "' submitted for approval",
+                            Body: "App Developers,<br /><br />The '" + item.Title + "' app has been submitted for approval by " + ContextInfo.userDisplayName + ". Please take some time to test this app and submit an assessment/review using the App Dashboard."
                         }).execute(() => {
                             // Call the update event
                             onUpdate();
