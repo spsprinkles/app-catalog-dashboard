@@ -522,12 +522,12 @@ export class AppForms {
     }
 
     // Method to get the assessment item associated with the app
-    private getAssessmentItem(item: IAppItem, lastFl: boolean = false): PromiseLike<IAssessmentItem> {
+    private getAssessmentItem(item: IAppItem, testFl: boolean = true, lastFl: boolean = false): PromiseLike<IAssessmentItem> {
         // Return a promise
         return new Promise((resolve, reject) => {
             // Get the assoicated item
             List(Strings.Lists.Assessments).Items().query({
-                Filter: "RelatedAppId eq " + item.Id,
+                Filter: "RelatedAppId eq " + item.Id + " and ContentType eq '" + (testFl ? "TestCases" : "Item") + "'",
                 OrderBy: ["Completed desc"]
             }).execute(items => {
                 // Parse the results
@@ -560,7 +560,7 @@ export class AppForms {
         ItemForm.ListName = Strings.Lists.Assessments;
 
         // Get the assessment item
-        this.getAssessmentItem(item, true).then(assessment => {
+        this.getAssessmentItem(item, false, true).then(assessment => {
             // See if an item exists
             if (assessment) {
                 // Show the edit form
@@ -795,7 +795,7 @@ export class AppForms {
         ItemForm.ListName = Strings.Lists.Assessments;
 
         // Get the assessment item
-        this.getAssessmentItem(item).then(assessment => {
+        this.getAssessmentItem(item, false).then(assessment => {
             // See if an item exists
             if (assessment) {
                 let completeFl = false;
@@ -1099,6 +1099,102 @@ export class AppForms {
                 Modal.setHeader("Error Adding Package");
                 Modal.setBody("The file must be a valid SPFx app package file.");
                 Modal.show();
+            }
+        });
+    }
+
+    // Views the tests for the application
+    viewTests(item: IAppItem, onUpdate: () => void) {
+        // Set the form properties
+        ItemForm.AutoClose = false;
+        ItemForm.ListName = Strings.Lists.Assessments;
+
+        // Get the assessment item
+        this.getAssessmentItem(item).then(assessment => {
+            // See if an item exists
+            if (assessment) {
+                let completeFl = false;
+                let alert: Components.IAlert = null;
+
+                // Show the edit form
+                ItemForm.edit({
+                    itemId: assessment.Id,
+                    webUrl: Strings.SourceUrl,
+                    onSetHeader: el => {
+                        // Render an alert
+                        alert = Components.Alert({
+                            el,
+                            content: "You still need to update the item to complete the assessment."
+                        });
+
+                        // Hide it by default
+                        alert.hide();
+                    },
+                    onSetFooter: el => {
+                        // Render a completed button
+                        let tooltip = Components.Tooltip({
+                            el,
+                            content: "Completes the review of the app.",
+                            btnProps: {
+                                text: "Complete Review",
+                                type: Components.ButtonTypes.OutlineSuccess,
+                                onClick: () => {
+                                    // Set the flag
+                                    completeFl = true;
+
+                                    // Disable the button
+                                    tooltip.button.disable();
+
+                                    // Show the alert
+                                    alert.show();
+                                }
+                            }
+                        })
+                    },
+                    onSave: (props: IAssessmentItem) => {
+                        // See if we are completing the assessment
+                        if (completeFl) {
+                            // Update the props
+                            props.Completed = new Date(Date.now()) as any;
+                        }
+
+                        // Return the properties
+                        return props;
+                    },
+                    onUpdate: () => {
+                        // See if we are updating the status
+                        if (completeFl) {
+                            // Update the status
+                            item.update({ AppStatus: "Requesting Approval" }).execute(onUpdate);
+                        } else {
+                            // Call the update event
+                            onUpdate();
+                        }
+                    }
+                });
+            } else {
+                // Show the new form
+                ItemForm.create({
+                    webUrl: Strings.SourceUrl,
+                    onGetListInfo: props => {
+                        // Set the content type
+                        props.contentType = "TestCases";
+
+                        // Return the properties
+                        return props;
+                    },
+                    onSave: (props: IAssessmentItem) => {
+                        // Set the title
+                        props.Title = item.Title + " " + (new Date(Date.now()).toDateString());
+
+                        // Set the related app
+                        props.RelatedAppId = item.Id;
+
+                        // Return the properties
+                        return props;
+                    },
+                    onUpdate
+                });
             }
         });
     }

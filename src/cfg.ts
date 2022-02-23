@@ -292,7 +292,7 @@ export const Configuration = Helper.SPConfig({
                         "TestCase06", "TestCase07", "TestCase08", "TestCase09", "TestCase10",
                         "TestCase11", /*"TestCase12", "TestCase13", "TestCase14", "TestCase15",
                         "TestCase16", "TestCase17", "TestCase18", "TestCase19", "TestCase20",*/
-                        "TestCaseComments", "Complete", "TestCaseResponse", "RelatedApp"
+                        "TestCaseComments", "Completed", "TestCaseResponse", "RelatedApp"
                     ]
                 }
             ],
@@ -308,7 +308,6 @@ export const Configuration = Helper.SPConfig({
                     allowDeletion: false,
                     description: "",
                     format: SPTypes.ChoiceFormatType.Dropdown,
-                    required: true,
                     defaultValue: "",
                     choices: [
                         "Yes", "No", "N/A"
@@ -321,7 +320,6 @@ export const Configuration = Helper.SPConfig({
                     allowDeletion: false,
                     description: "",
                     format: SPTypes.ChoiceFormatType.Dropdown,
-                    required: true,
                     defaultValue: "",
                     choices: [
                         "Yes", "No", "N/A"
@@ -334,7 +332,6 @@ export const Configuration = Helper.SPConfig({
                     allowDeletion: false,
                     description: "",
                     format: SPTypes.ChoiceFormatType.Dropdown,
-                    required: true,
                     defaultValue: "",
                     choices: [
                         "Yes", "No"
@@ -347,7 +344,6 @@ export const Configuration = Helper.SPConfig({
                     allowDeletion: false,
                     description: "",
                     format: SPTypes.ChoiceFormatType.Dropdown,
-                    required: true,
                     defaultValue: "",
                     choices: [
                         "Yes", "No"
@@ -360,7 +356,6 @@ export const Configuration = Helper.SPConfig({
                     allowDeletion: false,
                     description: "",
                     format: SPTypes.ChoiceFormatType.Dropdown,
-                    required: true,
                     defaultValue: "",
                     choices: [
                         "Yes", "No", "N/A"
@@ -373,7 +368,6 @@ export const Configuration = Helper.SPConfig({
                     allowDeletion: false,
                     description: "",
                     format: SPTypes.ChoiceFormatType.Dropdown,
-                    required: true,
                     defaultValue: "",
                     choices: [
                         "Yes", "No", "N/A"
@@ -386,7 +380,6 @@ export const Configuration = Helper.SPConfig({
                     allowDeletion: false,
                     description: "",
                     format: SPTypes.ChoiceFormatType.Dropdown,
-                    required: true,
                     defaultValue: "",
                     choices: [
                         "Yes", "No"
@@ -399,7 +392,6 @@ export const Configuration = Helper.SPConfig({
                     allowDeletion: false,
                     description: "",
                     format: SPTypes.ChoiceFormatType.Dropdown,
-                    required: true,
                     defaultValue: "",
                     choices: [
                         "Yes", "No"
@@ -412,7 +404,6 @@ export const Configuration = Helper.SPConfig({
                     allowDeletion: false,
                     description: "",
                     format: SPTypes.ChoiceFormatType.Dropdown,
-                    required: true,
                     defaultValue: "",
                     choices: [
                         "Yes", "No"
@@ -425,7 +416,6 @@ export const Configuration = Helper.SPConfig({
                     allowDeletion: false,
                     description: "",
                     format: SPTypes.ChoiceFormatType.Dropdown,
-                    required: true,
                     defaultValue: "",
                     choices: [
                         "Yes", "No"
@@ -438,7 +428,6 @@ export const Configuration = Helper.SPConfig({
                     allowDeletion: false,
                     description: "",
                     format: SPTypes.ChoiceFormatType.Dropdown,
-                    required: true,
                     defaultValue: "",
                     choices: [
                         "Yes", "No"
@@ -451,7 +440,6 @@ export const Configuration = Helper.SPConfig({
                     allowDeletion: false,
                     description: "",
                     format: SPTypes.ChoiceFormatType.Dropdown,
-                    required: true,
                     defaultValue: "",
                     choices: [
                         "Yes", "No"
@@ -464,7 +452,6 @@ export const Configuration = Helper.SPConfig({
                     allowDeletion: false,
                     description: "",
                     format: SPTypes.ChoiceFormatType.Dropdown,
-                    required: true,
                     defaultValue: "",
                     choices: [
                         "Yes", "No"
@@ -477,7 +464,6 @@ export const Configuration = Helper.SPConfig({
                     allowDeletion: false,
                     description: "",
                     format: SPTypes.ChoiceFormatType.Dropdown,
-                    required: true,
                     defaultValue: "",
                     choices: [
                         "Yes", "No"
@@ -490,7 +476,6 @@ export const Configuration = Helper.SPConfig({
                     allowDeletion: false,
                     description: "",
                     format: SPTypes.ChoiceFormatType.Dropdown,
-                    required: true,
                     defaultValue: "",
                     choices: [
                         "Yes", "No"
@@ -503,7 +488,6 @@ export const Configuration = Helper.SPConfig({
                     allowDeletion: false,
                     description: "",
                     format: SPTypes.ChoiceFormatType.Dropdown,
-                    required: true,
                     defaultValue: "",
                     choices: [
                         "Yes", "No"
@@ -516,7 +500,6 @@ export const Configuration = Helper.SPConfig({
                     allowDeletion: false,
                     description: "",
                     format: SPTypes.ChoiceFormatType.Dropdown,
-                    required: true,
                     defaultValue: "",
                     choices: [
                         "Yes", "No"
@@ -529,7 +512,6 @@ export const Configuration = Helper.SPConfig({
                     allowDeletion: false,
                     description: "",
                     format: SPTypes.ChoiceFormatType.Dropdown,
-                    required: true,
                     defaultValue: "",
                     choices: [
                         "Yes", "No"
@@ -542,7 +524,6 @@ export const Configuration = Helper.SPConfig({
                     allowDeletion: false,
                     description: "",
                     format: SPTypes.ChoiceFormatType.Dropdown,
-                    required: true,
                     defaultValue: "",
                     choices: [
                         "Yes", "No"
@@ -555,7 +536,6 @@ export const Configuration = Helper.SPConfig({
                     allowDeletion: false,
                     description: "",
                     format: SPTypes.ChoiceFormatType.Dropdown,
-                    required: true,
                     defaultValue: "",
                     choices: [
                         "Yes", "No"
@@ -597,7 +577,6 @@ export const Configuration = Helper.SPConfig({
                     allowDeletion: false,
                     description: "Does the &quot;Support URL&quot; have appropriate information to aid users in resolving problems or contacting the app's developers?",
                     format: SPTypes.ChoiceFormatType.Dropdown,
-                    required: true,
                     defaultValue: "",
                     choices: [
                         "Yes", "No"
@@ -610,7 +589,6 @@ export const Configuration = Helper.SPConfig({
                     allowDeletion: false,
                     description: "Are the app's icon and screenshots/images valid and sufficient?",
                     format: SPTypes.ChoiceFormatType.Dropdown,
-                    required: true,
                     defaultValue: "",
                     choices: [
                         "Yes", "No"
@@ -623,7 +601,6 @@ export const Configuration = Helper.SPConfig({
                     allowDeletion: false,
                     description: "Are the app's description text fields valid and sufficient to describe the app to users?",
                     format: SPTypes.ChoiceFormatType.Dropdown,
-                    required: true,
                     defaultValue: "",
                     choices: [
                         "Yes", "No"
@@ -636,7 +613,6 @@ export const Configuration = Helper.SPConfig({
                     allowDeletion: false,
                     description: "Has the app been tested in the client environment?",
                     format: SPTypes.ChoiceFormatType.Dropdown,
-                    required: true,
                     defaultValue: "",
                     choices: [
                         "Yes", "No"
@@ -649,7 +625,6 @@ export const Configuration = Helper.SPConfig({
                     allowDeletion: false,
                     description: "Are there any open issues with the app that would cause it to not be recommended to be published to the tenant app catalog?",
                     format: SPTypes.ChoiceFormatType.Dropdown,
-                    required: true,
                     defaultValue: "",
                     choices: [
                         "Yes", "No"
@@ -662,7 +637,6 @@ export const Configuration = Helper.SPConfig({
                     allowDeletion: false,
                     description: "Are there any requests to the graph api, and is the justification valid?",
                     format: SPTypes.ChoiceFormatType.Dropdown,
-                    required: true,
                     defaultValue: "",
                     choices: [
                         "Yes", "No"
@@ -675,7 +649,6 @@ export const Configuration = Helper.SPConfig({
                     allowDeletion: false,
                     description: "Are there any requests to a custom api, and is the justification valid?",
                     format: SPTypes.ChoiceFormatType.Dropdown,
-                    required: true,
                     defaultValue: "",
                     choices: [
                         "Yes", "No"
@@ -688,7 +661,6 @@ export const Configuration = Helper.SPConfig({
                     allowDeletion: false,
                     description: "Have the external libraries of the application been reviewed for vulnerabilities?",
                     format: SPTypes.ChoiceFormatType.Dropdown,
-                    required: true,
                     defaultValue: "",
                     choices: [
                         "Yes", "No"
@@ -701,7 +673,6 @@ export const Configuration = Helper.SPConfig({
                     allowDeletion: false,
                     description: "Have the import statements been reviewed for vulnerabilities?",
                     format: SPTypes.ChoiceFormatType.Dropdown,
-                    required: true,
                     defaultValue: "",
                     choices: [
                         "Yes", "No"
@@ -714,7 +685,6 @@ export const Configuration = Helper.SPConfig({
                     allowDeletion: false,
                     description: "Have the http requests been reviewed for vulnerabilities?",
                     format: SPTypes.ChoiceFormatType.Dropdown,
-                    required: true,
                     defaultValue: "",
                     choices: [
                         "Yes", "No"
@@ -728,7 +698,6 @@ export const Configuration = Helper.SPConfig({
                     description: "Enter any applicable comments you have for the app developer based on your responses above.",
                     noteType: SPTypes.FieldNoteType.TextOnly,
                     numberOfLines: 4,
-                    required: true,
                     sortable: false
                 } as Helper.IFieldInfoNote,
                 {
@@ -777,8 +746,8 @@ export const Configuration = Helper.SPConfig({
             ],
             ViewInformation: [{
                 ViewName: "All Items",
-                ViewFields: ["RelatedApp", "Completed", "Editor"],
-                ViewQuery: '<OrderBy><FieldRef Name="ID" Ascending="FALSE" /></OrderBy>'
+                ViewFields: ["RelatedApp", "LinkTitle", "Completed", "ContentType"],
+                ViewQuery: '<OrderBy><FieldRef Name="Title" /></OrderBy>'
             }]
         }
     ]

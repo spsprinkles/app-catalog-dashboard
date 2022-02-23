@@ -264,7 +264,7 @@ export class App {
                             {
                                 content: "Completes the testing and submits the approval for deployment.",
                                 btnProps: {
-                                    text: "Testing Complete",
+                                    text: "View Tests",
                                     iconClassName: "me-1",
                                     iconSize: 20,
                                     iconType: chatSquareDots,
@@ -273,7 +273,7 @@ export class App {
                                     type: Components.ButtonTypes.OutlinePrimary,
                                     onClick: () => {
                                         // Display the review form
-                                        this._forms.review(DataSource.DocSetItem, () => {
+                                        this._forms.viewTests(DataSource.DocSetItem, () => {
                                             // Refresh the page
                                             this.refresh();
                                         });
