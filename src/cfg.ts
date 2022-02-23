@@ -262,9 +262,9 @@ export const Configuration = Helper.SPConfig({
                 BaseTemplate: SPTypes.ListTemplateType.GenericList,
                 Title: Strings.Lists.Assessments,
                 Description: "Used by developers to submit their assessments of other apps",
-                ListExperienceOptions: 2,
+                ListExperienceOptions: SPTypes.ListExperienceOptions.NewExperience,
                 AllowContentTypes: true,
-                ContentTypesEnabled: false,
+                ContentTypesEnabled: true,
                 DisableGridEditing: true,
                 EnableFolderCreation: false,
                 ExcludeFromOfflineClient: true,
@@ -276,78 +276,478 @@ export const Configuration = Helper.SPConfig({
                 EnableVersioning: true,
                 MajorVersionLimit: 50
             },
-            CustomFields: [
+            ContentTypes: [
                 {
-                    name: "SupportUrlValid",
+                    Name: "Item",
+                    FieldRefs: [
+                        "TechReview01", "TechReview02", "TechReview03", "TechReview04", "TechReview05",
+                        "TechReview06", "TechReview07", "TechReview08", "TechReview09", "TechReview10",
+                        "TechReviewComments", "Completed", "TechReviewResponse", "RelatedApp"
+                    ]
+                },
+                {
+                    Name: "TestCases",
+                    FieldRefs: [
+                        "TestCase01", "TestCase02", "TestCase03", "TestCase04", "TestCase05",
+                        "TestCase06", "TestCase07", "TestCase08", "TestCase09", "TestCase10",
+                        "TestCase11", /*"TestCase12", "TestCase13", "TestCase14", "TestCase15",
+                        "TestCase16", "TestCase17", "TestCase18", "TestCase19", "TestCase20",*/
+                        "TestCaseComments", "Complete", "TestCaseResponse", "RelatedApp"
+                    ]
+                }
+            ],
+            CustomFields: [
+                /**
+                 * Test Case Fields
+                 */
+
+                {
+                    name: "TestCase01",
+                    title: "Tested in root site?",
+                    type: Helper.SPCfgFieldType.Choice,
+                    allowDeletion: false,
+                    description: "",
+                    format: SPTypes.ChoiceFormatType.Dropdown,
+                    required: true,
+                    defaultValue: "",
+                    choices: [
+                        "Yes", "No", "N/A"
+                    ]
+                } as Helper.IFieldInfoChoice,
+                {
+                    name: "TestCase02",
+                    title: "Tested in non-root site?",
+                    type: Helper.SPCfgFieldType.Choice,
+                    allowDeletion: false,
+                    description: "",
+                    format: SPTypes.ChoiceFormatType.Dropdown,
+                    required: true,
+                    defaultValue: "",
+                    choices: [
+                        "Yes", "No", "N/A"
+                    ]
+                } as Helper.IFieldInfoChoice,
+                {
+                    name: "TestCase03",
+                    title: "Tested in Browsers?",
+                    type: Helper.SPCfgFieldType.Choice,
+                    allowDeletion: false,
+                    description: "",
+                    format: SPTypes.ChoiceFormatType.Dropdown,
+                    required: true,
+                    defaultValue: "",
+                    choices: [
+                        "Yes", "No"
+                    ]
+                } as Helper.IFieldInfoChoice,
+                {
+                    name: "TestCase04",
+                    title: "Tested in a modern page?",
+                    type: Helper.SPCfgFieldType.Choice,
+                    allowDeletion: false,
+                    description: "",
+                    format: SPTypes.ChoiceFormatType.Dropdown,
+                    required: true,
+                    defaultValue: "",
+                    choices: [
+                        "Yes", "No"
+                    ]
+                } as Helper.IFieldInfoChoice,
+                {
+                    name: "TestCase05",
+                    title: "Tested in a classic page?",
+                    type: Helper.SPCfgFieldType.Choice,
+                    allowDeletion: false,
+                    description: "",
+                    format: SPTypes.ChoiceFormatType.Dropdown,
+                    required: true,
+                    defaultValue: "",
+                    choices: [
+                        "Yes", "No", "N/A"
+                    ]
+                } as Helper.IFieldInfoChoice,
+                {
+                    name: "TestCase06",
+                    title: "Tested in Teams?",
+                    type: Helper.SPCfgFieldType.Choice,
+                    allowDeletion: false,
+                    description: "",
+                    format: SPTypes.ChoiceFormatType.Dropdown,
+                    required: true,
+                    defaultValue: "",
+                    choices: [
+                        "Yes", "No", "N/A"
+                    ]
+                } as Helper.IFieldInfoChoice,
+                {
+                    name: "TestCase07",
+                    title: "Valid webpart properties?",
+                    type: Helper.SPCfgFieldType.Choice,
+                    allowDeletion: false,
+                    description: "",
+                    format: SPTypes.ChoiceFormatType.Dropdown,
+                    required: true,
+                    defaultValue: "",
+                    choices: [
+                        "Yes", "No"
+                    ]
+                } as Helper.IFieldInfoChoice,
+                {
+                    name: "TestCase08",
+                    title: "Validation of the links?",
+                    type: Helper.SPCfgFieldType.Choice,
+                    allowDeletion: false,
+                    description: "",
+                    format: SPTypes.ChoiceFormatType.Dropdown,
+                    required: true,
+                    defaultValue: "",
+                    choices: [
+                        "Yes", "No"
+                    ]
+                } as Helper.IFieldInfoChoice,
+                {
+                    name: "TestCase09",
+                    title: "Validation of the response time?",
+                    type: Helper.SPCfgFieldType.Choice,
+                    allowDeletion: false,
+                    description: "",
+                    format: SPTypes.ChoiceFormatType.Dropdown,
+                    required: true,
+                    defaultValue: "",
+                    choices: [
+                        "Yes", "No"
+                    ]
+                } as Helper.IFieldInfoChoice,
+                {
+                    name: "TestCase10",
+                    title: "Validation of the description?",
+                    type: Helper.SPCfgFieldType.Choice,
+                    allowDeletion: false,
+                    description: "",
+                    format: SPTypes.ChoiceFormatType.Dropdown,
+                    required: true,
+                    defaultValue: "",
+                    choices: [
+                        "Yes", "No"
+                    ]
+                } as Helper.IFieldInfoChoice,
+                {
+                    name: "TestCase11",
+                    title: "Validation of the user interface?",
+                    type: Helper.SPCfgFieldType.Choice,
+                    allowDeletion: false,
+                    description: "",
+                    format: SPTypes.ChoiceFormatType.Dropdown,
+                    required: true,
+                    defaultValue: "",
+                    choices: [
+                        "Yes", "No"
+                    ]
+                } as Helper.IFieldInfoChoice,
+                {
+                    name: "TestCase12",
+                    title: "Test Case 12",
+                    type: Helper.SPCfgFieldType.Choice,
+                    allowDeletion: false,
+                    description: "",
+                    format: SPTypes.ChoiceFormatType.Dropdown,
+                    required: true,
+                    defaultValue: "",
+                    choices: [
+                        "Yes", "No"
+                    ]
+                } as Helper.IFieldInfoChoice,
+                {
+                    name: "TestCase13",
+                    title: "Test Case 13",
+                    type: Helper.SPCfgFieldType.Choice,
+                    allowDeletion: false,
+                    description: "",
+                    format: SPTypes.ChoiceFormatType.Dropdown,
+                    required: true,
+                    defaultValue: "",
+                    choices: [
+                        "Yes", "No"
+                    ]
+                } as Helper.IFieldInfoChoice,
+                {
+                    name: "TestCase14",
+                    title: "Test Case 14",
+                    type: Helper.SPCfgFieldType.Choice,
+                    allowDeletion: false,
+                    description: "",
+                    format: SPTypes.ChoiceFormatType.Dropdown,
+                    required: true,
+                    defaultValue: "",
+                    choices: [
+                        "Yes", "No"
+                    ]
+                } as Helper.IFieldInfoChoice,
+                {
+                    name: "TestCase15",
+                    title: "Test Case 15",
+                    type: Helper.SPCfgFieldType.Choice,
+                    allowDeletion: false,
+                    description: "",
+                    format: SPTypes.ChoiceFormatType.Dropdown,
+                    required: true,
+                    defaultValue: "",
+                    choices: [
+                        "Yes", "No"
+                    ]
+                } as Helper.IFieldInfoChoice,
+                {
+                    name: "TestCase16",
+                    title: "Test Case 16",
+                    type: Helper.SPCfgFieldType.Choice,
+                    allowDeletion: false,
+                    description: "",
+                    format: SPTypes.ChoiceFormatType.Dropdown,
+                    required: true,
+                    defaultValue: "",
+                    choices: [
+                        "Yes", "No"
+                    ]
+                } as Helper.IFieldInfoChoice,
+                {
+                    name: "TestCase17",
+                    title: "Test Case 17",
+                    type: Helper.SPCfgFieldType.Choice,
+                    allowDeletion: false,
+                    description: "",
+                    format: SPTypes.ChoiceFormatType.Dropdown,
+                    required: true,
+                    defaultValue: "",
+                    choices: [
+                        "Yes", "No"
+                    ]
+                } as Helper.IFieldInfoChoice,
+                {
+                    name: "TestCase18",
+                    title: "Test Case 18",
+                    type: Helper.SPCfgFieldType.Choice,
+                    allowDeletion: false,
+                    description: "",
+                    format: SPTypes.ChoiceFormatType.Dropdown,
+                    required: true,
+                    defaultValue: "",
+                    choices: [
+                        "Yes", "No"
+                    ]
+                } as Helper.IFieldInfoChoice,
+                {
+                    name: "TestCase19",
+                    title: "Test Case 19",
+                    type: Helper.SPCfgFieldType.Choice,
+                    allowDeletion: false,
+                    description: "",
+                    format: SPTypes.ChoiceFormatType.Dropdown,
+                    required: true,
+                    defaultValue: "",
+                    choices: [
+                        "Yes", "No"
+                    ]
+                } as Helper.IFieldInfoChoice,
+                {
+                    name: "TestCase20",
+                    title: "Test Case 20",
+                    type: Helper.SPCfgFieldType.Choice,
+                    allowDeletion: false,
+                    description: "",
+                    format: SPTypes.ChoiceFormatType.Dropdown,
+                    required: true,
+                    defaultValue: "",
+                    choices: [
+                        "Yes", "No"
+                    ]
+                } as Helper.IFieldInfoChoice,
+                {
+                    name: "TestCaseComments",
+                    title: "Testing Comments",
+                    type: Helper.SPCfgFieldType.Note,
+                    allowDeletion: false,
+                    description: "The comments from testing the application.",
+                    noteType: SPTypes.FieldNoteType.TextOnly
+                } as Helper.IFieldInfoNote,
+                {
+                    name: "TestCaseResponse",
+                    title: "Test Cases Response",
+                    type: Helper.SPCfgFieldType.Calculated,
+                    allowDeletion: false,
+                    format: SPTypes.DateFormat.DateTime,
+                    formula: '=IF(ISNumber(FIND("No", [Tested in root site?]&amp;[Tested in non-root site?]&amp;[Tested in Browsers?]&amp;[Tested in a modern page?]&amp;[Tested in a classic page?]&amp;[Tested in Teams?]&amp;[Valid webpart properties?]&amp;[Validation of the links?]&amp;[Validation of the response time?]&amp;[Validation of the description?]&amp;[Validation of the user interface?])), "Oppose", "Recommend")',
+                    lcid: 1033,
+                    resultType: SPTypes.FieldResultType.Text,
+                    fieldRefs: [
+                        "TestCase01", "TestCase02", "TestCase03", "TestCase04", "TestCase05",
+                        "TestCase06", "TestCase07", "TestCase08", "TestCase09", "TestCase10",
+                        "TestCase11"/*, "TestCase12", "TestCase13", "TestCase14", "TestCase15",
+                        "TestCase16", "TestCase17", "TestCase18", "TestCase19", "TestCase20"*/
+                    ]
+                } as Helper.IFieldInfoCalculated,
+
+                /**
+                 * Technical Review Fields
+                 */
+
+                {
+                    name: "TechReview01",
                     title: "Support URL",
                     type: Helper.SPCfgFieldType.Choice,
                     allowDeletion: false,
                     description: "Does the &quot;Support URL&quot; have appropriate information to aid users in resolving problems or contacting the app's developers?",
                     format: SPTypes.ChoiceFormatType.Dropdown,
                     required: true,
+                    defaultValue: "",
                     choices: [
                         "Yes", "No"
                     ]
                 } as Helper.IFieldInfoChoice,
                 {
-                    name: "IconImages",
+                    name: "TechReview02",
                     title: "Icon/Images",
                     type: Helper.SPCfgFieldType.Choice,
                     allowDeletion: false,
                     description: "Are the app's icon and screenshots/images valid and sufficient?",
                     format: SPTypes.ChoiceFormatType.Dropdown,
                     required: true,
+                    defaultValue: "",
                     choices: [
                         "Yes", "No"
                     ]
                 } as Helper.IFieldInfoChoice,
                 {
-                    name: "DescriptionText",
-                    title: "Description text",
+                    name: "TechReview03",
+                    title: "App Description",
                     type: Helper.SPCfgFieldType.Choice,
                     allowDeletion: false,
                     description: "Are the app's description text fields valid and sufficient to describe the app to users?",
                     format: SPTypes.ChoiceFormatType.Dropdown,
                     required: true,
+                    defaultValue: "",
                     choices: [
                         "Yes", "No"
                     ]
                 } as Helper.IFieldInfoChoice,
                 {
-                    name: "AppTested",
-                    title: "App tested",
+                    name: "TechReview04",
+                    title: "App Tested",
                     type: Helper.SPCfgFieldType.Choice,
                     allowDeletion: false,
-                    description: "Have you tested the app and can you confirm it's sufficiently functional?",
+                    description: "Has the app been tested in the client environment?",
                     format: SPTypes.ChoiceFormatType.Dropdown,
                     required: true,
+                    defaultValue: "",
                     choices: [
                         "Yes", "No"
                     ]
                 } as Helper.IFieldInfoChoice,
                 {
-                    name: "UnresolvedIssues",
-                    title: "Unresolved Issues?",
+                    name: "TechReview05",
+                    title: "Unresolved Issues",
                     type: Helper.SPCfgFieldType.Choice,
                     allowDeletion: false,
-                    description: "Are there any unresolved issues with the app that would cause you to not recommend the app be published to the tenant app catalog for all users to see?",
+                    description: "Are there any open issues with the app that would cause it to not be recommended to be published to the tenant app catalog?",
                     format: SPTypes.ChoiceFormatType.Dropdown,
                     required: true,
+                    defaultValue: "",
                     choices: [
                         "Yes", "No"
                     ]
                 } as Helper.IFieldInfoChoice,
                 {
-                    name: "Comments",
-                    title: "Comments",
+                    name: "TechReview06",
+                    title: "Graph API Permissions",
+                    type: Helper.SPCfgFieldType.Choice,
+                    allowDeletion: false,
+                    description: "Are there any requests to the graph api, and is the justification valid?",
+                    format: SPTypes.ChoiceFormatType.Dropdown,
+                    required: true,
+                    defaultValue: "",
+                    choices: [
+                        "Yes", "No"
+                    ]
+                } as Helper.IFieldInfoChoice,
+                {
+                    name: "TechReview07",
+                    title: "Web API Permissions",
+                    type: Helper.SPCfgFieldType.Choice,
+                    allowDeletion: false,
+                    description: "Are there any requests to a custom api, and is the justification valid?",
+                    format: SPTypes.ChoiceFormatType.Dropdown,
+                    required: true,
+                    defaultValue: "",
+                    choices: [
+                        "Yes", "No"
+                    ]
+                } as Helper.IFieldInfoChoice,
+                {
+                    name: "TechReview08",
+                    title: "External Libraries",
+                    type: Helper.SPCfgFieldType.Choice,
+                    allowDeletion: false,
+                    description: "Have the external libraries of the application been reviewed for vulnerabilities?",
+                    format: SPTypes.ChoiceFormatType.Dropdown,
+                    required: true,
+                    defaultValue: "",
+                    choices: [
+                        "Yes", "No"
+                    ]
+                } as Helper.IFieldInfoChoice,
+                {
+                    name: "TechReview09",
+                    title: "Import Statements",
+                    type: Helper.SPCfgFieldType.Choice,
+                    allowDeletion: false,
+                    description: "Have the import statements been reviewed for vulnerabilities?",
+                    format: SPTypes.ChoiceFormatType.Dropdown,
+                    required: true,
+                    defaultValue: "",
+                    choices: [
+                        "Yes", "No"
+                    ]
+                } as Helper.IFieldInfoChoice,
+                {
+                    name: "TechReview10",
+                    title: "HTTP Requests",
+                    type: Helper.SPCfgFieldType.Choice,
+                    allowDeletion: false,
+                    description: "Have the http requests been reviewed for vulnerabilities?",
+                    format: SPTypes.ChoiceFormatType.Dropdown,
+                    required: true,
+                    defaultValue: "",
+                    choices: [
+                        "Yes", "No"
+                    ]
+                } as Helper.IFieldInfoChoice,
+                {
+                    name: "TechReviewComments",
+                    title: "Technical Review Comments",
                     type: Helper.SPCfgFieldType.Note,
                     allowDeletion: false,
                     description: "Enter any applicable comments you have for the app developer based on your responses above.",
-                    noteType: SPTypes.FieldNoteType.RichText,
+                    noteType: SPTypes.FieldNoteType.TextOnly,
                     numberOfLines: 4,
                     required: true,
                     sortable: false
                 } as Helper.IFieldInfoNote,
+                {
+                    name: "TechReviewResponse",
+                    title: "Technical Review Response",
+                    type: Helper.SPCfgFieldType.Calculated,
+                    allowDeletion: false,
+                    format: SPTypes.DateFormat.DateTime,
+                    formula: '=IF(AND(ISNumber(FIND("No", [Support URL]&amp;[Icon/Images]&amp;[App Description]&amp;[App Tested]&amp;[Graph API Permissions]&amp;[Web API Permissions]&amp;[External Libraries]&amp;[Import Statements]&amp;[HTTP Requests])), [Unresolved Issues]="Yes"), "Oppose", "Recommend")',
+                    lcid: 1033,
+                    resultType: SPTypes.FieldResultType.Text,
+                    fieldRefs: [
+                        "TechReview01", "TechReview02", "TechReview03", "TechReview04", "TechReview05",
+                        "TechReview06", "TechReview07", "TechReview08", "TechReview09", "TechReview10"
+                    ]
+                } as Helper.IFieldInfoCalculated,
+
+                /** Common Fields */
+
                 {
                     name: "Completed",
                     title: "Date Completed",
@@ -373,24 +773,11 @@ export const Configuration = Helper.SPConfig({
                     showInEditForm: false,
                     showInNewForm: false,
                     showInViewForms: false
-                } as Helper.IFieldInfoLookup,
-                {
-                    name: "ResultResponse",
-                    title: "Result Response",
-                    type: Helper.SPCfgFieldType.Calculated,
-                    allowDeletion: false,
-                    format: SPTypes.DateFormat.DateTime,
-                    formula: '=IF([Support URL]&amp;[Icon/Images]&amp;[Description text]&amp;[App tested]&amp;[Unresolved Issues?]="YesYesYesYesNo","Recommend","Oppose")',
-                    lcid: 1033,
-                    resultType: SPTypes.FieldResultType.Text,
-                    fieldRefs: [
-                        "UnresolvedIssues", "AppTested", "DescriptionText", "IconImages", "SupportUrlValid"
-                    ]
-                } as Helper.IFieldInfoCalculated
+                } as Helper.IFieldInfoLookup
             ],
             ViewInformation: [{
                 ViewName: "All Items",
-                ViewFields: ["Title", "SupportUrlValid", "IconImages", "DescriptionText", "AppTested", "UnresolvedIssues", "ResultResponse", "Editor"],
+                ViewFields: ["RelatedApp", "Completed", "Editor"],
                 ViewQuery: '<OrderBy><FieldRef Name="ID" Ascending="FALSE" /></OrderBy>'
             }]
         }
