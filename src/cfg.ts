@@ -316,6 +316,8 @@ export const Configuration = Helper.SPConfig({
                     FieldRefs: [
                         "TechReview01", "TechReview02", "TechReview03", "TechReview04", "TechReview05",
                         "TechReview06", "TechReview07", "TechReview08", "TechReview09", "TechReview10",
+                        /*"TechReview11", "TechReview12", "TechReview13", "TechReview14", "TechReview15",
+                        "TechReview16", "TechReview17", "TechReview18", "TechReview19", "TechReview20",*/
                         "TechReviewComments", "Completed", "TechReviewResponse", "RelatedApp"
                     ]
                 },
@@ -725,6 +727,126 @@ export const Configuration = Helper.SPConfig({
                     ]
                 } as Helper.IFieldInfoChoice,
                 {
+                    name: "TechReview11",
+                    title: "Tech Review 11",
+                    type: Helper.SPCfgFieldType.Choice,
+                    allowDeletion: false,
+                    description: "",
+                    format: SPTypes.ChoiceFormatType.Dropdown,
+                    defaultValue: "",
+                    choices: [
+                        "Yes", "No"
+                    ]
+                } as Helper.IFieldInfoChoice,
+                {
+                    name: "TechReview12",
+                    title: "Tech Review 12",
+                    type: Helper.SPCfgFieldType.Choice,
+                    allowDeletion: false,
+                    description: "",
+                    format: SPTypes.ChoiceFormatType.Dropdown,
+                    defaultValue: "",
+                    choices: [
+                        "Yes", "No"
+                    ]
+                } as Helper.IFieldInfoChoice,
+                {
+                    name: "TechReview13",
+                    title: "Tech Review 13",
+                    type: Helper.SPCfgFieldType.Choice,
+                    allowDeletion: false,
+                    description: "",
+                    format: SPTypes.ChoiceFormatType.Dropdown,
+                    defaultValue: "",
+                    choices: [
+                        "Yes", "No"
+                    ]
+                } as Helper.IFieldInfoChoice,
+                {
+                    name: "TechReview14",
+                    title: "Tech Review 14",
+                    type: Helper.SPCfgFieldType.Choice,
+                    allowDeletion: false,
+                    description: "",
+                    format: SPTypes.ChoiceFormatType.Dropdown,
+                    defaultValue: "",
+                    choices: [
+                        "Yes", "No"
+                    ]
+                } as Helper.IFieldInfoChoice,
+                {
+                    name: "TechReview15",
+                    title: "Tech Review 15",
+                    type: Helper.SPCfgFieldType.Choice,
+                    allowDeletion: false,
+                    description: "",
+                    format: SPTypes.ChoiceFormatType.Dropdown,
+                    defaultValue: "",
+                    choices: [
+                        "Yes", "No"
+                    ]
+                } as Helper.IFieldInfoChoice,
+                {
+                    name: "TechReview16",
+                    title: "Tech Review 16",
+                    type: Helper.SPCfgFieldType.Choice,
+                    allowDeletion: false,
+                    description: "",
+                    format: SPTypes.ChoiceFormatType.Dropdown,
+                    defaultValue: "",
+                    choices: [
+                        "Yes", "No"
+                    ]
+                } as Helper.IFieldInfoChoice,
+                {
+                    name: "TechReview17",
+                    title: "Tech Review 17",
+                    type: Helper.SPCfgFieldType.Choice,
+                    allowDeletion: false,
+                    description: "",
+                    format: SPTypes.ChoiceFormatType.Dropdown,
+                    defaultValue: "",
+                    choices: [
+                        "Yes", "No"
+                    ]
+                } as Helper.IFieldInfoChoice,
+                {
+                    name: "TechReview18",
+                    title: "Tech Review 18",
+                    type: Helper.SPCfgFieldType.Choice,
+                    allowDeletion: false,
+                    description: "",
+                    format: SPTypes.ChoiceFormatType.Dropdown,
+                    defaultValue: "",
+                    choices: [
+                        "Yes", "No"
+                    ]
+                } as Helper.IFieldInfoChoice,
+                {
+                    name: "TechReview19",
+                    title: "Tech Review 19",
+                    type: Helper.SPCfgFieldType.Choice,
+                    allowDeletion: false,
+                    description: "",
+                    format: SPTypes.ChoiceFormatType.Dropdown,
+                    defaultValue: "",
+                    choices: [
+                        "Yes", "No"
+                    ]
+                } as Helper.IFieldInfoChoice,
+                {
+                    name: "TechReview20",
+                    title: "Tech Review 20",
+                    type: Helper.SPCfgFieldType.Choice,
+                    allowDeletion: false,
+                    description: "",
+                    format: SPTypes.ChoiceFormatType.Dropdown,
+                    defaultValue: "",
+                    choices: [
+                        "Yes", "No"
+                    ]
+                } as Helper.IFieldInfoChoice,
+                {
                     name: "TechReviewComments",
                     title: "Technical Review Comments",
                     type: Helper.SPCfgFieldType.Note,
@@ -745,7 +867,9 @@ export const Configuration = Helper.SPConfig({
                     resultType: SPTypes.FieldResultType.Text,
                     fieldRefs: [
                         "TechReview01", "TechReview02", "TechReview03", "TechReview04", "TechReview05",
-                        "TechReview06", "TechReview07", "TechReview08", "TechReview09", "TechReview10"
+                        "TechReview06", "TechReview07", "TechReview08", "TechReview09", "TechReview10",
+                        /*"TechReview11", "TechReview12", "TechReview13", "TechReview14", "TechReview15",
+                        "TechReview16", "TechReview17", "TechReview18", "TechReview19", "TechReview20"*/
                     ]
                 } as Helper.IFieldInfoCalculated,
 
