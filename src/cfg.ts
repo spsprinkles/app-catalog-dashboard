@@ -39,9 +39,11 @@ export const Configuration = Helper.SPConfig({
                         { Name: "AppProductID", ReadOnly: true },
                         { Name: "AppIsClientSideSolution", ReadOnly: true },
                         { Name: "AppIsDomainIsolated", ReadOnly: true },
+                        { Name: "AppSharePointMinVersion", ReadOnly: true },
                         { Name: "AppSkipFeatureDeployment", ReadOnly: true },
                         { Name: "AppVersion", ReadOnly: true },
                         "AppPublisher",
+                        "AppSponser",
                         "AppDevelopers",
                         "AppDescription",
                         "AppJustification",
@@ -113,7 +115,7 @@ export const Configuration = Helper.SPConfig({
                 },
                 {
                     name: "AppPublisher",
-                    title: "App Owner",
+                    title: "App Publisher",
                     type: Helper.SPCfgFieldType.Text,
                     description: "The organization/unit responsible for the application.",
                     allowDeletion: false,
@@ -170,6 +172,13 @@ export const Configuration = Helper.SPConfig({
                     name: "AppProductID",
                     title: "Product ID",
                     type: Helper.SPCfgFieldType.Guid,
+                    allowDeletion: false,
+                    showInNewForm: false
+                },
+                {
+                    name: "AppSharePointMinVersion",
+                    title: "SharePoint Min Version",
+                    type: Helper.SPCfgFieldType.Text,
                     allowDeletion: false,
                     showInNewForm: false
                 },

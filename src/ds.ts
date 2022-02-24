@@ -38,6 +38,7 @@ export interface IAppItem extends Types.SP.ListItem {
     AppPermissionsJustification: string;
     AppProductID: string;
     AppPublisher: string;
+    AppSharePointMinVersion?: boolean;
     AppSkipFeatureDeployment?: boolean;
     AppStatus: string;
     AppVersion: string;

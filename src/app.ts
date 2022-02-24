@@ -64,30 +64,30 @@ export class App {
 
             // Ensure the user is an approver
             if (DataSource.IsApprover) {
-                // See if the app hasn't been deployed to the tenant app catalog
-                if (DataSource.DocSetTenantApp == null) {
-                    // Delete
-                    tooltips.push({
-                        content: "Deletes the app.",
-                        btnProps: {
-                            text: "Delete App/Solution",
-                            iconClassName: "me-1",
-                            iconSize: 20,
-                            iconType: trash,
-                            isDisabled: !canEdit,
-                            isSmall: true,
-                            type: Components.ButtonTypes.OutlineDanger,
-                            onClick: () => {
-                                // Display the delete form
-                                this._forms.delete(DataSource.DocSetItem, () => {
-                                    // Redirect to the dashboard
-                                    window.open(Strings.DashboardUrl, "_self");
-                                });
-                            }
+                // Delete
+                tooltips.push({
+                    content: "Deletes the app.",
+                    btnProps: {
+                        text: "Delete App/Solution",
+                        iconClassName: "me-1",
+                        iconSize: 20,
+                        iconType: trash,
+                        isDisabled: !canEdit,
+                        isSmall: true,
+                        type: Components.ButtonTypes.OutlineDanger,
+                        onClick: () => {
+                            // Display the delete form
+                            this._forms.delete(DataSource.DocSetItem, () => {
+                                // Redirect to the dashboard
+                                window.open(Strings.DashboardUrl, "_self");
+                            });
                         }
-                    });
-                }
+                    }
+                });
+            }
 
+            // See if the app hasn't been deployed to the tenant app catalog
+            if (DataSource.DocSetTenantApp == null) {
                 // Assessment button
                 tooltips.push({
                     content: "View the last assessment of the app.",
@@ -568,7 +568,7 @@ export class App {
                                     "AppStatus",
                                     "AppDevelopers",
                                     "AppProductID",
-                                    "AppVersion"
+                                    "AppIsClientSideSolution"
                                 ]
                             });
                         }
@@ -582,7 +582,8 @@ export class App {
                                 info: DataSource.DocSetInfo,
                                 el,
                                 includeFields: [
-                                    "AppIsClientSideSolution",
+                                    "AppVersion",
+                                    "AppSharePointMinVersion",
                                     "AppIsDomainIsolated",
                                     "AppSkipFeatureDeployment",
                                     "AppAPIPermissions"

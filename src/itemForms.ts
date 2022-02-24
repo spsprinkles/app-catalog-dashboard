@@ -469,7 +469,9 @@ export class AppForms {
                 // Update the field
                 props.onControlRendering = (ctrl, field) => {
                     // See if this is a read-only field
-                    if (["AppAPIPermissions", "AppIsClientSideSolution", "AppIsDomainIsolated", "AppProductID", "AppSkipFeatureDeployment", "AppVersion", "FileLeafRef", "Title"].indexOf(field.InternalName) >= 0) {
+                    if (["AppAPIPermissions", "AppIsClientSideSolution", "AppIsDomainIsolated",
+                        "AppProductID", "AppSharePointMinVersion", "AppSkipFeatureDeployment",
+                        "AppVersion", "FileLeafRef", "Title"].indexOf(field.InternalName) >= 0) {
                         // Make it read-only
                         ctrl.isReadonly = true;
                     }
@@ -633,13 +635,16 @@ export class AppForms {
                         let elIsDomainIsolated = oDOM.documentElement.attributes["IsDomainIsolated"];
                         metadata.AppIsDomainIsolated = elIsDomainIsolated ? elIsDomainIsolated.value == "true" : false;
 
+                        // Set the sp min version flag
+                        let elSPMinVersion = oDOM.documentElement.attributes["SharePointMinVersion"];
+                        if (elSPMinVersion) { metadata.AppSharePointMinVersion = elSPMinVersion.value; }
+
                         // Set the skip feature deployment flag
                         let elSkipFeatureDeployment = oDOM.documentElement.attributes["SkipFeatureDeployment"];
                         metadata.AppSkipFeatureDeployment = elSkipFeatureDeployment ? elSkipFeatureDeployment.value == "true" : false;
 
                         //var spfxElem = oDOM.documentElement.attributes["IsClientSideSolution"]; //Not for add-ins
                         //var isSPFx = (spfxElem ? spfxElem.value : "false");
-                        //Attribute: SharePointMinVersion="16.0.0.0" // 15.0.0.0
 
                         // Set the status
                         metadata.AppStatus = "Draft";
