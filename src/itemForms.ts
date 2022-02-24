@@ -254,9 +254,9 @@ export class AppForms {
                 LoadingDialog.show();
 
                 // Retract the solution from the site collection app catalog
-                this.retract(item, false, () => {
+                this.retract(item, false, true, () => {
                     // Retract the solution from the tenant app catalog
-                    this.retract(item, true, () => {
+                    this.retract(item, true, true, () => {
                         // Update the loading dialog
                         LoadingDialog.setHeader("Deleting the Test Site");
                         LoadingDialog.setBody("Removing the test site created for this app.");
@@ -762,7 +762,7 @@ export class AppForms {
     }
 
     // Retracts the solution to the app catalog
-    retract(item: IAppItem, tenantFl: boolean, onUpdate: () => void) {
+    retract(item: IAppItem, tenantFl: boolean, removeFl: boolean, onUpdate: () => void) {
         // Show a loading dialog
         LoadingDialog.setHeader("Retracting the Package");
         LoadingDialog.setBody("Retracting the spfx package to the app catalog.");
@@ -774,11 +774,23 @@ export class AppForms {
             // Load the apps
             let web = Web(catalogUrl, { requestDigest: context.GetContextWebInformation.FormDigestValue });
             (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog()).AvailableApps(item.AppProductID).retract().execute(() => {
-                // Call the update event
-                onUpdate();
+                // See if we are removing the app
+                if (removeFl) {
+                    // Remove the app
+                    (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog()).AvailableApps(item.AppProductID).remove().execute(() => {
+                        // Call the update event
+                        onUpdate();
 
-                // Close the dialog
-                LoadingDialog.hide();
+                        // Close the dialog
+                        LoadingDialog.hide();
+                    });
+                } else {
+                    // Call the update event
+                    onUpdate();
+
+                    // Close the dialog
+                    LoadingDialog.hide();
+                }
             }, () => {
                 // This shouldn't happen
                 // The app was already checked to be deployed
