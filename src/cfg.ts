@@ -120,6 +120,16 @@ export const Configuration = Helper.SPConfig({
                     required: true
                 },
                 {
+                    name: "AppSponser",
+                    title: "Sponser",
+                    type: Helper.SPCfgFieldType.User,
+                    allowDeletion: false,
+                    description: "The sponser of the application.",
+                    required: true,
+                    selectionMode: SPTypes.FieldUserSelectionType.PeopleAndGroups,
+                    showField: "ImnName"
+                } as Helper.IFieldInfoUser,
+                {
                     name: "AppStatus",
                     title: "App Status",
                     type: Helper.SPCfgFieldType.Choice,
@@ -130,7 +140,7 @@ export const Configuration = Helper.SPConfig({
                     showInEditForm: false,
                     showInNewForm: false,
                     choices: [
-                        "Draft", "Submitted", "Rejected", "In Testing", "Pending Approval", "Pending Deployment", "Deployed"
+                        "Draft", "Submitted", "Rejected", "In Testing", "Pending Approval", "Approved"
                     ]
                 } as Helper.IFieldInfoChoice,
                 /** Fields extracted from the SPFx package */

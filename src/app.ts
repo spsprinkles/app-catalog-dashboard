@@ -355,11 +355,11 @@ export class App {
             }
 
             /**
-             * Pending Deployment State
+             * Approved State
              */
 
             // See if this app is pending deployment
-            if (DataSource.DocSetItem.AppStatus == "Pending Deployment") {
+            if (DataSource.DocSetItem.AppStatus == "Approved") {
                 // See if this is a tenant app catalog owner
                 if (DataSource.IsTenantAppCatalogOwner) {
                     // See if the app is deployed

@@ -38,13 +38,11 @@ export class AppForms {
 
                         // Update the item
                         item.update({
-                            AppStatus: "Deployed"
+                            AppStatus: "Approved"
                         }).execute(() => {
                             // Close the dialog
                             LoadingDialog.hide();
 
-                            // Execute the update event
-                            onUpdate();
                         });
                     });
                 }
@@ -408,23 +406,11 @@ export class AppForms {
             Web(DataSource.Configuration.tenantAppCatalogUrl, { requestDigest }).TenantAppCatalog().syncSolutionToTeams(item.Id).execute(
                 // Success
                 () => {
-                    // See if the item is pending deployment
-                    if (item.AppStatus == "Pending Deployment") {
-                        // Update the item
-                        item.update({ AppStatus: "Deployed" }).execute(() => {
-                            // Hide the dialog
-                            LoadingDialog.hide();
+                    // Hide the dialog
+                    LoadingDialog.hide();
 
-                            // Call the update event
-                            onUpdate();
-                        });
-                    } else {
-                        // Hide the dialog
-                        LoadingDialog.hide();
-
-                        // Call the update event
-                        onUpdate();
-                    }
+                    // Call the update event
+                    onUpdate();
                 },
 
                 // Error
