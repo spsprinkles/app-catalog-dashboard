@@ -278,19 +278,37 @@ export class AppForms {
                 }
                 // Else, we are disabling the app
                 else {
-                    // Retract the solution from the site catalog
+                    // Retract the solution from the site collection app catalog
                     this.retract(item, false, () => {
-                        // Retract the solution from the tenant
+                        // Retract the solution from the tenant app catalog
                         this.retract(item, true, () => {
                             // Update the item
                             item.update({
                                 IsAppPackageEnabled: false
                             }).execute(() => {
-                                // Close the dialog
-                                LoadingDialog.hide();
+                                // Load the test site
+                                DataSource.loadTestSite(item).then(
+                                    // Exists
+                                    web => {
+                                        // Delete the web
+                                        web.delete().execute(() => {
+                                            // Close the dialog
+                                            LoadingDialog.hide();
 
-                                // Execute the update event
-                                onUpdate();
+                                            // Execute the update event
+                                            onUpdate();
+                                        });
+                                    },
+
+                                    // Doesn't exist
+                                    () => {
+                                        // Close the dialog
+                                        LoadingDialog.hide();
+
+                                        // Execute the update event
+                                        onUpdate();
+                                    }
+                                );
                             });
                         });
                     });
