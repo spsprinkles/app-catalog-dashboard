@@ -37,6 +37,9 @@ export const Configuration = Helper.SPConfig({
                         "FileLeafRef",
                         { Name: "AppStatus", ReadOnly: true },
                         { Name: "AppProductID", ReadOnly: true },
+                        { Name: "AppIsClientSideSolution", ReadOnly: true },
+                        { Name: "AppIsDomainIsolated", ReadOnly: true },
+                        { Name: "AppSkipFeatureDeployment", ReadOnly: true },
                         { Name: "AppVersion", ReadOnly: true },
                         "AppPublisher",
                         "AppDevelopers",
@@ -140,9 +143,30 @@ export const Configuration = Helper.SPConfig({
                     showInNewForm: false
                 },
                 {
+                    name: "AppIsClientSideSolution",
+                    title: "Is ClientSide Solution",
+                    type: Helper.SPCfgFieldType.Boolean,
+                    allowDeletion: false,
+                    showInNewForm: false
+                },
+                {
+                    name: "AppIsDomainIsolated",
+                    title: "Is Domain Isolated",
+                    type: Helper.SPCfgFieldType.Boolean,
+                    allowDeletion: false,
+                    showInNewForm: false
+                },
+                {
                     name: "AppProductID",
                     title: "Product ID",
                     type: Helper.SPCfgFieldType.Guid,
+                    allowDeletion: false,
+                    showInNewForm: false
+                },
+                {
+                    name: "AppSkipFeatureDeployment",
+                    title: "Skip Feature Deployment",
+                    type: Helper.SPCfgFieldType.Boolean,
                     allowDeletion: false,
                     showInNewForm: false
                 },

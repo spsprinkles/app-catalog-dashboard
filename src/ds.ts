@@ -32,10 +32,13 @@ export interface IAppItem extends Types.SP.ListItem {
     AppDescription: string;
     AppDevelopers: { results: { Id: number; EMail: string; }[] };
     AppDevelopersId: { results: number[] };
+    AppIsClientSideSolution?: boolean;
+    AppIsDomainIsolated?: boolean;
     AppJustification: string;
     AppPermissionsJustification: string;
     AppProductID: string;
     AppPublisher: string;
+    AppSkipFeatureDeployment?: boolean;
     AppStatus: string;
     AppVersion: string;
     AuthorId: number;
@@ -247,9 +250,12 @@ export class DataSource {
                 Web(url, { requestDigest: context.GetContextWebInformation.FormDigestValue }).delete().execute(() => {
                     // Resolve the request
                     resolve();
+                }, () => {
+                    // Web doesn't exist
+                    resolve();
                 });
             }, () => {
-                // Web doesn't exist
+                // Error getting the context
                 resolve();
             });
         });

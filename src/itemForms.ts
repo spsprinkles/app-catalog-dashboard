@@ -483,7 +483,7 @@ export class AppForms {
                 // Update the field
                 props.onControlRendering = (ctrl, field) => {
                     // See if this is a read-only field
-                    if (["AppAPIPermissions", "AppProductID", "AppVersion", "FileLeafRef", "Title"].indexOf(field.InternalName) >= 0) {
+                    if (["AppAPIPermissions", "AppIsClientSideSolution", "AppIsDomainIsolated", "AppProductID", "AppSkipFeatureDeployment", "AppVersion", "FileLeafRef", "Title"].indexOf(field.InternalName) >= 0) {
                         // Make it read-only
                         ctrl.isReadonly = true;
                     }
@@ -633,14 +633,25 @@ export class AppForms {
                         let elProductId = oDOM.documentElement.attributes["ProductID"];
                         if (elProductId) { metadata.AppProductID = elProductId.value; }
 
-                        // Are we storing this?
-                        var spfxElem = oDOM.documentElement.attributes["IsClientSideSolution"]; //Not for add-ins
-                        var isSPFx = (spfxElem ? spfxElem.value : "false");
+                        // Set the client side solution flag
+                        let elIsClientSideSolution = oDOM.documentElement.attributes["IsClientSideSolution"];
+                        metadata.AppIsClientSideSolution = elIsClientSideSolution ? elIsClientSideSolution.value == "true" : false;
+
+                        // Set the domain isolation flag
+                        let elIsDomainIsolated = oDOM.documentElement.attributes["IsDomainIsolated"];
+                        metadata.AppIsDomainIsolated = elIsDomainIsolated ? elIsDomainIsolated.value == "true" : false;
+
+                        // Set the skip feature deployment flag
+                        let elSkipFeatureDeployment = oDOM.documentElement.attributes["SkipFeatureDeployment"];
+                        metadata.AppSkipFeatureDeployment = elSkipFeatureDeployment ? elSkipFeatureDeployment.value == "true" : false;
+
+                        //var spfxElem = oDOM.documentElement.attributes["IsClientSideSolution"]; //Not for add-ins
+                        //var isSPFx = (spfxElem ? spfxElem.value : "false");
 
                         //Attribute: SharePointMinVersion="16.0.0.0" // 15.0.0.0
                         //Attribute: SkipFeatureDeployment="true" (not for add-ins)
 
-                        // Update the status
+                        // Set the status
                         metadata.AppStatus = "Draft";
 
                         // Resolve the request

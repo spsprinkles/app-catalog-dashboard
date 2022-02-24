@@ -567,6 +567,7 @@ export class App {
                                     "FileLeafRef",
                                     "AppStatus",
                                     "AppDevelopers",
+                                    "AppProductID",
                                     "AppVersion"
                                 ]
                             });
@@ -581,7 +582,9 @@ export class App {
                                 info: DataSource.DocSetInfo,
                                 el,
                                 includeFields: [
-                                    "AppProductID",
+                                    "AppIsClientSideSolution",
+                                    "AppIsDomainIsolated",
+                                    "AppSkipFeatureDeployment",
                                     "AppAPIPermissions"
                                 ]
                             });
