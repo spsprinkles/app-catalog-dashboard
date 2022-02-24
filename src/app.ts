@@ -376,7 +376,7 @@ export class App {
                                 type: Components.ButtonTypes.OutlineDanger,
                                 onClick: () => {
                                     // Retract the app
-                                    this._forms.retract(DataSource.DocSetItem, true, () => {
+                                    this._forms.retract(DataSource.DocSetItem, true, false, () => {
                                         // Refresh the page
                                         this.refresh();
                                     });

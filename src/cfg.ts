@@ -1,4 +1,4 @@
-import { ContextInfo, Helper, List, SPTypes, Types, Web } from "gd-sprest-bs";
+import { Helper, List, SPTypes, Types, Web } from "gd-sprest-bs";
 import Strings from "./strings";
 
 /**
