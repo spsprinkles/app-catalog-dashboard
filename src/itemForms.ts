@@ -627,7 +627,13 @@ export class AppForms {
 
                         // Set the permissions
                         let elPermissions = oDOM.documentElement.querySelector("WebApiPermissionRequests");
-                        if (elPermissions) { metadata.AppAPIPermissions = elPermissions.innerHTML; }
+                        if (elPermissions) {
+                            metadata.AppAPIPermissions = (elPermissions.innerHTML || "")
+                                .replace(/&lt;/g, '<')
+                                .replace(/&gt;/g, '>')
+                                .replace(/&amp;/g, '&')
+                                .replace(/&quot;/g, '"');
+                        }
 
                         // Set the product id
                         let elProductId = oDOM.documentElement.attributes["ProductID"];
@@ -647,9 +653,7 @@ export class AppForms {
 
                         //var spfxElem = oDOM.documentElement.attributes["IsClientSideSolution"]; //Not for add-ins
                         //var isSPFx = (spfxElem ? spfxElem.value : "false");
-
                         //Attribute: SharePointMinVersion="16.0.0.0" // 15.0.0.0
-                        //Attribute: SkipFeatureDeployment="true" (not for add-ins)
 
                         // Set the status
                         metadata.AppStatus = "Draft";
