@@ -368,7 +368,7 @@ export class AppDashboard {
                     },
                     {
                         name: "AppPublisher",
-                        title: "Publisher"
+                        title: "App Owner"
                     },
                     {
                         name: "",
