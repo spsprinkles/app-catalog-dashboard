@@ -237,82 +237,55 @@ export class AppForms {
         // Set the header
         Modal.setHeader("Delete App/Solution Package");
 
-        // Determine if we can delete this package
-        let deleteFl = item.HasUniqueRoleAssignments != true;
-
-        // Set the body based on the flag
-        if (deleteFl) {
-            // Set the body
-            Modal.setBody("Are you sure you want to delete this app package? This will remove it from the tenant app catalog.");
-        } else {
-            // Set the body
-            Modal.setBody("This package is already published and cannot be deleted. Would you like to disable it?");
-        }
+        // Set the body
+        Modal.setBody("Are you sure you want to delete this app package? This will remove it from the tenant app catalog.");
 
         // Render the footer
         Modal.setFooter(Components.Button({
-            text: deleteFl ? "Delete" : "Disable",
+            text: "Delete",
             type: Components.ButtonTypes.OutlineDanger,
             onClick: () => {
                 // Close the modal
                 Modal.hide();
 
                 // Show a loading dialog
-                LoadingDialog.setHeader(deleteFl ? "Deleting the App" : "Disabling the App");
-                LoadingDialog.setBody("This dialog will close after the app is updated.");
+                LoadingDialog.setHeader("Retracting the App");
+                LoadingDialog.setBody("Removing the app from the app catalog(s).");
                 LoadingDialog.show();
 
-                // See if we are deleting the package
-                if (deleteFl) {
-                    // Delete the assessments w/ this app
-                    this.deleteAssessments(item).then(() => {
-                        // Delete this folder
-                        item.delete().execute(() => {
-                            // Close the dialog
-                            LoadingDialog.hide();
+                // Retract the solution from the site collection app catalog
+                this.retract(item, false, () => {
+                    // Retract the solution from the tenant app catalog
+                    this.retract(item, true, () => {
+                        // Update the loading dialog
+                        LoadingDialog.setHeader("Deleting the Test Site");
+                        LoadingDialog.setBody("Removing the test site created for this app.");
+                        LoadingDialog.show();
 
-                            // Call the update event
-                            onUpdate();
-                        });
-                    });
-                }
-                // Else, we are disabling the app
-                else {
-                    // Retract the solution from the site collection app catalog
-                    this.retract(item, false, () => {
-                        // Retract the solution from the tenant app catalog
-                        this.retract(item, true, () => {
-                            // Update the item
-                            item.update({
-                                IsAppPackageEnabled: false
-                            }).execute(() => {
-                                // Load the test site
-                                DataSource.loadTestSite(item).then(
-                                    // Exists
-                                    web => {
-                                        // Delete the web
-                                        web.delete().execute(() => {
-                                            // Close the dialog
-                                            LoadingDialog.hide();
+                        // Delete the test site
+                        DataSource.deleteTestSite(item).then(() => {
+                            // Update the loading dialog
+                            LoadingDialog.setHeader("Removing Assessments");
+                            LoadingDialog.setBody("Removing the assessments associated with this app.");
 
-                                            // Execute the update event
-                                            onUpdate();
-                                        });
-                                    },
+                            // Delete the assessments w/ this app
+                            this.deleteAssessments(item).then(() => {
+                                // Update the loading dialog
+                                LoadingDialog.setHeader("Deleting the App Request");
+                                LoadingDialog.setBody("This dialog will close after the app request is deleted.");
 
-                                    // Doesn't exist
-                                    () => {
-                                        // Close the dialog
-                                        LoadingDialog.hide();
+                                // Delete this folder
+                                item.delete().execute(() => {
+                                    // Close the dialog
+                                    LoadingDialog.hide();
 
-                                        // Execute the update event
-                                        onUpdate();
-                                    }
-                                );
+                                    // Execute the update event
+                                    onUpdate();
+                                });
                             });
                         });
                     });
-                }
+                });
             }
         }).el);
 

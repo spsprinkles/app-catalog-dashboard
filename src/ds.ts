@@ -234,6 +234,27 @@ export class DataSource {
         });
     }
 
+    // Deletes the app test site
+    static deleteTestSite(item: IAppItem): PromiseLike<void> {
+        // Return a promise
+        return new Promise((resolve) => {
+            // Get the url to the test site
+            let url = [this.Configuration.appCatalogUrl, item.AppProductID].join('/');
+
+            // Get the web context
+            ContextInfo.getWeb(url).execute(context => {
+                // Delete the web
+                Web(url, { requestDigest: context.GetContextWebInformation.FormDigestValue }).delete().execute(() => {
+                    // Resolve the request
+                    resolve();
+                });
+            }, () => {
+                // Web doesn't exist
+                resolve();
+            });
+        });
+    }
+
     // Loads the app test site
     static loadTestSite(item: IAppItem): PromiseLike<Types.SP.Web> {
         // Return a promise
