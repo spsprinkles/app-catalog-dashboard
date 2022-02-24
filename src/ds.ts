@@ -122,36 +122,11 @@ export class DataSource {
         });
     }
 
-    // Gets the document set item id from the query string
-    private static _docSetItemId: number = 0;
-    static get IsDocSet(): boolean { return this.DocSetItemId > 0; }
-    static get DocSetItemId(): number {
-        // Return a valid value
-        if (this._docSetItemId <= 0) {
-            // Get the id from the querystring
-            let qs = document.location.search.split('?');
-            qs = qs.length > 1 ? qs[1].split('&') : [];
-            for (let i = 0; i < qs.length; i++) {
-                let qsItem = qs[i].split('=');
-                let key = qsItem[0].toLowerCase();
-                let value = qsItem[1];
-
-                // See if this is the "id" key
-                if (key == "id") {
-                    // Return the item
-                    this._docSetItemId = parseInt(value);
-                }
-            }
-        }
-
-        // Return the workspace item id
-        return this._docSetItemId;
-    }
-
     // Loads the document set item
     private static _docSetInfo: Helper.IListFormResult = null;
     static get DocSetInfo(): Helper.IListFormResult { return this._docSetInfo; }
-    static get DocSetItem(): IAppItem { return this._docSetInfo.item as any; }
+    static get DocSetItem(): IAppItem { return this.DocSetInfo ? this.DocSetInfo.item as any : null; }
+    static get DocSetItemId(): number { return this.DocSetItem ? this.DocSetItem.Id : 0; }
     static loadDocSet(id?: number): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve, reject) => {
@@ -171,8 +146,14 @@ export class DataSource {
                 // Save the info
                 this._docSetInfo = info;
 
-                // Resolve the request
-                resolve();
+                // Load the site collection apps
+                this.loadSiteCollectionApps().then(() => {
+                    // Load the tenant apps
+                    this.loadTenantApps().then(() => {
+                        // Resolve the request
+                        resolve();
+                    }, reject);
+                }, reject);
             }, reject);
         });
     }
@@ -444,7 +425,7 @@ export class DataSource {
             // See if the app catalog is defined
             if (this.Configuration.appCatalogUrl) {
                 // Ensure the user is an owner of the site
-                Web(this.Configuration.appCatalogUrl).AssociatedOwnerGroup().Users().getById(ContextInfo.userId).execute(user => {
+                Web(this.Configuration.appCatalogUrl).AssociatedOwnerGroup().Users().getByEmail(ContextInfo.userEmail).execute(user => {
                     // Ensure the user is an owner
                     if (user && user.Id > 0) {
                         // Set the flag
@@ -502,17 +483,17 @@ export class DataSource {
     static loadTenantApps(): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve, reject) => {
-            // See if the app catalog is defined
-            if (this.Configuration.appCatalogUrl) {
+            // See if the tenant app catalog is defined
+            if (this.Configuration.tenantAppCatalogUrl) {
                 // Ensure the user is an owner of the site
-                Web(this.Configuration.appCatalogUrl).AssociatedOwnerGroup().Users().getById(ContextInfo.userId).execute(user => {
+                Web(this.Configuration.tenantAppCatalogUrl).AssociatedOwnerGroup().Users().getByEmail(ContextInfo.userEmail).execute(user => {
                     // Ensure the user is an owner
                     if (user && user.Id > 0) {
                         // Set the flag
                         this._isTenantAppCatalogOwner = true;
 
                         // Load the available apps
-                        Web(this.Configuration.appCatalogUrl).TenantAppCatalog().AvailableApps().execute(apps => {
+                        Web(this.Configuration.tenantAppCatalogUrl).TenantAppCatalog().AvailableApps().execute(apps => {
                             // Set the apps
                             this._tenantApps = apps.results;
 

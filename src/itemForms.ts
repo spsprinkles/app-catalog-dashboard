@@ -29,20 +29,23 @@ export class AppForms {
                     // Close the modal
                     Modal.hide();
 
-                    // Show a loading dialog
-                    LoadingDialog.setHeader("Approving the App");
-                    LoadingDialog.setBody("This dialog will close after the app is approved.");
-                    LoadingDialog.show();
+                    // Deploy the app
+                    this.deploy(item, true, () => {
+                        // Show a loading dialog
+                        LoadingDialog.setHeader("Completing the Deployment");
+                        LoadingDialog.setBody("This dialog will close after the app is approved.");
+                        LoadingDialog.show();
 
-                    // Update the item
-                    item.update({
-                        AppStatus: "Approved"
-                    }).execute(() => {
-                        // Close the dialog
-                        LoadingDialog.hide();
+                        // Update the item
+                        item.update({
+                            AppStatus: "Deployed"
+                        }).execute(() => {
+                            // Close the dialog
+                            LoadingDialog.hide();
 
-                        // Execute the update event
-                        onUpdate();
+                            // Execute the update event
+                            onUpdate();
+                        });
                     });
                 }
             }
@@ -414,11 +417,23 @@ export class AppForms {
             Web(DataSource.Configuration.tenantAppCatalogUrl, { requestDigest }).TenantAppCatalog().syncSolutionToTeams(item.Id).execute(
                 // Success
                 () => {
-                    // Hide the dialog
-                    LoadingDialog.hide();
+                    // See if the item is pending deployment
+                    if (item.AppStatus == "Pending Deployment") {
+                        // Update the item
+                        item.update({ AppStatus: "Deployed" }).execute(() => {
+                            // Hide the dialog
+                            LoadingDialog.hide();
 
-                    // Call the update event
-                    onUpdate();
+                            // Call the update event
+                            onUpdate();
+                        });
+                    } else {
+                        // Hide the dialog
+                        LoadingDialog.hide();
+
+                        // Call the update event
+                        onUpdate();
+                    }
                 },
 
                 // Error
@@ -530,25 +545,8 @@ export class AppForms {
                 Filter: "RelatedAppId eq " + item.Id + " and ContentType eq '" + (testFl ? "TestCases" : "Item") + "'",
                 OrderBy: ["Completed desc"]
             }).execute(items => {
-                // Parse the results
-                for (let i = 0; i < items.results.length; i++) {
-                    let item: IAssessmentItem = items.results[i] as any;
-
-                    // See if this is not completed
-                    if (item.Completed == null) {
-                        // Resolve the request
-                        resolve(item);
-                        return;
-                    }
-                    // Else, see if we are viewing the last assessment
-                    else if (lastFl) {
-                        resolve(item);
-                        return;
-                    }
-                }
-
-                // Not found
-                resolve(null);
+                // Return the last item
+                resolve(items.results[0] as any);
             }, reject);
         });
     }
@@ -836,6 +834,32 @@ export class AppForms {
                             }
                         })
                     },
+                    onCreateEditForm: props => {
+                        // Set the rendering event
+                        props.onControlRendering = (props, field) => {
+                            // See if this is a test case field
+                            if (field.InternalName.indexOf("TechReview") == 0 && field.FieldTypeKind == SPTypes.FieldType.Choice) {
+                                // Set the validation
+                                props.onValidate = (ctrl, results) => {
+                                    // See if the complete flag is set
+                                    if (completeFl) {
+                                        // Set the flag
+                                        let selectedItem: Components.IDropdownItem = results.value;
+                                        results.isValid = selectedItem && selectedItem.text ? true : false;
+
+                                        // Set the error message
+                                        results.invalidMessage = "A selection is required.";
+                                    }
+
+                                    // Return the results
+                                    return results;
+                                }
+                            }
+                        }
+
+                        // Return the properties
+                        return props;
+                    },
                     onSave: (props: IAssessmentItem) => {
                         // See if we are completing the assessment
                         if (completeFl) {
@@ -850,7 +874,7 @@ export class AppForms {
                         // See if we are updating the status
                         if (completeFl) {
                             // Update the status
-                            item.update({ AppStatus: "Requesting Approval" }).execute(onUpdate);
+                            item.update({ AppStatus: "Pending Deployment" }).execute(onUpdate);
                         } else {
                             // Call the update event
                             onUpdate();
@@ -875,16 +899,11 @@ export class AppForms {
                         return props;
                     },
                     onSave: (props: IAssessmentItem) => {
+                        // Set the title
+                        props.Title = item.Title + " Review " + (new Date(Date.now()).toDateString());
+
                         // Set the item id
                         props.RelatedAppId = item.Id;
-
-                        // Update the status of the current item
-                        if (item.AppStatus == "Submitted") {
-                            // Update the status
-                            item.update({
-                                AppStatus: "In Review"
-                            }).execute(onUpdate);
-                        }
 
                         // Return the properties
                         return props;
@@ -1120,6 +1139,13 @@ export class AppForms {
                 ItemForm.edit({
                     itemId: assessment.Id,
                     webUrl: Strings.SourceUrl,
+                    onGetListInfo: props => {
+                        // Set the content type
+                        props.contentType = "TestCases";
+
+                        // Return the properties
+                        return props;
+                    },
                     onSetHeader: el => {
                         // Render an alert
                         alert = Components.Alert({
@@ -1134,9 +1160,9 @@ export class AppForms {
                         // Render a completed button
                         let tooltip = Components.Tooltip({
                             el,
-                            content: "Completes the review of the app.",
+                            content: "Completes the review of the app. You must update the item to complete it.",
                             btnProps: {
-                                text: "Complete Review",
+                                text: "Complete Review on Save",
                                 type: Components.ButtonTypes.OutlineSuccess,
                                 onClick: () => {
                                     // Set the flag
@@ -1150,6 +1176,32 @@ export class AppForms {
                                 }
                             }
                         })
+                    },
+                    onCreateEditForm: props => {
+                        // Set the rendering event
+                        props.onControlRendering = (props, field) => {
+                            // See if this is a test case field
+                            if (field.InternalName.indexOf("TestCase") == 0 && field.FieldTypeKind == SPTypes.FieldType.Choice) {
+                                // Set the validation
+                                props.onValidate = (ctrl, results) => {
+                                    // See if the complete flag is set
+                                    if (completeFl) {
+                                        // Set the flag
+                                        let selectedItem: Components.IDropdownItem = results.value;
+                                        results.isValid = selectedItem && selectedItem.text ? true : false;
+
+                                        // Set the error message
+                                        results.invalidMessage = "A selection is required.";
+                                    }
+
+                                    // Return the results
+                                    return results;
+                                }
+                            }
+                        }
+
+                        // Return the properties
+                        return props;
                     },
                     onSave: (props: IAssessmentItem) => {
                         // See if we are completing the assessment
@@ -1165,7 +1217,7 @@ export class AppForms {
                         // See if we are updating the status
                         if (completeFl) {
                             // Update the status
-                            item.update({ AppStatus: "Requesting Approval" }).execute(onUpdate);
+                            item.update({ AppStatus: "Pending Approval" }).execute(onUpdate);
                         } else {
                             // Call the update event
                             onUpdate();
@@ -1185,7 +1237,7 @@ export class AppForms {
                     },
                     onSave: (props: IAssessmentItem) => {
                         // Set the title
-                        props.Title = item.Title + " " + (new Date(Date.now()).toDateString());
+                        props.Title = item.Title + " Tests " + (new Date(Date.now()).toDateString());
 
                         // Set the related app
                         props.RelatedAppId = item.Id;

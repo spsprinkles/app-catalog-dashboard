@@ -46,7 +46,7 @@ const GlobalVariable = {
                     new UserAgreement();
                 }
                 // Else, see if this is a document set and we are not in teams
-                else if (!Strings.IsTeams && DataSource.IsDocSet) {
+                else if (!Strings.IsTeams && DataSource.DocSetItem) {
                     // Create the application
                     new App(elAppDetails);
                 } else {
