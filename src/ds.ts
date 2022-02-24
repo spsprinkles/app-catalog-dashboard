@@ -127,6 +127,10 @@ export class DataSource {
     static get DocSetInfo(): Helper.IListFormResult { return this._docSetInfo; }
     static get DocSetItem(): IAppItem { return this.DocSetInfo ? this.DocSetInfo.item as any : null; }
     static get DocSetItemId(): number { return this.DocSetItem ? this.DocSetItem.Id : 0; }
+    private static _docSetSCApp: Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata = null;
+    static get DocSetSCApp(): Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata { return this._docSetSCApp; }
+    private static _docSetTenantApp: Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata = null;
+    static get DocSetTenantApp(): Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata { return this._docSetTenantApp; }
     static loadDocSet(id?: number): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve, reject) => {
@@ -147,9 +151,9 @@ export class DataSource {
                 this._docSetInfo = info;
 
                 // Load the site collection apps
-                this.loadSiteCollectionApps().then(() => {
+                this.loadSiteCollectionApp(this.DocSetItem.AppProductID).then(() => {
                     // Load the tenant apps
-                    this.loadTenantApps().then(() => {
+                    this.loadTenantApp(this.DocSetItem.AppProductID).then(() => {
                         // Resolve the request
                         resolve();
                     }, reject);
@@ -419,6 +423,25 @@ export class DataSource {
         // App not found
         return null;
     }
+    static loadSiteCollectionApp(id: string): PromiseLike<void> {
+        // Return a promise
+        return new Promise((resolve) => {
+            // See if the app catalog is defined
+            if (this.Configuration.appCatalogUrl) {
+                // Load the available apps
+                Web(this.Configuration.appCatalogUrl).SiteCollectionAppCatalog().AvailableApps(id).execute(app => {
+                    // Set the app
+                    this._docSetSCApp = app;
+
+                    // Resolve the request
+                    resolve();
+                }, () => {
+                    // App not found, resolve the request
+                    resolve();
+                });
+            }
+        });
+    }
     static loadSiteCollectionApps(): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve) => {
@@ -479,6 +502,25 @@ export class DataSource {
 
         // App not found
         return null;
+    }
+    static loadTenantApp(id: string): PromiseLike<void> {
+        // Return a promise
+        return new Promise((resolve) => {
+            // See if the app catalog is defined
+            if (this.Configuration.tenantAppCatalogUrl) {
+                // Load the available apps
+                Web(this.Configuration.tenantAppCatalogUrl).TenantAppCatalog().AvailableApps(id).execute(app => {
+                    // Set the app
+                    this._docSetTenantApp = app;
+
+                    // Resolve the request
+                    resolve();
+                }, () => {
+                    // App not found, resolve the request
+                    resolve();
+                });
+            }
+        });
     }
     static loadTenantApps(): PromiseLike<void> {
         // Return a promise

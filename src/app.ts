@@ -64,11 +64,8 @@ export class App {
 
             // Ensure the user is an approver
             if (DataSource.IsApprover) {
-                // See if the app is not in the tenant app catalog
-                let app = DataSource.getTenantAppById(DataSource.DocSetItem.AppProductID);
-
-                // See if the app hasn't been deployed
-                if (app == null) {
+                // See if the app hasn't been deployed to the tenant app catalog
+                if (DataSource.DocSetTenantApp == null) {
                     // Delete
                     tooltips.push({
                         content: "Deletes the app.",
@@ -365,11 +362,8 @@ export class App {
             if (DataSource.DocSetItem.AppStatus == "Pending Deployment") {
                 // See if this is a tenant app catalog owner
                 if (DataSource.IsTenantAppCatalogOwner) {
-                    // See if the app is not in the tenant app catalog
-                    let app = DataSource.getTenantAppById(DataSource.DocSetItem.AppProductID);
-
                     // See if the app is deployed
-                    if (app && app.Deployed) {
+                    if (DataSource.DocSetTenantApp && DataSource.DocSetTenantApp.Deployed) {
                         // Retract
                         tooltips.push({
                             content: "Retracts the solution from the tenant app catalog.",
@@ -396,7 +390,7 @@ export class App {
                             let web = Web(DataSource.Configuration.tenantAppCatalogUrl, { requestDigest });
 
                             // Ensure this app can be deployed to the tenant
-                            web.TenantAppCatalog().solutionContainsTeamsComponent(app.ID).execute((resp: any) => {
+                            web.TenantAppCatalog().solutionContainsTeamsComponent(DataSource.DocSetTenantApp.ID).execute((resp: any) => {
                                 // See if we can deploy this app to teams
                                 if (resp.SolutionContainsTeamsComponent) {
                                     // Add the deploy to teams button
