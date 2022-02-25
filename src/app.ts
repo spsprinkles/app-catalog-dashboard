@@ -33,7 +33,8 @@ export class App {
         this._el.innerHTML = `
             <div id="app-dashboard" class="row">
                 <div id="app-nav" class="col-12"></div>
-                <div id="app-info" class="col-12"></div>
+                <div id="app-info" class="col-9"></div>
+                <div id="app-actions" class="col-3"></div>
                 <div id="app-docs" class="col-12 d-none"></div>
             </div>
         `.trim();
@@ -51,6 +52,7 @@ export class App {
         this.renderDocuments(docSetId);
     }
 
+    // Delete this method
     // Loads the actions available for the user
     private loadActions(): PromiseLike<Components.ITooltipProps[]> {
         let canEdit = Common.canEdit(DataSource.DocSetItem);
@@ -250,10 +252,7 @@ export class App {
                                     type: Components.ButtonTypes.OutlinePrimary,
                                     onClick: () => {
                                         // Display the review form
-                                        this._forms.viewTests(DataSource.DocSetItem, () => {
-                                            // Refresh the page
-                                            this.refresh();
-                                        });
+                                        this._forms.displayTestCases(DataSource.DocSetItem);
                                     }
                                 }
                             }
@@ -319,7 +318,7 @@ export class App {
                                 type: Components.ButtonTypes.OutlinePrimary,
                                 onClick: () => {
                                     // Display the review form
-                                    this._forms.review(DataSource.DocSetItem, () => {
+                                    this._forms.editTechReview(DataSource.DocSetItem, () => {
                                         // Refresh the page
                                         this.refresh();
                                     });
@@ -491,33 +490,373 @@ export class App {
 
     // Renders the dashboard
     private renderActions() {
-        // Load the actions
-        this.loadActions().then(tooltips => {
-            // Render a card
-            Components.Card({
-                el: this._el.querySelector("#app-info .card-group"),
-                body: [{
-                    title: "Actions",
-                    onRender: el => {
-                        // Render the actions
-                        let ttg = Components.TooltipGroup({
-                            el,
-                            className: "w-50",
-                            isVertical: true,
-                            tooltipOptions: {
-                                maxWidth: "200px"
-                            },
-                            tooltipPlacement: Components.TooltipPlacements.Right,
-                            tooltips
+        // Clear the actions
+        let elActions = this._el.querySelector("#app-actions");
+        while (elActions.firstChild) { elActions.removeChild(elActions.firstChild); }
+
+        // Render a card
+        let elActionButtons = null;
+        Components.Card({
+            el: elActions,
+            body: [{
+                title: "Actions",
+                onRender: el => {
+                    // Set the element
+                    elActionButtons = el;
+                }
+            }]
+        });
+
+        // Ensure the actions have been defined
+        let approvals = DataSource.Configuration.approvals;
+        let actions = approvals ? approvals[DataSource.DocSetItem.AppStatus] : null;
+        if (actions == null || actions.length == 0) { return; }
+
+        // Determine if the user can edit items
+        let canEdit = Common.canEdit(DataSource.DocSetItem);
+
+        // Parse the actions
+        for (let i = 0; i < actions.length; i++) {
+            // Render the action button
+            switch (actions[i]) {
+                // Approve/Reject
+                case "ApproveReject":
+                    break;
+
+                // Delete
+                case "Delete":
+                    // Ensure this is an approver
+                    if (DataSource.IsApprover) {
+                        // Render the button
+                        Components.Tooltip({
+                            el: elActionButtons,
+                            content: "Deletes the app.",
+                            btnProps: {
+                                text: "Delete App/Solution",
+                                iconClassName: "me-1",
+                                iconSize: 20,
+                                iconType: trash,
+                                isSmall: true,
+                                type: Components.ButtonTypes.OutlineDanger,
+                                onClick: () => {
+                                    // Display the delete form
+                                    this._forms.delete(DataSource.DocSetItem, () => {
+                                        // Redirect to the dashboard
+                                        window.open(Strings.DashboardUrl, "_self");
+                                    });
+                                }
+                            }
+                        });
+                    }
+                    break;
+
+                // Delete Test Site
+                case "DeleteTestSite":
+                    break;
+
+                // Deploy Site Catalog
+                case "DeploySiteCatalog":
+                    break;
+
+                // Deploy Tenant Catalog
+                case "DeployTenantCatalog":
+                    // See if the app is deployed
+                    if (DataSource.DocSetTenantApp && DataSource.DocSetTenantApp.Deployed) {
+                        // Render the retract button
+                        Components.Tooltip({
+                            el: elActionButtons,
+                            content: "Retracts the solution from the tenant app catalog.",
+                            btnProps: {
+                                text: "Retract from Tenant",
+                                iconClassName: "me-1",
+                                iconSize: 20,
+                                //iconType: trash,
+                                isDisabled: DataSource.IsTenantAppCatalogOwner,
+                                isSmall: true,
+                                type: Components.ButtonTypes.OutlineDanger,
+                                onClick: () => {
+                                    // Retract the app
+                                    this._forms.retract(DataSource.DocSetItem, true, false, () => {
+                                        // Refresh the page
+                                        this.refresh();
+                                    });
+                                }
+                            }
                         });
 
-                        // Fix weird alignment issue
-                        let elButton = ttg.el.querySelector("button:first-child") as HTMLButtonElement;
-                        elButton ? elButton.style.marginLeft = "-1px" : null;
+                        // Load the context of the app catalog
+                        ContextInfo.getWeb(DataSource.Configuration.tenantAppCatalogUrl).execute(context => {
+                            let requestDigest = context.GetContextWebInformation.FormDigestValue;
+                            let web = Web(DataSource.Configuration.tenantAppCatalogUrl, { requestDigest });
+
+                            // Ensure this app can be deployed to the tenant
+                            web.TenantAppCatalog().solutionContainsTeamsComponent(DataSource.DocSetTenantApp.ID).execute((resp: any) => {
+                                // See if we can deploy this app to teams
+                                if (resp.SolutionContainsTeamsComponent) {
+                                    // Render the deploy to teams button
+                                    Components.Tooltip({
+                                        el: elActionButtons,
+                                        content: "Deploys the solution to Teams.",
+                                        btnProps: {
+                                            text: "Deploy to Teams",
+                                            iconClassName: "me-1",
+                                            iconSize: 20,
+                                            //iconType: trash,
+                                            isDisabled: DataSource.IsTenantAppCatalogOwner,
+                                            isSmall: true,
+                                            type: Components.ButtonTypes.OutlineWarning,
+                                            onClick: () => {
+                                                // Deploy the app
+                                                this._forms.deployToTeams(DataSource.DocSetItem, () => {
+                                                    // Refresh the page
+                                                    this.refresh();
+                                                });
+                                            }
+                                        }
+                                    });
+                                }
+                            });
+                        });
+                    } else {
+                        // Render the deploy button
+                        Components.Tooltip({
+                            el: elActionButtons,
+                            content: "Approves the application for deployment.",
+                            btnProps: {
+                                text: "Deploy",
+                                iconClassName: "me-1",
+                                iconSize: 20,
+                                //iconType: trash,
+                                isSmall: true,
+                                type: Components.ButtonTypes.OutlineSuccess,
+                                onClick: () => {
+                                    // Approve the app
+                                    this._forms.approveForDeployment(DataSource.DocSetItem, () => {
+                                        // Refresh the page
+                                        this.refresh();
+                                    });
+                                }
+                            }
+                        });
                     }
-                }]
-            });
-        });
+                    break;
+
+                // Edit
+                case "Edit":
+                    // Render the button
+                    Components.Tooltip({
+                        el: elActionButtons,
+                        content: "Displays the edit form to update the app properties.",
+                        btnProps: {
+                            text: "Edit Properties",
+                            iconClassName: "me-1",
+                            iconSize: 20,
+                            iconType: pencilSquare,
+                            isDisabled: !canEdit,
+                            isSmall: true,
+                            type: Components.ButtonTypes.OutlineSecondary,
+                            onClick: () => {
+                                // Display the edit form
+                                this._forms.edit(DataSource.DocSetItem.Id, () => {
+                                    // Refresh the page
+                                    this.refresh();
+                                });
+                            }
+                        }
+                    });
+                    break;
+
+                // Edit Tech Review
+                case "EditTechReview":
+                    // Render the button
+                    Components.Tooltip({
+                        el: elActionButtons,
+                        content: "Edits the technical review for this app.",
+                        btnProps: {
+                            text: "Edit Technical Review",
+                            iconClassName: "me-1",
+                            iconSize: 20,
+                            iconType: chatSquareDots,
+                            isSmall: true,
+                            type: Components.ButtonTypes.OutlinePrimary,
+                            onClick: () => {
+                                // Display the test cases
+                                this._forms.editTechReview(DataSource.DocSetItem, () => {
+                                    // Refresh the page
+                                    this.refresh();
+                                });
+                            }
+                        }
+                    });
+                    break;
+
+                // Edit Test Cases
+                case "EditTestCases":
+                    // Render the button
+                    Components.Tooltip({
+                        el: elActionButtons,
+                        content: "Edit the test cases for this app.",
+                        btnProps: {
+                            text: "Edit Test Cases",
+                            iconClassName: "me-1",
+                            iconSize: 20,
+                            iconType: chatSquareDots,
+                            isDisabled: !canEdit,
+                            isSmall: true,
+                            type: Components.ButtonTypes.OutlinePrimary,
+                            onClick: () => {
+                                // Display the review form
+                                this._forms.editTestCases(DataSource.DocSetItem, () => {
+                                    // Refresh the page
+                                    this.refresh();
+                                });
+                            }
+                        }
+                    });
+                    break;
+
+                // Submit
+                case "Submit":
+                    // Render the button
+                    Components.Tooltip({
+                        el: elActionButtons,
+                        content: "Submits the app for approval",
+                        btnProps: {
+                            text: "Submit for Approval",
+                            iconClassName: "me-1",
+                            iconSize: 20,
+                            iconType: appIndicator,
+                            isDisabled: !canEdit,
+                            isSmall: true,
+                            type: Components.ButtonTypes.OutlinePrimary,
+                            onClick: () => {
+                                // Display the submit form
+                                this._forms.submit(DataSource.DocSetItem, () => {
+                                    // Refresh the page
+                                    this.refresh();
+                                });
+                            }
+                        }
+                    });
+                    break;
+
+                // Test Site
+                case "TestSite":
+                    // See if a test site exists
+                    DataSource.loadTestSite(DataSource.DocSetItem).then(
+                        // Test site exists
+                        web => {
+                            // Render the view button
+                            Components.Tooltip({
+                                el: elActionButtons,
+                                content: "Opens the test site in a new tab.",
+                                btnProps: {
+                                    text: "View Test Site",
+                                    iconClassName: "me-1",
+                                    iconSize: 20,
+                                    iconType: chatSquareDots,
+                                    isSmall: true,
+                                    type: Components.ButtonTypes.OutlinePrimary,
+                                    onClick: () => {
+                                        // Open the test site in a new tab
+                                        window.open(web.Url, "_blank");
+                                    }
+                                }
+                            });
+                        },
+
+                        // Test site doesn't exist
+                        () => {
+                            // Render the create button
+                            Components.Tooltip({
+                                el: elActionButtons,
+                                content: "Creates the test site for the app.",
+                                btnProps: {
+                                    text: "Create Test Site",
+                                    iconClassName: "me-1",
+                                    iconSize: 20,
+                                    iconType: chatSquareDots,
+                                    isDisabled: !canEdit,
+                                    isSmall: true,
+                                    type: Components.ButtonTypes.OutlinePrimary,
+                                    onClick: () => {
+                                        // Display the create test site form
+                                        this._forms.createTestSite(DataSource.DocSetItem, () => {
+                                            // Refresh the page
+                                            this.refresh();
+                                        });
+                                    }
+                                }
+                            });
+                        }
+                    );
+                    break;
+
+                // View
+                case "View":
+                    // Render the button
+                    Components.Tooltip({
+                        el: elActionButtons,
+                        content: "Displays the the app properties.",
+                        btnProps: {
+                            text: "View Properties",
+                            iconClassName: "me-1",
+                            iconSize: 20,
+                            iconType: pencilSquare,
+                            isSmall: true,
+                            type: Components.ButtonTypes.OutlineSecondary,
+                            onClick: () => {
+                                // Display the edit form
+                                this._forms.display(DataSource.DocSetItem.Id);
+                            }
+                        }
+                    });
+                    break;
+
+                // View Tech Review
+                case "ViewTechReview":
+                    // Render the button
+                    Components.Tooltip({
+                        el: elActionButtons,
+                        content: "Views the technical review for this app.",
+                        btnProps: {
+                            text: "View Technical Review",
+                            iconClassName: "me-1",
+                            iconSize: 20,
+                            iconType: chatSquareDots,
+                            isSmall: true,
+                            type: Components.ButtonTypes.OutlinePrimary,
+                            onClick: () => {
+                                // Display the test cases
+                                this._forms.displayTechReview(DataSource.DocSetItem);
+                            }
+                        }
+                    });
+                    break;
+
+                // View Test Cases
+                case "ViewTestCases":
+                    // Render the button
+                    Components.Tooltip({
+                        el: elActionButtons,
+                        content: "View the test cases for this app.",
+                        btnProps: {
+                            text: "View Test Cases",
+                            iconClassName: "me-1",
+                            iconSize: 20,
+                            iconType: chatSquareDots,
+                            isDisabled: !canEdit,
+                            isSmall: true,
+                            type: Components.ButtonTypes.OutlinePrimary,
+                            onClick: () => {
+                                // Display the review form
+                                this._forms.displayTestCases(DataSource.DocSetItem);
+                            }
+                        }
+                    });
+                    break;
+            }
+        }
     }
 
     // Renders the documents

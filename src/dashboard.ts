@@ -461,75 +461,21 @@ export class AppDashboard {
                                         }
                                     }
                                 });
-                            }
-
-                            // See if this is an owner
-                            if ((item.AppStatus == "Draft" || item.AppStatus == "Requires Attention") && canEdit) {
-                                // Submit button
+                            } else {
+                                // Render the edit properties button
                                 tooltips.push({
-                                    content: "Submit app for review",
+                                    content: "View app properties",
                                     btnProps: {
-                                        text: "Submit",
-                                        className: "p-1",
-                                        iconClassName: "me-1",
-                                        iconSize: 20,
-                                        iconType: appIndicator,
-                                        isDisabled: !canEdit,
-                                        isSmall: true,
-                                        type: Components.ButtonTypes.OutlinePrimary,
-                                        onClick: () => {
-                                            // Display the submit form
-                                            this._forms.submit(item, () => {
-                                                // Refresh the table
-                                                this.refresh();
-                                            });
-                                        }
-                                    }
-                                });
-                            }
-
-                            // Ensure this was not submitted by the user
-                            if (item.AppStatus.indexOf("Review") > 0 &&
-                                (!Common.isSubmitter(item) || DataSource.IsApprover)) {
-                                // Review button
-                                tooltips.push({
-                                    content: "Start/Continue an app assessment",
-                                    btnProps: {
-                                        text: "Review",
-                                        className: "p-1",
-                                        iconClassName: "me-1",
-                                        iconSize: 20,
-                                        iconType: chatSquareDots,
-                                        isDisabled: !canEdit,
-                                        isSmall: true,
-                                        type: Components.ButtonTypes.OutlinePrimary,
-                                        onClick: () => {
-                                            // Display the review form
-                                            this._forms.review(item, () => {
-                                                // Refresh the table
-                                                this.refresh();
-                                            });
-                                        }
-                                    }
-                                });
-
-                                // Reject button
-                                tooltips.push({
-                                    content: "Send the app back to the developer(s)",
-                                    btnProps: {
-                                        text: "Reject",
+                                        text: "View",
                                         className: "p-1",
                                         iconClassName: "me-1",
                                         iconSize: 20,
                                         iconType: chatSquareDots,
                                         isSmall: true,
-                                        type: Components.ButtonTypes.OutlineDanger,
+                                        type: Components.ButtonTypes.OutlineSecondary,
                                         onClick: () => {
-                                            // Display the reject form
-                                            this._forms.reject(item, () => {
-                                                // Refresh the page
-                                                window.location.reload();
-                                            });
+                                            // Display the view form
+                                            this._forms.display(item.Id);
                                         }
                                     }
                                 });

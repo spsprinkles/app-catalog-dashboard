@@ -19,5 +19,14 @@
         "App manifest file submitted.",
         "App source code submitted.",
         "Validation of the application manifest content."
-    ]
+    ],
+    "approvals": {
+        "Rejected": ["View", "Edit", "Submit"],
+        "Draft": ["View", "Edit", "Submit"],
+        "Pending Sponser Approval": ["View", "ApproveReject"],
+        "Pending Approval": ["View", "Approve"],
+        "In Testing": ["View", "TestSite", "EditTestCases", "Submit"],
+        "Pending Review": ["View", "TestSite", "ViewTestCases", "EditTechReview", "ApproveReject"],
+        "Approved": ["View", "ViewTestCases", "ViewTechReview", "TestSite", "DeleteTestSite"]
+    }
 }
