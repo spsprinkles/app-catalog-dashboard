@@ -299,9 +299,12 @@ export class AppDashboard {
                         title: "Version"
                     },
                     {
-                        name: "AppStatus",
+                        name: "",
                         title: "Status",
                         onRenderCell: (el, column, item: IAppItem) => {
+                            // Set the status
+                            el.innerHTML = item.AppIsRejected ? "Rejected" : item.AppStatus;
+
                             // See if the site app catalog exists
                             if (DataSource.SiteCollectionAppCatalogExists) {
                                 // Append a new line

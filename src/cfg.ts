@@ -68,18 +68,6 @@ export const Configuration = Helper.SPConfig({
             ],
             CustomFields: [
                 {
-                    name: "AppApprovalStep",
-                    title: "Approval Step",
-                    type: Helper.SPCfgFieldType.Number,
-                    description: "The current approval step of the application.",
-                    allowDeletion: false,
-                    defaultValue: "0",
-                    showInDisplayForm: false,
-                    showInEditForm: false,
-                    showInNewForm: false,
-                    showInViewForms: false
-                },
-                {
                     name: "AppComments",
                     title: "Comments",
                     type: Helper.SPCfgFieldType.Note,
@@ -154,9 +142,18 @@ export const Configuration = Helper.SPConfig({
                     showInEditForm: false,
                     showInNewForm: false,
                     choices: [
-                        "Rejected", "Draft", "Submitted", "Pending Sponser Approval", "Pending Approval", "In Testing", "Pending Review", "Approved"
+                        "New", "Pending Sponser Approval", "Pending Approval",
+                        "In Testing", "Pending Review", "Approved"
                     ]
                 } as Helper.IFieldInfoChoice,
+                {
+                    name: "AppIsRejected",
+                    title: "Is Rejected?",
+                    type: Helper.SPCfgFieldType.Boolean,
+                    allowDeletion: false,
+                    defaultValue: "0",
+                    showInNewForm: false
+                },
                 /** Fields extracted from the SPFx package */
                 {
                     name: "AppAPIPermissions",

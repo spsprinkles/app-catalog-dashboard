@@ -34,12 +34,14 @@ export interface IAppItem extends Types.SP.ListItem {
     AppDevelopersId: { results: number[] };
     AppIsClientSideSolution?: boolean;
     AppIsDomainIsolated?: boolean;
+    AppIsRejected: boolean;
     AppJustification: string;
     AppPermissionsJustification: string;
     AppProductID: string;
     AppPublisher: string;
     AppSharePointMinVersion?: boolean;
     AppSkipFeatureDeployment?: boolean;
+    AppSponserId: number;
     AppStatus: string;
     AppVersion: string;
     AuthorId: number;
@@ -71,12 +73,19 @@ export interface IAssessmentItem extends Types.SP.ListItem {
 export interface IConfiguration {
     appCatalogAdminEmailGroup?: string;
     appCatalogUrl?: string;
-    approvalChecklist?: string[];
     helpPageUrl?: string;
-    submitChecklist?: string[];
     templatesLibraryUrl?: string;
     tenantAppCatalogUrl?: string;
     actions: { [key: string]: string[] }
+    checklists: { [key: string]: string[] }
+}
+
+// Status
+export interface IStatus {
+    lastStep: boolean;
+    name: string;
+    nextStep: string;
+    stepNumber: number;
 }
 
 /**
@@ -85,6 +94,8 @@ export interface IConfiguration {
 export class DataSource {
     // Configuration
     private static _cfg: IConfiguration = null;
+    private static _status: { [key: string]: IStatus } = null;
+    static get Status(): { [key: string]: IStatus } { return this._status; }
     static get Configuration(): IConfiguration { return this._cfg; }
     static loadConfiguration(): PromiseLike<void> {
         // Return a promise
@@ -111,8 +122,8 @@ export class DataSource {
                     this._cfg.helpPageUrl = this._cfg.helpPageUrl ? updateUrl(this._cfg.helpPageUrl) : this._cfg.helpPageUrl;
                     this._cfg.templatesLibraryUrl = this._cfg.templatesLibraryUrl ? updateUrl(this._cfg.templatesLibraryUrl) : this._cfg.templatesLibraryUrl;
 
-                    // Resolve the request
-                    resolve();
+                    // Set the status and resolve the request
+                    this.setStatus().then(() => { resolve(); });
                 },
 
                 // Error
@@ -124,6 +135,33 @@ export class DataSource {
                     resolve();
                 }
             );
+        });
+    }
+    private static setStatus(): PromiseLike<void> {
+        // Return a promise
+        return new Promise((resolve, reject) => {
+            // Clear the status information
+            this._status = {};
+
+            // Read the status field
+            Web(Strings.SourceUrl).Lists(Strings.Lists.Apps).Fields("AppStatus").execute((field: Types.SP.FieldChoice) => {
+                // Parse the choices
+                for (let i = 0; i < field.Choices.results.length; i++) {
+                    let choice = field.Choices.results[i];
+                    let nextStep = field.Choices.results[i + 1];
+
+                    // Add the status
+                    this._status[choice] = {
+                        lastStep: nextStep ? false : true,
+                        name: choice,
+                        nextStep,
+                        stepNumber: i
+                    };
+                }
+
+                // Resolve the request
+                resolve();
+            }, reject);
         });
     }
 

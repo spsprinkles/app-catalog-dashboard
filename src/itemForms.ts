@@ -11,76 +11,23 @@ export class AppForms {
     // Constructor
     constructor() { }
 
-    // Approve for deployment form
-    approveForDeployment(item: IAppItem, onUpdate: () => void) {
+    // Approval form
+    approve(item: IAppItem, onUpdate: () => void) {
+        // Clear the modal
+        Modal.clear();
+
+        // Get the status information
+        let status = DataSource.Status[item.AppStatus];
+
         // Set the header
-        Modal.setHeader("Approve App/Solution Package for Deployment");
+        Modal.setHeader("Approve " + item.AppStatus + " State");
 
         // Set the body
-        Modal.setBody("Are you sure you want to approve this app package for deployment?");
+        Modal.setBody("Click 'Approve' to complete this approval step.");
 
         // Render the footer
         Modal.setFooter(Components.Tooltip({
-            content: "This will approve the app and make it available for deployement.",
-            btnProps: {
-                text: "Approve",
-                type: Components.ButtonTypes.OutlineSuccess,
-                onClick: () => {
-                    // Close the modal
-                    Modal.hide();
-
-                    // Deploy the app
-                    this.deploy(item, true, () => {
-                        // Show a loading dialog
-                        LoadingDialog.setHeader("Completing the Deployment");
-                        LoadingDialog.setBody("This dialog will close after the app is approved.");
-                        LoadingDialog.show();
-
-                        // Update the item
-                        item.update({
-                            AppStatus: "Approved"
-                        }).execute(() => {
-                            // Close the dialog
-                            LoadingDialog.hide();
-
-                        });
-                    });
-                }
-            }
-        }).el);
-
-        // Show the modal
-        Modal.show();
-    }
-
-    // Approve for testing form
-    approveForTesting(item: IAppItem, onUpdate: () => void) {
-        // Set the header
-        Modal.setHeader("Approve App/Solution Package for Testing");
-
-        // Get the checklist
-        let elChecklist = document.createElement("ul");
-        let checklist = DataSource.Configuration.approvalChecklist || [];
-        if (checklist.length > 0) {
-            // Parse the items
-            for (let i = 0; i < checklist.length; i++) {
-                // Append the item
-                let elItem = document.createElement("li");
-                elItem.innerHTML = checklist[i];
-                elChecklist.appendChild(elItem);
-            }
-        }
-
-        // Set the body
-        let elBody = document.createElement("div");
-        elBody.innerHTML = "<p>Are you sure you want to approve this app package for testing?" +
-            (checklist.length > 0 ? " Review the following checklist before approving the app." : "") + "</p>";
-        elBody.appendChild(elChecklist);
-        Modal.setBody(elBody);
-
-        // Render the footer
-        Modal.setFooter(Components.Tooltip({
-            content: "This will approve the app and make it available for testing.",
+            content: "This will approve the current state of the application.",
             btnProps: {
                 text: "Approve",
                 type: Components.ButtonTypes.OutlineSuccess,
@@ -89,18 +36,18 @@ export class AppForms {
                     Modal.hide();
 
                     // Show a loading dialog
-                    LoadingDialog.setHeader("Approving the App");
-                    LoadingDialog.setBody("This dialog will close after the app is approved.");
+                    LoadingDialog.setHeader("Updating the Status");
+                    LoadingDialog.setBody("This dialog will close after the status is updated.");
                     LoadingDialog.show();
 
                     // Update the item
                     item.update({
-                        AppStatus: "In Testing"
+                        AppStatus: status.nextStep
                     }).execute(() => {
                         // Close the dialog
                         LoadingDialog.hide();
 
-                        // Execute the update event
+                        // Call the update event
                         onUpdate();
                     });
                 }
@@ -1002,7 +949,7 @@ export class AppForms {
                         //var isSPFx = (spfxElem ? spfxElem.value : "false");
 
                         // Set the status
-                        metadata.AppStatus = "Draft";
+                        metadata.AppStatus = "New";
 
                         // Resolve the request
                         resolve(metadata);
@@ -1057,7 +1004,7 @@ export class AppForms {
                     // Update the status
                     item.update({
                         AppComments: comments,
-                        AppStatus: "Requires Attention"
+                        AppIsRejected: true
                     }).execute(() => {
                         // Parse the developers
                         let cc = [];
@@ -1150,7 +1097,7 @@ export class AppForms {
         });
     }
 
-    // Submit form
+    // Submit Form
     submit(item: IAppItem, onUpdate: () => void) {
         // Clear the modal
         Modal.clear();
@@ -1158,10 +1105,22 @@ export class AppForms {
         // Set the header
         Modal.setHeader("Submit App for Approval");
 
-        // Get the checklist
-        let elChecklist = document.createElement("ul");
-        let checklist = DataSource.Configuration.submitChecklist || [];
+        // Create the body element
+        let elBody = document.createElement("div");
+
+        // Append the content element
+        let elContent = document.createElement("p");
+        elBody.appendChild(elContent);
+
+        // See if a checklist exists
+        let checklist = (DataSource.Configuration.checklists ? DataSource.Configuration.checklists[item.AppStatus] : null) || [];
         if (checklist.length > 0) {
+            let elChecklist = document.createElement("ul");
+            elBody.appendChild(elChecklist);
+
+            // Set the content
+            elContent.innerHTML = "Review the following checklist before submitting the app for approval.";
+
             // Parse the items
             for (let i = 0; i < checklist.length; i++) {
                 // Append the item
@@ -1169,18 +1128,17 @@ export class AppForms {
                 elItem.innerHTML = checklist[i];
                 elChecklist.appendChild(elItem);
             }
+        } else {
+            // Set the content
+            elContent.innerHTML = "Are you sure you want to submit this app for approval?";
         }
 
         // Set the body
-        let elBody = document.createElement("div");
-        elBody.innerHTML = "<p>Are you sure you want to submit this app for approval?" +
-            (checklist.length > 0 ? " Review the following checklist before approving the app." : "") + "</p>";
-        elBody.appendChild(elChecklist);
         Modal.setBody(elBody);
 
         // Set the footer
         Modal.setFooter(Components.Button({
-            text: "Submit",
+            text: item.AppIsRejected ? "Resubmit" : "Submit",
             type: Components.ButtonTypes.OutlinePrimary,
             onClick: () => {
                 // Close the modal
@@ -1192,8 +1150,10 @@ export class AppForms {
                 LoadingDialog.show();
 
                 // Update the status
+                let status = DataSource.Status[item.AppStatus];
                 item.update({
-                    AppStatus: "Submitted"
+                    AppIsRejected: false,
+                    AppStatus: status ? status.nextStep : DataSource.Status[0]
                 }).execute(() => {
                     // Parse the developers
                     let to = DataSource.Configuration.appCatalogAdminEmailGroup ? [DataSource.Configuration.appCatalogAdminEmailGroup] : [];
