@@ -76,7 +76,7 @@ export interface IConfiguration {
     submitChecklist?: string[];
     templatesLibraryUrl?: string;
     tenantAppCatalogUrl?: string;
-    approvals: { [key: string]: string[] }
+    actions: { [key: string]: string[] }
 }
 
 /**

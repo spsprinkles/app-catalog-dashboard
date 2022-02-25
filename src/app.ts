@@ -508,17 +508,17 @@ export class App {
         });
 
         // Ensure the actions have been defined
-        let approvals = DataSource.Configuration.approvals;
-        let actions = approvals ? approvals[DataSource.DocSetItem.AppStatus] : null;
-        if (actions == null || actions.length == 0) { return; }
+        let actions = DataSource.Configuration.actions;
+        let btnActions = actions ? actions[DataSource.DocSetItem.AppStatus] : null;
+        if (btnActions == null || btnActions.length == 0) { return; }
 
         // Determine if the user can edit items
         let canEdit = Common.canEdit(DataSource.DocSetItem);
 
-        // Parse the actions
-        for (let i = 0; i < actions.length; i++) {
+        // Parse the button actions
+        for (let i = 0; i < btnActions.length; i++) {
             // Render the action button
-            switch (actions[i]) {
+            switch (btnActions[i]) {
                 // Approve/Reject
                 case "ApproveReject":
                     break;

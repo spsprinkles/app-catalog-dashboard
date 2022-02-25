@@ -20,7 +20,7 @@
         "App source code submitted.",
         "Validation of the application manifest content."
     ],
-    "approvals": {
+    "actions": {
         "Rejected": ["View", "Edit", "Submit"],
         "Draft": ["View", "Edit", "Submit"],
         "Pending Sponser Approval": ["View", "ApproveReject"],
