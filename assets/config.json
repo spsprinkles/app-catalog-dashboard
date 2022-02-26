@@ -4,62 +4,92 @@
     "helpPageUrl": "~site/SitePages/Help.aspx",
     "templatesLibraryUrl": "~site/shared%20documents/templates",
     "tenantAppCatalogUrl": "/sites/appcatalog",
-    "actions": {
-        "Approved": [
-            "View",
-            "ViewTestCases",
-            "ViewTechReview",
-            "TestSite",
-            "DeleteTestSite"
-        ],
-        "In Testing": [
-            "View",
-            "TestSite",
-            "EditTestCases",
-            "Submit"
-        ],
-        "New": [
-            "View",
-            "Edit",
-            "Submit"
-        ],
-        "Pending Approval": [
-            "View",
-            "ApproveReject"
-        ],
-        "Pending Review": [
-            "View",
-            "TestSite",
-            "ViewTestCases",
-            "EditTechReview",
-            "ApproveReject"
-        ],
-        "Pending Sponser Approval": [
-            "View",
-            "ApproveReject"
-        ],
-        "Rejected": [
-            "View",
-            "Edit",
-            "Submit"
-        ]
-    },
-    "checklists": {
-        "In Testing": [
-            "Validation of the application name and description.",
-            "Reviewed the justification of the application.",
-            "Reviewed the justification of the application permissions.",
-            "Validation of unit/organization.",
-            "App manifest file submitted.",
-            "App source code submitted.",
-            "Validation of the application manifest content."
-        ],
-        "New": [
-            "Application name is not generic and meaningful.",
-            "Application description is meaningful and gives a clear description of what the application purpose.",
-            "Justification for the application is descriptive.",
-            "Justification for custom API permissions is filled out, if needed.",
-            "App manifest is filled out correctly"
-        ]
+    "status": {
+        "Approved": {
+            "actions": [
+                "View",
+                "ViewTestCases",
+                "ViewTechReview",
+                "TestSite",
+                "DeleteTestSite"
+            ]
+        },
+        "In Testing": {
+            "actions": [
+                "View",
+                "TestSite",
+                "EditTestCases",
+                "Submit"
+            ],
+            "approval": [
+                "Approver", "Developers"
+            ],
+            "checklists": [
+                "Validation of the application name and description.",
+                "Reviewed the justification of the application.",
+                "Reviewed the justification of the application permissions.",
+                "Validation of unit/organization.",
+                "App manifest file submitted.",
+                "App source code submitted.",
+                "Validation of the application manifest content."
+            ]
+        },
+        "New": {
+            "actions": [
+                "View",
+                "Edit",
+                "Submit"
+            ],
+            "approval": [
+                "Approver", "Developer"
+            ],
+            "checklists": [
+                "Application name is not generic and meaningful.",
+                "Application description is meaningful and gives a clear description of what the application purpose.",
+                "Justification for the application is descriptive.",
+                "Justification for custom API permissions is filled out, if needed.",
+                "App manifest is filled out correctly"
+            ]
+        },
+        "Pending Approval": {
+            "actions": [
+                "View",
+                "ApproveReject"
+            ],
+            "approval": [
+                "Approver"
+            ]
+        },
+        "Pending Review": {
+            "actions": [
+                "View",
+                "TestSite",
+                "ViewTestCases",
+                "EditTechReview",
+                "ApproveReject"
+            ],
+            "approval": [
+                "Approver"
+            ]
+        },
+        "Pending Sponser Approval": {
+            "actions": [
+                "View",
+                "ApproveReject"
+            ],
+            "approval": [
+                "Sponser"
+            ]
+        },
+        "Rejected": {
+            "actions": [
+                "View",
+                "Edit",
+                "Submit"
+            ],
+            "approval": [
+                "Developer", "Sponser"
+            ]
+        }
     }
 }

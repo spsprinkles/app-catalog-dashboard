@@ -76,12 +76,14 @@ export interface IConfiguration {
     helpPageUrl?: string;
     templatesLibraryUrl?: string;
     tenantAppCatalogUrl?: string;
-    actions: { [key: string]: string[] }
-    checklists: { [key: string]: string[] }
+    status: { [key: string]: IStatus };
 }
 
 // Status
 export interface IStatus {
+    actions?: string[];
+    approval?: string[];
+    checklists?: string[];
     lastStep: boolean;
     name: string;
     nextStep: string;
@@ -150,8 +152,13 @@ export class DataSource {
                     let choice = field.Choices.results[i];
                     let nextStep = field.Choices.results[i + 1];
 
+                    // Get the configuration for this status
+                    let cfg = this.Configuration.status ? this.Configuration.status[choice] : null;
+
                     // Add the status
                     this._status[choice] = {
+                        actions: cfg ? cfg.actions : null,
+                        checklists: cfg ? cfg.checklists : null,
                         lastStep: nextStep ? false : true,
                         name: choice,
                         nextStep,

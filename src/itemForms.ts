@@ -1,7 +1,7 @@
 import { ItemForm, LoadingDialog, Modal } from "dattatable";
 import { Components, ContextInfo, Helper, List, SPTypes, Types, Utility, Web } from "gd-sprest-bs";
 import { loadAsync } from "jszip";
-import { DataSource, IAppItem, IAssessmentItem } from "./ds";
+import { DataSource, IAppItem, IAssessmentItem, IStatus } from "./ds";
 import Strings from "./strings";
 
 /**
@@ -202,13 +202,8 @@ export class AppForms {
                 this.retract(item, false, true, () => {
                     // Retract the solution from the tenant app catalog
                     this.retract(item, true, true, () => {
-                        // Update the loading dialog
-                        LoadingDialog.setHeader("Deleting the Test Site");
-                        LoadingDialog.setBody("Removing the test site created for this app.");
-                        LoadingDialog.show();
-
                         // Delete the test site
-                        DataSource.deleteTestSite(item).then(() => {
+                        this.deleteTestSite(item).then(() => {
                             // Update the loading dialog
                             LoadingDialog.setHeader("Removing Assessments");
                             LoadingDialog.setBody("Removing the assessments associated with this app.");
@@ -257,6 +252,54 @@ export class AppForms {
                     // Resolve the request
                     resolve();
                 });
+            }, reject);
+        });
+    }
+
+    // Delete test site form
+    deleteSite(item: IAppItem, onUpdate: () => void) {
+        // Set the header
+        Modal.setHeader("Delete Test Site");
+
+        // Set the body
+        Modal.setBody("Are you sure you want to delete the test site?");
+
+        // Render the footer
+        Modal.setFooter(Components.Button({
+            text: "Delete",
+            type: Components.ButtonTypes.OutlineDanger,
+            onClick: () => {
+                // Close the modal
+                Modal.hide();
+
+                // Delete the test site
+                this.deleteTestSite(item).then(() => {
+                    // Execute the update event
+                    onUpdate();
+                });
+            }
+        }).el);
+
+        // Show the modal
+        Modal.show();
+    }
+
+    // Method to delete the test site
+    private deleteTestSite(item: IAppItem): PromiseLike<void> {
+        // Return a promise
+        return new Promise((resolve, reject) => {
+            // Update the loading dialog
+            LoadingDialog.setHeader("Deleting the Test Site");
+            LoadingDialog.setBody("Removing the test site created for this app.");
+            LoadingDialog.show();
+
+            // Delete the test site
+            DataSource.deleteTestSite(item).then(() => {
+                // Close the dialog
+                LoadingDialog.hide();
+
+                // Resolve the request
+                resolve();
             }, reject);
         });
     }
@@ -1112,8 +1155,12 @@ export class AppForms {
         let elContent = document.createElement("p");
         elBody.appendChild(elContent);
 
+        // Get the status configuration
+        let appStatus = DataSource.DocSetItem.AppIsRejected ? "Rejected" : DataSource.DocSetItem.AppStatus;
+        let status: IStatus = DataSource.Status[appStatus] || {} as any;
+
         // See if a checklist exists
-        let checklist = (DataSource.Configuration.checklists ? DataSource.Configuration.checklists[item.AppStatus] : null) || [];
+        let checklist = status.checklists || [];
         if (checklist.length > 0) {
             let elChecklist = document.createElement("ul");
             elBody.appendChild(elChecklist);
