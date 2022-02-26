@@ -77,6 +77,10 @@ export interface IConfiguration {
     templatesLibraryUrl?: string;
     tenantAppCatalogUrl?: string;
     status: { [key: string]: IStatus };
+    validation: {
+        techReview: { [key: string]: string[]; }
+        testCases: { [key: string]: string[]; }
+    }
 }
 
 // Status
@@ -88,6 +92,8 @@ export interface IStatus {
     name: string;
     nextStep: string;
     prevStep: string;
+    requiresTechReview?: boolean;
+    requiresTestCase?: boolean;
     stepNumber: number;
 }
 
@@ -155,7 +161,7 @@ export class DataSource {
                     let prevStep = i > 0 ? field.Choices.results[i - 1] : null;
 
                     // Set the status
-                    this._status[choice] = this._status[choice] || {} as any;
+                    this._status[choice] = this.Configuration.status[choice] || {} as any;
                     this._status[choice].lastStep = nextStep ? false : true;
                     this._status[choice].name = choice;
                     this._status[choice].nextStep = nextStep;

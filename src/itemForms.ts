@@ -35,20 +35,33 @@ export class AppForms {
                     // Close the modal
                     Modal.hide();
 
-                    // Show a loading dialog
-                    LoadingDialog.setHeader("Updating the Status");
-                    LoadingDialog.setBody("This dialog will close after the status is updated.");
-                    LoadingDialog.show();
+                    // See if the tech review is valid
+                    this.isValidTechReview(item, status).then(isValid => {
+                        // Ensure it's valid
+                        if (isValid) {
+                            // See if the test cases are valid
+                            this.isValidTestCases(item, status).then(isValid => {
+                                // Ensure it's valid
+                                if (isValid) {
+                                    // Show a loading dialog
+                                    LoadingDialog.setHeader("Updating the Status");
+                                    LoadingDialog.setBody("This dialog will close after the status is updated.");
+                                    LoadingDialog.show();
 
-                    // Update the item
-                    item.update({
-                        AppStatus: status.nextStep
-                    }).execute(() => {
-                        // Close the dialog
-                        LoadingDialog.hide();
+                                    // Update the item
+                                    item.update({
+                                        AppStatus: status.nextStep
+                                    }).execute(() => {
+                                        // Close the dialog
+                                        LoadingDialog.hide();
 
-                        // Call the update event
-                        onUpdate();
+                                        // Call the update event
+                                        onUpdate();
+                                    });
+
+                                }
+                            });
+                        }
                     });
                 }
             }
@@ -611,7 +624,7 @@ export class AppForms {
 
         // Displays the assessment form
         let displayForm = (assessment: IAssessmentItem) => {
-            let completeFl = false;
+            let validateFl = false;
 
             // Show the edit form
             ItemForm.edit({
@@ -621,16 +634,16 @@ export class AppForms {
                     // Render a completed button
                     Components.Tooltip({
                         el,
-                        content: "Completes the review of the app.",
+                        content: "Validates the form.",
                         btnProps: {
-                            text: "Complete Review",
+                            text: "Validate",
                             type: Components.ButtonTypes.OutlineSuccess,
                             onClick: () => {
                                 // Set the flag
-                                completeFl = true;
+                                validateFl = true;
 
-                                // Save the form
-                                ItemForm.save();
+                                // Validate the form
+                                ItemForm.EditForm.isValid();
                             }
                         }
                     });
@@ -642,8 +655,8 @@ export class AppForms {
                         if (field.InternalName.indexOf("TechReview") == 0 && field.FieldTypeKind == SPTypes.FieldType.Choice) {
                             // Set the validation
                             props.onValidate = (ctrl, results) => {
-                                // See if the complete flag is set
-                                if (completeFl) {
+                                // See if we are validating the results
+                                if (validateFl) {
                                     // Set the flag
                                     let selectedItem: Components.IDropdownItem = results.value;
                                     results.isValid = selectedItem && selectedItem.text ? true : false;
@@ -661,25 +674,9 @@ export class AppForms {
                     // Return the properties
                     return props;
                 },
-                onSave: (props: IAssessmentItem) => {
-                    // See if we are completing the assessment
-                    if (completeFl) {
-                        // Update the props
-                        props.Completed = new Date(Date.now()) as any;
-                    }
-
-                    // Return the properties
-                    return props;
-                },
                 onUpdate: () => {
-                    // See if we are updating the status
-                    if (completeFl) {
-                        // Update the status
-                        item.update({ AppStatus: "Pending Deployment" }).execute(onUpdate);
-                    } else {
-                        // Call the update event
-                        onUpdate();
-                    }
+                    // Call the update event
+                    onUpdate();
                 }
             });
         }
@@ -715,7 +712,7 @@ export class AppForms {
 
         // Displays the form
         let displayForm = (assessment: IAssessmentItem) => {
-            let completeFl = false;
+            let validateFl = false;
 
             // Show the edit form
             ItemForm.edit({
@@ -732,13 +729,13 @@ export class AppForms {
                     // Render a completed button
                     Components.Tooltip({
                         el,
-                        content: "Completes the test cases for the app.",
+                        content: "Validates the form.",
                         btnProps: {
-                            text: "Complete Review",
+                            text: "Validate",
                             type: Components.ButtonTypes.OutlineSuccess,
                             onClick: () => {
                                 // Set the flag
-                                completeFl = true;
+                                validateFl = true;
 
                                 // Save the form
                                 ItemForm.save();
@@ -753,8 +750,8 @@ export class AppForms {
                         if (field.InternalName.indexOf("TestCase") == 0 && field.FieldTypeKind == SPTypes.FieldType.Choice) {
                             // Set the validation
                             props.onValidate = (ctrl, results) => {
-                                // See if the complete flag is set
-                                if (completeFl) {
+                                // See if we are validating the results
+                                if (validateFl) {
                                     // Set the flag
                                     let selectedItem: Components.IDropdownItem = results.value;
                                     results.isValid = selectedItem && selectedItem.text ? true : false;
@@ -772,25 +769,9 @@ export class AppForms {
                     // Return the properties
                     return props;
                 },
-                onSave: (props: IAssessmentItem) => {
-                    // See if we are completing the assessment
-                    if (completeFl) {
-                        // Update the props
-                        props.Completed = new Date(Date.now()) as any;
-                    }
-
-                    // Return the properties
-                    return props;
-                },
                 onUpdate: () => {
-                    // See if we are updating the status
-                    if (completeFl) {
-                        // Update the status
-                        item.update({ AppStatus: "Pending Approval" }).execute(onUpdate);
-                    } else {
-                        // Call the update event
-                        onUpdate();
-                    }
+                    // Call the update event
+                    onUpdate();
                 }
             });
         }
@@ -830,6 +811,198 @@ export class AppForms {
                 // Return the last item
                 resolve(items.results[0] as any);
             }, reject);
+        });
+    }
+
+    // Method to determine if the tech review is valid
+    private isValidTechReview(item: IAppItem, status: IStatus): PromiseLike<boolean> {
+        // Return a promise
+        return new Promise(resolve => {
+            let isValid = true;
+
+            // See if this approval requires a technical review and validation exists
+            if (status.requiresTechReview && DataSource.Configuration.validation && DataSource.Configuration.validation.techReview) {
+                // Show a loading dialog
+                LoadingDialog.setHeader("Validating the Technical Review");
+                LoadingDialog.setBody("This dialog will close after the validation completes.");
+                LoadingDialog.show();
+
+                // Get the assessment
+                this.getAssessmentItem(item, false).then(item => {
+                    // Ensure the item exists
+                    if (item) {
+                        // Parse the validation
+                        for (let fieldName in DataSource.Configuration.validation.techReview) {
+                            // Ensure values exist
+                            let values = DataSource.Configuration.validation.techReview[fieldName];
+                            if (values && values.length > 0) {
+                                let matchFl = false;
+
+                                // Parse the valid values
+                                for (let i = 0; i < values.length; i++) {
+                                    // See if the value matches
+                                    if (values[i] == item[fieldName]) {
+                                        // Set the flag and break from the loop
+                                        matchFl = true;
+                                        break;
+                                    }
+                                }
+
+                                // See if a match wasn't found
+                                if (!matchFl) {
+                                    // Form isn't valid
+                                    isValid = false;
+                                    break;
+                                }
+                            }
+                        }
+
+                        // Hide the dialog
+                        LoadingDialog.hide();
+
+                        // See if it's not valid
+                        if (!isValid) {
+                            // Clear the modal
+                            Modal.clear();
+
+                            // Set the header
+                            Modal.setHeader("Error");
+
+                            // Set the body
+                            Modal.setBody("The technical review is not valid. Please review it and try your request again.");
+
+                            // Wait for the loading dialog to complete it's closing event
+                            setTimeout(() => {
+                                // Show the dialog
+                                Modal.show();
+                            }, 250)
+                        }
+
+                        // Resolve the request
+                        resolve(isValid);
+                    } else {
+                        // Hide the dialog
+                        LoadingDialog.hide();
+
+                        // Clear the modal
+                        Modal.clear();
+
+                        // Set the header
+                        Modal.setHeader("Error");
+
+                        // Set the body
+                        Modal.setBody("No technical review exists for this application.");
+
+                        // Wait for the loading dialog to complete it's closing event
+                        setTimeout(() => {
+                            // Show the dialog
+                            Modal.show();
+                        }, 250)
+
+                        // Not valid
+                        resolve(false);
+                    }
+                });
+            } else {
+                // Resolve the request
+                resolve(isValid);
+            }
+        });
+    }
+
+    // Method to determine if the test cases are valid
+    private isValidTestCases(item: IAppItem, status: IStatus): PromiseLike<boolean> {
+        // Return a promise
+        return new Promise(resolve => {
+            let isValid = true;
+
+            // See if this approval requires test cases and validation exists
+            if (status.requiresTestCase && DataSource.Configuration.validation && DataSource.Configuration.validation.testCases) {
+                // Show a loading dialog
+                LoadingDialog.setHeader("Validating the Technical Review");
+                LoadingDialog.setBody("This dialog will close after the validation completes.");
+                LoadingDialog.show();
+
+                // Get the assessment
+                this.getAssessmentItem(item, false).then(item => {
+                    // Ensure the item exists
+                    if (item) {
+                        // Parse the validation
+                        for (let fieldName in DataSource.Configuration.validation.testCases) {
+                            // Ensure values exist
+                            let values = DataSource.Configuration.validation.testCases[fieldName];
+                            if (values && values.length > 0) {
+                                let matchFl = false;
+
+                                // Parse the valid values
+                                for (let i = 0; i < values.length; i++) {
+                                    // See if the value matches
+                                    if (values[i] == item[fieldName]) {
+                                        // Set the flag and break from the loop
+                                        matchFl = true;
+                                        break;
+                                    }
+                                }
+
+                                // See if a match wasn't found
+                                if (!matchFl) {
+                                    // Form isn't valid
+                                    isValid = false;
+                                    break;
+                                }
+                            }
+                        }
+
+                        // Hide the dialog
+                        LoadingDialog.hide();
+
+                        // See if it's not valid
+                        if (!isValid) {
+                            // Clear the modal
+                            Modal.clear();
+
+                            // Set the header
+                            Modal.setHeader("Error");
+
+                            // Set the body
+                            Modal.setBody("The test cases are not valid. Please review them and try your request again.");
+
+                            // Wait for the loading dialog to complete it's closing event
+                            setTimeout(() => {
+                                // Show the dialog
+                                Modal.show();
+                            }, 250)
+                        }
+
+                        // Resolve the request
+                        resolve(isValid);
+                    } else {
+                        // Hide the dialog
+                        LoadingDialog.hide();
+
+                        // Clear the modal
+                        Modal.clear();
+
+                        // Set the header
+                        Modal.setHeader("Error");
+
+                        // Set the body
+                        Modal.setBody("No test cases were found for this application.");
+
+                        // Wait for the loading dialog to complete it's closing event
+                        setTimeout(() => {
+                            // Show the dialog
+                            Modal.show();
+                        }, 250)
+
+                        // Not valid
+                        resolve(false);
+                    }
+                });
+            } else {
+                // Resolve the request
+                resolve(isValid);
+            }
         });
     }
 
@@ -1117,9 +1290,8 @@ export class AppForms {
         let elContent = document.createElement("p");
         elBody.appendChild(elContent);
 
-        // Get the status configuration
-        let appStatus = DataSource.DocSetItem.AppIsRejected ? "Rejected" : DataSource.DocSetItem.AppStatus;
-        let status: IStatus = DataSource.Status[appStatus] || {} as any;
+        // Get the status information
+        let status = DataSource.Status[item.AppStatus];
 
         // See if a checklist exists
         let checklist = status.checklists || [];
@@ -1153,53 +1325,65 @@ export class AppForms {
                 // Close the modal
                 Modal.hide();
 
-                // Show a loading dialog
-                LoadingDialog.setHeader("Updating App Submission");
-                LoadingDialog.setBody("This dialog will close after the app submission is completed.");
-                LoadingDialog.show();
+                // See if the tech review is valid
+                this.isValidTechReview(item, status).then(isValid => {
+                    // Ensure it's valid
+                    if (isValid) {
+                        // See if the test cases are valid
+                        this.isValidTestCases(item, status).then(isValid => {
+                            // Ensure it's valid
+                            if (isValid) {
+                                // Show a loading dialog
+                                LoadingDialog.setHeader("Updating App Submission");
+                                LoadingDialog.setBody("This dialog will close after the app submission is completed.");
+                                LoadingDialog.show();
 
-                // Update the status
-                let status = DataSource.Status[item.AppStatus];
-                item.update({
-                    AppIsRejected: false,
-                    AppStatus: status ? status.nextStep : DataSource.Status[0]
-                }).execute(() => {
-                    // Parse the developers
-                    let to = DataSource.Configuration.appCatalogAdminEmailGroup ? [DataSource.Configuration.appCatalogAdminEmailGroup] : [];
-                    for (let i = 0; i < DataSource.DevGroup.Users.results.length; i++) {
-                        // Append the email
-                        to.push(DataSource.DevGroup.Users.results[i].Email);
-                    }
+                                // Update the status
+                                let status = DataSource.Status[item.AppStatus];
+                                item.update({
+                                    AppIsRejected: false,
+                                    AppStatus: status ? status.nextStep : DataSource.Status[0]
+                                }).execute(() => {
+                                    // Parse the developers
+                                    let to = DataSource.Configuration.appCatalogAdminEmailGroup ? [DataSource.Configuration.appCatalogAdminEmailGroup] : [];
+                                    for (let i = 0; i < DataSource.DevGroup.Users.results.length; i++) {
+                                        // Append the email
+                                        to.push(DataSource.DevGroup.Users.results[i].Email);
+                                    }
 
-                    // Get the app developers
-                    let cc = [];
-                    let owners = item.AppDevelopers.results || [];
-                    for (let i = 0; i < owners.length; i++) {
-                        // Append the email
-                        cc.push(owners[i].EMail);
-                    }
+                                    // Get the app developers
+                                    let cc = [];
+                                    let owners = item.AppDevelopers.results || [];
+                                    for (let i = 0; i < owners.length; i++) {
+                                        // Append the email
+                                        cc.push(owners[i].EMail);
+                                    }
 
-                    // Ensure owners exist
-                    if (to.length > 0) {
-                        // Send an email
-                        Utility().sendEmail({
-                            To: to,
-                            CC: cc,
-                            Subject: "App '" + item.Title + "' submitted for approval",
-                            Body: "App Developers,<br /><br />The '" + item.Title + "' app has been submitted for approval by " + ContextInfo.userDisplayName + ". Please take some time to test this app and submit an assessment/review using the App Dashboard."
-                        }).execute(() => {
-                            // Call the update event
-                            onUpdate();
+                                    // Ensure owners exist
+                                    if (to.length > 0) {
+                                        // Send an email
+                                        Utility().sendEmail({
+                                            To: to,
+                                            CC: cc,
+                                            Subject: "App '" + item.Title + "' submitted for approval",
+                                            Body: "App Developers,<br /><br />The '" + item.Title + "' app has been submitted for approval by " + ContextInfo.userDisplayName + ". Please take some time to test this app and submit an assessment/review using the App Dashboard."
+                                        }).execute(() => {
+                                            // Call the update event
+                                            onUpdate();
 
-                            // Close the loading dialog
-                            LoadingDialog.hide();
+                                            // Close the loading dialog
+                                            LoadingDialog.hide();
+                                        });
+                                    } else {
+                                        // Call the update event
+                                        onUpdate();
+
+                                        // Close the loading dialog
+                                        LoadingDialog.hide();
+                                    }
+                                });
+                            }
                         });
-                    } else {
-                        // Call the update event
-                        onUpdate();
-
-                        // Close the loading dialog
-                        LoadingDialog.hide();
                     }
                 });
             }

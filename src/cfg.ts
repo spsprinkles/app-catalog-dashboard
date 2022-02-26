@@ -603,22 +603,6 @@ export const Configuration = Helper.SPConfig({
                     description: "The comments from testing the application.",
                     noteType: SPTypes.FieldNoteType.TextOnly
                 } as Helper.IFieldInfoNote,
-                {
-                    name: "TestCaseResponse",
-                    title: "Test Cases Response",
-                    type: Helper.SPCfgFieldType.Calculated,
-                    allowDeletion: false,
-                    format: SPTypes.DateFormat.DateTime,
-                    formula: '=IF(ISNumber(FIND("No", [Tested in root site?]&amp;[Tested in non-root site?]&amp;[Tested in Browsers?]&amp;[Tested in a modern page?]&amp;[Tested in a classic page?]&amp;[Tested in Teams?]&amp;[Valid webpart properties?]&amp;[Validation of the links?]&amp;[Validation of the response time?]&amp;[Validation of the description?]&amp;[Validation of the user interface?])), "Oppose", "Recommend")',
-                    lcid: 1033,
-                    resultType: SPTypes.FieldResultType.Text,
-                    fieldRefs: [
-                        "TestCase01", "TestCase02", "TestCase03", "TestCase04", "TestCase05",
-                        "TestCase06", "TestCase07", "TestCase08", "TestCase09", "TestCase10",
-                        "TestCase11"/*, "TestCase12", "TestCase13", "TestCase14", "TestCase15",
-                        "TestCase16", "TestCase17", "TestCase18", "TestCase19", "TestCase20"*/
-                    ]
-                } as Helper.IFieldInfoCalculated,
 
                 /**
                  * Technical Review Fields
@@ -693,7 +677,7 @@ export const Configuration = Helper.SPConfig({
                     format: SPTypes.ChoiceFormatType.Dropdown,
                     defaultValue: "",
                     choices: [
-                        "Yes", "No"
+                        "Yes", "No", "N/A"
                     ]
                 } as Helper.IFieldInfoChoice,
                 {
@@ -705,7 +689,7 @@ export const Configuration = Helper.SPConfig({
                     format: SPTypes.ChoiceFormatType.Dropdown,
                     defaultValue: "",
                     choices: [
-                        "Yes", "No"
+                        "Yes", "No", "N/A"
                     ]
                 } as Helper.IFieldInfoChoice,
                 {
@@ -874,22 +858,6 @@ export const Configuration = Helper.SPConfig({
                     numberOfLines: 4,
                     sortable: false
                 } as Helper.IFieldInfoNote,
-                {
-                    name: "TechReviewResponse",
-                    title: "Technical Review Response",
-                    type: Helper.SPCfgFieldType.Calculated,
-                    allowDeletion: false,
-                    format: SPTypes.DateFormat.DateTime,
-                    formula: '=IF(AND(ISNumber(FIND("No", [Support URL]&amp;[Icon/Images]&amp;[App Description]&amp;[App Tested]&amp;[Graph API Permissions]&amp;[Web API Permissions]&amp;[External Libraries]&amp;[Import Statements]&amp;[HTTP Requests])), [Unresolved Issues]="Yes"), "Oppose", "Recommend")',
-                    lcid: 1033,
-                    resultType: SPTypes.FieldResultType.Text,
-                    fieldRefs: [
-                        "TechReview01", "TechReview02", "TechReview03", "TechReview04", "TechReview05",
-                        "TechReview06", "TechReview07", "TechReview08", "TechReview09", "TechReview10",
-                        /*"TechReview11", "TechReview12", "TechReview13", "TechReview14", "TechReview15",
-                        "TechReview16", "TechReview17", "TechReview18", "TechReview19", "TechReview20"*/
-                    ]
-                } as Helper.IFieldInfoCalculated,
 
                 /** Common Fields */
 

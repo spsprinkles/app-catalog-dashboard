@@ -15,6 +15,7 @@
             ]
         },
         "In Testing": {
+            "requiresTestCase": true,
             "actions": [
                 "View",
                 "TestSite",
@@ -22,7 +23,8 @@
                 "Submit"
             ],
             "approval": [
-                "Approver", "Developers"
+                "Approver",
+                "Developers"
             ],
             "checklists": [
                 "Validation of the application name and description.",
@@ -41,7 +43,8 @@
                 "Submit"
             ],
             "approval": [
-                "Approver", "Developer"
+                "Approver",
+                "Developer"
             ],
             "checklists": [
                 "Application name is not generic and meaningful.",
@@ -70,6 +73,7 @@
             ]
         },
         "Pending Review": {
+            "requiresTechReview": true,
             "actions": [
                 "View",
                 "TestSite",
@@ -87,8 +91,100 @@
                 "ApproveReject"
             ],
             "approval": [
-                "Approver", "Sponser"
+                "Approver",
+                "Sponser"
             ]
+        }
+    },
+    "validation": {
+        "techReview": {
+            "TechReview01": [
+                "Yes"
+            ],
+            "TechReview02": [
+                "Yes"
+            ],
+            "TechReview03": [
+                "Yes"
+            ],
+            "TechReview04": [
+                "Yes"
+            ],
+            "TechReview05": [
+                "No"
+            ],
+            "TechReview06": [
+                "Yes",
+                "N/A"
+            ],
+            "TechReview07": [
+                "Yes",
+                "N/A"
+            ],
+            "TechReview08": [
+                "Yes"
+            ],
+            "TechReview09": [
+                "Yes"
+            ],
+            "TechReview10": [
+                "Yes"
+            ],
+            "TechReview11": [],
+            "TechReview12": [],
+            "TechReview13": [],
+            "TechReview14": [],
+            "TechReview15": [],
+            "TechReview16": [],
+            "TechReview17": [],
+            "TechReview18": [],
+            "TechReview19": [],
+            "TechReview20": []
+        },
+        "testCases": {
+            "TestCase01": [
+                "Yes"
+            ],
+            "TestCase02": [
+                "Yes"
+            ],
+            "TestCase03": [
+                "Yes"
+            ],
+            "TestCase04": [
+                "Yes"
+            ],
+            "TestCase05": [
+                "Yes"
+            ],
+            "TestCase06": [
+                "Yes",
+                "N/A"
+            ],
+            "TestCase07": [
+                "Yes"
+            ],
+            "TestCase08": [
+                "Yes"
+            ],
+            "TestCase09": [
+                "Yes"
+            ],
+            "TestCase10": [
+                "Yes"
+            ],
+            "TestCase11": [
+                "Yes"
+            ],
+            "TestCase12": [],
+            "TestCase13": [],
+            "TestCase14": [],
+            "TestCase15": [],
+            "TestCase16": [],
+            "TestCase17": [],
+            "TestCase18": [],
+            "TestCase19": [],
+            "TestCase20": []
         }
     }
 }
