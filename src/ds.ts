@@ -1,5 +1,6 @@
 import { InstallationRequired, LoadingDialog } from "dattatable";
-import { Components, ContextInfo, Helper, List, SPTypes, Types, Web } from "gd-sprest-bs";
+import { Components, ContextInfo, Helper, Types, Web } from "gd-sprest-bs";
+import { AppConfig } from "./app-cfg";
 import { Configuration, createSecurityGroups } from "./cfg";
 import Strings from "./strings";
 
@@ -69,112 +70,10 @@ export interface IAssessmentItem extends Types.SP.ListItem {
     RelatedAppId: number;
 }
 
-// Configuration
-export interface IConfiguration {
-    appCatalogAdminEmailGroup?: string;
-    appCatalogUrl?: string;
-    helpPageUrl?: string;
-    templatesLibraryUrl?: string;
-    tenantAppCatalogUrl?: string;
-    status: { [key: string]: IStatus };
-    validation: {
-        techReview: { [key: string]: string[]; }
-        testCases: { [key: string]: string[]; }
-    }
-}
-
-// Status
-export interface IStatus {
-    actions?: string[];
-    approval?: string[];
-    checklists?: string[];
-    lastStep: boolean;
-    name: string;
-    nextStep: string;
-    prevStep: string;
-    requiresTechReview?: boolean;
-    requiresTestCase?: boolean;
-    stepNumber: number;
-}
-
 /**
  * Data Source
  */
 export class DataSource {
-    // Configuration
-    private static _cfg: IConfiguration = null;
-    private static _status: { [key: string]: IStatus } = null;
-    static get Status(): { [key: string]: IStatus } { return this._status; }
-    static get Configuration(): IConfiguration { return this._cfg; }
-    static loadConfiguration(): PromiseLike<void> {
-        // Return a promise
-        return new Promise(resolve => {
-            // Get the current web
-            Web(Strings.SourceUrl).getFileByServerRelativeUrl(Strings.ConfigUrl).content().execute(
-                // Success
-                file => {
-                    // Convert the string to a json object
-                    let cfg = null;
-                    try { cfg = JSON.parse(String.fromCharCode.apply(null, new Uint8Array(file))); }
-                    catch { cfg = {}; }
-
-                    // Set the configuration
-                    this._cfg = cfg;
-
-                    // Updates the url
-                    let updateUrl = (url: string) => {
-                        return url.replace("~site/", ContextInfo.webServerRelativeUrl + "/")
-                            .replace("~sitecollection/", ContextInfo.siteServerRelativeUrl + "/");
-                    }
-
-                    // Replace the urls
-                    this._cfg.helpPageUrl = this._cfg.helpPageUrl ? updateUrl(this._cfg.helpPageUrl) : this._cfg.helpPageUrl;
-                    this._cfg.templatesLibraryUrl = this._cfg.templatesLibraryUrl ? updateUrl(this._cfg.templatesLibraryUrl) : this._cfg.templatesLibraryUrl;
-
-                    // Set the status and resolve the request
-                    this.setStatus().then(() => { resolve(); });
-                },
-
-                // Error
-                () => {
-                    // Set the configuration to nothing
-                    this._cfg = {} as any;
-
-                    // Resolve the request
-                    resolve();
-                }
-            );
-        });
-    }
-    private static setStatus(): PromiseLike<void> {
-        // Return a promise
-        return new Promise((resolve, reject) => {
-            // Clear the status information
-            this._status = {};
-
-            // Read the status field
-            Web(Strings.SourceUrl).Lists(Strings.Lists.Apps).Fields("AppStatus").execute((field: Types.SP.FieldChoice) => {
-                // Parse the choices
-                for (let i = 0; i < field.Choices.results.length; i++) {
-                    let choice = field.Choices.results[i];
-                    let nextStep = field.Choices.results[i + 1];
-                    let prevStep = i > 0 ? field.Choices.results[i - 1] : null;
-
-                    // Set the status
-                    this._status[choice] = this.Configuration.status[choice] || {} as any;
-                    this._status[choice].lastStep = nextStep ? false : true;
-                    this._status[choice].name = choice;
-                    this._status[choice].nextStep = nextStep;
-                    this._status[choice].prevStep = prevStep;
-                    this._status[choice].stepNumber = i;
-                };
-
-                // Resolve the request
-                resolve();
-            }, reject);
-        });
-    }
-
     // Loads the document set item
     private static _docSetInfo: Helper.IListFormResult = null;
     static get DocSetInfo(): Helper.IListFormResult { return this._docSetInfo; }
@@ -292,7 +191,7 @@ export class DataSource {
         // Return a promise
         return new Promise((resolve) => {
             // Get the url to the test site
-            let url = [this.Configuration.appCatalogUrl, item.AppProductID].join('/');
+            let url = [AppConfig.Configuration.appCatalogUrl, item.AppProductID].join('/');
 
             // Get the web context
             ContextInfo.getWeb(url).execute(context => {
@@ -316,7 +215,7 @@ export class DataSource {
         // Return a promise
         return new Promise((resolve, reject) => {
             // Get the url to the test site
-            let url = [this.Configuration.appCatalogUrl, item.AppProductID].join('/');
+            let url = [AppConfig.Configuration.appCatalogUrl, item.AppProductID].join('/');
 
             // Get the web
             Web(url).execute(
@@ -340,7 +239,7 @@ export class DataSource {
         // Return a promise
         return new Promise((resolve, reject) => {
             // Load the configuration
-            this.loadConfiguration().then(() => {
+            AppConfig.loadConfiguration().then(() => {
                 // Load the approvers group
                 this.loadApproverGroup().then(() => {
                     // Load the developers group
@@ -504,9 +403,9 @@ export class DataSource {
         // Return a promise
         return new Promise((resolve) => {
             // See if the app catalog is defined
-            if (this.Configuration.appCatalogUrl) {
+            if (AppConfig.Configuration.appCatalogUrl) {
                 // Load the available apps
-                Web(this.Configuration.appCatalogUrl).SiteCollectionAppCatalog().AvailableApps(id).execute(app => {
+                Web(AppConfig.Configuration.appCatalogUrl).SiteCollectionAppCatalog().AvailableApps(id).execute(app => {
                     // Set the app
                     this._docSetSCApp = app;
 
@@ -523,16 +422,16 @@ export class DataSource {
         // Return a promise
         return new Promise((resolve) => {
             // See if the app catalog is defined
-            if (this.Configuration.appCatalogUrl) {
+            if (AppConfig.Configuration.appCatalogUrl) {
                 // Ensure the user is an owner of the site
-                Web(this.Configuration.appCatalogUrl).AssociatedOwnerGroup().Users().getByEmail(ContextInfo.userEmail).execute(user => {
+                Web(AppConfig.Configuration.appCatalogUrl).AssociatedOwnerGroup().Users().getByEmail(ContextInfo.userEmail).execute(user => {
                     // Ensure the user is an owner
                     if (user && user.Id > 0) {
                         // Set the flag
                         this._isSiteAppCatalogOwner = true;
 
                         // Load the available apps
-                        Web(this.Configuration.appCatalogUrl).SiteCollectionAppCatalog().AvailableApps().execute(apps => {
+                        Web(AppConfig.Configuration.appCatalogUrl).SiteCollectionAppCatalog().AvailableApps().execute(apps => {
                             // Set the apps
                             this._siteCollectionApps = apps.results;
 
@@ -584,9 +483,9 @@ export class DataSource {
         // Return a promise
         return new Promise((resolve) => {
             // See if the app catalog is defined
-            if (this.Configuration.tenantAppCatalogUrl) {
+            if (AppConfig.Configuration.tenantAppCatalogUrl) {
                 // Load the available apps
-                Web(this.Configuration.tenantAppCatalogUrl).TenantAppCatalog().AvailableApps(id).execute(app => {
+                Web(AppConfig.Configuration.tenantAppCatalogUrl).TenantAppCatalog().AvailableApps(id).execute(app => {
                     // Set the app
                     this._docSetTenantApp = app;
 
@@ -603,16 +502,16 @@ export class DataSource {
         // Return a promise
         return new Promise((resolve, reject) => {
             // See if the tenant app catalog is defined
-            if (this.Configuration.tenantAppCatalogUrl) {
+            if (AppConfig.Configuration.tenantAppCatalogUrl) {
                 // Ensure the user is an owner of the site
-                Web(this.Configuration.tenantAppCatalogUrl).AssociatedOwnerGroup().Users().getByEmail(ContextInfo.userEmail).execute(user => {
+                Web(AppConfig.Configuration.tenantAppCatalogUrl).AssociatedOwnerGroup().Users().getByEmail(ContextInfo.userEmail).execute(user => {
                     // Ensure the user is an owner
                     if (user && user.Id > 0) {
                         // Set the flag
                         this._isTenantAppCatalogOwner = true;
 
                         // Load the available apps
-                        Web(this.Configuration.tenantAppCatalogUrl).TenantAppCatalog().AvailableApps().execute(apps => {
+                        Web(AppConfig.Configuration.tenantAppCatalogUrl).TenantAppCatalog().AvailableApps().execute(apps => {
                             // Set the apps
                             this._tenantApps = apps.results;
 
@@ -662,9 +561,6 @@ export class DataSource {
 
                 // Error
                 () => {
-                    // Set the configuration to nothing
-                    this._cfg = {} as any;
-
                     // Resolve the request
                     resolve();
                 }

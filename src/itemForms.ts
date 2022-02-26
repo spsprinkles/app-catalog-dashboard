@@ -1,7 +1,8 @@
 import { ItemForm, LoadingDialog, Modal } from "dattatable";
 import { Components, ContextInfo, Helper, List, SPTypes, Types, Utility, Web } from "gd-sprest-bs";
 import { loadAsync } from "jszip";
-import { DataSource, IAppItem, IAssessmentItem, IStatus } from "./ds";
+import { AppConfig, IStatus } from "./app-cfg";
+import { DataSource, IAppItem, IAssessmentItem } from "./ds";
 import Strings from "./strings";
 
 /**
@@ -17,7 +18,7 @@ export class AppForms {
         Modal.clear();
 
         // Get the status information
-        let status = DataSource.Status[item.AppStatus];
+        let status = AppConfig.Status[item.AppStatus];
 
         // Set the header
         Modal.setHeader("Approve " + item.AppStatus + " State");
@@ -100,11 +101,11 @@ export class AppForms {
                     LoadingDialog.show();
 
                     // Load the context of the app catalog
-                    ContextInfo.getWeb(DataSource.Configuration.appCatalogUrl).execute(context => {
+                    ContextInfo.getWeb(AppConfig.Configuration.appCatalogUrl).execute(context => {
                         let requestDigest = context.GetContextWebInformation.FormDigestValue;
 
                         // Create the test site
-                        Web(DataSource.Configuration.appCatalogUrl, { requestDigest }).WebInfos().add({
+                        Web(AppConfig.Configuration.appCatalogUrl, { requestDigest }).WebInfos().add({
                             Description: "The test site for the " + item.Title + " application.",
                             Title: item.Title,
                             Url: item.AppProductID,
@@ -349,7 +350,7 @@ export class AppForms {
 
             // Upload the package file
             appFile.content().execute(content => {
-                let catalogUrl = tenantFl ? DataSource.Configuration.tenantAppCatalogUrl : DataSource.Configuration.appCatalogUrl;
+                let catalogUrl = tenantFl ? AppConfig.Configuration.tenantAppCatalogUrl : AppConfig.Configuration.appCatalogUrl;
 
                 // Load the context of the app catalog
                 ContextInfo.getWeb(catalogUrl).execute(context => {
@@ -402,11 +403,11 @@ export class AppForms {
         LoadingDialog.show();
 
         // Load the context of the app catalog
-        ContextInfo.getWeb(DataSource.Configuration.tenantAppCatalogUrl).execute(context => {
+        ContextInfo.getWeb(AppConfig.Configuration.tenantAppCatalogUrl).execute(context => {
             let requestDigest = context.GetContextWebInformation.FormDigestValue;
 
             // Sync the app with Teams
-            Web(DataSource.Configuration.tenantAppCatalogUrl, { requestDigest }).TenantAppCatalog().syncSolutionToTeams(item.Id).execute(
+            Web(AppConfig.Configuration.tenantAppCatalogUrl, { requestDigest }).TenantAppCatalog().syncSolutionToTeams(item.Id).execute(
                 // Success
                 () => {
                     // Hide the dialog
@@ -658,7 +659,7 @@ export class AppForms {
                                 // See if we are validating the results
                                 if (validateFl) {
                                     // See if there is validation values for this field
-                                    let values = DataSource.Configuration.validation && DataSource.Configuration.validation.techReview ? DataSource.Configuration.validation.techReview[field.InternalName] : null;
+                                    let values = AppConfig.Configuration.validation && AppConfig.Configuration.validation.techReview ? AppConfig.Configuration.validation.techReview[field.InternalName] : null;
                                     if (values && values.length > 0) {
                                         // Set the flag
                                         let selectedItem: Components.IDropdownItem = results.value;
@@ -778,7 +779,7 @@ export class AppForms {
                                 // See if we are validating the results
                                 if (validateFl) {
                                     // See if there is validation values for this field
-                                    let values = DataSource.Configuration.validation && DataSource.Configuration.validation.testCases ? DataSource.Configuration.validation.testCases[field.InternalName] : null;
+                                    let values = AppConfig.Configuration.validation && AppConfig.Configuration.validation.testCases ? AppConfig.Configuration.validation.testCases[field.InternalName] : null;
                                     if (values && values.length > 0) {
                                         // Set the flag
                                         let selectedItem: Components.IDropdownItem = results.value;
@@ -874,7 +875,7 @@ export class AppForms {
             let isValid = true;
 
             // See if this approval requires a technical review and validation exists
-            if (status.requiresTechReview && DataSource.Configuration.validation && DataSource.Configuration.validation.techReview) {
+            if (status.requiresTechReview && AppConfig.Configuration.validation && AppConfig.Configuration.validation.techReview) {
                 // Show a loading dialog
                 LoadingDialog.setHeader("Validating the Technical Review");
                 LoadingDialog.setBody("This dialog will close after the validation completes.");
@@ -885,9 +886,9 @@ export class AppForms {
                     // Ensure the item exists
                     if (item) {
                         // Parse the validation
-                        for (let fieldName in DataSource.Configuration.validation.techReview) {
+                        for (let fieldName in AppConfig.Configuration.validation.techReview) {
                             // Ensure values exist
-                            let values = DataSource.Configuration.validation.techReview[fieldName];
+                            let values = AppConfig.Configuration.validation.techReview[fieldName];
                             if (values && values.length > 0) {
                                 let matchFl = false;
 
@@ -970,7 +971,7 @@ export class AppForms {
             let isValid = true;
 
             // See if this approval requires test cases and validation exists
-            if (status.requiresTestCase && DataSource.Configuration.validation && DataSource.Configuration.validation.testCases) {
+            if (status.requiresTestCase && AppConfig.Configuration.validation && AppConfig.Configuration.validation.testCases) {
                 // Show a loading dialog
                 LoadingDialog.setHeader("Validating the Technical Review");
                 LoadingDialog.setBody("This dialog will close after the validation completes.");
@@ -981,9 +982,9 @@ export class AppForms {
                     // Ensure the item exists
                     if (item) {
                         // Parse the validation
-                        for (let fieldName in DataSource.Configuration.validation.testCases) {
+                        for (let fieldName in AppConfig.Configuration.validation.testCases) {
                             // Ensure values exist
-                            let values = DataSource.Configuration.validation.testCases[fieldName];
+                            let values = AppConfig.Configuration.validation.testCases[fieldName];
                             if (values && values.length > 0) {
                                 let matchFl = false;
 
@@ -1229,7 +1230,7 @@ export class AppForms {
                     LoadingDialog.show();
 
                     // Get the current status configuration
-                    let status = DataSource.Status[item.AppStatus];
+                    let status = AppConfig.Status[item.AppStatus];
 
                     // Update the status
                     item.update({
@@ -1293,7 +1294,7 @@ export class AppForms {
         LoadingDialog.show();
 
         // Load the context of the app catalog
-        let catalogUrl = tenantFl ? DataSource.Configuration.tenantAppCatalogUrl : DataSource.Configuration.appCatalogUrl;
+        let catalogUrl = tenantFl ? AppConfig.Configuration.tenantAppCatalogUrl : AppConfig.Configuration.appCatalogUrl;
         ContextInfo.getWeb(catalogUrl).execute(context => {
             // Load the apps
             let web = Web(catalogUrl, { requestDigest: context.GetContextWebInformation.FormDigestValue });
@@ -1344,7 +1345,7 @@ export class AppForms {
         elBody.appendChild(elContent);
 
         // Get the status information
-        let status = DataSource.Status[item.AppStatus];
+        let status = AppConfig.Status[item.AppStatus];
 
         // See if a checklist exists
         let checklist = status.checklists || [];
@@ -1392,13 +1393,13 @@ export class AppForms {
                                 LoadingDialog.show();
 
                                 // Update the status
-                                let status = DataSource.Status[item.AppStatus];
+                                let status = AppConfig.Status[item.AppStatus];
                                 item.update({
                                     AppIsRejected: false,
-                                    AppStatus: status ? status.nextStep : DataSource.Status[0]
+                                    AppStatus: status ? status.nextStep : AppConfig.Status[0]
                                 }).execute(() => {
                                     // Parse the developers
-                                    let to = DataSource.Configuration.appCatalogAdminEmailGroup ? [DataSource.Configuration.appCatalogAdminEmailGroup] : [];
+                                    let to = AppConfig.Configuration.appCatalogAdminEmailGroup ? [AppConfig.Configuration.appCatalogAdminEmailGroup] : [];
                                     for (let i = 0; i < DataSource.DevGroup.Users.results.length; i++) {
                                         // Append the email
                                         to.push(DataSource.DevGroup.Users.results[i].Email);

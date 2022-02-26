@@ -1,6 +1,5 @@
-import { Dashboard, LoadingDialog, Modal } from "dattatable";
+import { Dashboard, LoadingDialog } from "dattatable";
 import { Components } from "gd-sprest-bs";
-import { appIndicator } from "gd-sprest-bs/build/icons/svgs/appIndicator";
 import { arrowClockwise } from "gd-sprest-bs/build/icons/svgs/arrowClockwise";
 import { chatSquareDots } from "gd-sprest-bs/build/icons/svgs/chatSquareDots";
 import { columnsGap } from "gd-sprest-bs/build/icons/svgs/columnsGap";
@@ -10,6 +9,7 @@ import { layoutTextWindow } from "gd-sprest-bs/build/icons/svgs/layoutTextWindow
 import { pencilSquare } from "gd-sprest-bs/build/icons/svgs/pencilSquare";
 import { questionLg } from "gd-sprest-bs/build/icons/svgs/questionLg";
 import { App } from "./app";
+import { AppConfig } from "./app-cfg";
 import * as Common from "./common";
 import { AppForms } from "./itemForms";
 import * as jQuery from "jquery";
@@ -95,7 +95,7 @@ export class AppDashboard {
         }
 
         // See if the help url exists
-        if (DataSource.Configuration.helpPageUrl) {
+        if (AppConfig.Configuration.helpPageUrl) {
             // Add the item
             navLinks.push({
                 className: "btn-outline-light mx-2 ps-1 pt-1",
@@ -105,7 +105,7 @@ export class AppDashboard {
                 text: "Help",
                 onClick: () => {
                     // Display in a new tab
-                    window.open(DataSource.Configuration.helpPageUrl, "_blank");
+                    window.open(AppConfig.Configuration.helpPageUrl, "_blank");
                 }
             });
         }

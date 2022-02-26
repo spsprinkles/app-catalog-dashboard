@@ -5,6 +5,7 @@ import { folderSymlink } from "gd-sprest-bs/build/icons/svgs/folderSymlink";
 import { layoutTextWindow } from "gd-sprest-bs/build/icons/svgs/layoutTextWindow";
 import { questionLg } from "gd-sprest-bs/build/icons/svgs/questionLg";
 import { Actions } from "./actions";
+import { AppConfig } from "./app-cfg";
 import * as Common from "./common";
 import { DataSource } from "./ds";
 import Strings from "./strings";
@@ -109,7 +110,7 @@ export class App {
             el: this._el.querySelector("#app-docs"),
             listName: Strings.Lists.Apps,
             docSetId,
-            templatesUrl: DataSource.Configuration.templatesLibraryUrl,
+            templatesUrl: AppConfig.Configuration.templatesLibraryUrl,
             webUrl: Strings.SourceUrl,
             onActionsRendered: (el, col, file) => {
                 // See if this is a package file
@@ -274,7 +275,7 @@ export class App {
         ];
 
         // See if the help url exists
-        if (DataSource.Configuration.helpPageUrl) {
+        if (AppConfig.Configuration.helpPageUrl) {
             // Add the item
             itemsEnd.push({
                 className: "btn-outline-light ms-2 ps-1 pt-1",
@@ -284,7 +285,7 @@ export class App {
                 text: "Help",
                 onClick: () => {
                     // Display in a new tab
-                    window.open(DataSource.Configuration.helpPageUrl, "_blank");
+                    window.open(AppConfig.Configuration.helpPageUrl, "_blank");
                 }
             });
         }

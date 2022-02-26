@@ -3,8 +3,9 @@ import { appIndicator } from "gd-sprest-bs/build/icons/svgs/appIndicator";
 import { chatSquareDots } from "gd-sprest-bs/build/icons/svgs/chatSquareDots";
 import { pencilSquare } from "gd-sprest-bs/build/icons/svgs/pencilSquare";
 import { trash } from "gd-sprest-bs/build/icons/svgs/trash";
+import { AppConfig, IStatus } from "./app-cfg";
 import * as Common from "./common";
-import { DataSource, IAppItem, IStatus } from "./ds";
+import { DataSource, IAppItem } from "./ds";
 import { AppForms } from "./itemForms";
 import Strings from "./strings";
 
@@ -31,7 +32,7 @@ export class Actions {
     }
 
     // Status
-    private get Status(): IStatus { return DataSource.Status[this._item.AppStatus] || {} as any; }
+    private get Status(): IStatus { return AppConfig.Status[this._item.AppStatus] || {} as any; }
 
     // Determines if the user is an approver
     private isApprover() {
@@ -218,9 +219,9 @@ export class Actions {
                         });
 
                         // Load the context of the app catalog
-                        ContextInfo.getWeb(DataSource.Configuration.tenantAppCatalogUrl).execute(context => {
+                        ContextInfo.getWeb(AppConfig.Configuration.tenantAppCatalogUrl).execute(context => {
                             let requestDigest = context.GetContextWebInformation.FormDigestValue;
-                            let web = Web(DataSource.Configuration.tenantAppCatalogUrl, { requestDigest });
+                            let web = Web(AppConfig.Configuration.tenantAppCatalogUrl, { requestDigest });
 
                             // Ensure this app can be deployed to the tenant
                             web.TenantAppCatalog().solutionContainsTeamsComponent(DataSource.DocSetTenantApp.ID).execute((resp: any) => {
