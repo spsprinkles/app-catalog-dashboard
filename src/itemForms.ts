@@ -657,12 +657,37 @@ export class AppForms {
                             props.onValidate = (ctrl, results) => {
                                 // See if we are validating the results
                                 if (validateFl) {
-                                    // Set the flag
-                                    let selectedItem: Components.IDropdownItem = results.value;
-                                    results.isValid = selectedItem && selectedItem.text ? true : false;
+                                    // See if there is validation values for this field
+                                    let values = DataSource.Configuration.validation && DataSource.Configuration.validation.techReview ? DataSource.Configuration.validation.techReview[field.InternalName] : null;
+                                    if (values && values.length > 0) {
+                                        // Set the flag
+                                        let selectedItem: Components.IDropdownItem = results.value;
+                                        if (selectedItem && selectedItem.text) {
+                                            let matchFl = false;
 
-                                    // Set the error message
-                                    results.invalidMessage = "A selection is required.";
+                                            // Parse the valid values
+                                            for (let i = 0; i < values.length; i++) {
+                                                // See if the value matches
+                                                if (values[i] == selectedItem.text) {
+                                                    // Set the flag and break from the loop
+                                                    matchFl = true;
+                                                    break;
+                                                }
+                                            }
+
+                                            // See if a match wasn't found
+                                            if (!matchFl) {
+                                                // Value isn't valid
+                                                results.isValid = false;
+
+                                                // Set the error message
+                                                results.invalidMessage = "The selected value will fail to approve the item.";
+                                            }
+                                        } else {
+                                            // Set the error message
+                                            results.invalidMessage = "A selection is required for approval.";
+                                        }
+                                    }
                                 }
 
                                 // Return the results
@@ -752,12 +777,40 @@ export class AppForms {
                             props.onValidate = (ctrl, results) => {
                                 // See if we are validating the results
                                 if (validateFl) {
-                                    // Set the flag
-                                    let selectedItem: Components.IDropdownItem = results.value;
-                                    results.isValid = selectedItem && selectedItem.text ? true : false;
+                                    // See if there is validation values for this field
+                                    let values = DataSource.Configuration.validation && DataSource.Configuration.validation.testCases ? DataSource.Configuration.validation.testCases[field.InternalName] : null;
+                                    if (values && values.length > 0) {
+                                        // Set the flag
+                                        let selectedItem: Components.IDropdownItem = results.value;
+                                        if (selectedItem && selectedItem.text) {
+                                            let matchFl = false;
 
-                                    // Set the error message
-                                    results.invalidMessage = "A selection is required.";
+                                            // Parse the valid values
+                                            for (let i = 0; i < values.length; i++) {
+                                                // See if the value matches
+                                                if (values[i] == selectedItem.text) {
+                                                    // Set the flag and break from the loop
+                                                    matchFl = true;
+                                                    break;
+                                                }
+                                            }
+
+                                            // See if a match wasn't found
+                                            if (!matchFl) {
+                                                // Value isn't valid
+                                                results.isValid = false;
+
+                                                // Set the error message
+                                                results.invalidMessage = "The selected value will fail to approve the item.";
+                                            }
+                                        } else {
+                                            // Value isn't valid
+                                            results.isValid = false;
+
+                                            // Set the error message
+                                            results.invalidMessage = "A selection is required for approval.";
+                                        }
+                                    }
                                 }
 
                                 // Return the results
