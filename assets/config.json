@@ -58,6 +58,15 @@
             ],
             "approval": [
                 "Approver"
+            ],
+            "checklists": [
+                "Validation of the application name and description.",
+                "Reviewed the justification of the application.",
+                "Reviewed the justification of the application permissions.",
+                "Validation of unit/organization.",
+                "App manifest file submitted.",
+                "App source code submitted.",
+                "Validation of the application manifest content."
             ]
         },
         "Pending Review": {
@@ -78,17 +87,7 @@
                 "ApproveReject"
             ],
             "approval": [
-                "Sponser"
-            ]
-        },
-        "Rejected": {
-            "actions": [
-                "View",
-                "Edit",
-                "Submit"
-            ],
-            "approval": [
-                "Developer", "Sponser"
+                "Approver", "Sponser"
             ]
         }
     }

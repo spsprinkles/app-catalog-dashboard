@@ -31,11 +31,7 @@ export class Actions {
     }
 
     // Status
-    private get Status(): IStatus {
-        // Get the status configuration
-        let appStatus = this._item.AppIsRejected ? "Rejected" : this._item.AppStatus;
-        return DataSource.Status[appStatus] || {} as any;
-    }
+    private get Status(): IStatus { return DataSource.Status[this._item.AppStatus] || {} as any; }
 
     // Determines if the user is an approver
     private isApprover() {
@@ -74,6 +70,12 @@ export class Actions {
         // Determine if the user can edit items
         let canEdit = Common.canEdit(this._item);
 
+        // Render the tooltip group
+        let tooltips = Components.TooltipGroup({
+            el: this._el,
+            isVertical: true
+        });
+
         // Parse the button actions
         for (let i = 0; i < btnActions.length; i++) {
             // Render the action button
@@ -83,8 +85,7 @@ export class Actions {
                     // Ensure this user can approve this item
                     if (this.isApprover()) {
                         // Render the approval button
-                        Components.Tooltip({
-                            el: this._el,
+                        tooltips.add({
                             content: "Approves the application.",
                             btnProps: {
                                 text: "Approve",
@@ -104,8 +105,7 @@ export class Actions {
                         });
 
                         // Render the reject button
-                        Components.Tooltip({
-                            el: this._el,
+                        tooltips.add({
                             content: "Sends the request back to the developer(s).",
                             btnProps: {
                                 text: "Reject",
@@ -131,8 +131,7 @@ export class Actions {
                     // Ensure this is an approver
                     if (DataSource.IsApprover) {
                         // Render the button
-                        Components.Tooltip({
-                            el: this._el,
+                        tooltips.add({
                             content: "Deletes the app.",
                             btnProps: {
                                 text: "Delete App/Solution",
@@ -162,8 +161,7 @@ export class Actions {
                             // Test site exists
                             () => {
                                 // Render the button
-                                Components.Tooltip({
-                                    el: this._el,
+                                tooltips.add({
                                     content: "Deletes the test site.",
                                     btnProps: {
                                         text: "Delete Test Site",
@@ -199,8 +197,7 @@ export class Actions {
                     // See if the app is deployed
                     if (DataSource.DocSetTenantApp && DataSource.DocSetTenantApp.Deployed) {
                         // Render the retract button
-                        Components.Tooltip({
-                            el: this._el,
+                        tooltips.add({
                             content: "Retracts the solution from the tenant app catalog.",
                             btnProps: {
                                 text: "Retract from Tenant",
@@ -230,8 +227,7 @@ export class Actions {
                                 // See if we can deploy this app to teams
                                 if (resp.SolutionContainsTeamsComponent) {
                                     // Render the deploy to teams button
-                                    Components.Tooltip({
-                                        el: this._el,
+                                    tooltips.add({
                                         content: "Deploys the solution to Teams.",
                                         btnProps: {
                                             text: "Deploy to Teams",
@@ -255,8 +251,7 @@ export class Actions {
                         });
                     } else {
                         // Render the deploy button
-                        Components.Tooltip({
-                            el: this._el,
+                        tooltips.add({
                             content: "Deploys the application to the tenant app catalog.",
                             btnProps: {
                                 text: "Deploy",
@@ -280,8 +275,7 @@ export class Actions {
                 // Edit
                 case "Edit":
                     // Render the button
-                    Components.Tooltip({
-                        el: this._el,
+                    tooltips.add({
                         content: "Displays the edit form to update the app properties.",
                         btnProps: {
                             text: "Edit Properties",
@@ -305,8 +299,7 @@ export class Actions {
                 // Edit Tech Review
                 case "EditTechReview":
                     // Render the button
-                    Components.Tooltip({
-                        el: this._el,
+                    tooltips.add({
                         content: "Edits the technical review for this app.",
                         btnProps: {
                             text: "Edit Technical Review",
@@ -329,8 +322,7 @@ export class Actions {
                 // Edit Test Cases
                 case "EditTestCases":
                     // Render the button
-                    Components.Tooltip({
-                        el: this._el,
+                    tooltips.add({
                         content: "Edit the test cases for this app.",
                         btnProps: {
                             text: "Edit Test Cases",
@@ -354,8 +346,7 @@ export class Actions {
                 // Submit
                 case "Submit":
                     // Render the button
-                    Components.Tooltip({
-                        el: this._el,
+                    tooltips.add({
                         content: "Submits the app for approval",
                         btnProps: {
                             text: "Submit for Approval",
@@ -383,8 +374,7 @@ export class Actions {
                         // Test site exists
                         web => {
                             // Render the view button
-                            Components.Tooltip({
-                                el: this._el,
+                            tooltips.add({
                                 content: "Opens the test site in a new tab.",
                                 btnProps: {
                                     text: "View Test Site",
@@ -404,8 +394,7 @@ export class Actions {
                         // Test site doesn't exist
                         () => {
                             // Render the create button
-                            Components.Tooltip({
-                                el: this._el,
+                            tooltips.add({
                                 content: "Creates the test site for the app.",
                                 btnProps: {
                                     text: "Create Test Site",
@@ -431,8 +420,7 @@ export class Actions {
                 // View
                 case "View":
                     // Render the button
-                    Components.Tooltip({
-                        el: this._el,
+                    tooltips.add({
                         content: "Displays the the app properties.",
                         btnProps: {
                             text: "View Properties",
@@ -452,8 +440,7 @@ export class Actions {
                 // View Tech Review
                 case "ViewTechReview":
                     // Render the button
-                    Components.Tooltip({
-                        el: this._el,
+                    tooltips.add({
                         content: "Views the technical review for this app.",
                         btnProps: {
                             text: "View Technical Review",
@@ -473,8 +460,7 @@ export class Actions {
                 // View Test Cases
                 case "ViewTestCases":
                     // Render the button
-                    Components.Tooltip({
-                        el: this._el,
+                    tooltips.add({
                         content: "View the test cases for this app.",
                         btnProps: {
                             text: "View Test Cases",

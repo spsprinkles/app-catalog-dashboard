@@ -87,6 +87,7 @@ export interface IStatus {
     lastStep: boolean;
     name: string;
     nextStep: string;
+    prevStep: string;
     stepNumber: number;
 }
 
@@ -151,20 +152,16 @@ export class DataSource {
                 for (let i = 0; i < field.Choices.results.length; i++) {
                     let choice = field.Choices.results[i];
                     let nextStep = field.Choices.results[i + 1];
+                    let prevStep = i > 0 ? field.Choices.results[i - 1] : null;
 
-                    // Get the configuration for this status
-                    let cfg = this.Configuration.status ? this.Configuration.status[choice] : null;
-
-                    // Add the status
-                    this._status[choice] = {
-                        actions: cfg ? cfg.actions : null,
-                        checklists: cfg ? cfg.checklists : null,
-                        lastStep: nextStep ? false : true,
-                        name: choice,
-                        nextStep,
-                        stepNumber: i
-                    };
-                }
+                    // Set the status
+                    this._status[choice] = this._status[choice] || {} as any;
+                    this._status[choice].lastStep = nextStep ? false : true;
+                    this._status[choice].name = choice;
+                    this._status[choice].nextStep = nextStep;
+                    this._status[choice].prevStep = prevStep;
+                    this._status[choice].stepNumber = i;
+                };
 
                 // Resolve the request
                 resolve();
