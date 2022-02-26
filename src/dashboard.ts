@@ -9,6 +9,7 @@ import { layoutTextWindow } from "gd-sprest-bs/build/icons/svgs/layoutTextWindow
 import { pencilSquare } from "gd-sprest-bs/build/icons/svgs/pencilSquare";
 import { questionLg } from "gd-sprest-bs/build/icons/svgs/questionLg";
 import { App } from "./app";
+import { AppActions } from "./appActions";
 import { AppConfig } from "./appCfg";
 import * as Common from "./common";
 import { AppForms } from "./itemForms";
@@ -176,9 +177,15 @@ export class AppDashboard {
                                     type: Components.ButtonTypes.OutlineSecondary,
                                     onClick: () => {
                                         // Upload the package file
-                                        this._forms.upload(() => {
+                                        AppActions.upload(item => {
                                             // Refresh the dashboard
                                             this.refresh();
+
+                                            // Display the edit form
+                                            this._forms.edit(item.Id, () => {
+                                                // Refresh the dashboard
+                                                this.refresh();
+                                            });
                                         });
                                     }
                                 },
