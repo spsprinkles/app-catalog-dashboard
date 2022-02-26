@@ -1,6 +1,6 @@
-import { App } from "./app";
+import { AppDashboard } from "./appDashboard";
+import { AppView } from "./appView";
 import { Configuration } from "./cfg";
-import { AppDashboard } from "./dashboard";
 import { DataSource } from "./ds";
 import Strings, { setContext } from "./strings";
 import { UserAgreement } from "./userAgreement";
@@ -47,11 +47,11 @@ const GlobalVariable = {
                 }
                 // Else, see if this is a document set and we are not in teams
                 else if (!Strings.IsTeams && DataSource.DocSetItem) {
-                    // Create the application
-                    new App(elAppDetails);
+                    // View the application dashboard
+                    new AppDashboard(elAppDetails);
                 } else {
-                    // Render the dashboard
-                    new AppDashboard(elApps, elAppDetails);
+                    // View all of the applications
+                    new AppView(elApps, elAppDetails);
                 }
             },
             // Error

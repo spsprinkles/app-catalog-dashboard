@@ -11,9 +11,10 @@ import { DataSource } from "./ds";
 import Strings from "./strings";
 
 /**
- * Main Application
+ * Application Dashboard
+ * Gives a more detailed overview of the application.
  */
-export class App {
+export class AppDashboard {
     private _el: HTMLElement = null;
     private _elDashboard: HTMLElement = null;
 

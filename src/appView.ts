@@ -8,9 +8,9 @@ import { gearWideConnected } from "gd-sprest-bs/build/icons/svgs/gearWideConnect
 import { layoutTextWindow } from "gd-sprest-bs/build/icons/svgs/layoutTextWindow";
 import { pencilSquare } from "gd-sprest-bs/build/icons/svgs/pencilSquare";
 import { questionLg } from "gd-sprest-bs/build/icons/svgs/questionLg";
-import { App } from "./app";
 import { AppActions } from "./appActions";
 import { AppConfig } from "./appCfg";
+import { AppDashboard } from "./appDashboard";
 import * as Common from "./common";
 import { AppForms } from "./itemForms";
 import * as jQuery from "jquery";
@@ -18,9 +18,10 @@ import { DataSource, IAppItem } from "./ds";
 import Strings from "./strings";
 
 /**
- * Dashboard
+ * Application View
+ * Displays a high-level overview of all the applications.
  */
-export class AppDashboard {
+export class AppView {
     private _dashboard: Dashboard = null;
     private _el: HTMLElement = null;
     private _elAppDetails: HTMLElement = null;
@@ -434,7 +435,7 @@ export class AppDashboard {
                                             while (this._elAppDetails.firstChild) { this._elAppDetails.removeChild(this._elAppDetails.firstChild); }
 
                                             // Set the body
-                                            new App(this._elAppDetails, this._el, item.Id);
+                                            new AppDashboard(this._elAppDetails, this._el, item.Id);
 
                                             // Hide the apps
                                             this._el.style.display = "none";
