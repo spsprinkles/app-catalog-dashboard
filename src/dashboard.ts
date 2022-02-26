@@ -9,7 +9,7 @@ import { layoutTextWindow } from "gd-sprest-bs/build/icons/svgs/layoutTextWindow
 import { pencilSquare } from "gd-sprest-bs/build/icons/svgs/pencilSquare";
 import { questionLg } from "gd-sprest-bs/build/icons/svgs/questionLg";
 import { App } from "./app";
-import { AppConfig } from "./app-cfg";
+import { AppConfig } from "./appCfg";
 import * as Common from "./common";
 import { AppForms } from "./itemForms";
 import * as jQuery from "jquery";

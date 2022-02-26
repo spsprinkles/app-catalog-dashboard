@@ -5,7 +5,7 @@ import { folderSymlink } from "gd-sprest-bs/build/icons/svgs/folderSymlink";
 import { layoutTextWindow } from "gd-sprest-bs/build/icons/svgs/layoutTextWindow";
 import { questionLg } from "gd-sprest-bs/build/icons/svgs/questionLg";
 import { Actions } from "./actions";
-import { AppConfig } from "./app-cfg";
+import { AppConfig } from "./appCfg";
 import * as Common from "./common";
 import { DataSource } from "./ds";
 import Strings from "./strings";

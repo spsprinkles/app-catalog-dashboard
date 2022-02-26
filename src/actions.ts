@@ -3,7 +3,7 @@ import { appIndicator } from "gd-sprest-bs/build/icons/svgs/appIndicator";
 import { chatSquareDots } from "gd-sprest-bs/build/icons/svgs/chatSquareDots";
 import { pencilSquare } from "gd-sprest-bs/build/icons/svgs/pencilSquare";
 import { trash } from "gd-sprest-bs/build/icons/svgs/trash";
-import { AppConfig, IStatus } from "./app-cfg";
+import { AppConfig, IStatus } from "./appCfg";
 import * as Common from "./common";
 import { DataSource, IAppItem } from "./ds";
 import { AppForms } from "./itemForms";

@@ -1,6 +1,6 @@
 import { InstallationRequired, LoadingDialog } from "dattatable";
 import { Components, ContextInfo, Helper, Types, Web } from "gd-sprest-bs";
-import { AppConfig } from "./app-cfg";
+import { AppConfig } from "./appCfg";
 import { Configuration, createSecurityGroups } from "./cfg";
 import Strings from "./strings";
 
