@@ -4,8 +4,8 @@ import { caretRightFill } from "gd-sprest-bs/build/icons/svgs/caretRightFill";
 import { folderSymlink } from "gd-sprest-bs/build/icons/svgs/folderSymlink";
 import { layoutTextWindow } from "gd-sprest-bs/build/icons/svgs/layoutTextWindow";
 import { questionLg } from "gd-sprest-bs/build/icons/svgs/questionLg";
-import { Actions } from "./actions";
 import { AppConfig } from "./appCfg";
+import { ButtonActions } from "./btnActions";
 import * as Common from "./common";
 import { DataSource } from "./ds";
 import Strings from "./strings";
@@ -94,7 +94,7 @@ export class App {
                 title: "Actions",
                 onRender: el => {
                     // Render the actions
-                    new Actions(el, DataSource.DocSetItem, () => {
+                    new ButtonActions(el, DataSource.DocSetItem, () => {
                         // Refresh the dashboard
                         this.refresh();
                     })

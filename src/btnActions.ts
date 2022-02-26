@@ -13,7 +13,7 @@ import Strings from "./strings";
  * Actions
  * Renders the actions available, based on the status.
  */
-export class Actions {
+export class ButtonActions {
     private _el: HTMLElement = null;
     private _forms: AppForms = null;
     private _item: IAppItem = null;
