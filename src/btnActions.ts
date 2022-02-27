@@ -4,9 +4,10 @@ import { chatSquareDots } from "gd-sprest-bs/build/icons/svgs/chatSquareDots";
 import { pencilSquare } from "gd-sprest-bs/build/icons/svgs/pencilSquare";
 import { trash } from "gd-sprest-bs/build/icons/svgs/trash";
 import { AppConfig, IStatus } from "./appCfg";
+import { AppForms } from "./appForms";
+import { AppSecurity } from "./appSecurity";
 import * as Common from "./common";
 import { DataSource, IAppItem } from "./ds";
-import { AppForms } from "./itemForms";
 import Strings from "./strings";
 
 /**
@@ -47,12 +48,12 @@ export class ButtonActions {
                 // Approver
                 case "Approver":
                     // See if this user is an approver
-                    return DataSource.IsApprover;
+                    return AppSecurity.IsApprover;
 
                 // Developer
                 case "Developer":
                     // See if this user is a developer
-                    return DataSource.IsDeveloper;
+                    return AppSecurity.IsDeveloper;
 
                 // Sponser
                 case "Sponser":
@@ -130,7 +131,7 @@ export class ButtonActions {
                 // Delete
                 case "Delete":
                     // Ensure this is an approver
-                    if (DataSource.IsApprover) {
+                    if (AppSecurity.IsApprover) {
                         // Render the button
                         tooltips.add({
                             content: "Deletes the app.",
@@ -156,7 +157,7 @@ export class ButtonActions {
                 // Delete Test Site
                 case "DeleteTestSite":
                     // See if this is an approver
-                    if (DataSource.IsSiteAppCatalogOwner) {
+                    if (AppSecurity.IsSiteAppCatalogOwner) {
                         // See if a test site exists
                         DataSource.loadTestSite(this._item).then(
                             // Test site exists
@@ -205,7 +206,7 @@ export class ButtonActions {
                                 iconClassName: "me-1",
                                 iconSize: 20,
                                 //iconType: trash,
-                                isDisabled: DataSource.IsTenantAppCatalogOwner,
+                                isDisabled: AppSecurity.IsTenantAppCatalogOwner,
                                 isSmall: true,
                                 type: Components.ButtonTypes.OutlineDanger,
                                 onClick: () => {
@@ -235,7 +236,7 @@ export class ButtonActions {
                                             iconClassName: "me-1",
                                             iconSize: 20,
                                             //iconType: trash,
-                                            isDisabled: DataSource.IsTenantAppCatalogOwner,
+                                            isDisabled: AppSecurity.IsTenantAppCatalogOwner,
                                             isSmall: true,
                                             type: Components.ButtonTypes.OutlineWarning,
                                             onClick: () => {

@@ -1,5 +1,6 @@
 import { LoadingDialog, Modal } from "dattatable";
 import { Components, ContextInfo } from "gd-sprest-bs";
+import { AppSecurity } from "./appSecurity";
 import { DataSource } from "./ds";
 
 /**
@@ -23,7 +24,7 @@ export class UserAgreement {
         LoadingDialog.show();
 
         // Add the user
-        DataSource.DevGroup.Users.addUserById(ContextInfo.userId).execute(() => {
+        AppSecurity.DevGroup.Users.addUserById(ContextInfo.userId).execute(() => {
             // Close the dialog
             LoadingDialog.hide();
 

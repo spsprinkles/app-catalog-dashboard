@@ -1,4 +1,5 @@
 import { AppDashboard } from "./appDashboard";
+import { AppSecurity } from "./appSecurity";
 import { AppView } from "./appView";
 import { Configuration } from "./cfg";
 import { DataSource } from "./ds";
@@ -36,12 +37,12 @@ const GlobalVariable = {
                 let elAppDetails = el.querySelector("#app-details") as HTMLElement;
 
                 // Ensure the security groups exist
-                if (DataSource.ApproverGroup == null || DataSource.DevGroup == null) {
+                if (AppSecurity.ApproverGroup == null || AppSecurity.DevGroup == null) {
                     // See if an install is required
                     DataSource.InstallRequired();
                 }
                 // Ensure the user is not an approver or developer
-                if (!DataSource.IsApprover && !DataSource.IsDeveloper) {
+                if (!AppSecurity.IsApprover && !AppSecurity.IsDeveloper) {
                     // Show the user agreement
                     new UserAgreement();
                 }
@@ -57,7 +58,7 @@ const GlobalVariable = {
             // Error
             () => {
                 // Ensure the user is not an approver or developer
-                if (!DataSource.IsApprover && !DataSource.IsDeveloper) {
+                if (!AppSecurity.IsApprover && !AppSecurity.IsDeveloper) {
                     // Show the user agreement
                     new UserAgreement();
                 } else {

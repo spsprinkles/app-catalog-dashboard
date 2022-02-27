@@ -1,6 +1,7 @@
 import { InstallationRequired, LoadingDialog } from "dattatable";
 import { Components, ContextInfo, Helper, Types, Web } from "gd-sprest-bs";
 import { AppConfig } from "./appCfg";
+import { AppSecurity } from "./appSecurity";
 import { Configuration, createSecurityGroups } from "./cfg";
 import Strings from "./strings";
 
@@ -114,78 +115,6 @@ export class DataSource {
         });
     }
 
-    // Approver Security Group
-    private static _approverGroup: Types.SP.GroupOData = null;
-    static get ApproverGroup(): Types.SP.GroupOData { return this._approverGroup; }
-    static get ApproverUrl(): string { return ContextInfo.webServerRelativeUrl + "/_layouts/15/people.aspx?MembershipGroupId=" + this._approverGroup.Id; }
-    static get IsApprover(): boolean {
-        // See if the group doesn't exist
-        if (this.ApproverGroup == null) { return false; }
-
-        // Parse the group
-        for (let i = 0; i < this.ApproverGroup.Users.results.length; i++) {
-            // See if this is the current user
-            if (this.ApproverGroup.Users.results[i].Id == ContextInfo.userId) {
-                // Found
-                return true;
-            }
-        }
-
-        // Return false by default
-        return false;
-    }
-    private static loadApproverGroup(): PromiseLike<void> {
-        // Return a promise
-        return new Promise((resolve, reject) => {
-            // Load the security group
-            Web(Strings.SourceUrl).SiteGroups().getByName(Strings.Groups.Approvers).query({
-                Expand: ["Users"]
-            }).execute(group => {
-                // Set the group
-                this._approverGroup = group;
-
-                // Resolve the request
-                resolve();
-            }, reject);
-        });
-    }
-
-    // Developer Security Group
-    private static _devGroup: Types.SP.GroupOData = null;
-    static get DevGroup(): Types.SP.GroupOData { return this._devGroup; }
-    static get DevUrl(): string { return ContextInfo.webServerRelativeUrl + "/_layouts/15/people.aspx?MembershipGroupId=" + this._devGroup.Id; }
-    static get IsDeveloper(): boolean {
-        // See if the group doesn't exist
-        if (this.DevGroup == null) { return false; }
-
-        // Parse the group
-        for (let i = 0; i < this.DevGroup.Users.results.length; i++) {
-            // See if this is the current user
-            if (this.DevGroup.Users.results[i].Id == ContextInfo.userId) {
-                // Found
-                return true;
-            }
-        }
-
-        // Return false by default
-        return false;
-    }
-    private static loadDevGroup(): PromiseLike<void> {
-        // Return a promise
-        return new Promise((resolve, reject) => {
-            // Load the security group
-            Web(Strings.SourceUrl).SiteGroups().getByName(Strings.Groups.Developers).query({
-                Expand: ["Users"]
-            }).execute(group => {
-                // Set the group
-                this._devGroup = group;
-
-                // Resolve the request
-                resolve();
-            }, reject);
-        });
-    }
-
     // Deletes the app test site
     static deleteTestSite(item: IAppItem): PromiseLike<void> {
         // Return a promise
@@ -240,35 +169,29 @@ export class DataSource {
         return new Promise((resolve, reject) => {
             // Load the configuration
             AppConfig.loadConfiguration().then(() => {
-                // Load the approvers group
-                this.loadApproverGroup().then(() => {
-                    // Load the developers group
-                    this.loadDevGroup().then(() => {
-                        // Load the owners group
-                        this.loadOwnerGroup().then(() => {
-                            // Load the site collection apps
-                            this.loadSiteCollectionApps().then(() => {
-                                // Load the tenant apps
-                                this.loadTenantApps().then(() => {
-                                    // See if this is a document set item and not teams
-                                    if (!Strings.IsTeams && this.DocSetItemId > 0) {
-                                        // Load the document set item
-                                        this.loadDocSet().then(() => {
-                                            // Resolve the request
-                                            resolve();
-                                        }, reject);
-                                    } else {
-                                        // Load the data
-                                        this.load().then(() => {
-                                            // Load the status filters
-                                            this.loadStatusFilters().then(() => {
-                                                // Resolve the request
-                                                resolve();
-                                            }, reject);
-                                        }, reject);
-                                    }
+                // Load the security information
+                AppSecurity.init(AppConfig.Configuration.appCatalogUrl, AppConfig.Configuration.tenantAppCatalogUrl).then(() => {
+                    // Load the site collection apps
+                    this.loadSiteCollectionApps().then(() => {
+                        // Load the tenant apps
+                        this.loadTenantApps().then(() => {
+                            // See if this is a document set item and not teams
+                            if (!Strings.IsTeams && this.DocSetItemId > 0) {
+                                // Load the document set item
+                                this.loadDocSet().then(() => {
+                                    // Resolve the request
+                                    resolve();
                                 }, reject);
-                            }, reject);
+                            } else {
+                                // Load the data
+                                this.load().then(() => {
+                                    // Load the status filters
+                                    this.loadStatusFilters().then(() => {
+                                        // Resolve the request
+                                        resolve();
+                                    }, reject);
+                                }, reject);
+                            }
                         }, reject);
                     }, reject);
                 }, reject);
@@ -283,7 +206,7 @@ export class DataSource {
             let errors: Components.IListGroupItem[] = [];
 
             // See if the security groups exist
-            if (DataSource.ApproverGroup == null || DataSource.DevGroup == null) {
+            if (AppSecurity.ApproverGroup == null || AppSecurity.DevGroup == null) {
                 // Add an error
                 errors.push({
                     content: "Security groups are not installed."
@@ -382,8 +305,6 @@ export class DataSource {
     }
 
     // Site Collection Apps
-    private static _isSiteAppCatalogOwner = false;
-    static get IsSiteAppCatalogOwner(): boolean { return this._isSiteAppCatalogOwner; }
     private static _siteCollectionApps: Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata[] = null;
     static get SiteCollectionAppCatalogExists(): boolean { return this._siteCollectionApps != null; }
     static get SiteCollectionApps(): Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata[] { return this._siteCollectionApps; }
@@ -423,37 +344,22 @@ export class DataSource {
         return new Promise((resolve) => {
             // See if the app catalog is defined
             if (AppConfig.Configuration.appCatalogUrl) {
-                // Ensure the user is an owner of the site
-                Web(AppConfig.Configuration.appCatalogUrl).AssociatedOwnerGroup().Users().getByEmail(ContextInfo.userEmail).execute(user => {
-                    // Ensure the user is an owner
-                    if (user && user.Id > 0) {
-                        // Set the flag
-                        this._isSiteAppCatalogOwner = true;
+                // Load the available apps
+                Web(AppConfig.Configuration.appCatalogUrl).SiteCollectionAppCatalog().AvailableApps().execute(apps => {
+                    // Set the apps
+                    this._siteCollectionApps = apps.results;
 
-                        // Load the available apps
-                        Web(AppConfig.Configuration.appCatalogUrl).SiteCollectionAppCatalog().AvailableApps().execute(apps => {
-                            // Set the apps
-                            this._siteCollectionApps = apps.results;
-
-                            // Resolve the request
-                            resolve();
-                        }, () => {
-                            // No access to the tenant app catalog
-                            this._siteCollectionApps = [];
-
-                            // Resolve the request
-                            resolve();
-                        });
-                    }
+                    // Resolve the request
+                    resolve();
                 }, () => {
-                    // Default the tenant apps
+                    // No access to the site collection app catalog
                     this._siteCollectionApps = [];
 
                     // Resolve the request
                     resolve();
                 });
             } else {
-                // Default the tenant apps
+                // Default the site collection apps
                 this._siteCollectionApps = [];
 
                 // Resolve the request
@@ -463,8 +369,6 @@ export class DataSource {
     }
 
     // Tenant Apps
-    private static _isTenantAppCatalogOwner = false;
-    static get IsTenantAppCatalogOwner(): boolean { return this._isTenantAppCatalogOwner; }
     private static _tenantApps: Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata[] = null;
     static get TenantApps(): Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata[] { return this._tenantApps; }
     static getTenantAppById(appId: string): Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata {
@@ -503,30 +407,15 @@ export class DataSource {
         return new Promise((resolve, reject) => {
             // See if the tenant app catalog is defined
             if (AppConfig.Configuration.tenantAppCatalogUrl) {
-                // Ensure the user is an owner of the site
-                Web(AppConfig.Configuration.tenantAppCatalogUrl).AssociatedOwnerGroup().Users().getByEmail(ContextInfo.userEmail).execute(user => {
-                    // Ensure the user is an owner
-                    if (user && user.Id > 0) {
-                        // Set the flag
-                        this._isTenantAppCatalogOwner = true;
+                // Load the available apps
+                Web(AppConfig.Configuration.tenantAppCatalogUrl).TenantAppCatalog().AvailableApps().execute(apps => {
+                    // Set the apps
+                    this._tenantApps = apps.results;
 
-                        // Load the available apps
-                        Web(AppConfig.Configuration.tenantAppCatalogUrl).TenantAppCatalog().AvailableApps().execute(apps => {
-                            // Set the apps
-                            this._tenantApps = apps.results;
-
-                            // Resolve the request
-                            resolve();
-                        }, () => {
-                            // No access to the tenant app catalog
-                            this._tenantApps = [];
-
-                            // Resolve the request
-                            resolve();
-                        });
-                    }
+                    // Resolve the request
+                    resolve();
                 }, () => {
-                    // Default the tenant apps
+                    // No access to the tenant app catalog
                     this._tenantApps = [];
 
                     // Resolve the request
@@ -565,41 +454,6 @@ export class DataSource {
                     resolve();
                 }
             );
-        });
-    }
-
-    // Owner Security Group
-    private static _ownerGroup: Types.SP.GroupOData = null;
-    static get OwnerGroup(): Types.SP.GroupOData { return this._ownerGroup; }
-    static get IsOwner(): boolean {
-        // See if the group doesn't exist
-        if (this.OwnerGroup == null) { return false; }
-
-        // Parse the group
-        for (let i = 0; i < this.OwnerGroup.Users.results.length; i++) {
-            // See if this is the current user
-            if (this.OwnerGroup.Users.results[i].Id == ContextInfo.userId) {
-                // Found
-                return true;
-            }
-        }
-
-        // Return false by default
-        return false;
-    }
-    private static loadOwnerGroup(): PromiseLike<void> {
-        // Return a promise
-        return new Promise((resolve) => {
-            // Load the security group
-            Web(Strings.SourceUrl).AssociatedOwnerGroup().query({
-                Expand: ["Users"]
-            }).execute(group => {
-                // Set the group
-                this._ownerGroup = group;
-
-                // Resolve the request
-                resolve();
-            }, resolve as any);
         });
     }
 }

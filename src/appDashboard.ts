@@ -160,9 +160,9 @@ export class AppDashboard {
                                 ],
                                 onControlRendering: (ctrl, field) => {
                                     // See if this is the status field and the item is rejected
-                                    if (field.InternalName == "AppStatus" && DataSource.DocSetItem.AppIsRejected) {
+                                    if (field.InternalName == "AppStatus") {
                                         // Set the status value
-                                        ctrl.value = "Rejected";
+                                        ctrl.value = Common.appStatus(DataSource.DocSetItem);
                                     }
                                 }
                             });

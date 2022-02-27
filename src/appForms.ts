@@ -1,8 +1,8 @@
 import { ItemForm, LoadingDialog, Modal } from "dattatable";
 import { Components, ContextInfo, Helper, List, SPTypes, Types, Utility, Web } from "gd-sprest-bs";
-import { loadAsync } from "jszip";
 import { AppActions } from "./appActions";
 import { AppConfig, IStatus } from "./appCfg";
+import { AppSecurity } from "./appSecurity";
 import { DataSource, IAppItem, IAssessmentItem } from "./ds";
 import Strings from "./strings";
 
@@ -659,13 +659,22 @@ export class AppForms {
                 LoadingDialog.setHeader("Creating the Form");
                 LoadingDialog.setBody("This dialog will close after the form is created.");
 
-                // Create the item
-                Web(Strings.SourceUrl).Lists(Strings.Lists.Assessments).Items().add({
-                    RelatedAppId: item.Id,
-                    Title: item.Title + " Tests " + (new Date(Date.now()).toDateString())
-                }).execute(item => {
-                    // Show the assessment form
-                    displayForm(item as any);
+                // Get the test content type
+                Web(Strings.SourceUrl).Lists(Strings.Lists.Assessments).ContentTypes().query({
+                    Filter: "Name eq 'TestCases'"
+                }).execute(cts => {
+                    // Set the content type
+                    let ct = cts.results[0];
+
+                    // Create the item
+                    Web(Strings.SourceUrl).Lists(Strings.Lists.Assessments).Items().add({
+                        ContentTypeId: ct ? ct.StringId : null,
+                        RelatedAppId: item.Id,
+                        Title: item.Title + " Tests " + (new Date(Date.now()).toDateString())
+                    }).execute(item => {
+                        // Show the assessment form
+                        displayForm(item as any);
+                    });
                 });
             }
         });
@@ -966,9 +975,9 @@ export class AppForms {
                     }).execute(() => {
                         // Parse the developers
                         let cc = [];
-                        for (let i = 0; i < DataSource.DevGroup.Users.results.length; i++) {
+                        for (let i = 0; i < AppSecurity.DevGroup.Users.results.length; i++) {
                             // Append the email
-                            cc.push(DataSource.DevGroup.Users.results[i].Email);
+                            cc.push(AppSecurity.DevGroup.Users.results[i].Email);
                         }
 
                         // Get the app developers
@@ -1126,9 +1135,9 @@ export class AppForms {
                                 }).execute(() => {
                                     // Parse the developers
                                     let to = AppConfig.Configuration.appCatalogAdminEmailGroup ? [AppConfig.Configuration.appCatalogAdminEmailGroup] : [];
-                                    for (let i = 0; i < DataSource.DevGroup.Users.results.length; i++) {
+                                    for (let i = 0; i < AppSecurity.DevGroup.Users.results.length; i++) {
                                         // Append the email
-                                        to.push(DataSource.DevGroup.Users.results[i].Email);
+                                        to.push(AppSecurity.DevGroup.Users.results[i].Email);
                                     }
 
                                     // Get the app developers

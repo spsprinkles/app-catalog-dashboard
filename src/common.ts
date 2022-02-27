@@ -1,23 +1,16 @@
 import { ContextInfo } from "gd-sprest-bs";
 import { IAppItem } from "./ds";
-import Strings from "./strings";
+
+// Determines the current application status
+export function appStatus(item: IAppItem) {
+    // See if item is rejected
+    return item.AppIsRejected ? "Rejected" : item.AppStatus;
+}
 
 // Determines if the user can edit the item
 export function canEdit(item: IAppItem) {
     // The user is the author or owner
     return isOwner(item) || isSubmitter(item);
-}
-
-// Generates the document set dashboard url
-export function generateDocSetUrl(item: IAppItem) {
-    // Set the list url
-    let listName = Strings.Lists.Apps.replace(/ /g, '');
-    let listUrl = ContextInfo.webAbsoluteUrl + "/" + listName;
-    let listUrlFolder = ContextInfo.webServerRelativeUrl + "/" + listName;
-
-    // Return the url
-    return listUrl + "/Forms/App/docsethomepage.aspx?ID=" +
-        item.Id + "&FolderCTID=" + item.ContentTypeId + "&RootFolder=" + listUrlFolder + "/" + item.Id;
 }
 
 // Generates an embedded SVG image to embed in a style tag

@@ -11,8 +11,9 @@ import { questionLg } from "gd-sprest-bs/build/icons/svgs/questionLg";
 import { AppActions } from "./appActions";
 import { AppConfig } from "./appCfg";
 import { AppDashboard } from "./appDashboard";
+import { AppForms } from "./appForms";
+import { AppSecurity } from "./appSecurity";
 import * as Common from "./common";
-import { AppForms } from "./itemForms";
 import * as jQuery from "jquery";
 import { DataSource, IAppItem } from "./ds";
 import Strings from "./strings";
@@ -61,7 +62,7 @@ export class AppView {
     private render() {
         // See if this is an owner
         let navLinks: Components.INavbarItem[] = [];
-        if (DataSource.IsOwner) {
+        if (AppSecurity.IsOwner) {
             // Set the admin buttons
             navLinks.push({
                 className: "btn-outline-light ms-2 pt-1",
@@ -82,14 +83,14 @@ export class AppView {
                         text: "Manage Approver Group",
                         onClick: () => {
                             // Show the group in a new tab
-                            window.open(DataSource.ApproverUrl, "_blank");
+                            window.open(AppSecurity.ApproverUrl, "_blank");
                         }
                     },
                     {
                         text: "Manage Developer Group",
                         onClick: () => {
                             // Show the group in a new tab
-                            window.open(DataSource.DevUrl, "_blank");
+                            window.open(AppSecurity.DevUrl, "_blank");
                         }
                     }
                 ]
@@ -311,7 +312,7 @@ export class AppView {
                         title: "Status",
                         onRenderCell: (el, column, item: IAppItem) => {
                             // Set the status
-                            el.innerHTML = item.AppIsRejected ? "Rejected" : item.AppStatus;
+                            el.innerHTML = Common.appStatus(item);
 
                             // See if the site app catalog exists
                             if (DataSource.SiteCollectionAppCatalogExists) {
