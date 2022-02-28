@@ -256,7 +256,7 @@ export class ButtonActions {
                         tooltips.add({
                             content: "Deploys the application to the tenant app catalog.",
                             btnProps: {
-                                text: "Deploy",
+                                text: "Deploy to Tenant",
                                 iconClassName: "me-1",
                                 iconSize: 20,
                                 //iconType: trash,

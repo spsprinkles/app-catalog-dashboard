@@ -1,7 +1,8 @@
 import { ItemForm, LoadingDialog, Modal } from "dattatable";
-import { Components, ContextInfo, Helper, List, SPTypes, Types, Utility, Web } from "gd-sprest-bs";
+import { Components, ContextInfo, Helper, List, SPTypes, Utility, Web } from "gd-sprest-bs";
 import { AppActions } from "./appActions";
 import { AppConfig, IStatus } from "./appCfg";
+import { AppNotifications } from "./appNotifications";
 import { AppSecurity } from "./appSecurity";
 import { DataSource, IAppItem, IAssessmentItem } from "./ds";
 import Strings from "./strings";
@@ -57,8 +58,8 @@ export class AppForms {
                                         // Close the dialog
                                         LoadingDialog.hide();
 
-                                        // Call the update event
-                                        onUpdate();
+                                        // Send the notification
+                                        AppNotifications.sendEmail(status.nextStep, item).then(onUpdate);
                                     });
 
                                 }
@@ -303,7 +304,12 @@ export class AppForms {
                 // Show the view form
                 ItemForm.view({
                     itemId: assessment.Id,
-                    webUrl: Strings.SourceUrl
+                    webUrl: Strings.SourceUrl,
+                    onGetListInfo: (props) => {
+                        // Exclude the related app field
+                        props.excludeFields = ["RelatedApp"];
+                        return props;
+                    }
                 });
             } else {
                 // No assessment found
@@ -330,6 +336,9 @@ export class AppForms {
                     itemId: assessment.Id,
                     webUrl: Strings.SourceUrl,
                     onGetListInfo: props => {
+                        // Exclude the related app field
+                        props.excludeFields = ["RelatedApp"];
+
                         // Set the content type
                         props.contentType = "TestCases";
 
@@ -474,6 +483,9 @@ export class AppForms {
                         if (field.InternalName.indexOf("TechReview") == 0 && field.FieldTypeKind == SPTypes.FieldType.Choice) {
                             // Set the validation
                             props.onValidate = (ctrl, results) => {
+                                // Clear the invalid message
+                                results.invalidMessage = "";
+
                                 // See if we are validating the results
                                 if (validateFl) {
                                     // See if there is validation values for this field
@@ -503,6 +515,9 @@ export class AppForms {
                                                 results.invalidMessage = "The selected value will fail to approve the item.";
                                             }
                                         } else {
+                                            // Value isn't valid
+                                            results.isValid = false;
+
                                             // Set the error message
                                             results.invalidMessage = "A selection is required for approval.";
                                         }
@@ -581,8 +596,8 @@ export class AppForms {
                                 // Set the flag
                                 validateFl = true;
 
-                                // Save the form
-                                ItemForm.save();
+                                // Validate the form
+                                ItemForm.EditForm.isValid();
                             }
                         }
                     });
@@ -681,7 +696,7 @@ export class AppForms {
     }
 
     // Method to get the assessment item associated with the app
-    private getAssessmentItem(item: IAppItem, testFl: boolean = true, lastFl: boolean = false): PromiseLike<IAssessmentItem> {
+    private getAssessmentItem(item: IAppItem, testFl: boolean = true): PromiseLike<IAssessmentItem> {
         // Return a promise
         return new Promise((resolve, reject) => {
             // Get the assoicated item
@@ -805,7 +820,7 @@ export class AppForms {
                 LoadingDialog.show();
 
                 // Get the assessment
-                this.getAssessmentItem(item, false).then(item => {
+                this.getAssessmentItem(item, true).then(item => {
                     // Ensure the item exists
                     if (item) {
                         // Parse the validation
@@ -894,7 +909,7 @@ export class AppForms {
         ItemForm.ListName = Strings.Lists.Assessments;
 
         // Get the assessment item
-        this.getAssessmentItem(item, false, true).then(assessment => {
+        this.getAssessmentItem(item, false).then(assessment => {
             // See if an item exists
             if (assessment) {
                 // Show the edit form
@@ -967,51 +982,17 @@ export class AppForms {
                     // Get the current status configuration
                     let status = AppConfig.Status[item.AppStatus];
 
+                    // Set the new status
+                    let newStatus = status && status.prevStep ? status.prevStep : item.AppStatus;
+
                     // Update the status
                     item.update({
                         AppComments: comments,
                         AppIsRejected: true,
-                        AppStatus: status && status.prevStep ? status.prevStep : item.AppStatus
+                        AppStatus: newStatus
                     }).execute(() => {
-                        // Parse the developers
-                        let cc = [];
-                        for (let i = 0; i < AppSecurity.DevGroup.Users.results.length; i++) {
-                            // Append the email
-                            cc.push(AppSecurity.DevGroup.Users.results[i].Email);
-                        }
-
-                        // Get the app developers
-                        let to = [];
-                        let owners = item.AppDevelopers && item.AppDevelopers.results ? item.AppDevelopers.results : [];
-                        for (let i = 0; i < owners.length; i++) {
-                            // Append the email
-                            to.push(owners[i].EMail);
-                        }
-
-                        // Ensure owners exist
-                        if (to.length > 0) {
-                            // Send an email
-                            Utility().sendEmail({
-                                To: to,
-                                CC: cc,
-                                Subject: "App '" + item.Title + "' Sent Back",
-                                Body: "App Developers,<br /><br />The '" + item.Title + "' app has been sent back based on the comments below." +
-                                    ContextInfo.userDisplayName +
-                                    ".<br /><br />" + comments
-                            }).execute(() => {
-                                // Call the update event
-                                onUpdate();
-
-                                // Close the loading dialog
-                                LoadingDialog.hide();
-                            });
-                        } else {
-                            // Call the update event
-                            onUpdate();
-
-                            // Close the loading dialog
-                            LoadingDialog.hide();
-                        }
+                        // Send the notification
+                        AppNotifications.rejectEmail(newStatus, item, comments).then(onUpdate);
                     });
                 }
             }
@@ -1129,47 +1110,13 @@ export class AppForms {
 
                                 // Update the status
                                 let status = AppConfig.Status[item.AppStatus];
+                                let newStatus = status ? status.nextStep : AppConfig.Status[0].name;
                                 item.update({
                                     AppIsRejected: false,
-                                    AppStatus: status ? status.nextStep : AppConfig.Status[0]
+                                    AppStatus: newStatus
                                 }).execute(() => {
-                                    // Parse the developers
-                                    let to = AppConfig.Configuration.appCatalogAdminEmailGroup ? [AppConfig.Configuration.appCatalogAdminEmailGroup] : [];
-                                    for (let i = 0; i < AppSecurity.DevGroup.Users.results.length; i++) {
-                                        // Append the email
-                                        to.push(AppSecurity.DevGroup.Users.results[i].Email);
-                                    }
-
-                                    // Get the app developers
-                                    let cc = [];
-                                    let owners = item.AppDevelopers.results || [];
-                                    for (let i = 0; i < owners.length; i++) {
-                                        // Append the email
-                                        cc.push(owners[i].EMail);
-                                    }
-
-                                    // Ensure owners exist
-                                    if (to.length > 0) {
-                                        // Send an email
-                                        Utility().sendEmail({
-                                            To: to,
-                                            CC: cc,
-                                            Subject: "App '" + item.Title + "' submitted for approval",
-                                            Body: "App Developers,<br /><br />The '" + item.Title + "' app has been submitted for approval by " + ContextInfo.userDisplayName + ". Please take some time to test this app and submit an assessment/review using the App Dashboard."
-                                        }).execute(() => {
-                                            // Call the update event
-                                            onUpdate();
-
-                                            // Close the loading dialog
-                                            LoadingDialog.hide();
-                                        });
-                                    } else {
-                                        // Call the update event
-                                        onUpdate();
-
-                                        // Close the loading dialog
-                                        LoadingDialog.hide();
-                                    }
+                                    // Send an email
+                                    AppNotifications.sendEmail(newStatus, item).then(onUpdate);
                                 });
                             }
                         });

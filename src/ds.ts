@@ -5,28 +5,6 @@ import { AppSecurity } from "./appSecurity";
 import { Configuration, createSecurityGroups } from "./cfg";
 import Strings from "./strings";
 
-// App Catalog Item
-export interface IAppCatalogItem extends Types.SP.ListItem {
-    AppDescription: string;
-    AppImageURL1: Types.SP.FieldUrlValue;
-    AppImageURL2: Types.SP.FieldUrlValue;
-    AppImageURL3: Types.SP.FieldUrlValue;
-    AppImageURL4: Types.SP.FieldUrlValue;
-    AppImageURL5: Types.SP.FieldUrlValue;
-    AppProductID: string;
-    AppPublisher: string;
-    AppShortDescription: string;
-    AppSupportURL: Types.SP.FieldUrlValue;
-    AppThumbnailURL: Types.SP.FieldUrlValue;
-    AppVersion: string;
-    AppVideoURL: Types.SP.FieldUrlValue;
-    AuthorId: number;
-    CheckoutUser: { Id: number; Title: string; };
-    FileLeafRef: string;
-    IsDefaultAppMetadataLocale: boolean;
-    IsAppPackageEnabled: boolean;
-}
-
 // App Item
 export interface IAppItem extends Types.SP.ListItem {
     AppAPIPermissions?: string;
@@ -43,6 +21,7 @@ export interface IAppItem extends Types.SP.ListItem {
     AppPublisher: string;
     AppSharePointMinVersion?: boolean;
     AppSkipFeatureDeployment?: boolean;
+    AppSponser: { Id: number; Title: string; };
     AppSponserId: number;
     AppStatus: string;
     AppVersion: string;
@@ -94,9 +73,12 @@ export class DataSource {
                 contentType: "App",
                 webUrl: Strings.SourceUrl,
                 query: {
-                    Expand: ["AppDevelopers", "CheckoutUser"],
+                    Expand: ["AppDevelopers", "AppSponser", "CheckoutUser"],
                     Select: [
-                        "*", "Id", "FileLeafRef", "ContentTypeId", "AppDevelopers/Id", "AppDevelopers/EMail", "CheckoutUser/Title"
+                        "*", "Id", "FileLeafRef", "ContentTypeId",
+                        "AppDevelopers/Id", "AppDevelopers/EMail", "AppDevelopers/Title",
+                        "AppSponser/Id", "AppSponser/EMail", "AppSponser/Title",
+                        "CheckoutUser/Id", "CheckoutUser/EMail", "CheckoutUser/Title"
                     ]
                 }
             }).then(info => {
@@ -263,10 +245,13 @@ export class DataSource {
         return new Promise((resolve, reject) => {
             // Load the list items
             Web(Strings.SourceUrl).Lists(Strings.Lists.Apps).Items().query({
-                Expand: ["AppDevelopers", "CheckoutUser", "Folder"],
+                Expand: ["AppDevelopers", "AppSponser", "CheckoutUser", "Folder"],
                 Filter: "ContentType eq 'App'",
                 Select: [
-                    "*", "Id", "FileLeafRef", "ContentTypeId", "AppDevelopers/Id", "AppDevelopers/EMail", "CheckoutUser/Title"
+                    "*", "Id", "FileLeafRef", "ContentTypeId",
+                    "AppDevelopers/Id", "AppDevelopers/EMail", "AppDevelopers/Title",
+                    "AppSponser/Id", "AppSponser/EMail", "AppSponser/Title",
+                    "CheckoutUser/Id", "CheckoutUser/EMail", "CheckoutUser/Title"
                 ]
             }).execute(items => {
                 // Set the items

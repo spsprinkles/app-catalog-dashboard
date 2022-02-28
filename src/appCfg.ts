@@ -3,7 +3,6 @@ import Strings from "./strings";
 
 // Configuration
 export interface IConfiguration {
-    appCatalogAdminEmailGroup?: string;
     appCatalogUrl?: string;
     helpPageUrl?: string;
     templatesLibraryUrl?: string;
@@ -15,6 +14,14 @@ export interface IConfiguration {
     }
 }
 
+// Email
+export interface IEmail {
+    content: string;
+    to: string[];
+    cc: string[];
+    subject: string;
+}
+
 // Status
 export interface IStatus {
     actions?: string[];
@@ -22,6 +29,7 @@ export interface IStatus {
     checklists?: string[];
     lastStep: boolean;
     name: string;
+    notification?: IEmail[];
     nextStep: string;
     prevStep: string;
     requiresTechReview?: boolean;

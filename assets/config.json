@@ -1,5 +1,4 @@
 {
-    "appCatalogAdminEmailGroup": "gudatta@microsoft.com",
     "appCatalogUrl": "/sites/demo",
     "helpPageUrl": "~site/SitePages/Help.aspx",
     "templatesLibraryUrl": "~site/shared%20documents/templates",
@@ -11,7 +10,23 @@
                 "ViewTestCases",
                 "ViewTechReview",
                 "TestSite",
-                "DeleteTestSite"
+                "DeleteTestSite",
+                "DeploySiteCatalog",
+                "DeployTenantCatalog"
+            ],
+            "notification": [
+                {
+                    "approval": true,
+                    "emails": [],
+                    "subject": "App Approved",
+                    "content": ""
+                },
+                {
+                    "submission": true,
+                    "emails": [],
+                    "subject": "App Approved",
+                    "content": ""
+                }
             ]
         },
         "In Testing": {
@@ -34,6 +49,20 @@
                 "App manifest file submitted.",
                 "App source code submitted.",
                 "Validation of the application manifest content."
+            ],
+            "notification": [
+                {
+                    "approval": true,
+                    "emails": [],
+                    "subject": "App Approved",
+                    "content": ""
+                },
+                {
+                    "submission": true,
+                    "emails": [],
+                    "subject": "App Approved",
+                    "content": ""
+                }
             ]
         },
         "New": {
@@ -52,6 +81,20 @@
                 "Justification for the application is descriptive.",
                 "Justification for custom API permissions is filled out, if needed.",
                 "App manifest is filled out correctly"
+            ],
+            "notification": [
+                {
+                    "approval": true,
+                    "emails": [],
+                    "subject": "App Approved",
+                    "content": ""
+                },
+                {
+                    "submission": true,
+                    "emails": [],
+                    "subject": "App Approved",
+                    "content": ""
+                }
             ]
         },
         "Pending Approval": {
@@ -70,6 +113,20 @@
                 "App manifest file submitted.",
                 "App source code submitted.",
                 "Validation of the application manifest content."
+            ],
+            "notification": [
+                {
+                    "approval": true,
+                    "emails": [],
+                    "subject": "App Approved",
+                    "content": ""
+                },
+                {
+                    "submission": true,
+                    "emails": [],
+                    "subject": "App Approved",
+                    "content": ""
+                }
             ]
         },
         "Pending Review": {
@@ -83,6 +140,20 @@
             ],
             "approval": [
                 "Approver"
+            ],
+            "notification": [
+                {
+                    "approval": true,
+                    "emails": [],
+                    "subject": "App Approved",
+                    "content": ""
+                },
+                {
+                    "submission": true,
+                    "emails": [],
+                    "subject": "App Approved",
+                    "content": ""
+                }
             ]
         },
         "Pending Sponser Approval": {
@@ -93,6 +164,20 @@
             "approval": [
                 "Approver",
                 "Sponser"
+            ],
+            "notification": [
+                {
+                    "approval": true,
+                    "emails": [],
+                    "subject": "App Approved",
+                    "content": ""
+                },
+                {
+                    "submission": true,
+                    "emails": [],
+                    "subject": "App Approved",
+                    "content": ""
+                }
             ]
         }
     },
