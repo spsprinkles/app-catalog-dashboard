@@ -152,7 +152,7 @@ export class AppDashboard {
                                 info: DataSource.DocSetInfo,
                                 el,
                                 includeFields: [
-                                    "FileLeafRef",
+                                    "AppSponser",
                                     "AppStatus",
                                     "AppDevelopers",
                                     "AppProductID",
