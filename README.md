@@ -1,5 +1,5 @@
-# Starter Solution
+# App Catalog Management Tool
 
-A basic solution to accelerate creating SharePoint solutions using Bootstrap. Reference the [Wiki](https://github.com/gunjandatta/sprest-bs-starter/wiki) for a walkthrough of using this project.
+Helps manage solutions that are deployed to site collection and/or tenant app catalogs.
 
-![Demo](https://github.com/gunjandatta/sprest-bs-starter/wiki/images/solution.png)
+![Demo](https://github.com/spsprinkles/app-catalog-dashboard/solution.png)
