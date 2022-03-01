@@ -1,9 +1,8 @@
 import { ItemForm, LoadingDialog, Modal } from "dattatable";
-import { Components, ContextInfo, Helper, List, SPTypes, Utility, Web } from "gd-sprest-bs";
+import { Components, ContextInfo, Helper, List, SPTypes, Types, Web } from "gd-sprest-bs";
 import { AppActions } from "./appActions";
 import { AppConfig, IStatus } from "./appCfg";
 import { AppNotifications } from "./appNotifications";
-import { AppSecurity } from "./appSecurity";
 import { DataSource, IAppItem, IAssessmentItem } from "./ds";
 import Strings from "./strings";
 
@@ -225,6 +224,125 @@ export class AppForms {
                 // Deploy the app
                 AppActions.deploy(item, tenantFl, onUpdate);
             }
+        }).el);
+
+        // Show the modal
+        Modal.show();
+    }
+
+    // Deploys the solution to a site collection app catalog
+    deployToSite(item: IAppItem, onUpdate: () => void) {
+        // Set the header
+        Modal.setHeader("Deploy to App Catalog");
+
+        // Create the form
+        let form = Components.Form({
+            controls: [
+                {
+                    name: "Url",
+                    title: "Site Collection Url",
+                    description: "The relative url to the site collection containing the app catalog to deploy the application to.",
+                    type: Components.FormControlTypes.TextField,
+                    required: true,
+                    onControlRendering: ctrl => {
+                        (ctrl as Components.IFormControlPropsTextField).onChange = () => {
+                            // Disable the deploy button
+                            btnDeploy.disable();
+                        }
+                    },
+                    onValidate: (ctrl, results) => {
+                        // Ensure a value exists
+                        if (results.value) {
+                            // Set the flag
+                            results.isValid = hasAppCatalog;
+
+                            // Set the error message
+                            results.invalidMessage = "The site does not contain an app catalog.";
+                        } else {
+                            // Set the flag
+                            results.isValid = false;
+
+                            // Set the error message
+                            results.invalidMessage = "Please enter the relative site collection url to the app catalog.";
+                        }
+
+                        // Return the results
+                        return results;
+                    }
+                }
+            ]
+        });
+
+        // Set the body
+        Modal.setBody(form.el);
+
+        // Render the footer
+        let hasAppCatalog: boolean = false;
+        let btnDeploy: Components.IButton = null;
+        Modal.setFooter(Components.TooltipGroup({
+            tooltips: [
+                {
+                    content: "Loads the site collection and validates the app catalog.",
+                    btnProps: {
+                        text: "Load Site",
+                        type: Components.ButtonTypes.OutlinePrimary,
+                        onClick: () => {
+                            // Validate the form
+                            let url = form.getValues()["Url"];
+                            if (url) {
+                                // Show a loading dialog
+                                LoadingDialog.setHeader("Loading App Catalog");
+                                LoadingDialog.setBody("This dialog will close after the app catalog is loaded.");
+                                LoadingDialog.show();
+
+                                // Load the app catalog
+                                hasAppCatalog = false;
+                                Web(url).SiteCollectionAppCatalog().AvailableApps().execute(
+                                    // Success
+                                    apps => {
+                                        // Set the flag
+                                        hasAppCatalog = apps.results && typeof (apps.results.length) === "number" ? true : false;
+
+                                        // Validate the form and disable/enable the deploy button
+                                        form.isValid() ? btnDeploy.enable() : btnDeploy.disable();
+
+                                        // Hide the dialog
+                                        LoadingDialog.hide();
+                                    },
+
+                                    // The app catalog doesn't exist
+                                    () => {
+                                        // Validate the form
+                                        form.isValid();
+
+                                        // Hide the dialog
+                                        LoadingDialog.hide();
+                                    }
+                                )
+                            } else {
+                                // Show the default error message
+                                form.isValid();
+                            }
+                        }
+                    }
+                },
+                {
+                    content: "Deploys the application to the site collection's app catalog.",
+                    btnProps: {
+                        assignTo: btn => { btnDeploy = btn; },
+                        isDisabled: true,
+                        text: "Deploy",
+                        type: Components.ButtonTypes.OutlineSuccess,
+                        onClick: () => {
+                            // Close the modal
+                            Modal.hide();
+
+                            // Deploy the app
+                            AppActions.deployToTeams(item, onUpdate);
+                        }
+                    }
+                }
+            ]
         }).el);
 
         // Show the modal

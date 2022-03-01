@@ -191,7 +191,25 @@ export class ButtonActions {
 
                 // Deploy Site Catalog
                 case "DeploySiteCatalog":
-                    // TODO
+                    // Render the retract button
+                    tooltips.add({
+                        content: "Deploys the application to a site collection app catalog.",
+                        btnProps: {
+                            text: "Deploy to Site Collection",
+                            iconClassName: "me-1",
+                            iconSize: 20,
+                            //iconType: trash,
+                            isSmall: true,
+                            type: Components.ButtonTypes.OutlineDanger,
+                            onClick: () => {
+                                // Display the delete site form
+                                this._forms.deployToSite(this._item, () => {
+                                    // Call the update event
+                                    this._onUpdate();
+                                });
+                            }
+                        }
+                    });
                     break;
 
                 // Deploy Tenant Catalog
