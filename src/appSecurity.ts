@@ -100,6 +100,9 @@ export class AppSecurity {
                     // Resolve the request
                     resolve();
                 });
+            } else {
+                // Resolve the request
+                resolve();
             }
         });
     }
@@ -126,6 +129,9 @@ export class AppSecurity {
                     // Resolve the request
                     resolve();
                 });
+            } else {
+                // Resolve the request
+                resolve();
             }
         });
     }
@@ -133,7 +139,7 @@ export class AppSecurity {
     // Initialization
     static init(appCatalogUrl: string, tenantAppCatalogUrl: string): PromiseLike<void> {
         // Return a promise
-        return new Promise(resolve => {
+        return new Promise((resolve, reject) => {
             // Initialize the SC Owner
             this.initSCOwner(appCatalogUrl).then(() => {
                 // Initialize the tenant owner
@@ -146,11 +152,11 @@ export class AppSecurity {
                             this.loadOwnerGroup().then(() => {
                                 // Resolve the request
                                 resolve();
-                            });
-                        });
-                    });
-                });
-            });
+                            }, reject);
+                        }, reject);
+                    }, reject);
+                }, reject);
+            }, reject);
         });
     }
 

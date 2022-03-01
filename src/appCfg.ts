@@ -51,21 +51,12 @@ export class AppConfig {
     static get Configuration(): IConfiguration { return this._cfg; }
 
     // Load the configuration file
-    static loadConfiguration(): PromiseLike<void> {
+    static loadConfiguration(cfg?: any): PromiseLike<void> {
         // Return a promise
-        return new Promise(resolve => {
-            // Get the current web
-            Web(Strings.SourceUrl).getFileByServerRelativeUrl(Strings.ConfigUrl).content().execute(
-                // Success
-                file => {
-                    // Convert the string to a json object
-                    let cfg = null;
-                    try { cfg = JSON.parse(String.fromCharCode.apply(null, new Uint8Array(file))); }
-                    catch { cfg = {}; }
-
-                    // Set the configuration
-                    this._cfg = cfg;
-
+        return new Promise((resolve, reject) => {
+            let completeRequest = () => {
+                // Ensure the configuration exists
+                if (this._cfg) {
                     // Updates the url
                     let updateUrl = (url: string) => {
                         return url.replace("~site/", ContextInfo.webServerRelativeUrl + "/")
@@ -78,17 +69,43 @@ export class AppConfig {
 
                     // Set the status and resolve the request
                     this.setStatus().then(() => { resolve(); });
-                },
-
-                // Error
-                () => {
-                    // Set the configuration to nothing
-                    this._cfg = {} as any;
-
-                    // Resolve the request
-                    resolve();
+                } else {
+                    // Reject the request
+                    reject();
                 }
-            );
+            }
+
+            // See if the configuration is being provided
+            if (cfg) {
+                try { this._cfg = JSON.parse(cfg); }
+                catch { this._cfg = null; }
+
+                // Complete the request
+                completeRequest();
+            } else {
+                // Get the current web
+                Web(Strings.SourceUrl).getFileByServerRelativeUrl(Strings.ConfigUrl).content().execute(
+                    // Success
+                    file => {
+                        // Convert the string to a json object
+                        let cfg = null;
+                        try { this._cfg = JSON.parse(String.fromCharCode.apply(null, new Uint8Array(file))); }
+                        catch { this._cfg = null; }
+
+                        // Complete the request
+                        completeRequest();
+                    },
+
+                    // Error
+                    () => {
+                        // Clear the configuration
+                        this._cfg = null;
+
+                        // Complete the request
+                        completeRequest();
+                    }
+                );
+            }
         });
     }
 

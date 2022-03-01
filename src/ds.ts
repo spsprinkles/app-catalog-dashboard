@@ -1,5 +1,5 @@
 import { InstallationRequired, LoadingDialog } from "dattatable";
-import { Components, ContextInfo, Helper, Types, Web } from "gd-sprest-bs";
+import { Components, ContextInfo, Helper, Site, Types, Web } from "gd-sprest-bs";
 import { AppConfig } from "./appCfg";
 import { AppSecurity } from "./appSecurity";
 import { Configuration, createSecurityGroups } from "./cfg";
@@ -121,6 +121,27 @@ export class DataSource {
         });
     }
 
+    // Determines if the document set feature is enabled on this site
+    private static docSetEnabled(): PromiseLike<boolean> {
+        // Return a promise
+        return new Promise((resolve) => {
+            // See if the site collection has the feature enabled
+            Site(Strings.SourceUrl).Features("3bae86a2-776d-499d-9db8-fa4cdc7884f8").execute(
+                // Request was successful
+                feature => {
+                    // Ensure the feature exists and resolve the request
+                    resolve(feature.DefinitionId ? true : false);
+                },
+
+                // Not enabled
+                () => {
+                    // Resolve the request
+                    resolve(false);
+                }
+            )
+        });
+    }
+
     // Loads the app test site
     static loadTestSite(item: IAppItem): PromiseLike<Types.SP.Web> {
         // Return a promise
@@ -146,36 +167,15 @@ export class DataSource {
     }
 
     // Initializes the application
-    static init(): PromiseLike<void> {
+    static init(cfg?: any): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve, reject) => {
             // Load the configuration
-            AppConfig.loadConfiguration().then(() => {
+            AppConfig.loadConfiguration(cfg).then(() => {
                 // Load the security information
                 AppSecurity.init(AppConfig.Configuration.appCatalogUrl, AppConfig.Configuration.tenantAppCatalogUrl).then(() => {
-                    // Load the site collection apps
-                    this.loadSiteCollectionApps().then(() => {
-                        // Load the tenant apps
-                        this.loadTenantApps().then(() => {
-                            // See if this is a document set item and not teams
-                            if (!Strings.IsTeams && this.DocSetItemId > 0) {
-                                // Load the document set item
-                                this.loadDocSet().then(() => {
-                                    // Resolve the request
-                                    resolve();
-                                }, reject);
-                            } else {
-                                // Load the data
-                                this.load().then(() => {
-                                    // Load the status filters
-                                    this.loadStatusFilters().then(() => {
-                                        // Resolve the request
-                                        resolve();
-                                    }, reject);
-                                }, reject);
-                            }
-                        }, reject);
-                    }, reject);
+                    // Call the refresh method to load the data
+                    this.refresh().then(resolve, reject);
                 }, reject);
             }, reject);
         });
@@ -187,53 +187,107 @@ export class DataSource {
         InstallationRequired.requiresInstall(Configuration).then(installFl => {
             let errors: Components.IListGroupItem[] = [];
 
-            // See if the security groups exist
-            if (AppSecurity.ApproverGroup == null || AppSecurity.DevGroup == null) {
+            // See if the configuration is correct
+            if(AppConfig.Configuration == null) {
                 // Add an error
                 errors.push({
-                    content: "Security groups are not installed."
+                    content: "App configuration doesn't exist. This is required for the application to work."
                 });
-            }
+        }
 
-            // See if an installation is required
-            if ((installFl || errors.length > 0) || showFl) {
-                // Show the installation dialog
-                InstallationRequired.showDialog({
-                    errors,
-                    onFooterRendered: el => {
-                        // See if a custom error exists
-                        if (errors.length > 0 || showFl) {
-                            // Add the custom install button
-                            Components.Tooltip({
-                                el,
-                                content: "Creates the security groups.",
-                                type: Components.ButtonTypes.OutlinePrimary,
-                                btnProps: {
-                                    text: "Security",
-                                    onClick: () => {
-                                        // Show a loading dialog
-                                        LoadingDialog.setHeader("Security Groups");
-                                        LoadingDialog.setBody("Creating the security groups. This dialog will close after it completes.");
-                                        LoadingDialog.show();
+            // Ensure the document set feature is enabled
+            this.docSetEnabled().then(featureEnabledFl => {
+                // See if the feature is enabled
+                if (!featureEnabledFl) {
+                    // Add an error
+                    errors.push({
+                        content: "Document Set site feature is not enabled."
+                    });
+                }
 
-                                        // Create the security groups
-                                        createSecurityGroups().then(() => {
-                                            // Close the dialog
-                                            LoadingDialog.hide();
+                // See if the security groups exist
+                let securityGroupsExist = true;
+                if (AppSecurity.ApproverGroup == null || AppSecurity.DevGroup == null) {
+                    // Set the flag
+                    securityGroupsExist = false;
 
-                                            // Refresh the page
-                                            window.location.reload();
-                                        });
+                    // Add an error
+                    errors.push({
+                        content: "Security groups are not installed."
+                    });
+                }
+
+                // See if an installation is required
+                if ((installFl || errors.length > 0) || showFl) {
+                    // Show the installation dialog
+                    InstallationRequired.showDialog({
+                        errors,
+                        onFooterRendered: el => {
+                            // See if the feature isn't enabled
+                            if (!featureEnabledFl) {
+                                // Add the custom install button
+                                Components.Tooltip({
+                                    el,
+                                    content: "Enables the document set site collection feature.",
+                                    type: Components.ButtonTypes.OutlinePrimary,
+                                    btnProps: {
+                                        text: "Enable Feature",
+                                        onClick: () => {
+                                            // Show a loading dialog
+                                            LoadingDialog.setHeader("Enable Feature");
+                                            LoadingDialog.setBody("Enabling the document set feature. This dialog will close after this requests completes.");
+                                            LoadingDialog.show();
+
+                                            // Enable the feature
+                                            Site(Strings.SourceUrl).Features().add("3bae86a2-776d-499d-9db8-fa4cdc7884f8").execute(
+                                                // Enabled
+                                                () => {
+                                                    // Close the dialog
+                                                    LoadingDialog.hide();
+
+                                                    // Refresh the page
+                                                    window.location.reload();
+                                                }
+                                            );
+                                        }
                                     }
-                                }
-                            });
+                                });
+                            }
+
+                            // See if the security group doesn't exist
+                            if (!securityGroupsExist) {
+                                // Add the custom install button
+                                Components.Tooltip({
+                                    el,
+                                    content: "Creates the security groups.",
+                                    type: Components.ButtonTypes.OutlinePrimary,
+                                    btnProps: {
+                                        text: "Security",
+                                        onClick: () => {
+                                            // Show a loading dialog
+                                            LoadingDialog.setHeader("Security Groups");
+                                            LoadingDialog.setBody("Creating the security groups. This dialog will close after it completes.");
+                                            LoadingDialog.show();
+
+                                            // Create the security groups
+                                            createSecurityGroups().then(() => {
+                                                // Close the dialog
+                                                LoadingDialog.hide();
+
+                                                // Refresh the page
+                                                window.location.reload();
+                                            });
+                                        }
+                                    }
+                                });
+                            }
                         }
-                    }
-                });
-            } else {
-                // Log
-                console.error("[" + Strings.ProjectName + "] Error initializing the solution.");
-            }
+                    });
+                } else {
+                    // Log
+                    console.error("[" + Strings.ProjectName + "] Error initializing the solution.");
+                }
+            });
         });
     }
 
@@ -439,6 +493,36 @@ export class DataSource {
                     resolve();
                 }
             );
+        });
+    }
+
+    // Method to refresh the data source
+    static refresh(): PromiseLike<void> {
+        // Return a promise
+        return new Promise((resolve, reject) => {
+            // Load the site collection apps
+            this.loadSiteCollectionApps().then(() => {
+                // Load the tenant apps
+                this.loadTenantApps().then(() => {
+                    // See if this is a document set item and not teams
+                    if (!Strings.IsTeams && this.DocSetItemId > 0) {
+                        // Load the document set item
+                        this.loadDocSet().then(() => {
+                            // Resolve the request
+                            resolve();
+                        }, reject);
+                    } else {
+                        // Load the data
+                        this.load().then(() => {
+                            // Load the status filters
+                            this.loadStatusFilters().then(() => {
+                                // Resolve the request
+                                resolve();
+                            }, reject);
+                        }, reject);
+                    }
+                }, reject);
+            }, reject);
         });
     }
 }

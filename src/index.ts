@@ -12,7 +12,7 @@ import "./styles.scss";
 // Create the global variable for this solution
 const GlobalVariable = {
     Configuration,
-    render: (el: HTMLElement, context?, sourceUrl?: string) => {
+    render: (el: HTMLElement, context?, cfg?: any, sourceUrl?: string) => {
         // See if the page context exists
         if (context) {
             // Set the context
@@ -28,7 +28,7 @@ const GlobalVariable = {
         wpZone ? wpZone.style.width = "100%" : null;
 
         // Initialize the solution
-        DataSource.init().then(
+        DataSource.init(cfg).then(
             // Success
             () => {
                 // Create the app elements
@@ -57,8 +57,13 @@ const GlobalVariable = {
             },
             // Error
             () => {
-                // Ensure the user is not an approver or developer
-                if (!AppSecurity.IsApprover && !AppSecurity.IsDeveloper) {
+                // Ensure the security groups exist
+                if (AppSecurity.ApproverGroup == null || AppSecurity.DevGroup == null) {
+                    // See if an install is required
+                    DataSource.InstallRequired();
+                }
+                // Else, ensure the user is not an approver or developer
+                else if (!AppSecurity.IsApprover && !AppSecurity.IsDeveloper) {
                     // Show the user agreement
                     new UserAgreement();
                 } else {
