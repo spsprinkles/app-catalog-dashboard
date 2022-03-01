@@ -2,4 +2,4 @@
 
 Helps manage solutions that are deployed to site collection and/or tenant app catalogs.
 
-![Demo](https://github.com/spsprinkles/app-catalog-dashboard/main/solution.png)
+![Demo](https://github.com/spsprinkles/app-catalog-dashboard/raw/main/solution.png)
