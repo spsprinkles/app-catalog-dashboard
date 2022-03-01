@@ -226,6 +226,9 @@ export class AppForms {
                 AppActions.deploy(item, tenantFl, onUpdate);
             }
         }).el);
+
+        // Show the modal
+        Modal.show();
     }
 
     // Deploys the solution to teams
@@ -248,6 +251,9 @@ export class AppForms {
                 AppActions.deployToTeams(item, onUpdate);
             }
         }).el);
+
+        // Show the modal
+        Modal.show();
     }
 
     // Display form
