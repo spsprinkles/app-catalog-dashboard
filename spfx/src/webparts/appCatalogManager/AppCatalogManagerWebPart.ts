@@ -10,7 +10,7 @@ import styles from './AppCatalogManagerWebPart.module.scss';
 import * as strings from 'AppCatalogManagerWebPartStrings';
 
 export interface IAppCatalogManagerWebPartProps {
-  description: string;
+  configuration: string;
 }
 
 // Reference the solution
@@ -21,7 +21,7 @@ export default class AppCatalogManagerWebPart extends BaseClientSideWebPart<IApp
 
   public render(): void {
     // Render the application
-    AppDashboard.render(this.domElement, this.context, "/sites/demo/appcatalog");
+    AppDashboard.render(this.domElement, this.context, this.properties.configuration);
   }
 
   protected get dataVersion(): Version {
@@ -32,15 +32,13 @@ export default class AppCatalogManagerWebPart extends BaseClientSideWebPart<IApp
     return {
       pages: [
         {
-          header: {
-            description: strings.PropertyPaneDescription
-          },
           groups: [
             {
-              groupName: strings.BasicGroupName,
               groupFields: [
-                PropertyPaneTextField('description', {
-                  label: strings.DescriptionFieldLabel
+                PropertyPaneTextField('configuration', {
+                  label: strings.ConfigFieldLabel,
+                  multiline: true,
+                  rows: 15
                 })
               ]
             }

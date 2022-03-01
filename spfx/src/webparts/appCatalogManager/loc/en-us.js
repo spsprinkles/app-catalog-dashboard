@@ -1,7 +1,5 @@
 define([], function() {
   return {
-    "PropertyPaneDescription": "Description",
-    "BasicGroupName": "Group Name",
-    "DescriptionFieldLabel": "Description Field"
+    "ConfigFieldLabel": "The JSON configuration for the application"
   }
 });

@@ -1,7 +1,5 @@
 declare interface IAppCatalogManagerWebPartStrings {
-  PropertyPaneDescription: string;
-  BasicGroupName: string;
-  DescriptionFieldLabel: string;
+  ConfigFieldLabel: string;
 }
 
 declare module 'AppCatalogManagerWebPartStrings' {
