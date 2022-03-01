@@ -8,6 +8,33 @@ import { IAppItem } from "./ds";
  * Application Notifications
  */
 export class AppNotifications {
+    // Gets the value
+    private static getValue(key: string, item: IAppItem, status: string) {
+        // Default the value
+        let value = item[key];
+
+        // See if this is the status
+        if (key == "Status") {
+            // Set the value
+            value = status;
+        }
+        // Else, see if this is the user name
+        else if (key == "User.Name") {
+            // Set the value
+            value = ContextInfo.userDisplayName;
+        } else {
+            // Parse the properties
+            let keys = key.split('.');
+            for (let i = 0; i < keys.length; i++) {
+                // Set the value
+                value = value ? value[keys[i]] : null;
+            }
+        }
+
+        // Return the value
+        return value;
+    }
+
     // Sends a rejection notification
     static rejectEmail(status: string, item: IAppItem, comments: string): PromiseLike<void> {
         // Return a promise
@@ -86,23 +113,7 @@ export class AppNotifications {
                 while (startIdx > 0 && endIdx > startIdx) {
                     // Get the key value
                     let key = Body.substring(startIdx + 2, endIdx);
-                    let value = "";
-
-                    // See if this is the status
-                    if (key == "Status") {
-                        // Set the value
-                        value = status;
-                    }
-                    // Else, see if this is a field value
-                    else if (item[key]) {
-                        // Set the value
-                        value = item[key];
-                    }
-                    // Else, see if this is the user name
-                    else if (key == "User.Name") {
-                        // Set the value
-                        value = ContextInfo.userDisplayName;
-                    }
+                    let value = this.getValue(key, item, status);
 
                     // Replace the value
                     let oldContent = Body;
