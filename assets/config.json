@@ -39,7 +39,7 @@
             "notification": [
                 {
                     "approval": true,
-                    "emails": [
+                    "to": [
                         "Approver"
                     ],
                     "subject": "App Testing Completed",
@@ -67,7 +67,7 @@
             "notification": [
                 {
                     "submission": true,
-                    "emails": [
+                    "to": [
                         "Sponser"
                     ],
                     "subject": "App Submitted",
@@ -95,7 +95,7 @@
             "notification": [
                 {
                     "approval": true,
-                    "emails": [
+                    "to": [
                         "Developer"
                     ],
                     "subject": "App Approved for Testing",
@@ -118,7 +118,7 @@
             "notification": [
                 {
                     "approval": true,
-                    "emails": [
+                    "to": [
                         "Developer"
                     ],
                     "subject": "App Approved",
@@ -138,7 +138,7 @@
             "notification": [
                 {
                     "approval": true,
-                    "emails": [
+                    "to": [
                         "Approver"
                     ],
                     "subject": "App Submitted",
