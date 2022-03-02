@@ -24,7 +24,7 @@
                 "Submit"
             ],
             "approval": [
-                "Approver",
+                "ApproversGroup",
                 "Developers"
             ],
             "checklists": [
@@ -40,7 +40,7 @@
                 {
                     "approval": true,
                     "to": [
-                        "Approver"
+                        "ApproversGroup"
                     ],
                     "subject": "App Testing Completed",
                     "content": "<p>Approval Group,<p>The application testing was completed and is awaiting approval. Please click on the link below to review this request.</p><p>[[PageUrl]]</p><p>App Team</p>"
@@ -54,8 +54,8 @@
                 "Submit"
             ],
             "approval": [
-                "Approver",
-                "Developer"
+                "ApproversGroup",
+                "Developers"
             ],
             "checklists": [
                 "Application name is not generic and meaningful.",
@@ -81,7 +81,7 @@
                 "ApproveReject"
             ],
             "approval": [
-                "Approver"
+                "ApproversGroup"
             ],
             "checklists": [
                 "Validation of the application name and description.",
@@ -96,7 +96,7 @@
                 {
                     "approval": true,
                     "to": [
-                        "Developer"
+                        "Developers"
                     ],
                     "subject": "App Approved for Testing",
                     "content": "<p>Your application was approved for testing. Please click on the link below to begin testing it.</p><p>[[TestSiteUrl]]</p><p>App Team</p>"
@@ -113,13 +113,13 @@
                 "ApproveReject"
             ],
             "approval": [
-                "Approver"
+                "ApproversGroup"
             ],
             "notification": [
                 {
                     "approval": true,
                     "to": [
-                        "Developer"
+                        "Developers"
                     ],
                     "subject": "App Approved",
                     "content": "<p>Your application was approved for deployment.</p><p>[[PageUrl]]</p><p>App Team</p>"
@@ -132,14 +132,14 @@
                 "ApproveReject"
             ],
             "approval": [
-                "Approver",
+                "ApproversGroup",
                 "Sponser"
             ],
             "notification": [
                 {
                     "approval": true,
                     "to": [
-                        "Approver"
+                        "ApproversGroup"
                     ],
                     "subject": "App Submitted",
                     "content": "<p>Approval Group,<p>An application was submitted and is awaiting approval. Please click on the link below to review this request.</p><p>[[PageUrl]]</p><p>App Team</p>"

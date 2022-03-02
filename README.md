@@ -28,6 +28,25 @@ The [configuration file](https://github.com/spsprinkles/app-catalog-dashboard/ra
 | checklists | Displayed on the approval/submission form. |
 | notification | The email information to notify users on submission/approval of the item. |
 
+#### Actions
+
+| Name | Description |
+| --- | --- |
+| ApproveReject | Displays the approve and reject button if the user is listed in the `approval` property. |
+| DeploySiteCatalog | Displays the deploy to site collection button, allowing the user to deploy the application to a site of their choice. |
+| DeleteTestSite | Displays the delete test site button if the site exists. |
+| DeployTenantCatalog | Displays the option to deploy to the tenant app catalog. |
+| Edit | Displays the edit form to modify the app metadata. |
+| EditTechReview | Displays the edit form to modify the technical review assessment. |
+| EditTestCases | Displays the edit form to modify the test cases assessment. |
+| Submit | Displays the submission form to request approval. |
+| TestSite | Displays a `create` or `view` button to the test site collection. |
+| View | Displays the app metadata view form. |
+| ViewTechReview | Displays the last technical review for the application. |
+| ViewTestCases | Displays the last test cases for the application. |
+
+#### Notification
+
 The notification property will be an array of objects with the following properties.
 
 | Name | Description |
@@ -38,6 +57,15 @@ The notification property will be an array of objects with the following propert
 | cc | An array of user types to notify. |
 | subject | The email subject. |
 | content | The email body. Utilize [[Internal Field Name]] to set dynamic values from the associated item. If it's a user field, add the additional property to display: _[[AppSponser.Title]]_ |
+
+#### User Types
+
+| Name | Description |
+| --- | --- |
+| ApproversGroup | A reference to the approver's security group. |
+| Developers | The developers of the application. _Linked to the AppOwners metadata field._ |
+| DevelopersGroup | A reference to the developer's security group. |
+| Sponser | The sponser of the application. _Linked to the AppSponser metadata field._ |
 
 ### Validation
 
