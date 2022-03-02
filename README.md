@@ -6,7 +6,7 @@ Helps manage solutions that are deployed to site collection and/or tenant app ca
 
 ## Configuration
 
-The configuration file contains the settings for the application.
+The [configuration file](https://github.com/spsprinkles/app-catalog-dashboard/raw/main/assets/config.json) contains the settings for the application.
 
 ### URLs
 
