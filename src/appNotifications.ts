@@ -37,7 +37,7 @@ export class AppNotifications {
             // Sponser
             case "Sponser":
                 // Return the email
-                return item.AppSponser ? [item.AppSponser.Title] : [];
+                return item.AppSponser ? [item.AppSponser.EMail] : [];
         }
     }
 
