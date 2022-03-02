@@ -3,7 +3,7 @@ import { appIndicator } from "gd-sprest-bs/build/icons/svgs/appIndicator";
 import { chatSquareDots } from "gd-sprest-bs/build/icons/svgs/chatSquareDots";
 import { pencilSquare } from "gd-sprest-bs/build/icons/svgs/pencilSquare";
 import { trash } from "gd-sprest-bs/build/icons/svgs/trash";
-import { AppConfig, IStatus } from "./appCfg";
+import { AppConfig, IStatus, UserTypes } from "./appCfg";
 import { AppForms } from "./appForms";
 import { AppSecurity } from "./appSecurity";
 import * as Common from "./common";
@@ -45,18 +45,30 @@ export class ButtonActions {
         for (let i = 0; i < approvers.length; i++) {
             // See which approver type it is
             switch (approvers[i]) {
-                // Approver
-                case "Approver":
+                // Approver's Group
+                case UserTypes.ApproversGroup:
                     // See if this user is an approver
                     return AppSecurity.IsApprover;
 
-                // Developer
-                case "Developer":
+                // Developers of the application
+                case UserTypes.DevelopersGroup:
+                    // See if this user is an owner of the app'
+                    let developerIds = this._item.AppDevelopersId ? this._item.AppDevelopersId.results : [];
+                    for (let j = 0; j < developerIds.length; i++) {
+                        // See if the user is a developer
+                        if (developerIds[j] == ContextInfo.userId) { return true; }
+                    }
+
+                    // Not a developer of the app
+                    return false;
+
+                // Developer's Group
+                case UserTypes.DevelopersGroup:
                     // See if this user is a developer
                     return AppSecurity.IsDeveloper;
 
                 // Sponser
-                case "Sponser":
+                case UserTypes.Sponser:
                     // See if this user is a sponser
                     return this._item.AppSponserId == ContextInfo.userId;
             }

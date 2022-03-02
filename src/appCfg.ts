@@ -37,6 +37,14 @@ export interface IStatus {
     stepNumber: number;
 }
 
+// User Types
+export const UserTypes = {
+    ApproversGroup: "ApproversGroup",
+    Developers: "Developers",
+    DevelopersGroup: "DevelopersGroup",
+    Sponser: "Sponser"
+}
+
 /**
  * Application Configuration
  * Reads the configuration json file.
