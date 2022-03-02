@@ -8,6 +8,39 @@ import { IAppItem } from "./ds";
  * Application Notifications
  */
 export class AppNotifications {
+    // Gets the emails for a specific key
+    private static getEmails(key: string, item: IAppItem) {
+        // See which email(s) we need to return
+        switch (key) {
+            // Approver's Group
+            case "ApproversGroup":
+                return AppSecurity.ApproverEmails;
+
+            // Developer's Group
+            case "DevelopersGroup":
+                return AppSecurity.DeveloperEmails;
+
+            // Developers
+            case "Developers":
+                let emails = [];
+
+                // Parse the developers
+                let developers = item.AppDevelopers.results;
+                for (let i = 0; i < developers.length; i++) {
+                    // Append the email
+                    emails.push(developers[i].EMail);
+                }
+
+                // Return the emails
+                return emails;
+
+            // Sponser
+            case "Sponser":
+                // Return the email
+                return item.AppSponser ? [item.AppSponser.Title] : [];
+        }
+    }
+
     // Gets the value
     private static getValue(key: string, item: IAppItem, status: string) {
         // Default the value
@@ -57,13 +90,6 @@ export class AppNotifications {
     static rejectEmail(status: string, item: IAppItem, comments: string): PromiseLike<void> {
         // Return a promise
         return new Promise(resolve => {
-            // Parse the developers
-            let CC = [];
-            for (let i = 0; i < AppSecurity.DevGroup.Users.results.length; i++) {
-                // Append the email
-                CC.push(AppSecurity.DevGroup.Users.results[i].Email);
-            }
-
             // Get the app developers
             let To = [];
             let owners = item.AppDevelopers && item.AppDevelopers.results ? item.AppDevelopers.results : [];
@@ -73,7 +99,7 @@ export class AppNotifications {
             }
 
             // Ensure emails exist
-            if (To.length > 0 || CC.length > 0) {
+            if (To.length > 0 || AppSecurity.DeveloperEmails.length > 0) {
                 // Display a loading dialog
                 LoadingDialog.setHeader("Sending Notification");
                 LoadingDialog.setBody("This dialog will close after the notification is sent.");
@@ -81,7 +107,7 @@ export class AppNotifications {
 
                 // Send an email
                 Utility().sendEmail({
-                    To, CC,
+                    To, CC: AppSecurity.DeveloperEmails,
                     Subject: "App '" + item.Title + "' Sent Back",
                     Body: "App Developers,<br /><br />The '" + item.Title +
                         "' app has been sent back based on the comments below.<br /><br />" + comments
@@ -113,15 +139,17 @@ export class AppNotifications {
                 // Parse the to configuration
                 let toEmails = notificationCfg.to || [];
                 for (let i = 0; i < toEmails.length; i++) {
-                    // Append the email
-                    To.push(toEmails[i]);
+                    // Append the emails
+                    let emails = this.getEmails(toEmails[i], item);
+                    To = To.concat(emails);
                 }
 
                 // Parse the cc configuration
                 let ccEmails = notificationCfg.cc || [];
                 for (let i = 0; i < ccEmails.length; i++) {
-                    // Append the email
-                    CC.push(ccEmails[i]);
+                    // Append the emails
+                    let emails = this.getEmails(ccEmails[i], item);
+                    CC = CC.concat(emails);
                 }
 
                 // Parse the email content and find [[Key]] instances w/in it.

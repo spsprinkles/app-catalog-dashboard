@@ -10,6 +10,20 @@ export class AppSecurity {
     private static _approverGroup: Types.SP.GroupOData = null;
     static get ApproverGroup(): Types.SP.GroupOData { return this._approverGroup; }
     static get ApproverUrl(): string { return ContextInfo.webServerRelativeUrl + "/_layouts/15/people.aspx?MembershipGroupId=" + this._approverGroup.Id; }
+    static get ApproverEmails(): string[] {
+        let emails = [];
+
+        // Parse the approvers
+        for (let i = 0; i < this.ApproverGroup.Users.results.length; i++) {
+            let email = this.ApproverGroup.Users.results[i].Email;
+
+            // Append the email
+            email ? emails.push(email) : null;
+        }
+
+        // Return the emails
+        return emails;
+    }
     static get IsApprover(): boolean {
         // See if the group doesn't exist
         if (this.ApproverGroup == null) { return false; }
@@ -46,6 +60,20 @@ export class AppSecurity {
     private static _devGroup: Types.SP.GroupOData = null;
     static get DevGroup(): Types.SP.GroupOData { return this._devGroup; }
     static get DevUrl(): string { return ContextInfo.webServerRelativeUrl + "/_layouts/15/people.aspx?MembershipGroupId=" + this._devGroup.Id; }
+    static get DeveloperEmails(): string[] {
+        let emails = [];
+
+        // Parse the approvers
+        for (let i = 0; i < this.DevGroup.Users.results.length; i++) {
+            let email = this.DevGroup.Users.results[i].Email;
+
+            // Append the email
+            email ? emails.push(email) : null;
+        }
+
+        // Return the emails
+        return emails;
+    }
     static get IsDeveloper(): boolean {
         // See if the group doesn't exist
         if (this.DevGroup == null) { return false; }
