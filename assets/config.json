@@ -16,7 +16,7 @@
             ]
         },
         "In Testing": {
-            "requiresTestCase": true,
+            "requiresTestCases": true,
             "actions": [
                 "View",
                 "TestSite",

@@ -33,7 +33,7 @@ export interface IStatus {
     nextStep: string;
     prevStep: string;
     requiresTechReview?: boolean;
-    requiresTestCase?: boolean;
+    requiresTestCases?: boolean;
     stepNumber: number;
 }
 

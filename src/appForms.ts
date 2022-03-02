@@ -937,7 +937,7 @@ export class AppForms {
             let isValid = true;
 
             // See if this approval requires test cases and validation exists
-            if (status.requiresTestCase && AppConfig.Configuration.validation && AppConfig.Configuration.validation.testCases) {
+            if (status.requiresTestCases && AppConfig.Configuration.validation && AppConfig.Configuration.validation.testCases) {
                 // Show a loading dialog
                 LoadingDialog.setHeader("Validating the Technical Review");
                 LoadingDialog.setBody("This dialog will close after the validation completes.");
