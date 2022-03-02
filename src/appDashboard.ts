@@ -206,8 +206,9 @@ export class AppDashboard {
                 text: "App Details",
                 onRender: el => { elNavInfo = el; },
                 onClick: () => {
-                    // Show the info
+                    // Show the info and actions
                     this._el.querySelector("#app-info").classList.remove("d-none");
+                    this._el.querySelector("#app-actions").classList.remove("d-none");
                     elNavInfo.classList.add("d-none");
 
                     // Hide the documents
@@ -236,9 +237,12 @@ export class AppDashboard {
                     this._el.querySelector("#app-docs").classList.remove("d-none");
                     elNavDocs.classList.add("d-none");
 
-                    // Hide the info
+                    // Hide the info and actions
                     this._el.querySelector("#app-info").classList.add("d-none");
+                    this._el.querySelector("#app-actions").classList.add("d-none");
                     elNavInfo.classList.remove("d-none");
+
+                    // Hide the actions
 
                     crumb.setItems([
                         {
