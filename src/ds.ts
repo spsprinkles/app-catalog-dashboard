@@ -182,18 +182,18 @@ export class DataSource {
     }
 
     // Sees if an install is required and displays a dialog
-    static InstallRequired(showFl: boolean = false) {
+    static InstallRequired(el: HTMLElement, showFl: boolean = false) {
         // See if an install is required
         InstallationRequired.requiresInstall(Configuration).then(installFl => {
             let errors: Components.IListGroupItem[] = [];
 
             // See if the configuration is correct
-            if(AppConfig.Configuration == null) {
+            if (AppConfig.Configuration == null) {
                 // Add an error
                 errors.push({
                     content: "App configuration doesn't exist. This is required for the application to work."
                 });
-        }
+            }
 
             // Ensure the document set feature is enabled
             this.docSetEnabled().then(featureEnabledFl => {
@@ -283,6 +283,12 @@ export class DataSource {
                             }
                         }
                     });
+
+                    // Render the errors
+                    Components.ListGroup({
+                        el,
+                        items: errors
+                    })
                 } else {
                     // Log
                     console.error("[" + Strings.ProjectName + "] Error initializing the solution.");

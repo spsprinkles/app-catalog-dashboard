@@ -76,7 +76,7 @@ export class AppView {
                         text: "Manage App Configuration",
                         onClick: () => {
                             // Show the install modal
-                            DataSource.InstallRequired(true);
+                            DataSource.InstallRequired(null, true);
                         }
                     },
                     {

@@ -31,28 +31,30 @@ const GlobalVariable = {
         DataSource.init(cfg).then(
             // Success
             () => {
-                // Create the app elements
-                el.innerHTML = "<div id='apps'></div><div id='app-details' style='display: none;'></div>";
-                let elApps = el.querySelector("#apps") as HTMLElement;
-                let elAppDetails = el.querySelector("#app-details") as HTMLElement;
-
                 // Ensure the security groups exist
                 if (AppSecurity.ApproverGroup == null || AppSecurity.DevGroup == null) {
                     // See if an install is required
-                    DataSource.InstallRequired();
+                    DataSource.InstallRequired(el);
                 }
                 // Ensure the user is not an approver or developer
                 if (!AppSecurity.IsApprover && !AppSecurity.IsDeveloper) {
                     // Show the user agreement
                     new UserAgreement();
                 }
-                // Else, see if this is a document set and we are not in teams
-                else if (!Strings.IsTeams && DataSource.DocSetItem) {
-                    // View the application dashboard
-                    new AppDashboard(elAppDetails);
-                } else {
-                    // View all of the applications
-                    new AppView(elApps, elAppDetails);
+                else {
+                    // Create the app elements
+                    el.innerHTML = "<div id='apps'></div><div id='app-details' style='display: none;'></div>";
+                    let elApps = el.querySelector("#apps") as HTMLElement;
+                    let elAppDetails = el.querySelector("#app-details") as HTMLElement;
+
+                    // See if this is a document set and we are not in teams
+                    if (!Strings.IsTeams && DataSource.DocSetItem) {
+                        // View the application dashboard
+                        new AppDashboard(elAppDetails);
+                    } else {
+                        // View all of the applications
+                        new AppView(elApps, elAppDetails);
+                    }
                 }
             },
             // Error
@@ -60,7 +62,7 @@ const GlobalVariable = {
                 // Ensure the security groups exist
                 if (AppSecurity.ApproverGroup == null || AppSecurity.DevGroup == null) {
                     // See if an install is required
-                    DataSource.InstallRequired();
+                    DataSource.InstallRequired(el);
                 }
                 // Else, ensure the user is not an approver or developer
                 else if (!AppSecurity.IsApprover && !AppSecurity.IsDeveloper) {
@@ -68,7 +70,7 @@ const GlobalVariable = {
                     new UserAgreement();
                 } else {
                     // See if an install is required
-                    DataSource.InstallRequired();
+                    DataSource.InstallRequired(el);
                 }
             }
         );
