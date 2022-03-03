@@ -1,8 +1,8 @@
-import { ItemForm, LoadingDialog, Modal } from "dattatable";
-import { Components, ContextInfo, Helper, List, SPTypes, Types, Utility, Web } from "gd-sprest-bs";
+import { LoadingDialog, Modal } from "dattatable";
+import { ContextInfo, Helper, SPTypes, Types, Utility, Web } from "gd-sprest-bs";
 import { loadAsync } from "jszip";
-import { AppConfig, IStatus } from "./appCfg";
-import { DataSource, IAppItem, IAssessmentItem } from "./ds";
+import { AppConfig } from "./appCfg";
+import { DataSource, IAppItem } from "./ds";
 import Strings from "./strings";
 
 

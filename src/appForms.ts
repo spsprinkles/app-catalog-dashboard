@@ -58,7 +58,10 @@ export class AppForms {
                                         LoadingDialog.hide();
 
                                         // Send the notification
-                                        AppNotifications.sendEmail(status.nextStep, item).then(onUpdate);
+                                        AppNotifications.sendEmail(status.nextStep, item).then(() => {
+                                            // Call the update event
+                                            onUpdate();
+                                        });
                                     });
 
                                 }
@@ -90,7 +93,10 @@ export class AppForms {
                 Modal.hide();
 
                 // Create the test site
-                AppActions.createTestSite(item, onUpdate);
+                AppActions.createTestSite(item, () => {
+                    // Call the update event
+                    onUpdate();
+                });
             }
         }).el);
 
@@ -222,7 +228,10 @@ export class AppForms {
                 Modal.hide();
 
                 // Deploy the app
-                AppActions.deploy(item, tenantFl, onUpdate);
+                AppActions.deploy(item, tenantFl, () => {
+                    // Call the update event
+                    onUpdate();
+                });
             }
         }).el);
 
@@ -338,7 +347,10 @@ export class AppForms {
                             Modal.hide();
 
                             // Deploy the app
-                            AppActions.deployToTeams(item, onUpdate);
+                            AppActions.deployToTeams(item, () => {
+                                // Call the update event
+                                onUpdate();
+                            });
                         }
                     }
                 }
@@ -366,7 +378,10 @@ export class AppForms {
                 Modal.hide();
 
                 // Deploy the app
-                AppActions.deployToTeams(item, onUpdate);
+                AppActions.deployToTeams(item, () => {
+                    // Call the update event
+                    onUpdate();
+                });
             }
         }).el);
 
@@ -1116,7 +1131,10 @@ export class AppForms {
                         AppStatus: newStatus
                     }).execute(() => {
                         // Send the notification
-                        AppNotifications.rejectEmail(newStatus, item, comments).then(onUpdate);
+                        AppNotifications.rejectEmail(newStatus, item, comments).then(() => {
+                            // Call the update event
+                            onUpdate();
+                        });
                     });
                 }
             }
@@ -1240,7 +1258,10 @@ export class AppForms {
                                     AppStatus: newStatus
                                 }).execute(() => {
                                     // Send an email
-                                    AppNotifications.sendEmail(newStatus, item).then(onUpdate);
+                                    AppNotifications.sendEmail(newStatus, item).then(() => {
+                                        // Call the update event
+                                        onUpdate();
+                                    });
                                 });
                             }
                         });
