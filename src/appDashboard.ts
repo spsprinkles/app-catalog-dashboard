@@ -258,6 +258,7 @@ export class AppDashboard {
                             text: DataSource.DocSetItem.Title, className: "pe-auto", href: "#", onClick: () => {
                                 // Show the info
                                 this._el.querySelector("#app-info").classList.remove("d-none");
+                                this._el.querySelector("#app-actions").classList.remove("d-none");
                                 elNavInfo.classList.add("d-none");
 
                                 // Hide the documents
