@@ -188,7 +188,11 @@ export class DataSource {
             let errors: Components.IListGroupItem[] = [];
 
             // See if the configuration is correct
+            let cfgExists = true;
             if (AppConfig.Configuration == null) {
+                // Update the flag
+                cfgExists = false;
+
                 // Add an error
                 errors.push({
                     content: "App configuration doesn't exist. This is required for the application to work."
@@ -223,6 +227,12 @@ export class DataSource {
                     InstallationRequired.showDialog({
                         errors,
                         onFooterRendered: el => {
+                            // See if the configuration isn't defined
+                            if (!cfgExists) {
+                                // Disable the install button
+                                (el.firstChild as HTMLButtonElement).disabled = true;
+                            }
+
                             // See if the feature isn't enabled
                             if (!featureEnabledFl) {
                                 // Add the custom install button
