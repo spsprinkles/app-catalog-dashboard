@@ -14,7 +14,7 @@ export interface IAppCatalogManagerWebPartProps {
 }
 
 // Reference the solution
-import "../../../../dist/app-catalog-dashboard.min.js";
+import "../../../../dist/app-catalog-dashboard.js";
 declare var AppDashboard;
 
 export default class AppCatalogManagerWebPart extends BaseClientSideWebPart<IAppCatalogManagerWebPartProps> {
@@ -24,9 +24,9 @@ export default class AppCatalogManagerWebPart extends BaseClientSideWebPart<IApp
     AppDashboard.render(this.domElement, this.context, this.properties.configuration);
   }
 
-  protected get dataVersion(): Version {
-    return Version.parse('1.0');
-  }
+  protected get dataVersion(): Version { return Version.parse('1.0'); }
+
+  protected get disableReactivePropertyChanges(): boolean { return true; }
 
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
     return {

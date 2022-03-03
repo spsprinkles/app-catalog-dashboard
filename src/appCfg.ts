@@ -72,8 +72,10 @@ export class AppConfig {
                     }
 
                     // Replace the urls
+                    this._cfg.appCatalogUrl = this.Configuration.appCatalogUrl ? updateUrl(this._cfg.appCatalogUrl) : Strings.SourceUrl;
                     this._cfg.helpPageUrl = this._cfg.helpPageUrl ? updateUrl(this._cfg.helpPageUrl) : this._cfg.helpPageUrl;
                     this._cfg.templatesLibraryUrl = this._cfg.templatesLibraryUrl ? updateUrl(this._cfg.templatesLibraryUrl) : this._cfg.templatesLibraryUrl;
+                    this._cfg.tenantAppCatalogUrl = this.Configuration.tenantAppCatalogUrl ? updateUrl(this._cfg.tenantAppCatalogUrl) : this._cfg.tenantAppCatalogUrl;
 
                     // Set the status and resolve the request
                     this.setStatus().then(() => { resolve(); });

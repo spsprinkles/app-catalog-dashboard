@@ -195,7 +195,7 @@ export class DataSource {
 
                 // Add an error
                 errors.push({
-                    content: "App configuration doesn't exist. This is required for the application to work."
+                    content: "App configuration doesn't exist. Edit the webpart and set the configuration property."
                 });
             }
 
