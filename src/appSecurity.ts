@@ -192,6 +192,9 @@ export class AppSecurity {
     private static _ownerGroup: Types.SP.GroupOData = null;
     static get OwnerGroup(): Types.SP.GroupOData { return this._ownerGroup; }
     static get IsOwner(): boolean {
+        // See if the user is a site admin
+        if (ContextInfo.isSiteAdmin) { return true; }
+
         // See if the group doesn't exist
         if (this.OwnerGroup == null) { return false; }
 
