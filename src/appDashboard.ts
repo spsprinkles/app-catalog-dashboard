@@ -123,6 +123,24 @@ export class AppDashboard {
                     });
                 }
             },
+            onFileAdding: (fileInfo) => {
+                // Return a promise
+                return new Promise(resolve => {
+                    // See if this is an spfx package
+                    if (fileInfo.name.toLowerCase().endsWith(".sppkg")) {
+                        // Read the package
+
+                        // Deny based on status
+
+                        // Deny if the product id doesn't match
+
+                        // Deny if the version is less than the current
+                    } else {
+                        // Resolve the request
+                        resolve(true);
+                    }
+                });
+            },
             onNavigationRendered: (nav) => {
                 // Update the upload button tooltip
                 (nav.el.querySelector("#navbar_content ul:last-child li:last-child button") as any)._tippy.setContent("Upload Document");
