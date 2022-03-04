@@ -245,7 +245,7 @@ export class AppActions {
                     let requestDigest = context.GetContextWebInformation.FormDigestValue;
 
                     // Upload the file to the app catalog
-                    Web(siteUrl).SiteCollectionAppCatalog().add(item.FileLeafRef, true, content).execute(file => {
+                    Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().add(item.FileLeafRef, true, content).execute(file => {
                         // Update the dialog
                         LoadingDialog.setHeader("Deploying the Package");
                         LoadingDialog.setBody("This will close after the app is deployed.");
@@ -257,8 +257,13 @@ export class AppActions {
                                 // Deploy the app
                                 Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(item.AppProductID).deploy().execute(app => {
                                     // Append the url to the list of sites the solution has been deployed to
-                                    let sites = item.AppSiteDeployments || "";
-                                    sites = (sites ? "\r\n" : "") + siteUrl;
+                                    let sites = (item.AppSiteDeployments || "").trim();
+
+                                    // Ensure it doesn't contain the url already
+                                    if (sites.indexOf(context.GetContextWebInformation.WebFullUrl) < 0) {
+                                        // Append the url
+                                        sites = (sites.length > 0 ? "\r\n" : "") + context.GetContextWebInformation.WebFullUrl;
+                                    }
 
                                     // Update the metadata
                                     item.update({

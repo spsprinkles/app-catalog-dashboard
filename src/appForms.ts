@@ -415,6 +415,12 @@ export class AppForms {
                 // Exclude fields
                 props.excludeFields = ["AppVideoURL", "AppStatus", "IsAppPackageEnabled", "IsDefaultAppMetadataLocale"];
 
+                // See if the item is not approved
+                if ((props.info.item as IAppItem).AppStatus != "Approved") {
+                    // Exclude the site deployments field
+                    props.excludeFields.push("AppSiteDeployments");
+                }
+
                 // Update the field
                 props.onControlRendering = (ctrl, field) => {
                     // See if this is a url field

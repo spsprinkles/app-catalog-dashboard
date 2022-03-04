@@ -42,13 +42,14 @@ export const Configuration = Helper.SPConfig({
                         { Name: "AppSharePointMinVersion", ReadOnly: true },
                         { Name: "AppSkipFeatureDeployment", ReadOnly: true },
                         { Name: "AppVersion", ReadOnly: true },
+                        { Name: "AppSiteDeployments", ReadOnly: true },
                         "AppPublisher",
                         "AppSponser",
                         "AppDevelopers",
                         "AppDescription",
                         "AppJustification",
                         { Name: "AppAPIPermissions", ReadOnly: true },
-                        "AppPermissionsJustification"
+                        "AppPermissionsJustification",
                     ],
                     onCreated: () => {
                         // Get the list document set home page
