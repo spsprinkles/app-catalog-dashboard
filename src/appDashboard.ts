@@ -1,9 +1,10 @@
-import { Documents, LoadingDialog } from "dattatable";
+import { Documents, LoadingDialog, Modal } from "dattatable";
 import { Components } from "gd-sprest-bs";
 import { caretRightFill } from "gd-sprest-bs/build/icons/svgs/caretRightFill";
 import { folderSymlink } from "gd-sprest-bs/build/icons/svgs/folderSymlink";
 import { layoutTextWindow } from "gd-sprest-bs/build/icons/svgs/layoutTextWindow";
 import { questionLg } from "gd-sprest-bs/build/icons/svgs/questionLg";
+import { AppActions } from "./appActions";
 import { AppConfig } from "./appCfg";
 import { ButtonActions } from "./btnActions";
 import * as Common from "./common";
@@ -128,13 +129,74 @@ export class AppDashboard {
                 return new Promise(resolve => {
                     // See if this is an spfx package
                     if (fileInfo.name.toLowerCase().endsWith(".sppkg")) {
+                        // See if the app isn't approved or requires an assessment
+                        if ([AppConfig.ApprovedStatus, AppConfig.TechReviewStatus, AppConfig.TestCasesStatus].indexOf(DataSource.DocSetItem.AppStatus) < 0) {
+                            // Add the file
+                            resolve(true);
+                            return;
+                        }
+
                         // Read the package
+                        AppActions.readPackage(fileInfo.data).then(appInfo => {
+                            let errorMessage = null;
 
-                        // Deny based on status
+                            // Deny if the product id doesn't match
+                            if (appInfo.AppProductID != DataSource.DocSetItem.AppProductID) {
+                                // Set the error message
+                                errorMessage = "The app's product id doesn't match the current one.";
+                            }
+                            // Else, deny if the version is less than the current
+                            else if (appInfo.AppVersion != DataSource.DocSetItem.AppVersion) {
+                                // Compare the values
+                                let appVersion = DataSource.DocSetItem.AppVersion.split('.');
+                                let newAppVersion = appInfo.AppVersion.split('.');
 
-                        // Deny if the product id doesn't match
+                                // See if the new version is greater
+                                for (let i = 0; i < appVersion.length; i++) {
+                                    // See if this version is not greater than
+                                    if (newAppVersion[0] < appVersion[0]) {
+                                        // Set the error message
+                                        errorMessage = "The app's version is less than the current one."
+                                        break;
+                                    }
+                                }
+                            }
 
-                        // Deny if the version is less than the current
+                            // See if an error message exists
+                            if (errorMessage) {
+                                // Deny the file upload
+                                resolve(false);
+
+                                // Clear the modal
+                                Modal.clear();
+
+                                // Set the header
+                                Modal.setHeader("Error Uploading File");
+
+                                // Set the body
+                                Modal.setBody("<p>The app package being uploaded has been denied for the following reason:</p><br/>" + errorMessage)
+
+                                // Show the modal
+                                Modal.show();
+                            } else {
+                                // Update the status and set it back to the testing status
+                                DataSource.DocSetItem.update({
+                                    AppStatus: AppConfig.TestCasesStatus
+                                }).execute(() => {
+                                    // See if the item is currently approved
+                                    if (DataSource.DocSetItem.AppStatus == AppConfig.TestCasesStatus) {
+                                        // Archive the file
+                                        AppActions.archivePackage(DataSource.DocSetItem, () => {
+                                            // Add the file
+                                            resolve(true);
+                                        });
+                                    } else {
+                                        // Add the file
+                                        resolve(true);
+                                    }
+                                });
+                            }
+                        });
                     } else {
                         // Resolve the request
                         resolve(true);

@@ -11,6 +11,85 @@ import Strings from "./strings";
  * The actions taken for an app.
  */
 export class AppActions {
+    // Archives the current package file
+    static archivePackage(item: IAppItem, onComplete: () => void) {
+        // Show a loading dialog
+        LoadingDialog.setHeader("Archiving the Package");
+        LoadingDialog.setBody("The current app package is being archived.");
+        LoadingDialog.show();
+
+        // Get the package file
+        item.Folder().query({
+            Expand: ["Files", "Folders"]
+        }).execute(rootFolder => {
+            let appFile = null;
+
+            // Find the package file
+            for (let i = 0; i < rootFolder.Files.results.length; i++) {
+                let file = rootFolder.Files.results[i];
+
+                // See if this is the package
+                if (file.Name.endsWith(".sppkg")) {
+                    // Set the file
+                    appFile = file;
+                    break;
+                }
+            }
+
+            // Ensure a file exists
+            if (appFile == null) {
+                // This shouldn't happen
+                LoadingDialog.hide();
+                return;
+            }
+
+            // Create the archive folder
+            this.createArchiveFolder(rootFolder).then(archiveFolder => {
+                // Get the package file contents
+                appFile.content().execute(content => {
+                    // Get the file name
+                    let fileName = item.FileLeafRef.split('.sppkg')[0] + "_" + item.AppVersion
+
+                    // Update the dialog
+                    LoadingDialog.setBody("Copying the file package.")
+
+                    // Upload the file to the app catalog
+                    archiveFolder.Files().add(fileName, true, content).execute(file => {
+                        // Hide the dialog
+                        LoadingDialog.hide();
+
+                        // Call the event
+                        onComplete();
+                    });
+                });
+            });
+        });
+    }
+
+    // Creates the archive folder
+    private static createArchiveFolder(rootFolder: Types.SP.FolderOData): PromiseLike<Types.SP.Folder> {
+        // Return a promise
+        return new Promise(resolve => {
+            // Find the archive folder
+            for (let i = 0; i < rootFolder.Folders.results.length; i++) {
+                let folder = rootFolder.Folders.results[i];
+
+                // See if this is the archive folder
+                if (folder.Name.toLowerCase() == "archive") {
+                    // Resolve the request
+                    resolve(folder);
+                    return;
+                }
+            }
+
+            // Create the folder
+            rootFolder.Folders.add("archive").execute(folder => {
+                // Resolve the request
+                resolve(folder);
+            });
+        });
+    }
+
     // Creates the test site for the application
     static createTestSite(item: IAppItem, onComplete: () => void) {
         // Show a loading dialog
@@ -161,7 +240,7 @@ export class AppActions {
                 return;
             }
 
-            // Upload the package file
+            // Get the package file contents
             appFile.content().execute(content => {
                 let catalogUrl = tenantFl ? AppConfig.Configuration.tenantAppCatalogUrl : AppConfig.Configuration.appCatalogUrl;
 
@@ -330,7 +409,7 @@ export class AppActions {
     }
 
     // Reads an app package file
-    private static readPackage(data): PromiseLike<IAppItem> {
+    static readPackage(data): PromiseLike<IAppItem> {
         // Return a promise
         return new Promise(resolve => {
             // Unzip the package

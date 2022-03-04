@@ -55,6 +55,18 @@ export class AppConfig {
     private static _status: { [key: string]: IStatus } = null;
     static get Status(): { [key: string]: IStatus } { return this._status; }
 
+    // Approved Status
+    private static _statusApproved: string = null;
+    static get ApprovedStatus(): string { return this._statusApproved; }
+
+    // Tech Review Status
+    private static _statusTechReview: string = null;
+    static get TechReviewStatus(): string { return this._statusTechReview; }
+
+    // Test Cases Status
+    private static _statusTestCases: string = null;
+    static get TestCasesStatus(): string { return this._statusTestCases; }
+
     // Configuration
     private static _cfg: IConfiguration = null;
     static get Configuration(): IConfiguration { return this._cfg; }
@@ -106,7 +118,6 @@ export class AppConfig {
                 // Success
                 file => {
                     // Convert the string to a json object
-                    let cfg = null;
                     try { this._cfg = JSON.parse(String.fromCharCode.apply(null, new Uint8Array(file))); }
                     catch { this._cfg = null; }
 
@@ -147,6 +158,22 @@ export class AppConfig {
                     this._status[choice].nextStep = nextStep;
                     this._status[choice].prevStep = prevStep;
                     this._status[choice].stepNumber = i;
+
+                    // See if this is the last step
+                    if (this._status[choice].lastStep) {
+                        // Set the status
+                        this._statusApproved = choice;
+                    }
+                    // Else, see if this is the tech review status
+                    else if (this._status[choice].requiresTechReview) {
+                        // Set the status
+                        this._statusTechReview = choice;
+                    }
+                    // Else, see if this is the test cases status
+                    else if (this._status[choice].requiresTestCases) {
+                        // Set the status
+                        this._statusTestCases = choice;
+                    }
                 };
 
                 // Resolve the request
