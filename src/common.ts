@@ -29,3 +29,9 @@ export function isSubmitter(item: IAppItem) {
     // Determine if the user submitted the app
     return item.AuthorId == ContextInfo.userId;
 }
+
+// Updates the url
+export function updateUrl(url: string) {
+    return url.replace("~site/", ContextInfo.webServerRelativeUrl + "/")
+        .replace("~sitecollection/", ContextInfo.siteServerRelativeUrl + "/");
+}

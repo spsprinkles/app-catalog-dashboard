@@ -12,7 +12,7 @@ import "./styles.scss";
 // Create the global variable for this solution
 const GlobalVariable = {
     Configuration,
-    render: (el: HTMLElement, context?, cfg?: any, sourceUrl?: string) => {
+    render: (el: HTMLElement, context?, cfgUrl?: string, sourceUrl?: string) => {
         // See if the page context exists
         if (context) {
             // Set the context
@@ -28,7 +28,7 @@ const GlobalVariable = {
         wpZone ? wpZone.style.width = "100%" : null;
 
         // Initialize the solution
-        DataSource.init(cfg).then(
+        DataSource.init(cfgUrl).then(
             // Success
             () => {
                 // Ensure the security groups exist

@@ -1,4 +1,5 @@
-import { ContextInfo, Types, Web } from "gd-sprest-bs";
+import { Types, Web } from "gd-sprest-bs";
+import * as Common from "./common";
 import Strings from "./strings";
 
 // Configuration
@@ -58,64 +59,70 @@ export class AppConfig {
     private static _cfg: IConfiguration = null;
     static get Configuration(): IConfiguration { return this._cfg; }
 
+    // Validation
+    static get IsValid(): boolean {
+        let isValid = true;
+
+        // Check the required properties
+        isValid = this._cfg.status ? true : false;
+        isValid = this._cfg.validation ? true : false;
+
+        // Return the flag
+        return isValid;
+    }
+
     // Load the configuration file
-    static loadConfiguration(cfg?: any): PromiseLike<void> {
+    static loadConfiguration(cfgUrl?: string): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve, reject) => {
             let completeRequest = () => {
                 // Ensure the configuration exists
                 if (this._cfg) {
-                    // Updates the url
-                    let updateUrl = (url: string) => {
-                        return url.replace("~site/", ContextInfo.webServerRelativeUrl + "/")
-                            .replace("~sitecollection/", ContextInfo.siteServerRelativeUrl + "/");
-                    }
-
                     // Replace the urls
-                    this._cfg.appCatalogUrl = this.Configuration.appCatalogUrl ? updateUrl(this._cfg.appCatalogUrl) : Strings.SourceUrl;
-                    this._cfg.helpPageUrl = this._cfg.helpPageUrl ? updateUrl(this._cfg.helpPageUrl) : this._cfg.helpPageUrl;
-                    this._cfg.templatesLibraryUrl = this._cfg.templatesLibraryUrl ? updateUrl(this._cfg.templatesLibraryUrl) : this._cfg.templatesLibraryUrl;
-                    this._cfg.tenantAppCatalogUrl = this.Configuration.tenantAppCatalogUrl ? updateUrl(this._cfg.tenantAppCatalogUrl) : this._cfg.tenantAppCatalogUrl;
+                    this._cfg.appCatalogUrl = this.Configuration.appCatalogUrl ? Common.updateUrl(this._cfg.appCatalogUrl) : Strings.SourceUrl;
+                    this._cfg.helpPageUrl = this._cfg.helpPageUrl ? Common.updateUrl(this._cfg.helpPageUrl) : this._cfg.helpPageUrl;
+                    this._cfg.templatesLibraryUrl = this._cfg.templatesLibraryUrl ? Common.updateUrl(this._cfg.templatesLibraryUrl) : this._cfg.templatesLibraryUrl;
+                    this._cfg.tenantAppCatalogUrl = this.Configuration.tenantAppCatalogUrl ? Common.updateUrl(this._cfg.tenantAppCatalogUrl) : this._cfg.tenantAppCatalogUrl;
 
-                    // Set the status and resolve the request
-                    this.setStatus().then(() => { resolve(); });
+                    // Ensure the configuration is valid
+                    if (this.IsValid) {
+                        // Set the status and resolve the request
+                        this.setStatus().then(() => { resolve(); });
+                    } else {
+                        // Reject the request
+                        reject();
+                    }
                 } else {
                     // Reject the request
                     reject();
                 }
             }
 
-            // See if the configuration is being provided
-            if (cfg) {
-                try { this._cfg = JSON.parse(cfg); }
-                catch { this._cfg = null; }
+            // Update the configuration url
+            cfgUrl = cfgUrl ? Common.updateUrl(cfgUrl) : cfgUrl;
 
-                // Complete the request
-                completeRequest();
-            } else {
-                // Get the current web
-                Web(Strings.SourceUrl).getFileByServerRelativeUrl(Strings.ConfigUrl).content().execute(
-                    // Success
-                    file => {
-                        // Convert the string to a json object
-                        let cfg = null;
-                        try { this._cfg = JSON.parse(String.fromCharCode.apply(null, new Uint8Array(file))); }
-                        catch { this._cfg = null; }
+            // Get the current web
+            Web(Strings.SourceUrl).getFileByServerRelativeUrl(cfgUrl || Strings.ConfigUrl).content().execute(
+                // Success
+                file => {
+                    // Convert the string to a json object
+                    let cfg = null;
+                    try { this._cfg = JSON.parse(String.fromCharCode.apply(null, new Uint8Array(file))); }
+                    catch { this._cfg = null; }
 
-                        // Complete the request
-                        completeRequest();
-                    },
+                    // Complete the request
+                    completeRequest();
+                },
 
-                    // Error
-                    () => {
-                        // Clear the configuration
-                        this._cfg = null;
+                // Error
+                () => {
+                    // Clear the configuration
+                    this._cfg = null;
 
-                        // Complete the request
-                        completeRequest();
-                    }
-                );
-            }
+                    // Complete the request
+                    completeRequest();
+                }
+            );
         });
     }
 

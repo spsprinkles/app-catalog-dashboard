@@ -3,6 +3,7 @@ import { Components, ContextInfo, Helper, Site, Types, Web } from "gd-sprest-bs"
 import { AppConfig } from "./appCfg";
 import { AppSecurity } from "./appSecurity";
 import { Configuration, createSecurityGroups } from "./cfg";
+import * as Common from "./common";
 import Strings from "./strings";
 
 // App Item
@@ -167,11 +168,11 @@ export class DataSource {
     }
 
     // Initializes the application
-    static init(cfg?: any): PromiseLike<void> {
+    static init(cfgUrl?: string): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve, reject) => {
             // Load the configuration
-            AppConfig.loadConfiguration(cfg).then(() => {
+            AppConfig.loadConfiguration(cfgUrl).then(() => {
                 // Load the security information
                 AppSecurity.init(AppConfig.Configuration.appCatalogUrl, AppConfig.Configuration.tenantAppCatalogUrl).then(() => {
                     // Call the refresh method to load the data
@@ -188,14 +189,24 @@ export class DataSource {
             let errors: Components.IListGroupItem[] = [];
 
             // See if the configuration is correct
-            let cfgExists = true;
+            let cfgIsValid = true;
             if (AppConfig.Configuration == null) {
                 // Update the flag
-                cfgExists = false;
+                cfgIsValid = false;
 
                 // Add an error
                 errors.push({
                     content: "App configuration doesn't exist. Edit the webpart and set the configuration property."
+                });
+            }
+            // Else, ensure it's valid
+            else if (!AppConfig.IsValid) {
+                // Update the flag
+                cfgIsValid = false;
+
+                // Add an error
+                errors.push({
+                    content: "App configuration exists, but is invalid. Please contact your administrator."
                 });
             }
 
@@ -228,7 +239,7 @@ export class DataSource {
                         errors,
                         onFooterRendered: el => {
                             // See if the configuration isn't defined
-                            if (!cfgExists) {
+                            if (!cfgIsValid) {
                                 // Disable the install button
                                 (el.firstChild as HTMLButtonElement).disabled = true;
                             }
@@ -294,11 +305,27 @@ export class DataSource {
                         }
                     });
 
+                    // Clear the element
+                    while (el.firstChild) { el.removeChild(el.firstChild); }
+
                     // Render the errors
                     Components.ListGroup({
                         el,
                         items: errors
-                    })
+                    });
+
+                    // Show a button to display the modal
+                    Components.Tooltip({
+                        el,
+                        content: "Displays the installation status modal.",
+                        btnProps: {
+                            text: "Status",
+                            onClick: () => {
+                                // Dispaly this modal
+                                this.InstallRequired(el, true);
+                            }
+                        }
+                    });
                 } else {
                     // Log
                     console.error("[" + Strings.ProjectName + "] Error initializing the solution.");

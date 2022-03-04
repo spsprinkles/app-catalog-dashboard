@@ -1,5 +1,5 @@
 define([], function() {
   return {
-    "ConfigFieldLabel": "The JSON configuration for the application"
+    "ConfigFieldUrlLabel": "The url to the JSON configuration for this application."
   }
 });
