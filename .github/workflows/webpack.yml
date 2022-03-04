@@ -3,6 +3,7 @@ name: NodeJS with Webpack
 on:
   project:
     types: [ closed ]
+  [workflow_dispatch]
 
 jobs:
   build:
