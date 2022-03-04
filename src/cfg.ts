@@ -122,6 +122,16 @@ export const Configuration = Helper.SPConfig({
                     required: true
                 },
                 {
+                    name: "AppSiteDeployments",
+                    title: "App Site Deployments",
+                    type: Helper.SPCfgFieldType.Note,
+                    allowDeletion: false,
+                    description: "The sites where the app has been deployed to.",
+                    noteType: SPTypes.FieldNoteType.TextOnly,
+                    showInEditForm: false,
+                    showInNewForm: false
+                } as Helper.IFieldInfoNote,
+                {
                     name: "AppSponser",
                     title: "Sponser",
                     type: Helper.SPCfgFieldType.User,

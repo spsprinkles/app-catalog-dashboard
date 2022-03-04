@@ -347,7 +347,7 @@ export class AppForms {
                             Modal.hide();
 
                             // Deploy the app
-                            AppActions.deployToTeams(item, () => {
+                            AppActions.deployToSite(item, form.getValues()["Url"], () => {
                                 // Call the update event
                                 onUpdate();
                             });

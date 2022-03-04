@@ -208,6 +208,85 @@ export class AppActions {
         });
     }
 
+    // Deploys the solution to the app catalog
+    static deployToSite(item: IAppItem, siteUrl: string, onUpdate: () => void) {
+        // Show a loading dialog
+        LoadingDialog.setHeader("Uploading Package");
+        LoadingDialog.setBody("Uploading the spfx package to the site collection app catalog.");
+        LoadingDialog.show();
+
+        // Get the package file
+        DataSource.DocSetItem.Folder().Files().execute(files => {
+            let appFile = null;
+
+            // Find the package file
+            for (let i = 0; i < files.results.length; i++) {
+                let file = files.results[i];
+
+                // See if this is the package
+                if (file.Name.endsWith(".sppkg")) {
+                    // Set the file
+                    appFile = file;
+                    break;
+                }
+            }
+
+            // Ensure a file exists
+            if (appFile == null) {
+                // This shouldn't happen
+                LoadingDialog.hide();
+                return;
+            }
+
+            // Upload the package file
+            appFile.content().execute(content => {
+                // Load the context of the app catalog
+                ContextInfo.getWeb(siteUrl).execute(context => {
+                    let requestDigest = context.GetContextWebInformation.FormDigestValue;
+
+                    // Upload the file to the app catalog
+                    Web(siteUrl).SiteCollectionAppCatalog().add(item.FileLeafRef, true, content).execute(file => {
+                        // Update the dialog
+                        LoadingDialog.setHeader("Deploying the Package");
+                        LoadingDialog.setBody("This will close after the app is deployed.");
+
+                        // Get the app item
+                        file.ListItemAllFields().execute(appItem => {
+                            // Update the metadata
+                            this.updateApp(item, appItem.Id, false, siteUrl, requestDigest).then(() => {
+                                // Deploy the app
+                                Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(item.AppProductID).deploy().execute(app => {
+                                    // Append the url to the list of sites the solution has been deployed to
+                                    let sites = item.AppSiteDeployments || "";
+                                    sites = (sites ? "\r\n" : "") + siteUrl;
+
+                                    // Update the metadata
+                                    item.update({
+                                        AppSiteDeployments: sites
+                                    }).execute(() => {
+                                        // Hide the dialog
+                                        LoadingDialog.hide();
+
+                                        // Call the update event
+                                        onUpdate();
+                                    });
+                                }, () => {
+                                    // Hide the dialog
+                                    LoadingDialog.hide();
+
+                                    // Error deploying the app
+                                    // TODO - Show an error
+                                    // Call the update event
+                                    onUpdate();
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    }
+
     // Deploys the solution to teams
     static deployToTeams(item: IAppItem, onComplete: () => void) {
         // Show a loading dialog

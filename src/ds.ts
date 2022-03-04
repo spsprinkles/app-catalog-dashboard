@@ -21,6 +21,7 @@ export interface IAppItem extends Types.SP.ListItem {
     AppProductID: string;
     AppPublisher: string;
     AppSharePointMinVersion?: boolean;
+    AppSiteDeployments?: string;
     AppSkipFeatureDeployment?: boolean;
     AppSponser: { Id: number; EMail: string; Title: string; };
     AppSponserId: number;
