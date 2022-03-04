@@ -1,3 +1,5 @@
+[![Current Build](https://github.com/spsprinkles/app-catalog-dashboard/actions/workflows/webpack.yml/badge.svg)](https://github.com/spsprinkles/app-catalog-dashboard/actions/workflows/webpack.yml)
+
 # App Catalog Management Tool
 
 Helps manage solutions that are deployed to site collection and/or tenant app catalogs.
