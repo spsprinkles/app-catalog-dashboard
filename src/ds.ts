@@ -145,7 +145,7 @@ export class DataSource {
     }
 
     // Loads the app test site
-    static loadTestSite(item: IAppItem): PromiseLike<Types.SP.Web> {
+    static loadTestSite(item: IAppItem): PromiseLike<{ web: Types.SP.Web, versionMatchFl: boolean }> {
         // Return a promise
         return new Promise((resolve, reject) => {
             // Get the url to the test site
@@ -155,8 +155,19 @@ export class DataSource {
             Web(url).execute(
                 // Success
                 web => {
-                    // Resolve the request
-                    resolve(web);
+                    // Get the app
+                    web.SiteCollectionAppCatalog().AvailableApps(item.AppProductID).execute(
+                        // App exists
+                        app => {
+                            // Resolve the request
+                            resolve({ web, versionMatchFl: app.InstalledVersion == item.AppVersion });
+                        },
+                        // App doesn't exist
+                        () => {
+                            // Reject the request
+                            reject();
+                        }
+                    );
                 },
 
                 // Error

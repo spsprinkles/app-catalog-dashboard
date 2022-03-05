@@ -1279,4 +1279,32 @@ export class AppForms {
         // Show the modal
         Modal.show();
     }
+
+    // Updates the app
+    updateApp(item: IAppItem, siteUrl: string, onUpdate: () => void) {
+        // Set the header
+        Modal.setHeader("Update App");
+
+        // Set the body
+        Modal.setBody("Are you sure you want to update the app?");
+
+        // Render the footer
+        Modal.setFooter(Components.Button({
+            text: "Update",
+            type: Components.ButtonTypes.OutlineSuccess,
+            onClick: () => {
+                // Close the modal
+                Modal.hide();
+
+                // Update the app
+                AppActions.updateApp(item, siteUrl).then(() => {
+                    // Call the update event
+                    onUpdate();
+                });
+            }
+        }).el);
+
+        // Show the modal
+        Modal.show();
+    }
 }

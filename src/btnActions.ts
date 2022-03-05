@@ -404,7 +404,7 @@ export class ButtonActions {
                     // See if a test site exists
                     DataSource.loadTestSite(this._item).then(
                         // Test site exists
-                        web => {
+                        webInfo => {
                             // Render the view button
                             tooltips.add({
                                 content: "Opens the test site in a new tab.",
@@ -417,10 +417,33 @@ export class ButtonActions {
                                     type: Components.ButtonTypes.OutlinePrimary,
                                     onClick: () => {
                                         // Open the test site in a new tab
-                                        window.open(web.Url, "_blank");
+                                        window.open(webInfo.web.Url, "_blank");
                                     }
                                 }
                             });
+
+                            // See if the versions do not match
+                            if (!webInfo.versionMatchFl) {
+                                // Render the update button
+                                tooltips.add({
+                                    content: "Versions do not match. Click to update the test site.",
+                                    btnProps: {
+                                        text: "Update Test Site",
+                                        iconClassName: "me-1",
+                                        iconSize: 20,
+                                        iconType: chatSquareDots,
+                                        isSmall: true,
+                                        type: Components.ButtonTypes.OutlinePrimary,
+                                        onClick: () => {
+                                            // Show the update form
+                                            this._forms.updateApp(this._item, webInfo.web.Url, () => {
+                                                // Call the update event
+                                                this._onUpdate();
+                                            });
+                                        }
+                                    }
+                                });
+                            }
                         },
 
                         // Test site doesn't exist
