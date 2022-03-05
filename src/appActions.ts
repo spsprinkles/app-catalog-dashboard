@@ -288,7 +288,7 @@ export class AppActions {
     }
 
     // Deploys the app to a site collection app catalog
-    static deployAppToSite(item: IAppItem, siteUrl: string, onUpdate: (context) => void) {
+    static deployAppToSite(item: IAppItem, siteUrl: string, updateSitesFl: boolean, onUpdate: () => void) {
         // Show a loading dialog
         LoadingDialog.setHeader("Uploading Package");
         LoadingDialog.setBody("Uploading the spfx package to the site collection app catalog.");
@@ -335,11 +335,34 @@ export class AppActions {
                             this.updateAppMetadata(item, appItem.Id, false, siteUrl, requestDigest).then(() => {
                                 // Deploy the app
                                 Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(item.AppProductID).deploy().execute(app => {
-                                    // Hide the dialog
-                                    LoadingDialog.hide();
+                                    // See if we are updating the metadata
+                                    if (updateSitesFl) {
+                                        // Append the url to the list of sites the solution has been deployed to
+                                        let sites = (item.AppSiteDeployments || "").trim();
 
-                                    // Call the update event
-                                    onUpdate(context);
+                                        // Ensure it doesn't contain the url already
+                                        if (sites.indexOf(context.GetContextWebInformation.WebFullUrl) < 0) {
+                                            // Append the url
+                                            sites = (sites.length > 0 ? "\r\n" : "") + context.GetContextWebInformation.WebFullUrl;
+                                        }
+
+                                        // Update the metadata
+                                        item.update({
+                                            AppSiteDeployments: sites
+                                        }).execute(() => {
+                                            // Hide the dialog
+                                            LoadingDialog.hide();
+
+                                            // Call the update event
+                                            onUpdate();
+                                        });
+                                    } else {
+                                        // Hide the dialog
+                                        LoadingDialog.hide();
+
+                                        // Call the update event
+                                        onUpdate();
+                                    }
                                 }, () => {
                                     // Hide the dialog
                                     LoadingDialog.hide();
@@ -347,7 +370,7 @@ export class AppActions {
                                     // Error deploying the app
                                     // TODO - Show an error
                                     // Call the update event
-                                    onUpdate(context);
+                                    onUpdate();
                                 });
                             });
                         });
@@ -360,24 +383,10 @@ export class AppActions {
     // Deploys the solution to the app catalog
     static deployToSite(item: IAppItem, siteUrl: string, onUpdate: () => void) {
         // Deploy the app to the site
-        this.deployAppToSite(item, siteUrl, (context) => {
-            // Append the url to the list of sites the solution has been deployed to
-            let sites = (item.AppSiteDeployments || "").trim();
-
-            // Ensure it doesn't contain the url already
-            if (sites.indexOf(context.GetContextWebInformation.WebFullUrl) < 0) {
-                // Append the url
-                sites = (sites.length > 0 ? "\r\n" : "") + context.GetContextWebInformation.WebFullUrl;
-            }
-
-            // Update the metadata
-            item.update({
-                AppSiteDeployments: sites
-            }).execute(() => {
-                // Call the update event
-                onUpdate();
-            });
-        })
+        this.deployAppToSite(item, siteUrl, true, () => {
+            // Call the update event
+            onUpdate();
+        });
     }
 
     // Deploys the solution to teams
@@ -514,7 +523,7 @@ export class AppActions {
         // Return a promise
         return new Promise((resolve) => {
             // Deploy the solution to the site
-            this.deployAppToSite(item, siteUrl, () => {
+            this.deployAppToSite(item, siteUrl, false, () => {
                 // Resolve the requst
                 resolve();
             });
