@@ -577,8 +577,33 @@ export class AppActions {
 
                 // Extract the metadata from the package
                 this.readPackage(file.data).then(data => {
-                    // Validate the data
-                    if (data.AppProductID && data.AppVersion && data.Title) {
+
+                    // Ensure the package doesn't exist
+                    let existsFl = false;
+                    for (let i = 0; i < DataSource.Items.length; i++) {
+                        let item = DataSource.Items[i];
+
+                        // See if it exists
+                        if (item.AppProductID == data.AppProductID) {
+                            // Set the flag
+                            existsFl = true;
+                            break;
+                        }
+                    }
+
+                    // See if the app exists
+                    if (existsFl) {
+                        // Close the loading dialog
+                        LoadingDialog.hide();
+
+                        // Display a modal
+                        Modal.clear();
+                        Modal.setHeader("Package Validation Error");
+                        Modal.setBody("The spfx package already exists. Please update the existing application through it's details page.");
+                        Modal.show();
+                    }
+                    // Else, validate the data extracted from the app
+                    else if (data.AppProductID && data.AppVersion && data.Title) {
                         // Update the loading dialog
                         LoadingDialog.setHeader("Creating App Folder");
                         LoadingDialog.setBody("Creating the app folder...");

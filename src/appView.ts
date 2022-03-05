@@ -383,7 +383,7 @@ export class AppView {
                         title: "App Sponser",
                         onRenderCell: (el, column, item: IAppItem) => {
                             // Display the owners
-                            el.innerText = item.AppSponser ? item.AppSponser.Title : "";
+                            el.innerText = (item.AppSponser ? item.AppSponser.Title : null) || "";
                         }
                     },
                     {
