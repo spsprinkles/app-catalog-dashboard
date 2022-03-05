@@ -48,7 +48,7 @@ export class AppActions {
                 // Get the package file contents
                 appFile.content().execute(content => {
                     // Get the file name
-                    let fileName = item.FileLeafRef.split('.sppkg')[0] + "_" + item.AppVersion
+                    let fileName = item.FileLeafRef.split('.sppkg')[0] + "_" + item.AppVersion + ".sppkg"
 
                     // Update the dialog
                     LoadingDialog.setBody("Copying the file package.")
