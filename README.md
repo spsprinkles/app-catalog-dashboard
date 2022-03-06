@@ -15,6 +15,7 @@ The [configuration file](https://github.com/spsprinkles/app-catalog-dashboard/ra
 | Name | Description |
 | --- | --- |
 | appCatalogUrl | The url to the test site collection to be used for testing the application. This site must be have an app catalog enabled on it. |
+| dashboardUrl | The url to the dashboard page. This will be used by the `PageUrl` notification content replacement. |
 | helpPageUrl | The url to the help page button located in the navigation bar. If not provided, the help button will not be rendered. |
 | templatesLibraryUrl | The url to the folder containing the templates. If not provided, the templates dropdown will not be rendered. |
 | tenantAppCatalogUrl | The url to the tenant app catalog. |
