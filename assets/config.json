@@ -1,5 +1,6 @@
 {
     "appCatalogUrl": "/sites/demo",
+    "dashboardUrl": "~site/SiteAssets/dashboard.aspx",
     "helpPageUrl": "~site/SitePages/Help.aspx",
     "templatesLibraryUrl": "~site/shared%20documents/templates",
     "tenantAppCatalogUrl": "/sites/appcatalog",

@@ -26,6 +26,7 @@ export const setContext = (context, sourceUrl?: string) => {
 
     // Update the values
     Strings.ConfigUrl = AssetsUrl + "config.json";
+    Strings.DashboardUrl = AssetsUrl + "dashboard.aspx";
     Strings.SolutionUrl = AssetsUrl + "index.html";
     Strings.TermsOfUseUrl = AssetsUrl + "termsOfUse.html";
     Strings.UserAgreementUrl = AssetsUrl + "user_agreement.html";

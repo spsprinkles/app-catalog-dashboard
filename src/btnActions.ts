@@ -158,7 +158,7 @@ export class ButtonActions {
                                     // Display the delete form
                                     this._forms.delete(this._item, () => {
                                         // Redirect to the dashboard
-                                        window.open(Strings.DashboardUrl, "_self");
+                                        window.open(AppConfig.Configuration.dashboardUrl, "_self");
                                     });
                                 }
                             }
@@ -188,7 +188,7 @@ export class ButtonActions {
                                             // Display the delete site form
                                             this._forms.deleteSite(this._item, () => {
                                                 // Redirect to the dashboard
-                                                window.open(Strings.DashboardUrl, "_self");
+                                                window.open(AppConfig.Configuration.dashboardUrl, "_self");
                                             });
                                         }
                                     }

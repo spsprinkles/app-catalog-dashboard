@@ -67,7 +67,7 @@ export class AppDashboard {
             // See if this is the document set home page
             if (pageName == "docsethomepage.aspx") {
                 // Open the dashboard in a new tab
-                window.open(Strings.DashboardUrl, "_blank");
+                window.open(AppConfig.Configuration.dashboardUrl, "_blank");
             }
             else {
                 // Show a loading dialog
@@ -416,7 +416,7 @@ export class AppDashboard {
                         this.redirectToDashboard();
                     }
                 },
-                //{ text: "App Dashboard", href: Strings.DashboardUrl, className: "pe-auto" },
+                //{ text: "App Dashboard", href: AppConfig.Configuration.dashboardUrl, className: "pe-auto" },
                 { text: DataSource.DocSetItem.Title, href: "#", isActive: true }
             ]
         });

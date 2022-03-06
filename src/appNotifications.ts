@@ -58,7 +58,7 @@ export class AppNotifications {
             // Url to the dashboard page
             case "PageUrl":
                 // Set the value
-                let pageUrl = window.location.origin + Strings.DashboardUrl + "?app-id=" + item.Id;
+                let pageUrl = window.location.origin + AppConfig.Configuration.dashboardUrl + "?app-id=" + item.Id;
                 value = "<a href='" + pageUrl + "'>" + pageUrl + "</a>";
                 break;
 

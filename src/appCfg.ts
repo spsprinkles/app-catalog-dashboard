@@ -5,6 +5,7 @@ import Strings from "./strings";
 // Configuration
 export interface IConfiguration {
     appCatalogUrl?: string;
+    dashboardUrl?: string;
     helpPageUrl?: string;
     templatesLibraryUrl?: string;
     tenantAppCatalogUrl?: string;
@@ -92,6 +93,7 @@ export class AppConfig {
                 if (this._cfg) {
                     // Replace the urls
                     this._cfg.appCatalogUrl = this.Configuration.appCatalogUrl ? Common.updateUrl(this._cfg.appCatalogUrl) : Strings.SourceUrl;
+                    this._cfg.dashboardUrl = this.Configuration.dashboardUrl ? Common.updateUrl(this._cfg.dashboardUrl) : Strings.DashboardUrl;
                     this._cfg.helpPageUrl = this._cfg.helpPageUrl ? Common.updateUrl(this._cfg.helpPageUrl) : this._cfg.helpPageUrl;
                     this._cfg.templatesLibraryUrl = this._cfg.templatesLibraryUrl ? Common.updateUrl(this._cfg.templatesLibraryUrl) : this._cfg.templatesLibraryUrl;
                     this._cfg.tenantAppCatalogUrl = this.Configuration.tenantAppCatalogUrl ? Common.updateUrl(this._cfg.tenantAppCatalogUrl) : this._cfg.tenantAppCatalogUrl;
