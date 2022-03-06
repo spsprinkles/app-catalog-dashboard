@@ -1,4 +1,4 @@
-name: Package Solution
+name: Build & Package
 
 on:
   project:
