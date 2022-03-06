@@ -22,16 +22,20 @@ The [configuration file](https://github.com/spsprinkles/app-catalog-dashboard/ra
 
 ### Status
 
+The `status` configuration value is an object consisting of the following properties.
+
 | Name | Description |
 | --- | --- |
 | requiresTechReview | If set to true, will validate the technical review form as part of the approval process. |
 | requiresTestCases | If set to true, will validate the test cases form as part of the approval process. |
 | actions | An array of buttons to be displayed on the app dashboard. |
-| approval | The type of user that can approve the item. |
+| approval | An array of user type values that can approve the item. |
 | checklists | Displayed on the approval/submission form. |
 | notification | The email information to notify users on submission/approval of the item. |
 
 #### Actions
+
+The available values for the `actions` status property.
 
 | Name | Description |
 | --- | --- |
@@ -50,14 +54,14 @@ The [configuration file](https://github.com/spsprinkles/app-catalog-dashboard/ra
 
 #### Notification
 
-The notification property will be an array of objects with the following properties.
+The notification configuration value is an array of objects with the following properties.
 
 | Name | Description |
 | --- | --- |
 | approval | If set to true, will send the notification when the approval button is clicked. |
 | submission | If set to true, will send the notification when the submit button is clicked. |
-| to | An array of user types to notify. |
-| cc | An array of user types to notify. |
+| to | An array of user type values to notify. |
+| cc | An array of user type values to notify. |
 | subject | The email subject. |
 | content | The email body. |
 
@@ -71,6 +75,8 @@ The notification email content can be dynamically set by using the `[[Internal F
 | PageUrl | The html link to display the item. |
 
 #### User Types
+
+The available values for the user type property values.
 
 | Name | Description |
 | --- | --- |
