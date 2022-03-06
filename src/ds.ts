@@ -65,6 +65,28 @@ export class DataSource {
     static get DocSetSCApp(): Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata { return this._docSetSCApp; }
     private static _docSetTenantApp: Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata = null;
     static get DocSetTenantApp(): Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata { return this._docSetTenantApp; }
+    static loadDocSetFromQS(): number {
+        let itemId = null;
+
+        // Parse the query string values
+        let qs = document.location.search.split('?');
+        qs = qs.length > 1 ? qs[1].split('&') : [];
+        for (let i = 0; i < qs.length; i++) {
+            let qsItem = qs[i].split('=');
+            let key = qsItem[0].toLowerCase();
+            let value = qsItem[1];
+
+            // See if this is the "id" key
+            if (key == "id" || key == "app-id") {
+                // Return the item
+                itemId = parseInt(value);
+                break;
+            }
+        }
+
+        // Return the doc set item id
+        return itemId;
+    }
     static loadDocSet(id?: number): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve, reject) => {
@@ -188,7 +210,7 @@ export class DataSource {
                 // Load the security information
                 AppSecurity.init(AppConfig.Configuration.appCatalogUrl, AppConfig.Configuration.tenantAppCatalogUrl).then(() => {
                     // Call the refresh method to load the data
-                    this.refresh().then(resolve, reject);
+                    this.refresh(this.loadDocSetFromQS()).then(resolve, reject);
                 }, reject);
             }, reject);
         });
@@ -552,22 +574,22 @@ export class DataSource {
     }
 
     // Method to refresh the data source
-    static refresh(): PromiseLike<void> {
+    static refresh(docSetId?:number): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve, reject) => {
             // Load the site collection apps
             this.loadSiteCollectionApps().then(() => {
                 // Load the tenant apps
                 this.loadTenantApps().then(() => {
-                    // See if this is a document set item and not teams
-                    if (!Strings.IsTeams && this.DocSetItemId > 0) {
+                    // See if this is a document set id is set
+                    if (docSetId > 0) {
                         // Load the document set item
-                        this.loadDocSet().then(() => {
+                        this.loadDocSet(docSetId).then(() => {
                             // Resolve the request
                             resolve();
                         }, reject);
                     } else {
-                        // Load the data
+                        // Load all the items
                         this.load().then(() => {
                             // Load the status filters
                             this.loadStatusFilters().then(() => {

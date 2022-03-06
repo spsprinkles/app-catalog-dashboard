@@ -60,7 +60,7 @@ export class AppDashboard {
             this._elDashboard.style.display = "";
         } else {
             // Redirect to the dashboard
-            window.open(Strings.DashboardUrl, "_self");
+            window.open(Strings.DashboardUrl, "_blank");
         }
     }
 

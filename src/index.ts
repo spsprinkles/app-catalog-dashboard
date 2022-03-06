@@ -51,6 +51,9 @@ const GlobalVariable = {
                     if (!Strings.IsTeams && DataSource.DocSetItem) {
                         // View the application dashboard
                         new AppDashboard(elAppDetails);
+
+                        // Show the details
+                        elAppDetails.style.display = "";
                     } else {
                         // View all of the applications
                         new AppView(elApps, elAppDetails);
