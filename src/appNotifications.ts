@@ -49,17 +49,17 @@ export class AppNotifications {
 
         // Return the value
         switch (key) {
+            // See if this is the status field
+            case "AppStatus":
+                // Set the value
+                value = status;
+                break;
+
             // Url to the dashboard page
             case "PageUrl":
                 // Set the value
                 let pageUrl = window.location.origin + Strings.DashboardUrl + "?app-id=" + item.Id;
                 value = "<a href='" + pageUrl + "'>" + pageUrl + "</a>";
-                break;
-
-            // Status
-            case "Status":
-                // Set the value
-                value = status;
                 break;
 
             // Current user's name

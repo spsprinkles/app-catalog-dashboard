@@ -58,7 +58,16 @@ The notification property will be an array of objects with the following propert
 | to | An array of user types to notify. |
 | cc | An array of user types to notify. |
 | subject | The email subject. |
-| content | The email body. Utilize [[Internal Field Name]] to set dynamic values from the associated item. If it's a user field, add the additional property to display: _[[AppSponser.Title]]_ |
+| content | The email body. |
+
+##### Notification Content
+
+The notification email content can be dynamically set by using the `[[Internal Field Name]]` template as a placeholder within it. Complex field types, like a user field, can be used to access their properties. For example, to set the sponser's name the value `[[AppSponser.Title]]` would be used as the placeholder. Other wildcard values that can be used are listed below.
+
+| Name | Description |
+| --- | --- |
+| Internal Field Name | The item's metadata. |
+| PageUrl | The html link to display the item. |
 
 #### User Types
 
