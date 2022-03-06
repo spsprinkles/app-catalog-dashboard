@@ -3,6 +3,7 @@ import { ContextInfo, Utility } from "gd-sprest-bs";
 import { AppConfig } from "./appCfg";
 import { AppSecurity } from "./appSecurity";
 import { IAppItem } from "./ds";
+import Strings from "./strings";
 
 /**
  * Application Notifications
@@ -46,40 +47,54 @@ export class AppNotifications {
         // Default the value
         let value = item[key];
 
-        // See if this is the status
-        if (key == "Status") {
-            // Set the value
-            value = status;
-        }
-        // Else, see if this is the user name
-        else if (key == "User.Name") {
-            // Set the value
-            value = ContextInfo.userDisplayName;
-        } else {
-            let values = [];
+        // Return the value
+        switch (key) {
+            // Url to the dashboard page
+            case "PageUrl":
+                // Set the value
+                let pageUrl = window.location.origin + Strings.DashboardUrl + "?app-id=" + item.Id;
+                value = "<a href='" + pageUrl + "'>" + pageUrl + "</a>";
+                break;
 
-            // Default the value to be a collection if it's not one
-            let results = value && value.results ? value.results : [value];
-            value = "";
+            // Status
+            case "Status":
+                // Set the value
+                value = status;
+                break;
 
-            // Parse the collection
-            for (let i = 0; i < results.length; i++) {
-                let result = results[i];
-                if (result) {
-                    // Parse the properties
-                    let keys = key.split('.');
-                    for (let j = 0; j < keys.length; j++) {
-                        // Set the value
-                        value = result[key] ? value[keys[j]] : null;
+            // Current user's name
+            case "User.Name":
+                // Set the value
+                value = ContextInfo.userDisplayName;
+                break;
+
+            // Item Metadata
+            default:
+                let values = [];
+
+                // Default the value to be a collection if it's not one
+                let results = value && value.results ? value.results : [value];
+                value = "";
+
+                // Parse the collection
+                for (let i = 0; i < results.length; i++) {
+                    let result = results[i];
+                    if (result) {
+                        // Parse the properties of complex fields
+                        let keys = key.split('.');
+                        for (let j = 0; j < keys.length; j++) {
+                            // Set the value
+                            value = result[key] ? value[keys[j]] : null;
+                        }
+
+                        // Append the value if it exists
+                        value ? values.push(value) : null;
                     }
-
-                    // Append the value if it exists
-                    value ? values.push(value) : null;
                 }
-            }
 
-            // Set the value
-            value = values.join(', ');
+                // Set the value
+                value = values.join(', ');
+                break;
         }
 
         // Return the value

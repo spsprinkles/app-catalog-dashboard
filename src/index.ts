@@ -50,7 +50,7 @@ const GlobalVariable = {
                     // See if this is a document set and we are not in teams
                     if (!Strings.IsTeams && DataSource.DocSetItem) {
                         // View the application dashboard
-                        new AppDashboard(elAppDetails);
+                        new AppDashboard(elAppDetails, elApps);
 
                         // Show the details
                         elAppDetails.style.display = "";

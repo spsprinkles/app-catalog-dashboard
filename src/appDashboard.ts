@@ -6,6 +6,7 @@ import { layoutTextWindow } from "gd-sprest-bs/build/icons/svgs/layoutTextWindow
 import { questionLg } from "gd-sprest-bs/build/icons/svgs/questionLg";
 import { AppActions } from "./appActions";
 import { AppConfig } from "./appCfg";
+import { AppView } from "./appView";
 import { ButtonActions } from "./btnActions";
 import * as Common from "./common";
 import { DataSource } from "./ds";
@@ -51,16 +52,41 @@ export class AppDashboard {
 
     // Redirects to the dashboard
     private redirectToDashboard() {
-        // See if the parent element exists
-        if (this._elDashboard) {
+        // See if the dashboard exists
+        if (this._elDashboard && this._elDashboard.firstChild) {
             // Hide the details
             this._el.style.display = "none";
 
             // Show the dashboard
             this._elDashboard.style.display = "";
         } else {
-            // Redirect to the dashboard
-            window.open(Strings.DashboardUrl, "_blank");
+            // Get the page name
+            let names = window.location.pathname.split('/');
+            let pageName = names[names.length - 1].toLowerCase();
+
+            // See if this is the document set home page
+            if (pageName == "docsethomepage.aspx") {
+                // Open the dashboard in a new tab
+                window.open(Strings.DashboardUrl, "_blank");
+            }
+            else {
+                // Show a loading dialog
+                LoadingDialog.setHeader("Loading the Applications");
+                LoadingDialog.setBody("This will close after the data is loaded.");
+                LoadingDialog.show();
+
+                // Load the data
+                DataSource.refresh().then(() => {
+                    // Hide the details
+                    this._el.style.display = "none";
+
+                    // Render the app view
+                    new AppView(this._elDashboard, this._el);
+
+                    // Hide the dialog
+                    LoadingDialog.hide();
+                });
+            }
         }
     }
 
@@ -69,6 +95,7 @@ export class AppDashboard {
         // Show a loading dialog
         LoadingDialog.setHeader("Refreshing the Data");
         LoadingDialog.setBody("This will close after the data is loaded.");
+        LoadingDialog.show();
 
         // Load the the document set information
         DataSource.loadDocSet().then(() => {
