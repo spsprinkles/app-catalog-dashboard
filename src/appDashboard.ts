@@ -126,7 +126,7 @@ export class AppDashboard {
                     new ButtonActions(el, DataSource.DocSetItem, () => {
                         // Refresh the dashboard
                         this.refresh();
-                    })
+                    });
                 }
             }]
         });
