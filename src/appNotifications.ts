@@ -144,8 +144,15 @@ export class AppNotifications {
     static sendEmail(status: string, item: IAppItem): PromiseLike<void> {
         // Return a promise
         return new Promise(resolve => {
-            // Parse the email configurations for this status
+            // Get the notification configuration and ensure they exist
             let notificationCfgs = (AppConfig.Status[status] ? AppConfig.Status[status].notification : null) || [];
+            if (notificationCfgs.length == 0) {
+                // Resolve the request
+                resolve();
+                return;
+            }
+
+            // Parse the email configurations for this status
             for (let i = 0; i < notificationCfgs.length; i++) {
                 let notificationCfg = notificationCfgs[i];
                 let CC: string[] = [];
@@ -210,7 +217,6 @@ export class AppNotifications {
                     resolve();
                 }
             }
-
         });
     }
 }
