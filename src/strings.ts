@@ -28,7 +28,6 @@ export const setContext = (context, sourceUrl?: string) => {
     Strings.ConfigUrl = AssetsUrl + "config.json";
     Strings.DashboardUrl = AssetsUrl + "dashboard.aspx";
     Strings.SolutionUrl = AssetsUrl + "index.html";
-    Strings.TermsOfUseUrl = AssetsUrl + "termsOfUse.html";
 }
 
 // Strings
@@ -50,7 +49,6 @@ const Strings = {
     ProjectDescription: "App Dashboard for Developers",
     SolutionUrl: AssetsUrl + "index.html",
     SourceUrl: ContextInfo.webServerRelativeUrl,
-    TermsOfUseUrl: AssetsUrl + "TermsOfUse.html",
     Version: "0.1",
 };
 export default Strings;
