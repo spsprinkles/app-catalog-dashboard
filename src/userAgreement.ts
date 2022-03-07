@@ -1,7 +1,7 @@
 import { LoadingDialog, Modal } from "dattatable";
 import { Components, ContextInfo } from "gd-sprest-bs";
+import { AppConfig } from "./appCfg";
 import { AppSecurity } from "./appSecurity";
-import { DataSource } from "./ds";
 
 /**
  * User Agreement
@@ -9,11 +9,19 @@ import { DataSource } from "./ds";
 export class UserAgreement {
     // Constructor
     constructor() {
-        // Load the user agreement
-        DataSource.loadUserAgreement().then(() => {
+        // Ensure the user agreement exists
+        if (AppConfig.Configuration.userAgreement) {
             // Render the modal
             this.render();
-        });
+        } else {
+            // Clear the modal
+            Modal.clear();
+
+            // Set the header and body
+            Modal.setHeader("User Agreement");
+            Modal.setBody("The user agreement hasn't been setup. Please contact your administrator to update the configuration.");
+            Modal.show();
+        }
     }
 
     // Add the user to the developer group
@@ -45,12 +53,12 @@ export class UserAgreement {
         Modal.setType(Components.ModalTypes.Large)
 
         // Set the header and body
-        Modal.setHeader("Developer Agreement");
-        Modal.setBody(DataSource.UserAgreement || "Developer agreement has not been identified by the client");
+        Modal.setHeader("User Agreement");
+        Modal.setBody(AppConfig.Configuration.userAgreement);
 
         // Set the footer
         Modal.setFooter(Components.Tooltip({
-            content: "Clicking 'Agree' will allow you to continue",
+            content: "Clicking 'Agree' will allow you to submit applications.",
             btnProps: {
                 text: "Agree",
                 type: Components.ButtonTypes.OutlinePrimary,

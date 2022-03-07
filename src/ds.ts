@@ -547,32 +547,6 @@ export class DataSource {
         });
     }
 
-    // User Agreement
-    private static _userAgreement: string = null;
-    static get UserAgreement(): string { return this._userAgreement; }
-    static loadUserAgreement(): PromiseLike<void> {
-        // Return a promise
-        return new Promise((resolve) => {
-            // Get the current web
-            Web(Strings.SourceUrl).getFileByServerRelativeUrl(Strings.UserAgreementUrl).content().execute(
-                // Success
-                file => {
-                    // Set the html
-                    this._userAgreement = String.fromCharCode.apply(null, new Uint8Array(file));
-
-                    // Resolve the request
-                    resolve();
-                },
-
-                // Error
-                () => {
-                    // Resolve the request
-                    resolve();
-                }
-            );
-        });
-    }
-
     // Method to refresh the data source
     static refresh(docSetId?:number): PromiseLike<void> {
         // Return a promise

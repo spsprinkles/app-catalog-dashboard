@@ -10,6 +10,7 @@ export interface IConfiguration {
     templatesLibraryUrl?: string;
     tenantAppCatalogUrl?: string;
     status: { [key: string]: IStatus };
+    userAgreement?: string;
     validation: {
         techReview: { [key: string]: string[]; }
         testCases: { [key: string]: string[]; }
@@ -52,6 +53,10 @@ export const UserTypes = {
  * Reads the configuration json file.
  */
 export class AppConfig {
+    // Configuration
+    private static _cfg: IConfiguration = null;
+    static get Configuration(): IConfiguration { return this._cfg; }
+
     // Status
     private static _status: { [key: string]: IStatus } = null;
     static get Status(): { [key: string]: IStatus } { return this._status; }
@@ -67,10 +72,6 @@ export class AppConfig {
     // Test Cases Status
     private static _statusTestCases: string = null;
     static get TestCasesStatus(): string { return this._statusTestCases; }
-
-    // Configuration
-    private static _cfg: IConfiguration = null;
-    static get Configuration(): IConfiguration { return this._cfg; }
 
     // Validation
     static get IsValid(): boolean {

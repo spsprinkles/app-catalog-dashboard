@@ -4,6 +4,7 @@
     "helpPageUrl": "~site/SitePages/Help.aspx",
     "templatesLibraryUrl": "~site/shared%20documents/templates",
     "tenantAppCatalogUrl": "/sites/appcatalog",
+    "userAgreement": "<p>This developer agreement will be modified by the client. It should contain verbiage that defines the terms of use for this application.</p><p>By agreeing to these terms, you are not going to upload or deploy un-tested code into the app catalog. You agree to follow all company IT rules & policies.</p>",
     "status": {
         "Approved": {
             "actions": [
