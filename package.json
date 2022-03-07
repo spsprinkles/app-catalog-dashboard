@@ -22,8 +22,8 @@
   },
   "homepage": "https://github.com/spsprinkles/app-catalog-dashboard#readme",
   "dependencies": {
-    "datatables.net": "^1.11.4",
-    "datatables.net-bs5": "^1.11.4",
+    "datatables.net": "^1.11.5",
+    "datatables.net-bs5": "^1.11.5",
     "dattatable": "^1.6.7",
     "gd-sprest-bs": "^9.2.3",
     "jquery": "^3.6.0",
@@ -36,16 +36,16 @@
     "@types/datatables.net": "^1.10.21",
     "@types/jquery": "^3.5.14",
     "babel-loader": "^8.2.3",
-    "css-loader": "^6.6.0",
+    "css-loader": "^6.7.0",
     "html-loader": "^3.1.0",
     "moment-locales-webpack-plugin": "^1.2.0",
     "node-sass": "^7.0.1",
     "sass-loader": "^12.6.0",
     "style-loader": "^3.3.1",
-    "ts-loader": "^9.2.6",
-    "typescript": "^4.5.5",
+    "ts-loader": "^9.2.7",
+    "typescript": "^4.6.2",
     "url-loader": "^4.1.1",
-    "webpack": "^5.69.1",
+    "webpack": "^5.70.0",
     "webpack-cli": "^4.9.2"
   }
 }
