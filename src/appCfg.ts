@@ -45,7 +45,7 @@ export const UserTypes = {
     ApproversGroup: "ApproversGroup",
     Developers: "Developers",
     DevelopersGroup: "DevelopersGroup",
-    Sponser: "Sponser"
+    Sponsor: "Sponsor"
 }
 
 /**
@@ -102,7 +102,7 @@ export class AppConfig {
                     // Ensure the configuration is valid
                     if (this.IsValid) {
                         // Set the status and resolve the request
-                        this.setStatus().then(() => { resolve(); });
+                        this.setStatus().then(() => { resolve(); }, reject);
                     } else {
                         // Reject the request
                         reject();

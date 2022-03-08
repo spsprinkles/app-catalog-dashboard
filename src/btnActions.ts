@@ -67,10 +67,10 @@ export class ButtonActions {
                     // See if this user is a developer
                     return AppSecurity.IsDeveloper;
 
-                // Sponser
-                case UserTypes.Sponser:
-                    // See if this user is a sponser
-                    return this._item.AppSponserId == ContextInfo.userId;
+                // Sponsor
+                case UserTypes.Sponsor:
+                    // See if this user is a sponsor
+                    return this._item.AppSponsorId == ContextInfo.userId;
             }
         }
     }

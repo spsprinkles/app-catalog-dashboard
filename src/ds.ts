@@ -23,8 +23,8 @@ export interface IAppItem extends Types.SP.ListItem {
     AppSharePointMinVersion?: boolean;
     AppSiteDeployments?: string;
     AppSkipFeatureDeployment?: boolean;
-    AppSponser: { Id: number; EMail: string; Title: string; };
-    AppSponserId: number;
+    AppSponsor: { Id: number; EMail: string; Title: string; };
+    AppSponsorId: number;
     AppStatus: string;
     AppVersion: string;
     AuthorId: number;
@@ -97,11 +97,11 @@ export class DataSource {
                 contentType: "App",
                 webUrl: Strings.SourceUrl,
                 query: {
-                    Expand: ["AppDevelopers", "AppSponser", "CheckoutUser"],
+                    Expand: ["AppDevelopers", "AppSponsor", "CheckoutUser"],
                     Select: [
                         "*", "Id", "FileLeafRef", "ContentTypeId",
                         "AppDevelopers/Id", "AppDevelopers/EMail", "AppDevelopers/Title",
-                        "AppSponser/Id", "AppSponser/EMail", "AppSponser/Title",
+                        "AppSponsor/Id", "AppSponsor/EMail", "AppSponsor/Title",
                         "CheckoutUser/Id", "CheckoutUser/EMail", "CheckoutUser/Title"
                     ]
                 }
@@ -376,12 +376,12 @@ export class DataSource {
         return new Promise((resolve, reject) => {
             // Load the list items
             Web(Strings.SourceUrl).Lists(Strings.Lists.Apps).Items().query({
-                Expand: ["AppDevelopers", "AppSponser", "CheckoutUser", "Folder"],
+                Expand: ["AppDevelopers", "AppSponsor", "CheckoutUser", "Folder"],
                 Filter: "ContentType eq 'App'",
                 Select: [
                     "*", "Id", "FileLeafRef", "ContentTypeId",
                     "AppDevelopers/Id", "AppDevelopers/EMail", "AppDevelopers/Title",
-                    "AppSponser/Id", "AppSponser/EMail", "AppSponser/Title",
+                    "AppSponsor/Id", "AppSponsor/EMail", "AppSponsor/Title",
                     "CheckoutUser/Id", "CheckoutUser/EMail", "CheckoutUser/Title"
                 ]
             }).execute(items => {

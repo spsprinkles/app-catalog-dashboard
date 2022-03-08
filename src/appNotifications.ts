@@ -35,10 +35,10 @@ export class AppNotifications {
                 // Return the emails
                 return emails;
 
-            // Sponser
-            case "Sponser":
+            // Sponsor
+            case "Sponsor":
                 // Return the email
-                return item.AppSponser ? [item.AppSponser.EMail] : [];
+                return item.AppSponsor ? [item.AppSponsor.EMail] : [];
         }
     }
 
@@ -121,7 +121,7 @@ export class AppNotifications {
                 LoadingDialog.show();
 
                 // Send an email
-                Utility().sendEmail({
+                Utility(Strings.SourceUrl).sendEmail({
                     To, CC: AppSecurity.DeveloperEmails,
                     Subject: "App '" + item.Title + "' Sent Back",
                     Body: "App Developers,<br /><br />The '" + item.Title +
@@ -200,7 +200,7 @@ export class AppNotifications {
                     LoadingDialog.show();
 
                     // Send an email
-                    Utility().sendEmail({
+                    Utility(Strings.SourceUrl).sendEmail({
                         To, CC,
                         Body,
                         Subject: notificationCfg.subject,

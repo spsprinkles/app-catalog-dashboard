@@ -262,7 +262,7 @@ export class AppDashboard {
                                 info: DataSource.DocSetInfo,
                                 el,
                                 includeFields: [
-                                    "AppSponser",
+                                    "AppSponsor",
                                     "AppStatus",
                                     "AppDevelopers",
                                     "AppProductID",

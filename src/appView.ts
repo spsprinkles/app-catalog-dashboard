@@ -379,11 +379,11 @@ export class AppView {
                         }
                     },
                     {
-                        name: "AppSponser",
-                        title: "App Sponser",
+                        name: "AppSponsor",
+                        title: "App Sponsor",
                         onRenderCell: (el, column, item: IAppItem) => {
                             // Display the owners
-                            el.innerText = (item.AppSponser ? item.AppSponser.Title : null) || "";
+                            el.innerText = (item.AppSponsor ? item.AppSponsor.Title : null) || "";
                         }
                     },
                     {

@@ -44,7 +44,7 @@ export const Configuration = Helper.SPConfig({
                         { Name: "AppVersion", ReadOnly: true },
                         { Name: "AppSiteDeployments", ReadOnly: true },
                         "AppPublisher",
-                        "AppSponser",
+                        "AppSponsor",
                         "AppDevelopers",
                         "AppDescription",
                         "AppJustification",
@@ -133,11 +133,11 @@ export const Configuration = Helper.SPConfig({
                     showInNewForm: false
                 } as Helper.IFieldInfoNote,
                 {
-                    name: "AppSponser",
-                    title: "Sponser",
+                    name: "AppSponsor",
+                    title: "Sponsor",
                     type: Helper.SPCfgFieldType.User,
                     allowDeletion: false,
-                    description: "The sponser of the application.",
+                    description: "The sponsor of the application.",
                     required: true,
                     selectionMode: SPTypes.FieldUserSelectionType.PeopleAndGroups,
                     showField: "ImnName"
@@ -153,7 +153,7 @@ export const Configuration = Helper.SPConfig({
                     showInEditForm: false,
                     showInNewForm: false,
                     choices: [
-                        "New", "Pending Sponser Approval", "Pending Approval",
+                        "New", "Pending Sponsor Approval", "Pending Approval",
                         "In Testing", "Pending Review", "Approved"
                     ]
                 } as Helper.IFieldInfoChoice,
@@ -347,7 +347,7 @@ export const Configuration = Helper.SPConfig({
                         "TechReview06", "TechReview07", "TechReview08", "TechReview09", "TechReview10",
                         /*"TechReview11", "TechReview12", "TechReview13", "TechReview14", "TechReview15",
                         "TechReview16", "TechReview17", "TechReview18", "TechReview19", "TechReview20",*/
-                        "TechReviewComments", "Completed", "TechReviewResponse", "RelatedApp"
+                        "TechReviewComments", "Completed", "RelatedApp"
                     ]
                 },
                 {
@@ -357,7 +357,7 @@ export const Configuration = Helper.SPConfig({
                         "TestCase06", "TestCase07", "TestCase08", "TestCase09", "TestCase10",
                         "TestCase11", /*"TestCase12", "TestCase13", "TestCase14", "TestCase15",
                         "TestCase16", "TestCase17", "TestCase18", "TestCase19", "TestCase20",*/
-                        "TestCaseComments", "Completed", "TestCaseResponse", "RelatedApp"
+                        "TestCaseComments", "Completed", "RelatedApp"
                     ]
                 }
             ],
