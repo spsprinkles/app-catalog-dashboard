@@ -45,7 +45,7 @@
                         "ApproversGroup"
                     ],
                     "subject": "App Testing Completed",
-                    "content": "<p>Approval Group,<p>The application testing was completed and is awaiting approval. Please click on the link below to review this request.</p><p>[[PageUrl]]</p><p>App Team</p>"
+                    "content": "<p>Approval Group,</p>The application testing was completed and is awaiting approval. Please click on the link below to review this request.</p><p>[[PageUrl]]</p><p>App Team</p>"
                 }
             ]
         },
@@ -73,7 +73,7 @@
                         "Sponser"
                     ],
                     "subject": "App Submitted",
-                    "content": "<p>[[AppSponser.Title]],<p>An application was submitted and assigned to you as its sponser. Please click on the link below to approve this application.</p><p>[[PageUrl]]</p><p>App Team</p>"
+                    "content": "<p>[[AppSponser.Title]],</p>An application was submitted and assigned to you as its sponser. Please click on the link below to approve this application.</p><p>[[PageUrl]]</p><p>App Team</p>"
                 }
             ]
         },
@@ -144,7 +144,7 @@
                         "ApproversGroup"
                     ],
                     "subject": "App Submitted",
-                    "content": "<p>Approval Group,<p>An application was submitted and is awaiting approval. Please click on the link below to review this request.</p><p>[[PageUrl]]</p><p>App Team</p>"
+                    "content": "<p>Approval Group,</p>An application was submitted and is awaiting approval. Please click on the link below to review this request.</p><p>[[PageUrl]]</p><p>App Team</p>"
                 }
             ]
         }
