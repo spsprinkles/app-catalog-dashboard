@@ -87,6 +87,7 @@ export class ButtonActions {
         // Render the tooltip group
         let tooltips = Components.TooltipGroup({
             el: this._el,
+            className: "w-50",
             isVertical: true
         });
 
@@ -534,5 +535,7 @@ export class ButtonActions {
                     break;
             }
         }
+        // Fix weird alignment of the first button element
+        (tooltips.el.querySelector("button:first-child") as HTMLButtonElement).style.marginLeft = '-1px';
     }
 }
