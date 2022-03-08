@@ -88,7 +88,8 @@ export class ButtonActions {
         let tooltips = Components.TooltipGroup({
             el: this._el,
             className: "w-50",
-            isVertical: true
+            isVertical: true,
+            tooltipPlacement: Components.TooltipPlacements.Right
         });
 
         // Parse the button actions
