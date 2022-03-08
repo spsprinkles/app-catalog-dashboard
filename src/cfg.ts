@@ -147,7 +147,7 @@ export const Configuration = Helper.SPConfig({
                     title: "App Status",
                     type: Helper.SPCfgFieldType.Choice,
                     allowDeletion: false,
-                    defaultValue: "Missing Metadata",
+                    defaultValue: "New",
                     format: SPTypes.ChoiceFormatType.Dropdown,
                     required: true,
                     showInEditForm: false,
