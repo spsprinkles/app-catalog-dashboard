@@ -31,8 +31,7 @@ export class AppDashboard {
         this._el.innerHTML = `
             <div id="app-dashboard" class="row">
                 <div id="app-nav" class="col-12"></div>
-                <div id="app-info" class="col-9"></div>
-                <div id="app-actions" class="col-3"></div>
+                <div id="app-info" class="col-12"></div>
                 <div id="app-docs" class="col-12 d-none"></div>
             </div>
         `.trim();
@@ -112,13 +111,17 @@ export class AppDashboard {
 
     // Renders the dashboard
     private renderActions() {
+        // Define the card group parent
+        let cardGroup = this._el.querySelector("#app-info > div.card-group");
+
         // Clear the actions
-        let elActions = this._el.querySelector("#app-actions");
-        while (elActions.firstChild) { elActions.removeChild(elActions.firstChild); }
+        let elActions = cardGroup.querySelector("div.app-actions");
+        while (elActions) { elActions.parentElement.removeChild(elActions); }
 
         // Render a card
         Components.Card({
-            el: elActions,
+            el: cardGroup,
+            className: "app-actions",
             body: [{
                 title: "Actions",
                 onRender: el => {
@@ -315,7 +318,6 @@ export class AppDashboard {
                 onClick: () => {
                     // Show the info and actions
                     this._el.querySelector("#app-info").classList.remove("d-none");
-                    this._el.querySelector("#app-actions").classList.remove("d-none");
                     elNavInfo.classList.add("d-none");
 
                     // Hide the documents
@@ -346,7 +348,6 @@ export class AppDashboard {
 
                     // Hide the info and actions
                     this._el.querySelector("#app-info").classList.add("d-none");
-                    this._el.querySelector("#app-actions").classList.add("d-none");
                     elNavInfo.classList.remove("d-none");
 
                     // Hide the actions
@@ -365,7 +366,6 @@ export class AppDashboard {
                             text: DataSource.DocSetItem.Title, className: "pe-auto", href: "#", onClick: () => {
                                 // Show the info
                                 this._el.querySelector("#app-info").classList.remove("d-none");
-                                this._el.querySelector("#app-actions").classList.remove("d-none");
                                 elNavInfo.classList.add("d-none");
 
                                 // Hide the documents
