@@ -31,6 +31,7 @@ export class AppDashboard {
         this._el.innerHTML = `
             <div id="app-dashboard" class="row">
                 <div id="app-nav" class="col-12"></div>
+                <div id="app-alert" class="col-12"></div>
                 <div id="app-info" class="col-12"></div>
                 <div id="app-docs" class="col-12 d-none"></div>
             </div>
@@ -38,6 +39,9 @@ export class AppDashboard {
 
         // Render the navigation
         this.renderNav();
+
+        // Render the alert
+        this.renderAlert();
 
         // Render the info
         this.renderInfo();
@@ -98,6 +102,9 @@ export class AppDashboard {
 
         // Load the the document set information
         DataSource.loadDocSet().then(() => {
+            // Render the alert
+            this.renderAlert();
+
             // Render the info
             this.renderInfo();
 
@@ -133,6 +140,30 @@ export class AppDashboard {
                 }
             }]
         });
+    }
+
+    // Renders the alert
+    private renderAlert() {
+        // Clear the element
+        let elAlert = this._el.querySelector("#app-alert");
+        while (elAlert.firstChild) { elAlert.removeChild(elAlert.firstChild); }
+
+        // See if an alert exists
+        if (DataSource.DocSetItem.AppIsRejected && DataSource.DocSetItem.AppComments) {
+            // Show the element
+            elAlert.classList.remove("d-none");
+
+            // Render an alert
+            Components.Alert({
+                el: elAlert,
+                header: "Request Rejected",
+                content: DataSource.DocSetItem.AppComments,
+                type: Components.AlertTypes.Danger
+            });
+        } else {
+            // Hide the element
+            elAlert.classList.add("d-none");
+        }
     }
 
     // Renders the documents
