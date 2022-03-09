@@ -1053,7 +1053,7 @@ export const createSecurityGroups = (): PromiseLike<void> => {
                     // Execute against the groups
                     Helper.Executor([devGroup], group => {
                         // Set the site owner
-                        return Helper.setGroupOwner(group.Title, approveGroup.Title);
+                        return Helper.setGroupOwner(group.Title, approveGroup.Title, Strings.SourceUrl);
                     }).then(resolve, reject);
                 });
             }
