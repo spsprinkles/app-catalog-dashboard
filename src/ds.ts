@@ -222,35 +222,38 @@ export class DataSource {
         InstallationRequired.requiresInstall(Configuration).then(installFl => {
             let errors: Components.IListGroupItem[] = [];
 
-            // See if the configuration is correct
-            let cfgIsValid = true;
-            if (AppConfig.Configuration == null) {
-                // Update the flag
-                cfgIsValid = false;
-
-                // Add an error
-                errors.push({
-                    content: "App configuration doesn't exist. Edit the webpart and set the configuration property."
-                });
-            }
-            // Else, ensure it's valid
-            else if (!AppConfig.IsValid) {
-                // Update the flag
-                cfgIsValid = false;
-
-                // Add an error
-                errors.push({
-                    content: "App configuration exists, but is invalid. Please contact your administrator."
-                });
-            }
-
             // Ensure the document set feature is enabled
             this.docSetEnabled().then(featureEnabledFl => {
                 // See if the feature is enabled
                 if (!featureEnabledFl) {
                     // Add an error
                     errors.push({
-                        content: "Document Set site feature is not enabled."
+                        content: "Document Set site feature is not enabled.",
+                        type: Components.ListGroupItemTypes.Danger
+                    });
+                }
+
+                // See if the configuration is correct
+                let cfgIsValid = true;
+                if (AppConfig.Configuration == null) {
+                    // Update the flag
+                    cfgIsValid = false;
+
+                    // Add an error
+                    errors.push({
+                        content: "App configuration doesn't exist. Edit the webpart and set the configuration property.",
+                        type: featureEnabledFl ? null : Components.ListGroupItemTypes.Danger
+                    });
+                }
+                // Else, ensure it's valid
+                else if (!AppConfig.IsValid) {
+                    // Update the flag
+                    cfgIsValid = false;
+
+                    // Add an error
+                    errors.push({
+                        content: "App configuration exists, but is invalid. Please contact your administrator.",
+                        type: featureEnabledFl ? null : Components.ListGroupItemTypes.Danger
                     });
                 }
 
@@ -262,7 +265,8 @@ export class DataSource {
 
                     // Add an error
                     errors.push({
-                        content: "Security groups are not installed."
+                        content: "Security groups are not installed.",
+                        type: featureEnabledFl && cfgIsValid ? null : Components.ListGroupItemTypes.Danger
                     });
                 }
 
@@ -318,6 +322,7 @@ export class DataSource {
                                     type: Components.ButtonTypes.OutlinePrimary,
                                     btnProps: {
                                         text: "Security",
+                                        isDisabled: !featureEnabledFl || !cfgIsValid || !InstallationRequired.ListsExist,
                                         onClick: () => {
                                             // Show a loading dialog
                                             LoadingDialog.setHeader("Security Groups");
@@ -548,7 +553,7 @@ export class DataSource {
     }
 
     // Method to refresh the data source
-    static refresh(docSetId?:number): PromiseLike<void> {
+    static refresh(docSetId?: number): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve, reject) => {
             // Load the site collection apps
