@@ -410,9 +410,6 @@ export class AppView {
                         onRenderCell: (el, column, item: IAppItem) => {
                             let tooltips: Components.ITooltipProps[] = [];
 
-                            // Determine if the user can edit
-                            let canEdit = Common.canEdit(item);
-
                             // Render the view button to redirect the user to the document set dashboard
                             tooltips.push({
                                 content: "View app details",
@@ -455,47 +452,23 @@ export class AppView {
                                 }
                             });
 
-                            // See if the user can edit
-                            if (canEdit) {
-                                // Render the edit properties button
-                                tooltips.push({
-                                    content: "Edit app properties",
-                                    btnProps: {
-                                        text: "Edit",
-                                        className: "p-1",
-                                        iconClassName: "me-1",
-                                        iconSize: 20,
-                                        iconType: pencilSquare,
-                                        isSmall: true,
-                                        type: Components.ButtonTypes.OutlineSecondary,
-                                        onClick: () => {
-                                            // Display the edit form
-                                            this._forms.edit(item.Id, () => {
-                                                // Refresh the table
-                                                this.refresh();
-                                            });
-                                        }
+                            // Render the edit properties button
+                            tooltips.push({
+                                content: "View app properties",
+                                btnProps: {
+                                    text: "View",
+                                    className: "p-1",
+                                    iconClassName: "me-1",
+                                    iconSize: 20,
+                                    iconType: chatSquareDots,
+                                    isSmall: true,
+                                    type: Components.ButtonTypes.OutlineSecondary,
+                                    onClick: () => {
+                                        // Display the view form
+                                        this._forms.display(item.Id);
                                     }
-                                });
-                            } else {
-                                // Render the edit properties button
-                                tooltips.push({
-                                    content: "View app properties",
-                                    btnProps: {
-                                        text: "View",
-                                        className: "p-1",
-                                        iconClassName: "me-1",
-                                        iconSize: 20,
-                                        iconType: chatSquareDots,
-                                        isSmall: true,
-                                        type: Components.ButtonTypes.OutlineSecondary,
-                                        onClick: () => {
-                                            // Display the view form
-                                            this._forms.display(item.Id);
-                                        }
-                                    }
-                                });
-                            }
+                                }
+                            });
 
                             // Render the tooltips
                             Components.TooltipGroup({
