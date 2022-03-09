@@ -292,7 +292,21 @@ export class AppDashboard {
                                     "AppIsDomainIsolated",
                                     "AppSkipFeatureDeployment",
                                     "AppAPIPermissions"
-                                ]
+                                ],
+                                onControlRendered: (ctrl, field) => {
+                                    // See if this is the API permission field
+                                    if (field.InternalName == "AppAPIPermissions") {
+                                        // Check if a value exists
+                                        if (ctrl.getValue()) {
+                                            // Select the textarea element
+                                            let textarea = ctrl.el.querySelector("textarea");
+                                            // Shrink the text size
+                                            textarea.style.fontSize = "0.75rem";
+                                            // Extend the textarea number of rows
+                                            textarea.setAttribute("rows", "4");
+                                        }
+                                    }
+                                }
                             });
                         }
                     }]
