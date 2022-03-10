@@ -314,75 +314,8 @@ export class AppView {
                         title: "Version"
                     },
                     {
-                        name: "",
-                        title: "Status",
-                        onRenderCell: (el, column, item: IAppItem) => {
-                            // Set the status
-                            el.innerHTML = Common.appStatus(item);
-
-                            // See if the site app catalog exists
-                            if (DataSource.SiteCollectionAppCatalogExists) {
-                                // Append a new line
-                                let lineBreak = document.createElement("br");
-                                el.appendChild(lineBreak);
-
-                                // See if it's deployed
-                                let app = DataSource.getSiteCollectionAppById(item.AppProductID);
-                                if (app) {
-                                    // Render a badge
-                                    Components.Badge({
-                                        el,
-                                        content: "Deployed to Site Catalog",
-                                        isPill: true,
-                                        type: Components.BadgeTypes.Primary
-                                    });
-                                } else {
-                                    // Render a badge
-                                    Components.Badge({
-                                        el,
-                                        content: "Not in Site Catalog",
-                                        isPill: true,
-                                        type: Components.BadgeTypes.Secondary
-                                    });
-                                }
-                            }
-
-                            // Append a new line
-                            let lineBreak = document.createElement("br");
-                            el.appendChild(lineBreak);
-
-                            // See if this app is deployed in the tenant app catalog
-                            let app = DataSource.getTenantAppById(item.AppProductID);
-                            if (app) {
-                                // See if it's deployed
-                                if (app.Deployed) {
-                                    // Render a badge
-                                    Components.Badge({
-                                        el,
-                                        content: "Deployed to Tenant Catalog",
-                                        isPill: true,
-                                        type: Components.BadgeTypes.Primary
-                                    });
-                                } else {
-                                    // Render a badge
-                                    Components.Badge({
-                                        el,
-                                        content: "Not Deployed to Tenant Catalog",
-                                        isPill: true,
-                                        type: Components.BadgeTypes.Secondary
-                                    });
-                                }
-                            } else {
-                                // Render a badge
-                                Components.Badge({
-                                    el,
-                                    className: "text-dark",
-                                    content: "Not in Tenant App Catalog",
-                                    isPill: true,
-                                    type: Components.BadgeTypes.Info
-                                });
-                            }
-                        }
+                        name: "AppStatus",
+                        title: "Status"
                     },
                     {
                         name: "AppSponsor",
