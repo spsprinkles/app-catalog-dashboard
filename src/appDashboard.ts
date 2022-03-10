@@ -156,6 +156,7 @@ export class AppDashboard {
             // Render an alert
             Components.Alert({
                 el: elAlert,
+                className: "m-0 rounded-0",
                 header: "Request Rejected",
                 content: DataSource.DocSetItem.AppComments,
                 type: Components.AlertTypes.Danger

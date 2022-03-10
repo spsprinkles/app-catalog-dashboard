@@ -219,7 +219,7 @@ export const Configuration = Helper.SPConfig({
                 /** Fields required by the app catalog */
                 {
                     name: "AppImageURL1",
-                    title: "Image URL 1",
+                    title: "Screenshot URL 1",
                     type: Helper.SPCfgFieldType.Url,
                     allowDeletion: false,
                     description: "An image or screenshot for this app. Images should have a width of 512 pixes and a height of 384 pixels.",
@@ -228,7 +228,7 @@ export const Configuration = Helper.SPConfig({
                 } as Helper.IFieldInfoUrl,
                 {
                     name: "AppImageURL2",
-                    title: "Image URL 2",
+                    title: "Screenshot URL 2",
                     type: Helper.SPCfgFieldType.Url,
                     allowDeletion: false,
                     description: "An image or screenshot for this app. Images should have a width of 512 pixes and a height of 384 pixels.",
@@ -237,7 +237,7 @@ export const Configuration = Helper.SPConfig({
                 } as Helper.IFieldInfoUrl,
                 {
                     name: "AppImageURL3",
-                    title: "Image URL 3",
+                    title: "Screenshot URL 3",
                     type: Helper.SPCfgFieldType.Url,
                     allowDeletion: false,
                     description: "An image or screenshot for this app. Images should have a width of 512 pixes and a height of 384 pixels.",
@@ -245,7 +245,7 @@ export const Configuration = Helper.SPConfig({
                 } as Helper.IFieldInfoUrl,
                 {
                     name: "AppImageURL4",
-                    title: "Image URL 4",
+                    title: "Screenshot URL 4",
                     type: Helper.SPCfgFieldType.Url,
                     allowDeletion: false,
                     description: "An image or screenshot for this app. Images should have a width of 512 pixes and a height of 384 pixels.",
@@ -253,7 +253,7 @@ export const Configuration = Helper.SPConfig({
                 } as Helper.IFieldInfoUrl,
                 {
                     name: "AppImageURL5",
-                    title: "Image URL 5",
+                    title: "Screenshot URL 5",
                     type: Helper.SPCfgFieldType.Url,
                     allowDeletion: false,
                     description: "An image or screenshot for this app. Images should have a width of 512 pixes and a height of 384 pixels.",
