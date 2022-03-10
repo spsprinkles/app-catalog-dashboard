@@ -4,7 +4,6 @@ import { AppView } from "./appView";
 import { Configuration } from "./cfg";
 import { DataSource } from "./ds";
 import Strings, { setContext } from "./strings";
-import { UserAgreement } from "./userAgreement";
 
 // Styling
 import "./styles.scss";
@@ -35,13 +34,7 @@ const GlobalVariable = {
                 if (AppSecurity.ApproverGroup == null || AppSecurity.DevGroup == null) {
                     // See if an install is required
                     DataSource.InstallRequired(el);
-                }
-                // Ensure the user is not an approver or developer
-                if (!AppSecurity.IsApprover && !AppSecurity.IsDeveloper) {
-                    // Show the user agreement
-                    new UserAgreement();
-                }
-                else {
+                } else {
                     // Create the app elements
                     el.innerHTML = "<div id='apps'></div><div id='app-details' style='display: none;'></div>";
                     let elApps = el.querySelector("#apps") as HTMLElement;
@@ -62,19 +55,8 @@ const GlobalVariable = {
             },
             // Error
             () => {
-                // Ensure the security groups exist
-                if (AppSecurity.ApproverGroup == null || AppSecurity.DevGroup == null) {
-                    // See if an install is required
-                    DataSource.InstallRequired(el);
-                }
-                // Else, ensure the user is not an approver or developer
-                else if (!AppSecurity.IsApprover && !AppSecurity.IsDeveloper) {
-                    // Show the user agreement
-                    new UserAgreement();
-                } else {
-                    // See if an install is required
-                    DataSource.InstallRequired(el);
-                }
+                // See if an install is required
+                DataSource.InstallRequired(el);
             }
         );
     }

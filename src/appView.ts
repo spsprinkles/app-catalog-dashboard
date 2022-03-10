@@ -6,13 +6,13 @@ import { columnsGap } from "gd-sprest-bs/build/icons/svgs/columnsGap";
 import { fileEarmarkArrowUp } from "gd-sprest-bs/build/icons/svgs/fileEarmarkArrowUp";
 import { gearWideConnected } from "gd-sprest-bs/build/icons/svgs/gearWideConnected";
 import { layoutTextWindow } from "gd-sprest-bs/build/icons/svgs/layoutTextWindow";
-import { pencilSquare } from "gd-sprest-bs/build/icons/svgs/pencilSquare";
 import { questionLg } from "gd-sprest-bs/build/icons/svgs/questionLg";
 import { AppActions } from "./appActions";
 import { AppConfig } from "./appCfg";
 import { AppDashboard } from "./appDashboard";
 import { AppForms } from "./appForms";
 import { AppSecurity } from "./appSecurity";
+import { UserAgreement } from "./userAgreement";
 import * as Common from "./common";
 import * as jQuery from "jquery";
 import { DataSource, IAppItem } from "./ds";
@@ -178,17 +178,23 @@ export class AppView {
                                     iconSize: 24,
                                     type: Components.ButtonTypes.OutlineSecondary,
                                     onClick: () => {
-                                        // Upload the package file
-                                        AppActions.upload(item => {
-                                            // Refresh the dashboard
-                                            this.refresh();
-
-                                            // Display the edit form
-                                            this._forms.edit(item.Id, () => {
+                                        // Ensure the user is not an approver or developer
+                                        if (!AppSecurity.IsApprover && !AppSecurity.IsDeveloper) {
+                                            // Show the user agreement
+                                            new UserAgreement();
+                                        } else {
+                                            // Upload the package file
+                                            AppActions.upload(item => {
                                                 // Refresh the dashboard
                                                 this.refresh();
+
+                                                // Display the edit form
+                                                this._forms.edit(item.Id, () => {
+                                                    // Refresh the dashboard
+                                                    this.refresh();
+                                                });
                                             });
-                                        });
+                                        }
                                     }
                                 },
                             });
