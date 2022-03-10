@@ -36,7 +36,7 @@ const GlobalVariable = {
                     DataSource.InstallRequired(el);
                 } else {
                     // Create the app elements
-                    el.innerHTML = "<div id='apps'></div><div id='app-details' style='display: none;'></div>";
+                    el.innerHTML = "<div id='apps'></div><div id='app-details' class='d-none'></div>";
                     let elApps = el.querySelector("#apps") as HTMLElement;
                     let elAppDetails = el.querySelector("#app-details") as HTMLElement;
 
@@ -46,7 +46,7 @@ const GlobalVariable = {
                         new AppDashboard(elAppDetails, elApps);
 
                         // Show the details
-                        elAppDetails.style.display = "";
+                        elAppDetails.classList.remove("d-none");
                     } else {
                         // View all of the applications
                         new AppView(elApps, elAppDetails);

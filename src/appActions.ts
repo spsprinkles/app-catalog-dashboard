@@ -265,11 +265,25 @@ export class AppActions {
 
                                 // Deploy the app
                                 appCatalog.AvailableApps(item.AppProductID).deploy().execute(app => {
-                                    // Hide the dialog
-                                    LoadingDialog.hide();
+                                    // See if this is the tenant app
+                                    if (tenantFl) {
+                                        // Update the tenant deployed flag
+                                        item.update({
+                                            AppIsTenantDeployed: true
+                                        }).execute(() => {
+                                            // Hide the dialog
+                                            LoadingDialog.hide();
 
-                                    // Call the update event
-                                    onUpdate();
+                                            // Call the update event
+                                            onUpdate();
+                                        });
+                                    } else {
+                                        // Hide the dialog
+                                        LoadingDialog.hide();
+
+                                        // Call the update event
+                                        onUpdate();
+                                    }
                                 }, () => {
                                     // Hide the dialog
                                     LoadingDialog.hide();

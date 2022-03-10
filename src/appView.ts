@@ -325,7 +325,7 @@ export class AppView {
                         name: "AppSponsor",
                         title: "App Sponsor",
                         onRenderCell: (el, column, item: IAppItem) => {
-                            // Display the owners
+                            // Display the sponsor
                             el.innerText = (item.AppSponsor ? item.AppSponsor.Title : null) || "";
                         }
                     },
@@ -383,10 +383,10 @@ export class AppView {
                                             new AppDashboard(this._elAppDetails, this._el, item.Id);
 
                                             // Hide the apps
-                                            this._el.style.display = "none";
+                                            this._el.classList.add("d-none");
 
                                             // Show the details
-                                            this._elAppDetails.style.display = "";
+                                            this._elAppDetails.classList.remove("d-none");
 
                                             // Hide the loading dialog
                                             LoadingDialog.hide();

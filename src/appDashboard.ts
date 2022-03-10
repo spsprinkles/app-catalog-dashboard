@@ -58,10 +58,16 @@ export class AppDashboard {
         // See if the dashboard exists
         if (this._elDashboard && this._elDashboard.firstChild) {
             // Hide the details
-            this._el.style.display = "none";
+            this._el.classList.add("d-none");
+
+            // Clear the dashboard
+            while (this._elDashboard.firstChild) { this._elDashboard.removeChild(this._elDashboard.firstChild); }
 
             // Show the dashboard
-            this._elDashboard.style.display = "";
+            this._elDashboard.classList.remove("d-none");
+
+            // Render the app view
+            new AppView(this._elDashboard, this._el);
         } else {
             // Get the page name
             let names = window.location.pathname.split('/');
@@ -81,7 +87,7 @@ export class AppDashboard {
                 // Load the data
                 DataSource.refresh().then(() => {
                     // Hide the details
-                    this._el.style.display = "none";
+                    this._el.classList.add("d-none");
 
                     // Render the app view
                     new AppView(this._elDashboard, this._el);
