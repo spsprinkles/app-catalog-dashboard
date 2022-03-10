@@ -3,25 +3,33 @@
   "id": "970b3fd7-f763-4043-90c5-fbc0c8a6d680",
   "alias": "AppCatalogManagerWebPart",
   "componentType": "WebPart",
-
   // The "*" signifies that the version should be taken from the package.json
   "version": "*",
   "manifestVersion": 2,
-
   // If true, the component can only be installed on sites where Custom Script is allowed.
   // Components that allow authors to embed arbitrary script code should set this to true.
   // https://support.office.com/en-us/article/Turn-scripting-capabilities-on-or-off-1f2c515f-5d7e-448a-9fd7-835da935584f
   "requiresCustomScript": false,
-  "supportedHosts": ["SharePointWebPart", "TeamsTab", "TeamsPersonalApp"],
-
-  "preconfiguredEntries": [{
-    "groupId": "5c03119e-3074-46fd-976b-c60198311f70", // Other
-    "group": { "default": "Other" },
-    "title": { "default": "AppCatalogManager" },
-    "description": { "default": "AppCatalogManager description" },
-    "officeFabricIconFontName": "Page",
-    "properties": {
-      "description": "AppCatalogManager"
+  "supportedHosts": [
+    "SharePointWebPart",
+    "TeamsTab",
+    "TeamsPersonalApp"
+  ],
+  "preconfiguredEntries": [
+    {
+      "groupId": "5c03119e-3074-46fd-976b-c60198311f70", // Other
+      "group": {
+        "default": "Other"
+      },
+      "title": {
+        "default": "App Catalog Managment Tool"
+      },
+      "description": {
+        "default": "A tool to manage SPFx app packages to be approved and deployed to site collection and/or tenant app catalogs."
+      },
+      "officeFabricIconFontName": "Page",
+      "iconImageUrl": "data:image/png;base64,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",
+      "properties": {}
     }
-  }]
+  ]
 }
