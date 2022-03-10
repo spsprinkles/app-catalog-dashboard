@@ -110,6 +110,21 @@ export class DataSource {
                 // Save the info
                 this._docSetInfo = info;
 
+                // Ensure items exist
+                if (this._items) {
+                    // Parse the items
+                    for (let i = 0; i < this._items.length; i++) {
+                        let item = this._items[i];
+
+                        // See if the id match
+                        if (item.Id == info.item.Id) {
+                            // Update the item
+                            this._items[i] = info.item as any;
+                            break;
+                        }
+                    }
+                }
+
                 // Load the site collection apps
                 this.loadSiteCollectionApp(this.DocSetItem.AppProductID).then(() => {
                     // Load the tenant apps
