@@ -11,7 +11,7 @@ export interface IAppItem extends Types.SP.ListItem {
     AppAPIPermissions?: string;
     AppComments?: string;
     AppDescription: string;
-    AppDevelopers: { results: { Id: number; EMail: string; }[] };
+    AppDevelopers: { results: { Id: number; EMail: string; Title: string; }[] };
     AppDevelopersId: { results: number[] };
     AppIsClientSideSolution?: boolean;
     AppIsDomainIsolated?: boolean;

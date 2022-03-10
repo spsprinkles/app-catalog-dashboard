@@ -339,11 +339,11 @@ export class AppView {
                             var strOwners = [];
                             owners.forEach(owner => {
                                 // Append the email
-                                strOwners.push(owner.EMail.split("@")[0]);
+                                strOwners.push(owner.Title);
                             });
 
                             // Display the owners
-                            el.innerText = strOwners.join("; ");
+                            el.innerHTML = strOwners.join("<br/>");
                         }
                     },
                     {
