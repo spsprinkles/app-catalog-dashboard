@@ -314,8 +314,12 @@ export class AppView {
                         title: "Version"
                     },
                     {
-                        name: "AppStatus",
-                        title: "Status"
+                        name: "",
+                        title: "Status",
+                        onRenderCell: (el, column, item: IAppItem) => {
+                            // Set the status
+                            el.innerHTML = Common.appStatus(item);
+                        }
                     },
                     {
                         name: "AppSponsor",

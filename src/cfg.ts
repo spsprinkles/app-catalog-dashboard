@@ -165,6 +165,14 @@ export const Configuration = Helper.SPConfig({
                     defaultValue: "0",
                     showInNewForm: false
                 },
+                {
+                    name: "AppIsTenantDeployed",
+                    title: "Is Tenant Deployed?",
+                    type: Helper.SPCfgFieldType.Boolean,
+                    allowDeletion: false,
+                    defaultValue: "0",
+                    showInNewForm: false
+                },
                 /** Fields extracted from the SPFx package */
                 {
                     name: "AppAPIPermissions",
