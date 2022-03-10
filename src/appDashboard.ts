@@ -205,19 +205,19 @@ export class AppDashboard {
                         }
 
                         // Read the package
-                        AppActions.readPackage(fileInfo.data).then(appInfo => {
+                        AppActions.readPackage(fileInfo.data).then(pkgInfo => {
                             let errorMessage = null;
 
                             // Deny if the product id doesn't match
-                            if (appInfo.AppProductID != DataSource.DocSetItem.AppProductID) {
+                            if (pkgInfo.item.AppProductID != DataSource.DocSetItem.AppProductID) {
                                 // Set the error message
                                 errorMessage = "The app's product id doesn't match the current one.";
                             }
                             // Else, deny if the version is less than the current
-                            else if (appInfo.AppVersion != DataSource.DocSetItem.AppVersion) {
+                            else if (pkgInfo.item.AppVersion != DataSource.DocSetItem.AppVersion) {
                                 // Compare the values
                                 let appVersion = DataSource.DocSetItem.AppVersion.split('.');
-                                let newAppVersion = appInfo.AppVersion.split('.');
+                                let newAppVersion = pkgInfo.item.AppVersion.split('.');
 
                                 // See if the new version is greater
                                 for (let i = 0; i < appVersion.length; i++) {

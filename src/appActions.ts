@@ -1,6 +1,6 @@
 import { LoadingDialog, Modal } from "dattatable";
 import { ContextInfo, Helper, SPTypes, Types, Utility, Web } from "gd-sprest-bs";
-import { loadAsync } from "jszip";
+import * as JSZip from "jszip";
 import { AppConfig } from "./appCfg";
 import { DataSource, IAppItem } from "./ds";
 import Strings from "./strings";
@@ -441,13 +441,13 @@ export class AppActions {
     }
 
     // Reads an app package file
-    static readPackage(data): PromiseLike<IAppItem> {
+    static readPackage(data): PromiseLike<{ item: IAppItem; image: JSZip.JSZipObject }> {
         // Return a promise
         return new Promise(resolve => {
             // Unzip the package
-            loadAsync(data).then(files => {
+            JSZip.loadAsync(data).then(files => {
                 let metadata: IAppItem = {} as any;
-                let imageFound = false;
+                let image = null;
 
                 // Parse the files
                 files.forEach((path, fileInfo) => {
@@ -456,16 +456,8 @@ export class AppActions {
 
                     // See if this is an image
                     if (fileInfo.name.endsWith(".png") || fileInfo.name.endsWith(".jpg") || fileInfo.name.endsWith(".jpeg") || fileInfo.name.endsWith(".gif")) {
-                        // NOTE: Reading of the file is asynchronous!
-                        fileInfo.async("base64").then(function (content) {
-                            //$get("appIcon").src = "data:image/png;base64," + content;
-                            imageFound = true;
-                        });
-
-                        // Get image in different format for later uploading
-                        fileInfo.async("arraybuffer").then(function (content) {
-                            // Are we storing this somewhere?
-                        });
+                        // Save a reference to the iamge
+                        image = fileInfo;
 
                         // Check the next file
                         return;
@@ -525,7 +517,7 @@ export class AppActions {
                         metadata.AppStatus = "New";
 
                         // Resolve the request
-                        resolve(metadata);
+                        resolve({ item: metadata, image });
                     });
                 });
             });
@@ -590,7 +582,7 @@ export class AppActions {
                 LoadingDialog.show();
 
                 // Extract the metadata from the package
-                this.readPackage(file.data).then(data => {
+                this.readPackage(file.data).then(pkgInfo => {
 
                     // Ensure the package doesn't exist
                     let existsFl = false;
@@ -598,7 +590,7 @@ export class AppActions {
                         let item = DataSource.Items[i];
 
                         // See if it exists
-                        if (item.AppProductID == data.AppProductID) {
+                        if (item.AppProductID == pkgInfo.item.AppProductID) {
                             // Set the flag
                             existsFl = true;
                             break;
@@ -617,13 +609,13 @@ export class AppActions {
                         Modal.show();
                     }
                     // Else, validate the data extracted from the app
-                    else if (data.AppProductID && data.AppVersion && data.Title) {
+                    else if (pkgInfo.item.AppProductID && pkgInfo.item.AppVersion && pkgInfo.item.Title) {
                         // Update the loading dialog
                         LoadingDialog.setHeader("Creating App Folder");
                         LoadingDialog.setBody("Creating the app folder...");
 
                         // Create the document set folder
-                        Helper.createDocSet(data.Title, Strings.Lists.Apps).then(
+                        Helper.createDocSet(pkgInfo.item.Title, Strings.Lists.Apps).then(
                             // Success
                             item => {
                                 // Update the loading dialog
@@ -631,10 +623,10 @@ export class AppActions {
                                 LoadingDialog.setBody("Saving the package information...");
 
                                 // Default the owner to the current user
-                                data["AppDevelopersId"] = { results: [ContextInfo.userId] } as any;
+                                pkgInfo.item.AppDevelopersId = { results: [ContextInfo.userId] } as any;
 
                                 // Update the metadata
-                                item.update(data).execute(() => {
+                                item.update(pkgInfo.item).execute(() => {
                                     // Update the loading dialog
                                     LoadingDialog.setHeader("Uploading the Package");
                                     LoadingDialog.setBody("Uploading the app package...");
@@ -643,11 +635,39 @@ export class AppActions {
                                     item.Folder().Files().add(file.name, true, file.data).execute(
                                         // Success
                                         file => {
-                                            // Close the loading dialog
-                                            LoadingDialog.hide();
+                                            // See if the image exists
+                                            if (pkgInfo.image) {
+                                                // Get image in different format for later uploading
+                                                pkgInfo.image.async("arraybuffer").then(function (content) {
+                                                    // Get the file extension
+                                                    let fileExt: string | string[] = pkgInfo.image.name.split('.');
+                                                    fileExt = fileExt[fileExt.length - 1];
 
-                                            // Execute the completed event
-                                            onComplete(item as any);
+                                                    // Upload the image to this folder
+                                                    item.Folder().Files().add("AppIcon." + fileExt, true, content).execute(file => {
+                                                        // Set the icon url
+                                                        item.update({
+                                                            AppThumbnailURL: {
+                                                                __metadata: { type: "SP.FieldUrlValue" },
+                                                                Description: file.ServerRelativeUrl,
+                                                                Url: file.ServerRelativeUrl
+                                                            }
+                                                        }).execute(() => {
+                                                            // Close the loading dialog
+                                                            LoadingDialog.hide();
+
+                                                            // Execute the completed event
+                                                            onComplete(item as any);
+                                                        });
+                                                    });
+                                                });
+                                            } else {
+                                                // Close the loading dialog
+                                                LoadingDialog.hide();
+
+                                                // Execute the completed event
+                                                onComplete(item as any);
+                                            }
                                         },
 
                                         // Error
