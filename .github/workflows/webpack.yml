@@ -37,15 +37,15 @@ jobs:
     - name: Artifacts - JS Files
       uses: actions/upload-artifact@v2
       with:
-        name: dev-build
+        name: js
         path: dist/app-catalog-dashboard*.js
 
     - name: Artifacts - SPFx
       uses: actions/upload-artifact@v2
-        name: prod-build
+        name: spfx
         path: dist/app-catalog-mgr.sppkg
 
     - name: Artifacts - Config File
       uses: actions/upload-artifact@v2
-        name: configuration
+        name: config
         path: assets/config.json
