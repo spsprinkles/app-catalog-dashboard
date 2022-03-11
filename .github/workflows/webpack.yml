@@ -34,23 +34,18 @@ jobs:
       run: |
         npm run all
 
-    - name: Artifacts
+    - name: Artifacts - JS Files
       uses: actions/upload-artifact@v2
       with:
         name: dev-build
-        path: dist/app-catalog-dashboard.js
+        path: dist/app-catalog-dashboard*.js
 
-    - name: Artifacts
+    - name: Artifacts - SPFx
       uses: actions/upload-artifact@v2
         name: prod-build
-        path: dist/app-catalog-dashboard.min.js
+        path: dist/app-catalog-mgr.sppkg
 
-    - name: Artifacts
+    - name: Artifacts - Config File
       uses: actions/upload-artifact@v2
         name: configuration
         path: assets/config.json
-
-    - name: Artifacts
-      uses: actions/upload-artifact@v2
-        name: spfx
-        path: dist/app-catalog-mgr.sppkg
