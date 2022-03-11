@@ -2,7 +2,7 @@ const path = require("path");
 const fs = require("fs");
 
 // Get the image file
-const imgFile = path.join(__dirname, "assets/AppIcon-96.png");
+const imgFile = path.join(__dirname, "assets/AppIcon.png");
 
 // See if it exists
 if (fs.existsSync(imgFile)) {

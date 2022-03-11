@@ -2,7 +2,6 @@ import { Dashboard, LoadingDialog } from "dattatable";
 import { Components } from "gd-sprest-bs";
 import { arrowClockwise } from "gd-sprest-bs/build/icons/svgs/arrowClockwise";
 import { chatSquareDots } from "gd-sprest-bs/build/icons/svgs/chatSquareDots";
-import { columnsGap } from "gd-sprest-bs/build/icons/svgs/columnsGap";
 import { fileEarmarkArrowUp } from "gd-sprest-bs/build/icons/svgs/fileEarmarkArrowUp";
 import { gearWideConnected } from "gd-sprest-bs/build/icons/svgs/gearWideConnected";
 import { layoutTextWindow } from "gd-sprest-bs/build/icons/svgs/layoutTextWindow";
@@ -140,7 +139,7 @@ export class AppView {
                     // Set the brand
                     let brand = document.createElement("div");
                     brand.className = "d-flex";
-                    brand.appendChild(columnsGap());
+                    brand.appendChild(Common.getAppIcon());
                     brand.append(Strings.ProjectName);
                     brand.querySelector("svg").classList.add("me-75");
                     props.brand = brand;
