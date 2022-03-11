@@ -31,6 +31,7 @@ The `status` configuration value is an object consisting of the following proper
 | actions | An array of buttons to be displayed on the app dashboard. |
 | approval | An array of user type values that can approve the item. |
 | checklists | Displayed on the approval/submission form. |
+| createTestSite | If set to true, will create the test site for the application. |
 | notification | The email information to notify users on submission/approval of the item. |
 
 #### Actions

@@ -80,6 +80,7 @@
             ]
         },
         "Pending Approval": {
+            "createTestSite": true,
             "actions": [
                 "View",
                 "ApproveReject"
