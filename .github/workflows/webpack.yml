@@ -37,5 +37,14 @@ jobs:
     - name: Artifacts
       uses: actions/upload-artifact@v2
       with:
-        name: dist
-        path: dist/
+        name: dev-build
+        path: dist/app-catalog-dashboard.js
+
+        name: prod-build
+        path: dist/app-catalog-dashboard.min.js
+
+        name: configuration
+        path: assets/config.json
+
+        name: spfx
+        path: dist/app-catalog-mgr.sppkg
