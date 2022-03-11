@@ -8,6 +8,7 @@
     "status": {
         "Approved": {
             "actions": [
+                "AppData",
                 "View",
                 "ViewTestCases",
                 "ViewTechReview",
@@ -51,6 +52,7 @@
         },
         "New": {
             "actions": [
+                "AppData",
                 "View",
                 "Edit",
                 "Submit"
@@ -108,6 +110,7 @@
         "Pending Review": {
             "requiresTechReview": true,
             "actions": [
+                "AppData",
                 "View",
                 "TestSite",
                 "ViewTestCases",

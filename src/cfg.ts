@@ -232,8 +232,7 @@ export const Configuration = Helper.SPConfig({
                     type: Helper.SPCfgFieldType.Url,
                     allowDeletion: false,
                     description: "An image or screenshot for this app. Images should have a width of 512 pixels and a height of 384 pixels.",
-                    format: SPTypes.UrlFormatType.Image,
-                    required: true
+                    format: SPTypes.UrlFormatType.Image
                 } as Helper.IFieldInfoUrl,
                 {
                     name: "AppImageURL2",
@@ -241,8 +240,7 @@ export const Configuration = Helper.SPConfig({
                     type: Helper.SPCfgFieldType.Url,
                     allowDeletion: false,
                     description: "An image or screenshot for this app. Images should have a width of 512 pixels and a height of 384 pixels.",
-                    format: SPTypes.UrlFormatType.Image,
-                    required: true
+                    format: SPTypes.UrlFormatType.Image
                 } as Helper.IFieldInfoUrl,
                 {
                     name: "AppImageURL3",
@@ -272,8 +270,7 @@ export const Configuration = Helper.SPConfig({
                     name: "AppSupportURL",
                     title: "Support URL",
                     type: Helper.SPCfgFieldType.Url,
-                    allowDeletion: false,
-                    required: true
+                    allowDeletion: false
                 } as Helper.IFieldInfoUrl,
                 {
                     name: "AppThumbnailURL",
@@ -281,8 +278,7 @@ export const Configuration = Helper.SPConfig({
                     type: Helper.SPCfgFieldType.Url,
                     allowDeletion: false,
                     description: "The URL to the app icon. The icon should have a width and height of 96 pixels.",
-                    format: SPTypes.UrlFormatType.Image,
-                    required: true
+                    format: SPTypes.UrlFormatType.Image
                 } as Helper.IFieldInfoUrl,
                 {
                     name: "AppVideoURL",

@@ -39,6 +39,7 @@ The available values for the `actions` status property.
 
 | Name | Description |
 | --- | --- |
+| AppData | Displays the edit form to modify the metadata related to the app catalog. |
 | ApproveReject | Displays the approve and reject button if the user is listed in the `approval` property. |
 | DeploySiteCatalog | Displays the deploy to site collection button, allowing the user to deploy the application to a site of their choice. |
 | DeleteTestSite | Displays the delete test site button if the site exists. |
