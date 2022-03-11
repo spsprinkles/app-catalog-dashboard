@@ -293,7 +293,7 @@ export class AppView {
                             // Ensure a url exists
                             if (item.AppThumbnailURL && item.AppThumbnailURL.Url) {
                                 // Render the link
-                                el.innerHTML = '<img class="bg-sharepoint" src="' + item.AppThumbnailURL.Url + '" style="width:42px; height:42px;">';
+                                el.innerHTML = '<img src="' + item.AppThumbnailURL.Url + '" height="32px" width="32px" title="' + item.Title + '">';
                             }
                         }
                     },
