@@ -48,6 +48,7 @@ export const Configuration = Helper.SPConfig({
                         "AppDevelopers",
                         "AppDescription",
                         "AppJustification",
+                        "AppThumbnailURL",
                         { Name: "AppAPIPermissions", ReadOnly: true },
                         "AppPermissionsJustification",
                     ],
