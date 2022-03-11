@@ -255,13 +255,12 @@ export class AppForms {
 
                 // Set the flag
                 let skipFeatureDeployment = form ? form.getValues()["SkipFeatureDeployment"] : false;
-                debugger;
 
                 // Deploy the app
-                /*AppActions.deploy(item, tenantFl, item.AppSkipFeatureDeployment, () => {
+                AppActions.deploy(item, tenantFl, skipFeatureDeployment, () => {
                     // Call the update event
                     onUpdate();
-                });*/
+                });
             }
         }).el);
 
