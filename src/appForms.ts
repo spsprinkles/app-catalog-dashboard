@@ -213,11 +213,37 @@ export class AppForms {
 
     // Deploys the solution to the app catalog
     deploy(item: IAppItem, tenantFl: boolean, onUpdate: () => void) {
+        // Clear the modal
+        Modal.clear();
+
         // Set the header
         Modal.setHeader("Deploy to " + (tenantFl ? " Tenant " : " Site Collection ") + "App Catalog");
 
-        // Set the body
-        Modal.setBody("Are you sure you want to deploy the application?");
+        // See if the app can be deployed to all sites
+        let form: Components.IForm = null;
+        if (item.AppSkipFeatureDeployment) {
+            // Create the form
+            form = Components.Form({
+                el: Modal.BodyElement,
+                controls: [
+                    {
+                        name: "SkipFeatureDeployment",
+                        label: "Skip Feature Deployment?",
+                        description: "Select this option if you are deploying to teams or if you want to make the solution available to all sites immediately.",
+                        type: Components.FormControlTypes.Switch,
+                        value: true
+                    }
+                ]
+            });
+
+            // Append the confirmation message
+            let elConfirmation = document.createElement("p");
+            elConfirmation.innerHTML = "Click 'Deploy' to deploy the solution to the app catalog.";
+            Modal.BodyElement.appendChild(elConfirmation);
+        } else {
+            // Set the body
+            Modal.setBody("Are you sure you want to deploy the application?");
+        }
 
         // Render the footer
         Modal.setFooter(Components.Button({
@@ -227,8 +253,11 @@ export class AppForms {
                 // Close the modal
                 Modal.hide();
 
+                // Set the flag
+                let skipFeatureDeployment = form ? form.getValues()["SkipFeatureDeployment"] : false;
+
                 // Deploy the app
-                AppActions.deploy(item, tenantFl, () => {
+                AppActions.deploy(item, tenantFl, skipFeatureDeployment, () => {
                     // Call the update event
                     onUpdate();
                 });

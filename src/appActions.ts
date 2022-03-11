@@ -98,7 +98,7 @@ export class AppActions {
         LoadingDialog.show();
 
         // Deploy the solution
-        this.deploy(item, false, () => {
+        this.deploy(item, false, false, () => {
             // Update the loading dialog
             LoadingDialog.setHeader("Creating the Test Site");
             LoadingDialog.setBody("Creating the sub-web for testing the application.");
@@ -211,7 +211,7 @@ export class AppActions {
     }
 
     // Deploys the solution to the app catalog
-    static deploy(item: IAppItem, tenantFl: boolean, onUpdate: () => void) {
+    static deploy(item: IAppItem, tenantFl: boolean, skipFeatureDeployment: boolean, onUpdate: () => void) {
         // Show a loading dialog
         LoadingDialog.setHeader("Uploading Package");
         LoadingDialog.setBody("Uploading the spfx package to the app catalog.");
@@ -264,7 +264,7 @@ export class AppActions {
                                 let appCatalog = (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog());
 
                                 // Deploy the app
-                                appCatalog.AvailableApps(item.AppProductID).deploy().execute(app => {
+                                appCatalog.AvailableApps(item.AppProductID).deploy(skipFeatureDeployment).execute(app => {
                                     // See if this is the tenant app
                                     if (tenantFl) {
                                         // Update the tenant deployed flag
