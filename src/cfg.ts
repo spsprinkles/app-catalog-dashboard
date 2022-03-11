@@ -101,6 +101,22 @@ export const Configuration = Helper.SPConfig({
                     sortable: false
                 } as Helper.IFieldInfoUser,
                 {
+                    name: "AppIsRejected",
+                    title: "Is Rejected?",
+                    type: Helper.SPCfgFieldType.Boolean,
+                    allowDeletion: false,
+                    defaultValue: "0",
+                    showInNewForm: false
+                },
+                {
+                    name: "AppIsTenantDeployed",
+                    title: "Is Tenant Deployed?",
+                    type: Helper.SPCfgFieldType.Boolean,
+                    allowDeletion: false,
+                    defaultValue: "0",
+                    showInNewForm: false
+                },
+                {
                     name: "AppJustification",
                     title: "Justification",
                     type: Helper.SPCfgFieldType.Note,
@@ -154,26 +170,11 @@ export const Configuration = Helper.SPConfig({
                     showInEditForm: false,
                     showInNewForm: false,
                     choices: [
-                        "New", "Pending Sponsor Approval", "Pending Approval",
-                        "In Testing", "Pending Review", "Approved"
+                        "New", "Pending Sponsor Approval", "In Testing",
+                        "Pending Peer Review", "Pending Approval", "Pending Deployment",
+                        "Deployed"
                     ]
                 } as Helper.IFieldInfoChoice,
-                {
-                    name: "AppIsRejected",
-                    title: "Is Rejected?",
-                    type: Helper.SPCfgFieldType.Boolean,
-                    allowDeletion: false,
-                    defaultValue: "0",
-                    showInNewForm: false
-                },
-                {
-                    name: "AppIsTenantDeployed",
-                    title: "Is Tenant Deployed?",
-                    type: Helper.SPCfgFieldType.Boolean,
-                    allowDeletion: false,
-                    defaultValue: "0",
-                    showInNewForm: false
-                },
                 /** Fields extracted from the SPFx package */
                 {
                     name: "AppAPIPermissions",

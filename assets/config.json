@@ -6,7 +6,7 @@
     "tenantAppCatalogUrl": "/sites/appcatalog",
     "userAgreement": "<p>This developer agreement will be modified by the client. It should contain verbiage that defines the terms of use for this application.</p><p>By agreeing to these terms, you are not going to upload or deploy un-tested code into the app catalog. You agree to follow all company IT rules & policies.</p>",
     "status": {
-        "Approved": {
+        "Deployed": {
             "actions": [
                 "AppData",
                 "View",
@@ -27,7 +27,6 @@
                 "Submit"
             ],
             "approval": [
-                "ApproversGroup",
                 "Developers"
             ],
             "checklists": [
@@ -43,7 +42,7 @@
                 {
                     "approval": true,
                     "to": [
-                        "ApproversGroup"
+                        "DevelopersGroup"
                     ],
                     "subject": "App Testing Completed",
                     "content": "<p>Approval Group,</p>The application testing was completed and is awaiting approval. Please click on the link below to review this request.</p><p>[[PageUrl]]</p><p>App Team</p>"
@@ -58,7 +57,6 @@
                 "Submit"
             ],
             "approval": [
-                "ApproversGroup",
                 "Developers"
             ],
             "checklists": [
@@ -80,9 +78,11 @@
             ]
         },
         "Pending Approval": {
-            "createTestSite": true,
             "actions": [
                 "View",
+                "ViewTestCases",
+                "ViewTechReview",
+                "TestSite",
                 "ApproveReject"
             ],
             "approval": [
@@ -103,23 +103,32 @@
                     "to": [
                         "Developers"
                     ],
-                    "subject": "App Approved for Testing",
-                    "content": "<p>Your application was approved for testing. Please click on the link below to begin testing it.</p><p>[[TestSiteUrl]]</p><p>App Team</p>"
+                    "subject": "App Approved for Deployment",
+                    "content": "<p>Your application was approved and is ready for deployment. Please click on the link below to complete the request.</p><p>[[TestSiteUrl]]</p><p>App Team</p>"
                 }
             ]
         },
-        "Pending Review": {
-            "requiresTechReview": true,
+        "Pending Deployment": {
             "actions": [
-                "AppData",
                 "View",
-                "TestSite",
                 "ViewTestCases",
-                "EditTechReview",
-                "ApproveReject"
+                "ViewTechReview",
+                "TestSite",
+                "DeleteTestSite",
+                "DeploySiteCatalog",
+                "DeployTenantCatalog"
             ],
             "approval": [
                 "ApproversGroup"
+            ],
+            "checklists": [
+                "Validation of the application name and description.",
+                "Reviewed the justification of the application.",
+                "Reviewed the justification of the application permissions.",
+                "Validation of unit/organization.",
+                "App manifest file submitted.",
+                "App source code submitted.",
+                "Validation of the application manifest content."
             ],
             "notification": [
                 {
@@ -127,12 +136,45 @@
                     "to": [
                         "Developers"
                     ],
-                    "subject": "App Approved",
-                    "content": "<p>Your application was approved for deployment.</p><p>[[PageUrl]]</p><p>App Team</p>"
+                    "subject": "App Approved for Deployment",
+                    "content": "<p>Your application was approved and is ready for deployment. Please click on the link below to complete the request.</p><p>[[TestSiteUrl]]</p><p>App Team</p>"
+                }
+            ]
+        },
+        "Pending Peer Review": {
+            "requiresTechReview": true,
+            "actions": [
+                "View",
+                "TestSite",
+                "ViewTestCases",
+                "EditTechReview",
+                "Submit"
+            ],
+            "approval": [
+                "DevelopersGroup"
+            ],
+            "checklists": [
+                "Validation of the application name and description.",
+                "Reviewed the justification of the application.",
+                "Reviewed the justification of the application permissions.",
+                "Validation of unit/organization.",
+                "App manifest file submitted.",
+                "App source code submitted.",
+                "Validation of the application manifest content."
+            ],
+            "notification": [
+                {
+                    "approval": true,
+                    "to": [
+                        "ApproversGroup"
+                    ],
+                    "subject": "App Testing Completed",
+                    "content": "<p>Approval Group,</p>The application testing was completed and is awaiting approval. Please click on the link below to review this request.</p><p>[[PageUrl]]</p><p>App Team</p>"
                 }
             ]
         },
         "Pending Sponsor Approval": {
+            "createTestSite": true,
             "actions": [
                 "View",
                 "ApproveReject"
