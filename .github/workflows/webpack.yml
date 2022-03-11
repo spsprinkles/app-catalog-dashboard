@@ -34,20 +34,10 @@ jobs:
       run: |
         npm run all
 
-    - name: Artifacts - JS Files
+    - name: Artifacts
       uses: actions/upload-artifact@v2
       with:
-        name: js
-        path: dist/app-catalog-dashboard*.js
-
-    - name: Artifacts - SPFx
-      uses: actions/upload-artifact@v2
-      with:
-        name: spfx
-        path: dist/app-catalog-mgr.sppkg
-
-    - name: Artifacts - Config File
-      uses: actions/upload-artifact@v2
-      with:
-        name: config
-        path: assets/config.json
+        name: artifacts
+        path: |
+          assets/config.json
+          dist
