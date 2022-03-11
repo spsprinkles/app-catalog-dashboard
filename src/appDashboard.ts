@@ -300,9 +300,9 @@ export class AppDashboard {
                                 info: DataSource.DocSetInfo,
                                 el,
                                 includeFields: [
-                                    "AppSponsor",
                                     "AppStatus",
                                     "AppDevelopers",
+                                    "AppSponsor",
                                     "AppProductID",
                                     "AppIsClientSideSolution"
                                 ],
