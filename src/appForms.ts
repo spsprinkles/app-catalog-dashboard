@@ -59,8 +59,35 @@ export class AppForms {
 
                                         // Send the notification
                                         AppNotifications.sendEmail(status.nextStep, item).then(() => {
-                                            // Call the update event
-                                            onUpdate();
+                                            // See if the test app catalog exists and we are creating the test site
+                                            if (DataSource.SiteCollectionAppCatalogExists && status.createTestSite) {
+                                                // Load the test site
+                                                DataSource.loadTestSite(item).then(
+                                                    // Exists
+                                                    webInfo => {
+                                                        // See if the version match
+                                                        if (webInfo.versionMatchFl) {
+                                                            // Call the update event
+                                                            onUpdate();
+                                                        } else {
+                                                            // Update the app
+                                                            AppActions.updateApp(item, webInfo.web.ServerRelativeUrl).then(() => {
+                                                                // Call the update event
+                                                                onUpdate();
+                                                            });
+                                                        }
+                                                    },
+
+                                                    // Doesn't exist
+                                                    () => {
+                                                        // Create the test site
+                                                        AppActions.createTestSite(item, onUpdate);
+                                                    }
+                                                );
+                                            } else {
+                                                // Call the update event
+                                                onUpdate();
+                                            }
                                         });
                                     });
 

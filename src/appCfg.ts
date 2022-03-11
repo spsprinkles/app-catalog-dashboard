@@ -30,6 +30,7 @@ export interface IStatus {
     actions?: string[];
     approval?: string[];
     checklists?: string[];
+    createTestSite?: boolean;
     lastStep: boolean;
     name: string;
     notification?: IEmail[];
