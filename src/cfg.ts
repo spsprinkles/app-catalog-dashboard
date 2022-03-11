@@ -92,7 +92,7 @@ export const Configuration = Helper.SPConfig({
                     title: "Developers",
                     type: Helper.SPCfgFieldType.User,
                     allowDeletion: false,
-                    description: "The developer poc(s) of the application.",
+                    description: "The developers of the application.",
                     enforceUniqueValues: false,
                     multi: true,
                     required: true,
@@ -112,7 +112,7 @@ export const Configuration = Helper.SPConfig({
                     name: "AppPermissionsJustification",
                     title: "Permissions Justification",
                     type: Helper.SPCfgFieldType.Note,
-                    description: "The justification for the web api permissions being requested.",
+                    description: "The justification for the Web API permissions being requested.",
                     allowDeletion: false
                 },
                 {
@@ -179,7 +179,7 @@ export const Configuration = Helper.SPConfig({
                     name: "AppAPIPermissions",
                     title: "API Permission",
                     type: Helper.SPCfgFieldType.Note,
-                    description: "The web api permission requests for the application.",
+                    description: "The Web API permission requests for the application.",
                     allowDeletion: false,
                     showInNewForm: false
                 },
@@ -231,7 +231,7 @@ export const Configuration = Helper.SPConfig({
                     title: "Screenshot URL 1",
                     type: Helper.SPCfgFieldType.Url,
                     allowDeletion: false,
-                    description: "An image or screenshot for this app. Images should have a width of 512 pixes and a height of 384 pixels.",
+                    description: "An image or screenshot for this app. Images should have a width of 512 pixels and a height of 384 pixels.",
                     format: SPTypes.UrlFormatType.Image,
                     required: true
                 } as Helper.IFieldInfoUrl,
@@ -240,7 +240,7 @@ export const Configuration = Helper.SPConfig({
                     title: "Screenshot URL 2",
                     type: Helper.SPCfgFieldType.Url,
                     allowDeletion: false,
-                    description: "An image or screenshot for this app. Images should have a width of 512 pixes and a height of 384 pixels.",
+                    description: "An image or screenshot for this app. Images should have a width of 512 pixels and a height of 384 pixels.",
                     format: SPTypes.UrlFormatType.Image,
                     required: true
                 } as Helper.IFieldInfoUrl,
@@ -249,7 +249,7 @@ export const Configuration = Helper.SPConfig({
                     title: "Screenshot URL 3",
                     type: Helper.SPCfgFieldType.Url,
                     allowDeletion: false,
-                    description: "An image or screenshot for this app. Images should have a width of 512 pixes and a height of 384 pixels.",
+                    description: "An image or screenshot for this app. Images should have a width of 512 pixels and a height of 384 pixels.",
                     format: SPTypes.UrlFormatType.Image,
                 } as Helper.IFieldInfoUrl,
                 {
@@ -257,7 +257,7 @@ export const Configuration = Helper.SPConfig({
                     title: "Screenshot URL 4",
                     type: Helper.SPCfgFieldType.Url,
                     allowDeletion: false,
-                    description: "An image or screenshot for this app. Images should have a width of 512 pixes and a height of 384 pixels.",
+                    description: "An image or screenshot for this app. Images should have a width of 512 pixels and a height of 384 pixels.",
                     format: SPTypes.UrlFormatType.Image
                 } as Helper.IFieldInfoUrl,
                 {
@@ -265,7 +265,7 @@ export const Configuration = Helper.SPConfig({
                     title: "Screenshot URL 5",
                     type: Helper.SPCfgFieldType.Url,
                     allowDeletion: false,
-                    description: "An image or screenshot for this app. Images should have a width of 512 pixes and a height of 384 pixels.",
+                    description: "An image or screenshot for this app. Images should have a width of 512 pixels and a height of 384 pixels.",
                     format: SPTypes.UrlFormatType.Image,
                 } as Helper.IFieldInfoUrl,
                 {
@@ -633,7 +633,7 @@ export const Configuration = Helper.SPConfig({
                     title: "Support URL",
                     type: Helper.SPCfgFieldType.Choice,
                     allowDeletion: false,
-                    description: "Does the &quot;Support URL&quot; have appropriate information to aid users in resolving problems or contacting the app's developers?",
+                    description: "Does the &quot;Support URL&quot; have appropriate information to aid users in resolving problems or contacting the app developers?",
                     format: SPTypes.ChoiceFormatType.Dropdown,
                     defaultValue: "",
                     choices: [
@@ -693,7 +693,7 @@ export const Configuration = Helper.SPConfig({
                     title: "Graph API Permissions",
                     type: Helper.SPCfgFieldType.Choice,
                     allowDeletion: false,
-                    description: "Are there any requests to the graph api, and is the justification valid?",
+                    description: "Are there any requests to the Graph API, and is the justification valid?",
                     format: SPTypes.ChoiceFormatType.Dropdown,
                     defaultValue: "",
                     choices: [
@@ -705,7 +705,7 @@ export const Configuration = Helper.SPConfig({
                     title: "Web API Permissions",
                     type: Helper.SPCfgFieldType.Choice,
                     allowDeletion: false,
-                    description: "Are there any requests to a custom api, and is the justification valid?",
+                    description: "Are there any requests to a custom API, and is the justification valid?",
                     format: SPTypes.ChoiceFormatType.Dropdown,
                     defaultValue: "",
                     choices: [
