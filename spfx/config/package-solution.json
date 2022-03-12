@@ -7,7 +7,6 @@
     "includeClientSideAssets": true,
     "isDomainIsolated": false,
     "skipFeatureDeployment": true,
-    "iconPath": "../../assets/AppIcon.png",
     "developer": {
       "name": "",
       "websiteUrl": "",
