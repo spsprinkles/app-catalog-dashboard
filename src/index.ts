@@ -1,3 +1,4 @@
+import { ContextInfo } from "gd-sprest-bs";
 import { AppDashboard } from "./appDashboard";
 import { AppSecurity } from "./appSecurity";
 import { AppView } from "./appView";
@@ -16,6 +17,9 @@ const GlobalVariable = {
         if (context) {
             // Set the context
             setContext(context, sourceUrl);
+
+            // Set the web url
+            Configuration.setWebUrl(sourceUrl || ContextInfo.webServerRelativeUrl);
         }
 
         // Hide the first column of the webpart zones

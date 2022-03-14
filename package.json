@@ -24,14 +24,14 @@
   "dependencies": {
     "datatables.net": "^1.11.5",
     "datatables.net-bs5": "^1.11.5",
-    "dattatable": "^1.7.2",
-    "gd-sprest-bs": "^9.2.8",
+    "dattatable": "^1.7.3",
+    "gd-sprest-bs": "^9.2.9",
     "jquery": "^3.6.0",
     "jszip": "^3.7.1",
     "moment": "^2.29.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.17.5",
+    "@babel/core": "^7.17.7",
     "@babel/preset-env": "^7.16.11",
     "@types/datatables.net": "^1.10.21",
     "@types/jquery": "^3.5.14",
@@ -42,7 +42,7 @@
     "node-sass": "^7.0.1",
     "sass-loader": "^12.6.0",
     "style-loader": "^3.3.1",
-    "ts-loader": "^9.2.7",
+    "ts-loader": "^9.2.8",
     "typescript": "^4.6.2",
     "url-loader": "^4.1.1",
     "webpack": "^5.70.0",
