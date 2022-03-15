@@ -955,13 +955,13 @@ export const createSecurityGroups = (): PromiseLike<void> => {
         });
 
         // Get the default owners group
-        web.AssociatedMemberGroup().execute(group => {
+        web.AssociatedOwnerGroup().execute(group => {
             // Set the owners group
             webOwnersGroup = group;
         });
 
         // Get the default visitors group
-        web.AssociatedMemberGroup().execute(group => {
+        web.AssociatedVisitorGroup().execute(group => {
             // Set the visitors group
             webVisitorsGroup = group;
         });
