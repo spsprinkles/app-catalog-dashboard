@@ -943,7 +943,28 @@ export const createSecurityGroups = (): PromiseLike<void> => {
     return new Promise((resolve, reject) => {
         let approveGroup: Types.SP.Group = null;
         let devGroup: Types.SP.Group = null;
+        let webMembersGroup: Types.SP.Group = null;
+        let webOwnersGroup: Types.SP.Group = null;
+        let webVisitorsGroup: Types.SP.Group = null;
         let web = Web();
+
+        // Get the default members group
+        web.AssociatedMemberGroup().execute(group => {
+            // Set the members group
+            webMembersGroup = group;
+        });
+
+        // Get the default owners group
+        web.AssociatedOwnerGroup().execute(group => {
+            // Set the owners group
+            webOwnersGroup = group;
+        });
+
+        // Get the default visitors group
+        web.AssociatedVisitorGroup().execute(group => {
+            // Set the visitors group
+            webVisitorsGroup = group;
+        });
 
         // Parse the groups to create
         Helper.Executor([Strings.Groups.Approvers, Strings.Groups.Developers], groupName => {
@@ -1097,6 +1118,45 @@ export const createSecurityGroups = (): PromiseLike<void> => {
                             listAssessments.RoleAssignments().addRoleAssignment(devGroup.Id, permissions[SPTypes.RoleType.Contributor]).execute(() => {
                                 // Log
                                 console.log("[Assessments List] The dev permission was added successfully.");
+                            });
+                        }
+
+                        // Ensure the default members group exists
+                        if (webMembersGroup) {
+                            // Set the list permissions
+                            listApps.RoleAssignments().addRoleAssignment(webMembersGroup.Id, permissions[SPTypes.RoleType.Reader]).execute(() => {
+                                // Log
+                                console.log("[Apps List] The default members permission was added successfully.");
+                            });
+                            listAssessments.RoleAssignments().addRoleAssignment(webMembersGroup.Id, permissions[SPTypes.RoleType.Reader]).execute(() => {
+                                // Log
+                                console.log("[Assessments List] The default members permission was added successfully.");
+                            });
+                        }
+
+                        // Ensure the default owners group exists
+                        if (webOwnersGroup) {
+                            // Set the list permissions
+                            listApps.RoleAssignments().addRoleAssignment(webOwnersGroup.Id, permissions[SPTypes.RoleType.Reader]).execute(() => {
+                                // Log
+                                console.log("[Apps List] The default owners permission was added successfully.");
+                            });
+                            listAssessments.RoleAssignments().addRoleAssignment(webOwnersGroup.Id, permissions[SPTypes.RoleType.Reader]).execute(() => {
+                                // Log
+                                console.log("[Assessments List] The default owners permission was added successfully.");
+                            });
+                        }
+
+                        // Ensure the default members group exists
+                        if (webVisitorsGroup) {
+                            // Set the list permissions
+                            listApps.RoleAssignments().addRoleAssignment(webVisitorsGroup.Id, permissions[SPTypes.RoleType.Reader]).execute(() => {
+                                // Log
+                                console.log("[Apps List] The default visitors permission was added successfully.");
+                            });
+                            listAssessments.RoleAssignments().addRoleAssignment(webVisitorsGroup.Id, permissions[SPTypes.RoleType.Reader]).execute(() => {
+                                // Log
+                                console.log("[Assessments List] The default visitors permission was added successfully.");
                             });
                         }
 
