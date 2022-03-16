@@ -540,11 +540,11 @@ export class AppActions {
         });
     }
 
-    // Retracts the solution to the app catalog
+    // Retracts the solution from the app catalog
     static retract(item: IAppItem, tenantFl: boolean, removeFl: boolean, onUpdate: () => void) {
         // Show a loading dialog
         LoadingDialog.setHeader("Retracting the Package");
-        LoadingDialog.setBody("Retracting the spfx package to the app catalog.");
+        LoadingDialog.setBody("Retracting the spfx package from the app catalog.");
         LoadingDialog.show();
 
         // Load the context of the app catalog
