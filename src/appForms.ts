@@ -153,9 +153,9 @@ export class AppForms {
                 LoadingDialog.show();
 
                 // Retract the solution from the site collection app catalog
-                this.retract(item, false, true, () => {
+                AppActions.retract(item, false, true, () => {
                     // Retract the solution from the tenant app catalog
-                    this.retract(item, true, true, () => {
+                    AppActions.retract(item, true, true, () => {
                         // Delete the test site
                         AppActions.deleteTestSite(item).then(() => {
                             // Update the loading dialog
@@ -1279,49 +1279,33 @@ export class AppForms {
         Modal.show();
     }
 
-    // Retracts the solution to the app catalog
-    retract(item: IAppItem, tenantFl: boolean, removeFl: boolean, onUpdate: () => void) {
-        // Show a loading dialog
-        LoadingDialog.setHeader("Retracting the Package");
-        LoadingDialog.setBody("Retracting the spfx package to the app catalog.");
-        LoadingDialog.show();
+    // Retracts the solution from the tenant app catalog
+    retractFromTenant(item: IAppItem, onUpdate: () => void) {
+        // Set the header
+        Modal.setHeader("Deploy to Teams");
 
-        // Load the context of the app catalog
-        let catalogUrl = tenantFl ? AppConfig.Configuration.tenantAppCatalogUrl : AppConfig.Configuration.appCatalogUrl;
-        ContextInfo.getWeb(catalogUrl).execute(context => {
-            // Load the apps
-            let web = Web(catalogUrl, { requestDigest: context.GetContextWebInformation.FormDigestValue });
-            (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog()).AvailableApps(item.AppProductID).retract().execute(() => {
-                // See if we are removing the app
-                if (removeFl) {
-                    // Remove the app
-                    (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog()).AvailableApps(item.AppProductID).remove().execute(() => {
-                        // Call the update event
-                        onUpdate();
+        // Set the body
+        Modal.setBody("Are you sure you want to retract the solution?");
 
-                        // Close the dialog
-                        LoadingDialog.hide();
-                    });
-                } else {
+        // Render the footer
+        Modal.setFooter(Components.Button({
+            text: "Retract",
+            type: Components.ButtonTypes.OutlineDanger,
+            onClick: () => {
+                // Close the modal
+                Modal.hide();
+
+                // Retract the app
+                AppActions.retract(item, true, false, () => {
                     // Call the update event
                     onUpdate();
+                });
+            }
+        }).el);
 
-                    // Close the dialog
-                    LoadingDialog.hide();
-                }
-            }, () => {
-                // This shouldn't happen
-                // The app was already checked to be deployed
-
-                // Call the update event
-                onUpdate();
-
-                // Close the dialog
-                LoadingDialog.hide();
-            });
-        });
+        // Show the modal
+        Modal.show();
     }
-
     // Submit Form
     submit(item: IAppItem, onUpdate: () => void) {
         // Clear the modal

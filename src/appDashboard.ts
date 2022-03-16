@@ -248,9 +248,9 @@ export class AppDashboard {
                                 Modal.show();
                             } else {
                                 // Update the status and set it back to the testing status
-                                DataSource.DocSetItem.update({
-                                    AppStatus: AppConfig.TestCasesStatus
-                                }).execute(() => {
+                                let itemInfo = pkgInfo.item;
+                                itemInfo.AppStatus = AppConfig.TestCasesStatus;
+                                DataSource.DocSetItem.update(itemInfo).execute(() => {
                                     // See if the item is currently approved
                                     if (DataSource.DocSetItem.AppStatus == AppConfig.TestCasesStatus) {
                                         // Archive the file
@@ -262,6 +262,9 @@ export class AppDashboard {
                                         // Add the file
                                         resolve(true);
                                     }
+
+                                    // Refresh the dashboard
+                                    this.refresh();
                                 });
                             }
                         });

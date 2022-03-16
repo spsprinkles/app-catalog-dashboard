@@ -267,7 +267,7 @@ export class ButtonActions {
                                 type: Components.ButtonTypes.OutlineDanger,
                                 onClick: () => {
                                     // Retract the app
-                                    this._forms.retract(this._item, true, false, () => {
+                                    this._forms.retractFromTenant(this._item, () => {
                                         // Call the update event
                                         this._onUpdate();
                                     });
