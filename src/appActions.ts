@@ -247,51 +247,59 @@ export class AppActions {
                 // Load the context of the app catalog
                 ContextInfo.getWeb(catalogUrl).execute(context => {
                     let requestDigest = context.GetContextWebInformation.FormDigestValue;
-
-                    // Upload the file to the app catalog
                     let web = Web(catalogUrl, { requestDigest });
-                    (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog()).add(item.FileLeafRef, true, content).execute(file => {
+
+                    // Retract the app
+                    this.retract(item, tenantFl, true, () => {
                         // Update the dialog
-                        LoadingDialog.setHeader("Deploying the Package");
+                        LoadingDialog.setHeader("Uploading the Package");
                         LoadingDialog.setBody("This will close after the app is deployed.");
+                        LoadingDialog.show();
 
-                        // Get the app item
-                        file.ListItemAllFields().execute(appItem => {
-                            // Update the metadata
-                            this.updateAppMetadata(item, appItem.Id, tenantFl, catalogUrl, requestDigest).then(() => {
-                                // Get the app catalog
-                                let web = Web(catalogUrl, { requestDigest });
-                                let appCatalog = (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog());
+                        // Upload the file to the app catalog
+                        (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog()).add(item.FileLeafRef, true, content).execute(file => {
+                            // Update the dialog
+                            LoadingDialog.setHeader("Deploying the Package");
+                            LoadingDialog.setBody("This will close after the app is deployed.");
 
-                                // Deploy the app
-                                appCatalog.AvailableApps(item.AppProductID).deploy(skipFeatureDeployment).execute(app => {
-                                    // See if this is the tenant app
-                                    if (tenantFl) {
-                                        // Update the tenant deployed flag
-                                        item.update({
-                                            AppIsTenantDeployed: true
-                                        }).execute(() => {
+                            // Get the app item
+                            file.ListItemAllFields().execute(appItem => {
+                                // Update the metadata
+                                this.updateAppMetadata(item, appItem.Id, tenantFl, catalogUrl, requestDigest).then(() => {
+                                    // Get the app catalog
+                                    let web = Web(catalogUrl, { requestDigest });
+                                    let appCatalog = (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog());
+
+                                    // Deploy the app
+                                    appCatalog.AvailableApps(item.AppProductID).deploy(skipFeatureDeployment).execute(app => {
+                                        // See if this is the tenant app
+                                        if (tenantFl) {
+                                            // Update the tenant deployed flag
+                                            item.update({
+                                                AppIsTenantDeployed: true
+                                            }).execute(() => {
+                                                // Hide the dialog
+                                                LoadingDialog.hide();
+
+                                                // Call the update event
+                                                onUpdate();
+                                            });
+                                        } else {
                                             // Hide the dialog
                                             LoadingDialog.hide();
 
                                             // Call the update event
                                             onUpdate();
-                                        });
-                                    } else {
+                                        }
+                                    }, () => {
                                         // Hide the dialog
                                         LoadingDialog.hide();
 
+                                        // Error deploying the app
+                                        // TODO - Show an error
                                         // Call the update event
                                         onUpdate();
-                                    }
-                                }, () => {
-                                    // Hide the dialog
-                                    LoadingDialog.hide();
-
-                                    // Error deploying the app
-                                    // TODO - Show an error
-                                    // Call the update event
-                                    onUpdate();
+                                    });
                                 });
                             });
                         });
@@ -337,54 +345,62 @@ export class AppActions {
                 ContextInfo.getWeb(siteUrl).execute(context => {
                     let requestDigest = context.GetContextWebInformation.FormDigestValue;
 
-                    // Upload the file to the app catalog
-                    Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().add(item.FileLeafRef, true, content).execute(file => {
+                    // Retract the app
+                    this.retract(item, false, true, () => {
                         // Update the dialog
-                        LoadingDialog.setHeader("Deploying the Package");
-                        LoadingDialog.setBody("This will close after the app is deployed.");
+                        LoadingDialog.setHeader("Uploading the Package");
+                        LoadingDialog.setBody("This will close after the app is uploaded.");
+                        LoadingDialog.show();
 
-                        // Get the app item
-                        file.ListItemAllFields().execute(appItem => {
-                            // Update the metadata
-                            this.updateAppMetadata(item, appItem.Id, false, siteUrl, requestDigest).then(() => {
-                                // Deploy the app
-                                Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(item.AppProductID).deploy().execute(app => {
-                                    // See if we are updating the metadata
-                                    if (updateSitesFl) {
-                                        // Append the url to the list of sites the solution has been deployed to
-                                        let sites = (item.AppSiteDeployments || "").trim();
+                        // Upload the file to the app catalog
+                        Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().add(item.FileLeafRef, true, content).execute(file => {
+                            // Update the dialog
+                            LoadingDialog.setHeader("Deploying the Package");
+                            LoadingDialog.setBody("This will close after the app is deployed.");
 
-                                        // Ensure it doesn't contain the url already
-                                        if (sites.indexOf(context.GetContextWebInformation.WebFullUrl) < 0) {
-                                            // Append the url
-                                            sites = (sites.length > 0 ? "\r\n" : "") + context.GetContextWebInformation.WebFullUrl;
-                                        }
+                            // Get the app item
+                            file.ListItemAllFields().execute(appItem => {
+                                // Update the metadata
+                                this.updateAppMetadata(item, appItem.Id, false, siteUrl, requestDigest).then(() => {
+                                    // Deploy the app
+                                    Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(item.AppProductID).deploy().execute(app => {
+                                        // See if we are updating the metadata
+                                        if (updateSitesFl) {
+                                            // Append the url to the list of sites the solution has been deployed to
+                                            let sites = (item.AppSiteDeployments || "").trim();
 
-                                        // Update the metadata
-                                        item.update({
-                                            AppSiteDeployments: sites
-                                        }).execute(() => {
+                                            // Ensure it doesn't contain the url already
+                                            if (sites.indexOf(context.GetContextWebInformation.WebFullUrl) < 0) {
+                                                // Append the url
+                                                sites = (sites.length > 0 ? "\r\n" : "") + context.GetContextWebInformation.WebFullUrl;
+                                            }
+
+                                            // Update the metadata
+                                            item.update({
+                                                AppSiteDeployments: sites
+                                            }).execute(() => {
+                                                // Hide the dialog
+                                                LoadingDialog.hide();
+
+                                                // Call the update event
+                                                onUpdate();
+                                            });
+                                        } else {
                                             // Hide the dialog
                                             LoadingDialog.hide();
 
                                             // Call the update event
                                             onUpdate();
-                                        });
-                                    } else {
+                                        }
+                                    }, () => {
                                         // Hide the dialog
                                         LoadingDialog.hide();
 
+                                        // Error deploying the app
+                                        // TODO - Show an error
                                         // Call the update event
                                         onUpdate();
-                                    }
-                                }, () => {
-                                    // Hide the dialog
-                                    LoadingDialog.hide();
-
-                                    // Error deploying the app
-                                    // TODO - Show an error
-                                    // Call the update event
-                                    onUpdate();
+                                    });
                                 });
                             });
                         });
@@ -524,14 +540,67 @@ export class AppActions {
         });
     }
 
+    // Retracts the solution from the app catalog
+    static retract(item: IAppItem, tenantFl: boolean, removeFl: boolean, onUpdate: () => void) {
+        // Show a loading dialog
+        LoadingDialog.setHeader("Retracting the Package");
+        LoadingDialog.setBody("Retracting the spfx package from the app catalog.");
+        LoadingDialog.show();
+
+        // Load the context of the app catalog
+        let catalogUrl = tenantFl ? AppConfig.Configuration.tenantAppCatalogUrl : AppConfig.Configuration.appCatalogUrl;
+        ContextInfo.getWeb(catalogUrl).execute(context => {
+            // Load the apps
+            let web = Web(catalogUrl, { requestDigest: context.GetContextWebInformation.FormDigestValue });
+            (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog()).AvailableApps(item.AppProductID).retract().execute(() => {
+                // See if we are removing the app
+                if (removeFl) {
+                    // Remove the app
+                    (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog()).AvailableApps(item.AppProductID).remove().execute(() => {
+                        // Close the dialog
+                        LoadingDialog.hide();
+
+                        // Call the update event
+                        onUpdate();
+                    });
+                } else {
+                    // Close the dialog
+                    LoadingDialog.hide();
+
+                    // Call the update event
+                    onUpdate();
+                }
+            }, () => {
+                // Close the dialog
+                LoadingDialog.hide();
+
+                // Call the update event
+                onUpdate();
+            });
+        });
+    }
+
     // Updates the app
     static updateApp(item: IAppItem, siteUrl: string): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve) => {
-            // Deploy the solution to the site
-            this.deployAppToSite(item, siteUrl, false, () => {
-                // Resolve the requst
-                resolve();
+            // Load the context of the app catalog
+            ContextInfo.getWeb(siteUrl).execute(context => {
+                let requestDigest = context.GetContextWebInformation.FormDigestValue;
+
+                // Update the dialog
+                LoadingDialog.setHeader("Upgrading the Solution");
+                LoadingDialog.setBody("This will close after the app is upgraded.");
+                LoadingDialog.show();
+
+                // Upload the file to the app catalog
+                Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(item.AppProductID).upgrade().execute(() => {
+                    // Close the dialog
+                    LoadingDialog.hide();
+
+                    // Resolve the requst
+                    resolve();
+                });
             });
         });
     }
