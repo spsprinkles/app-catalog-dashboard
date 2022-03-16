@@ -102,7 +102,10 @@ export class DataSource {
                 contentType: "App",
                 webUrl: Strings.SourceUrl,
                 query: {
-                    Expand: ["AppDevelopers", "AppSponsor", "CheckoutUser", "Folder/Files"],
+                    Expand: [
+                        "AppDevelopers", "AppSponsor", "CheckoutUser",
+                        "Folder/Files", "Folder/Folders"
+                    ],
                     Select: [
                         "*", "Id", "FileLeafRef", "ContentTypeId",
                         "AppDevelopers/Id", "AppDevelopers/EMail", "AppDevelopers/Title",

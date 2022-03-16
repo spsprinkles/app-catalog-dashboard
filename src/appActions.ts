@@ -42,7 +42,7 @@ export class AppActions {
         // Create the archive folder
         this.createArchiveFolder(DataSource.DocSetFolder).then(archiveFolder => {
             // Get the package file contents
-            appFile.content().execute(content => {
+            Web(Strings.SourceUrl).getFileByServerRelativeUrl(appFile.ServerRelativeUrl).content().execute(content => {
                 // Get the file name
                 let fileName = item.FileLeafRef.split('.sppkg')[0] + "_" + item.AppVersion + ".sppkg"
 
@@ -62,7 +62,7 @@ export class AppActions {
     }
 
     // Creates the archive folder
-    private static createArchiveFolder(rootFolder: Types.SP.FolderOData): PromiseLike<Types.SP.Folder> {
+    private static createArchiveFolder(rootFolder: Types.SP.FolderOData): PromiseLike<Types.SP.IFolder> {
         // Return a promise
         return new Promise(resolve => {
             // Find the archive folder
@@ -72,7 +72,7 @@ export class AppActions {
                 // See if this is the archive folder
                 if (folder.Name.toLowerCase() == "archive") {
                     // Resolve the request
-                    resolve(folder);
+                    resolve(Web(Strings.SourceUrl).getFolderByServerRelativeUrl(folder.ServerRelativeUrl));
                     return;
                 }
             }
@@ -80,7 +80,7 @@ export class AppActions {
             // Create the folder
             rootFolder.Folders.add("archive").execute(folder => {
                 // Resolve the request
-                resolve(folder);
+                resolve(Web(Strings.SourceUrl).getFolderByServerRelativeUrl(folder.ServerRelativeUrl));
             });
         });
     }
@@ -234,7 +234,7 @@ export class AppActions {
         }
 
         // Get the package file contents
-        appFile.content().execute(content => {
+        Web(Strings.SourceUrl).getFileByServerRelativeUrl(appFile.ServerRelativeUrl).content().execute(content => {
             let catalogUrl = tenantFl ? AppConfig.Configuration.tenantAppCatalogUrl : AppConfig.Configuration.appCatalogUrl;
 
             // Load the context of the app catalog
@@ -330,7 +330,7 @@ export class AppActions {
         }
 
         // Upload the package file
-        appFile.content().execute(content => {
+        Web(Strings.SourceUrl).getFileByServerRelativeUrl(appFile.ServerRelativeUrl).content().execute(content => {
             // Load the context of the app catalog
             ContextInfo.getWeb(siteUrl).execute(context => {
                 let requestDigest = context.GetContextWebInformation.FormDigestValue;

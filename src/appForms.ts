@@ -119,11 +119,26 @@ export class AppForms {
                 // Close the modal
                 Modal.hide();
 
-                // Create the test site
-                AppActions.createTestSite(item, () => {
-                    // Call the update event
-                    onUpdate();
-                });
+                // Code to run after the logic below completes
+                let onComplete = () => {
+                    // Create the test site
+                    AppActions.createTestSite(item, () => {
+                        // Call the update event
+                        onUpdate();
+                    });
+                }
+
+                // See if the app was deployed, but errored out
+                if (DataSource.DocSetSCAppItem && DataSource.DocSetSCAppItem.AppPackageErrorMessage && DataSource.DocSetSCAppItem.AppPackageErrorMessage != "No errors.") {
+                    // Delete the item
+                    DataSource.DocSetItem.delete().execute(() => {
+                        // Create the test site
+                        onComplete();
+                    });
+                } else {
+                    // Create the test site
+                    onComplete();
+                }
             }
         }).el);
 
