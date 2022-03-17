@@ -6,6 +6,9 @@ import Strings from "./strings";
  * The security group/user references for the application.
  */
 export class AppSecurity {
+    // Administrator
+    static get IsAdmin(): boolean { return ContextInfo.isSiteAdmin; }
+
     // Approver Security Group
     private static _approverGroup: Types.SP.GroupOData = null;
     static get ApproverGroup(): Types.SP.GroupOData { return this._approverGroup; }
