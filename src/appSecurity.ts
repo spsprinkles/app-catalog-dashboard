@@ -1,3 +1,4 @@
+import { LoadingDialog } from "dattatable";
 import { ContextInfo, Types, Web } from "gd-sprest-bs";
 import Strings from "./strings";
 
@@ -96,6 +97,20 @@ export class AppSecurity {
         // Return false by default
         return false;
     }
+    // Add the user to the developer group
+    static addDeveloper(userId: number): PromiseLike<void> {
+        // Return a promise
+        return new Promise((resolve, reject) => {
+            // Add the user
+            this.DevGroup.Users.addUserById(userId).execute(user => {
+                // Append the user
+                this.DevGroup.Users.results.push(user);
+
+                // Resolve the request
+                resolve();
+            }, reject);
+        });
+    }
     private static loadDevGroup(): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve, reject) => {
@@ -109,114 +124,6 @@ export class AppSecurity {
                 // Resolve the request
                 resolve();
             }, reject);
-        });
-    }
-
-    // Sponsor Security Group
-    private static _sponsorGroup: Types.SP.GroupOData = null;
-    static get SponsorGroup(): Types.SP.GroupOData { return this._sponsorGroup; }
-    static get SponsorUrl(): string { return ContextInfo.webServerRelativeUrl + "/_layouts/15/people.aspx?MembershipGroupId=" + this._sponsorGroup.Id; }
-    static get SponsorEmails(): string[] {
-        let emails = [];
-
-        // Parse the users
-        for (let i = 0; i < this.SponsorGroup.Users.results.length; i++) {
-            let email = this.SponsorGroup.Users.results[i].Email;
-
-            // Append the email
-            email ? emails.push(email) : null;
-        }
-
-        // Return the emails
-        return emails;
-    }
-    static get IsSponsor(): boolean {
-        // See if the group doesn't exist
-        if (this.SponsorGroup == null) { return false; }
-
-        // Parse the users
-        for (let i = 0; i < this.SponsorGroup.Users.results.length; i++) {
-            // See if this is the current user
-            if (this.SponsorGroup.Users.results[i].Id == ContextInfo.userId) {
-                // Found
-                return true;
-            }
-        }
-
-        // Return false by default
-        return false;
-    }
-    private static loadSponsorGroup(): PromiseLike<void> {
-        // Return a promise
-        return new Promise((resolve, reject) => {
-            // Load the security group
-            Web(Strings.SourceUrl).SiteGroups().getByName(Strings.Groups.Sponsors).query({
-                Expand: ["Users"]
-            }).execute(group => {
-                // Set the group
-                this._sponsorGroup = group;
-
-                // Resolve the request
-                resolve();
-            }, reject);
-        });
-    }
-
-    // Site Collection App Catalog Owner
-    private static _isSiteAppCatalogOwner = false;
-    static get IsSiteAppCatalogOwner(): boolean { return this._isSiteAppCatalogOwner; }
-    private static initSCOwner(appCatalogUrl: string): PromiseLike<void> {
-        // Return a promise
-        return new Promise(resolve => {
-            // See if the app catalog is defined
-            if (appCatalogUrl) {
-                // Ensure the user is an owner of the site
-                Web(appCatalogUrl).AssociatedOwnerGroup().Users().getByEmail(ContextInfo.userEmail).execute(user => {
-                    // Ensure the user is an owner
-                    if (user && user.Id > 0) {
-                        // Set the flag
-                        this._isSiteAppCatalogOwner = true;
-                    }
-
-                    // resolve the request
-                    resolve();
-                }, () => {
-                    // Resolve the request
-                    resolve();
-                });
-            } else {
-                // Resolve the request
-                resolve();
-            }
-        });
-    }
-
-    // Tenant App Catalog Owner
-    private static _isTenantAppCatalogOwner = false;
-    static get IsTenantAppCatalogOwner(): boolean { return this._isTenantAppCatalogOwner; }
-    private static initTenantOwner(tenantAppCatalogUrl: string): PromiseLike<void> {
-        // Return a promise
-        return new Promise(resolve => {
-            // See if the tenant app catalog is defined
-            if (tenantAppCatalogUrl) {
-                // Ensure the user is an owner of the site
-                Web(tenantAppCatalogUrl).AssociatedOwnerGroup().Users().getByEmail(ContextInfo.userEmail).execute(user => {
-                    // Ensure the user is an owner
-                    if (user && user.Id > 0) {
-                        // Set the flag
-                        this._isTenantAppCatalogOwner = true;
-                    }
-
-                    // Resolve the request
-                    resolve();
-                }, () => {
-                    // Resolve the request
-                    resolve();
-                });
-            } else {
-                // Resolve the request
-                resolve();
-            }
         });
     }
 
@@ -282,6 +189,140 @@ export class AppSecurity {
                 // Resolve the request
                 resolve();
             }, resolve as any);
+        });
+    }
+
+    // Site Collection App Catalog Owner
+    private static _isSiteAppCatalogOwner = false;
+    static get IsSiteAppCatalogOwner(): boolean { return this._isSiteAppCatalogOwner; }
+    private static initSCOwner(appCatalogUrl: string): PromiseLike<void> {
+        // Return a promise
+        return new Promise(resolve => {
+            // See if the app catalog is defined
+            if (appCatalogUrl) {
+                // Ensure the user is an owner of the site
+                Web(appCatalogUrl).AssociatedOwnerGroup().Users().getByEmail(ContextInfo.userEmail).execute(user => {
+                    // Ensure the user is an owner
+                    if (user && user.Id > 0) {
+                        // Set the flag
+                        this._isSiteAppCatalogOwner = true;
+                    }
+
+                    // resolve the request
+                    resolve();
+                }, () => {
+                    // Resolve the request
+                    resolve();
+                });
+            } else {
+                // Resolve the request
+                resolve();
+            }
+        });
+    }
+
+    // Sponsor Security Group
+    private static _sponsorGroup: Types.SP.GroupOData = null;
+    static get SponsorGroup(): Types.SP.GroupOData { return this._sponsorGroup; }
+    static get SponsorUrl(): string { return ContextInfo.webServerRelativeUrl + "/_layouts/15/people.aspx?MembershipGroupId=" + this._sponsorGroup.Id; }
+    static get SponsorEmails(): string[] {
+        let emails = [];
+
+        // Parse the users
+        for (let i = 0; i < this.SponsorGroup.Users.results.length; i++) {
+            let email = this.SponsorGroup.Users.results[i].Email;
+
+            // Append the email
+            email ? emails.push(email) : null;
+        }
+
+        // Return the emails
+        return emails;
+    }
+    // Add the user to the sponsor group
+    static addSponsor(userId: number): PromiseLike<void> {
+        // Return a promise
+        return new Promise((resolve, reject) => {
+            // Add the user
+            this.SponsorGroup.Users.addUserById(userId).execute(user => {
+                // Append the user
+                this.SponsorGroup.Users.results.push(user);
+
+                // Resolve the request
+                resolve();
+            }, reject);
+        });
+    }
+    static getSponsor(userId: number): Types.SP.User {
+        // Parse the users
+        for (let i = 0; i < this.SponsorGroup.Users.results.length; i++) {
+            let user = this.SponsorGroup.Users.results[i];
+
+            // Return the user if we found them
+            if (user.Id == userId) { return user; }
+        }
+
+        // User not found
+        return null;
+    }
+    static get IsSponsor(): boolean {
+        // See if the group doesn't exist
+        if (this.SponsorGroup == null) { return false; }
+
+        // Parse the users
+        for (let i = 0; i < this.SponsorGroup.Users.results.length; i++) {
+            // See if this is the current user
+            if (this.SponsorGroup.Users.results[i].Id == ContextInfo.userId) {
+                // Found
+                return true;
+            }
+        }
+
+        // Return false by default
+        return false;
+    }
+    private static loadSponsorGroup(): PromiseLike<void> {
+        // Return a promise
+        return new Promise((resolve, reject) => {
+            // Load the security group
+            Web(Strings.SourceUrl).SiteGroups().getByName(Strings.Groups.Sponsors).query({
+                Expand: ["Users"]
+            }).execute(group => {
+                // Set the group
+                this._sponsorGroup = group;
+
+                // Resolve the request
+                resolve();
+            }, reject);
+        });
+    }
+
+    // Tenant App Catalog Owner
+    private static _isTenantAppCatalogOwner = false;
+    static get IsTenantAppCatalogOwner(): boolean { return this._isTenantAppCatalogOwner; }
+    private static initTenantOwner(tenantAppCatalogUrl: string): PromiseLike<void> {
+        // Return a promise
+        return new Promise(resolve => {
+            // See if the tenant app catalog is defined
+            if (tenantAppCatalogUrl) {
+                // Ensure the user is an owner of the site
+                Web(tenantAppCatalogUrl).AssociatedOwnerGroup().Users().getByEmail(ContextInfo.userEmail).execute(user => {
+                    // Ensure the user is an owner
+                    if (user && user.Id > 0) {
+                        // Set the flag
+                        this._isTenantAppCatalogOwner = true;
+                    }
+
+                    // Resolve the request
+                    resolve();
+                }, () => {
+                    // Resolve the request
+                    resolve();
+                });
+            } else {
+                // Resolve the request
+                resolve();
+            }
         });
     }
 }
