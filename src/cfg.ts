@@ -996,12 +996,13 @@ export const createSecurityGroups = (): PromiseLike<void> => {
                     // Doesn't exist
                     () => {
                         let isDevGroup = groupName == Strings.Groups.Developers;
+                        let isSponsorGroup = groupName == Strings.Groups.Sponsors;
 
                         // Create the group
                         Web().SiteGroups().add({
                             AllowMembersEditMembership: true,
-                            AllowRequestToJoinLeave: isDevGroup,
-                            AutoAcceptRequestToJoinLeave: isDevGroup,
+                            AllowRequestToJoinLeave: isDevGroup || isSponsorGroup,
+                            AutoAcceptRequestToJoinLeave: isDevGroup || isSponsorGroup,
                             Title: groupName,
                             Description: "Group contains the '" + groupName + "' users.",
                             OnlyAllowMembersViewMembership: false
