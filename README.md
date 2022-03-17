@@ -87,6 +87,7 @@ The available values for the user type property values.
 | Developers | The developers of the application. _Linked to the AppOwners metadata field._ |
 | DevelopersGroup | A reference to the developer's security group. |
 | Sponsor | The sponsor of the application. _Linked to the AppSponsor metadata field._ |
+| SponsorsGroup | A reference to the sponsor's security group. |
 
 ### Validation
 
