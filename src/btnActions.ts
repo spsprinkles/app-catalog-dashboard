@@ -71,6 +71,11 @@ export class ButtonActions {
                 case UserTypes.Sponsor:
                     // See if this user is a sponsor
                     return this._item.AppSponsorId == ContextInfo.userId;
+
+                // Sponsor's Group
+                case UserTypes.SponsorsGroup:
+                    // See if this user is a sponsor
+                    return AppSecurity.IsSponsor;
             }
         }
     }
