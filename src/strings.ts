@@ -38,7 +38,8 @@ const Strings = {
     GlobalVariable: "AppDashboard",
     Groups: {
         Approvers: "App Approvers",
-        Developers: "App Developers"
+        Developers: "App Developers",
+        Sponsors: "App Sponsors"
     },
     IsTeams: false,
     Lists: {

@@ -69,7 +69,7 @@ export class AppSecurity {
     static get DeveloperEmails(): string[] {
         let emails = [];
 
-        // Parse the approvers
+        // Parse the users
         for (let i = 0; i < this.DevGroup.Users.results.length; i++) {
             let email = this.DevGroup.Users.results[i].Email;
 
@@ -84,7 +84,7 @@ export class AppSecurity {
         // See if the group doesn't exist
         if (this.DevGroup == null) { return false; }
 
-        // Parse the group
+        // Parse the users
         for (let i = 0; i < this.DevGroup.Users.results.length; i++) {
             // See if this is the current user
             if (this.DevGroup.Users.results[i].Id == ContextInfo.userId) {
@@ -105,6 +105,56 @@ export class AppSecurity {
             }).execute(group => {
                 // Set the group
                 this._devGroup = group;
+
+                // Resolve the request
+                resolve();
+            }, reject);
+        });
+    }
+
+    // Sponsor Security Group
+    private static _sponsorGroup: Types.SP.GroupOData = null;
+    static get SponsorGroup(): Types.SP.GroupOData { return this._sponsorGroup; }
+    static get SponsorUrl(): string { return ContextInfo.webServerRelativeUrl + "/_layouts/15/people.aspx?MembershipGroupId=" + this._sponsorGroup.Id; }
+    static get SponsorEmails(): string[] {
+        let emails = [];
+
+        // Parse the users
+        for (let i = 0; i < this.SponsorGroup.Users.results.length; i++) {
+            let email = this.SponsorGroup.Users.results[i].Email;
+
+            // Append the email
+            email ? emails.push(email) : null;
+        }
+
+        // Return the emails
+        return emails;
+    }
+    static get IsSponsor(): boolean {
+        // See if the group doesn't exist
+        if (this.SponsorGroup == null) { return false; }
+
+        // Parse the users
+        for (let i = 0; i < this.SponsorGroup.Users.results.length; i++) {
+            // See if this is the current user
+            if (this.SponsorGroup.Users.results[i].Id == ContextInfo.userId) {
+                // Found
+                return true;
+            }
+        }
+
+        // Return false by default
+        return false;
+    }
+    private static loadSponsorGroup(): PromiseLike<void> {
+        // Return a promise
+        return new Promise((resolve, reject) => {
+            // Load the security group
+            Web(Strings.SourceUrl).SiteGroups().getByName(Strings.Groups.Sponsors).query({
+                Expand: ["Users"]
+            }).execute(group => {
+                // Set the group
+                this._sponsorGroup = group;
 
                 // Resolve the request
                 resolve();
@@ -184,8 +234,11 @@ export class AppSecurity {
                         this.loadDevGroup().then(() => {
                             // Load the owner's group
                             this.loadOwnerGroup().then(() => {
-                                // Resolve the request
-                                resolve();
+                                // Load the sponsor's group
+                                this.loadSponsorGroup().then(() => {
+                                    // Resolve the request
+                                    resolve();
+                                }, reject);
                             }, reject);
                         }, reject);
                     }, reject);
