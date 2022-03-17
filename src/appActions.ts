@@ -18,56 +18,51 @@ export class AppActions {
         LoadingDialog.setBody("The current app package is being archived.");
         LoadingDialog.show();
 
-        // Get the package file
-        item.Folder().query({
-            Expand: ["Files", "Folders"]
-        }).execute(rootFolder => {
-            let appFile = null;
+        let appFile = null;
 
-            // Find the package file
-            for (let i = 0; i < rootFolder.Files.results.length; i++) {
-                let file = rootFolder.Files.results[i];
+        // Find the package file
+        for (let i = 0; i < DataSource.DocSetFolder.Files.results.length; i++) {
+            let file = DataSource.DocSetFolder.Files.results[i];
 
-                // See if this is the package
-                if (file.Name.endsWith(".sppkg")) {
-                    // Set the file
-                    appFile = file;
-                    break;
-                }
+            // See if this is the package
+            if (file.Name.endsWith(".sppkg")) {
+                // Set the file
+                appFile = file;
+                break;
             }
+        }
 
-            // Ensure a file exists
-            if (appFile == null) {
-                // This shouldn't happen
-                LoadingDialog.hide();
-                return;
-            }
+        // Ensure a file exists
+        if (appFile == null) {
+            // This shouldn't happen
+            LoadingDialog.hide();
+            return;
+        }
 
-            // Create the archive folder
-            this.createArchiveFolder(rootFolder).then(archiveFolder => {
-                // Get the package file contents
-                appFile.content().execute(content => {
-                    // Get the file name
-                    let fileName = item.FileLeafRef.split('.sppkg')[0] + "_" + item.AppVersion + ".sppkg"
+        // Create the archive folder
+        this.createArchiveFolder(DataSource.DocSetFolder).then(archiveFolder => {
+            // Get the package file contents
+            Web(Strings.SourceUrl).getFileByServerRelativeUrl(appFile.ServerRelativeUrl).content().execute(content => {
+                // Get the file name
+                let fileName = item.FileLeafRef.split('.sppkg')[0] + "_" + item.AppVersion + ".sppkg"
 
-                    // Update the dialog
-                    LoadingDialog.setBody("Copying the file package.")
+                // Update the dialog
+                LoadingDialog.setBody("Copying the file package.")
 
-                    // Upload the file to the app catalog
-                    archiveFolder.Files().add(fileName, true, content).execute(file => {
-                        // Hide the dialog
-                        LoadingDialog.hide();
+                // Upload the file to the app catalog
+                archiveFolder.Files().add(fileName, true, content).execute(file => {
+                    // Hide the dialog
+                    LoadingDialog.hide();
 
-                        // Call the event
-                        onComplete();
-                    });
+                    // Call the event
+                    onComplete();
                 });
             });
         });
     }
 
     // Creates the archive folder
-    private static createArchiveFolder(rootFolder: Types.SP.FolderOData): PromiseLike<Types.SP.Folder> {
+    private static createArchiveFolder(rootFolder: Types.SP.FolderOData): PromiseLike<Types.SP.IFolder> {
         // Return a promise
         return new Promise(resolve => {
             // Find the archive folder
@@ -77,7 +72,7 @@ export class AppActions {
                 // See if this is the archive folder
                 if (folder.Name.toLowerCase() == "archive") {
                     // Resolve the request
-                    resolve(folder);
+                    resolve(Web(Strings.SourceUrl).getFolderByServerRelativeUrl(folder.ServerRelativeUrl));
                     return;
                 }
             }
@@ -85,7 +80,7 @@ export class AppActions {
             // Create the folder
             rootFolder.Folders.add("archive").execute(folder => {
                 // Resolve the request
-                resolve(folder);
+                resolve(Web(Strings.SourceUrl).getFolderByServerRelativeUrl(folder.ServerRelativeUrl));
             });
         });
     }
@@ -217,89 +212,86 @@ export class AppActions {
         LoadingDialog.setBody("Uploading the spfx package to the app catalog.");
         LoadingDialog.show();
 
-        // Get the package file
-        DataSource.DocSetItem.Folder().Files().execute(files => {
-            let appFile = null;
+        let appFile = null;
 
-            // Find the package file
-            for (let i = 0; i < files.results.length; i++) {
-                let file = files.results[i];
+        // Find the package file
+        for (let i = 0; i < DataSource.DocSetFolder.Files.results.length; i++) {
+            let file = DataSource.DocSetFolder.Files.results[i];
 
-                // See if this is the package
-                if (file.Name.endsWith(".sppkg")) {
-                    // Set the file
-                    appFile = file;
-                    break;
-                }
+            // See if this is the package
+            if (file.Name.endsWith(".sppkg")) {
+                // Set the file
+                appFile = file;
+                break;
             }
+        }
 
-            // Ensure a file exists
-            if (appFile == null) {
-                // This shouldn't happen
-                LoadingDialog.hide();
-                return;
-            }
+        // Ensure a file exists
+        if (appFile == null) {
+            // This shouldn't happen
+            LoadingDialog.hide();
+            return;
+        }
 
-            // Get the package file contents
-            appFile.content().execute(content => {
-                let catalogUrl = tenantFl ? AppConfig.Configuration.tenantAppCatalogUrl : AppConfig.Configuration.appCatalogUrl;
+        // Get the package file contents
+        Web(Strings.SourceUrl).getFileByServerRelativeUrl(appFile.ServerRelativeUrl).content().execute(content => {
+            let catalogUrl = tenantFl ? AppConfig.Configuration.tenantAppCatalogUrl : AppConfig.Configuration.appCatalogUrl;
 
-                // Load the context of the app catalog
-                ContextInfo.getWeb(catalogUrl).execute(context => {
-                    let requestDigest = context.GetContextWebInformation.FormDigestValue;
-                    let web = Web(catalogUrl, { requestDigest });
+            // Load the context of the app catalog
+            ContextInfo.getWeb(catalogUrl).execute(context => {
+                let requestDigest = context.GetContextWebInformation.FormDigestValue;
+                let web = Web(catalogUrl, { requestDigest });
 
-                    // Retract the app
-                    this.retract(item, tenantFl, true, () => {
+                // Retract the app
+                this.retract(item, tenantFl, true, () => {
+                    // Update the dialog
+                    LoadingDialog.setHeader("Uploading the Package");
+                    LoadingDialog.setBody("This will close after the app is deployed.");
+                    LoadingDialog.show();
+
+                    // Upload the file to the app catalog
+                    (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog()).add(item.FileLeafRef, true, content).execute(file => {
                         // Update the dialog
-                        LoadingDialog.setHeader("Uploading the Package");
+                        LoadingDialog.setHeader("Deploying the Package");
                         LoadingDialog.setBody("This will close after the app is deployed.");
-                        LoadingDialog.show();
 
-                        // Upload the file to the app catalog
-                        (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog()).add(item.FileLeafRef, true, content).execute(file => {
-                            // Update the dialog
-                            LoadingDialog.setHeader("Deploying the Package");
-                            LoadingDialog.setBody("This will close after the app is deployed.");
+                        // Get the app item
+                        file.ListItemAllFields().execute(appItem => {
+                            // Update the metadata
+                            this.updateAppMetadata(item, appItem.Id, tenantFl, catalogUrl, requestDigest).then(() => {
+                                // Get the app catalog
+                                let web = Web(catalogUrl, { requestDigest });
+                                let appCatalog = (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog());
 
-                            // Get the app item
-                            file.ListItemAllFields().execute(appItem => {
-                                // Update the metadata
-                                this.updateAppMetadata(item, appItem.Id, tenantFl, catalogUrl, requestDigest).then(() => {
-                                    // Get the app catalog
-                                    let web = Web(catalogUrl, { requestDigest });
-                                    let appCatalog = (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog());
-
-                                    // Deploy the app
-                                    appCatalog.AvailableApps(item.AppProductID).deploy(skipFeatureDeployment).execute(app => {
-                                        // See if this is the tenant app
-                                        if (tenantFl) {
-                                            // Update the tenant deployed flag
-                                            item.update({
-                                                AppIsTenantDeployed: true
-                                            }).execute(() => {
-                                                // Hide the dialog
-                                                LoadingDialog.hide();
-
-                                                // Call the update event
-                                                onUpdate();
-                                            });
-                                        } else {
+                                // Deploy the app
+                                appCatalog.AvailableApps(item.AppProductID).deploy(skipFeatureDeployment).execute(app => {
+                                    // See if this is the tenant app
+                                    if (tenantFl) {
+                                        // Update the tenant deployed flag
+                                        item.update({
+                                            AppIsTenantDeployed: true
+                                        }).execute(() => {
                                             // Hide the dialog
                                             LoadingDialog.hide();
 
                                             // Call the update event
                                             onUpdate();
-                                        }
-                                    }, () => {
+                                        });
+                                    } else {
                                         // Hide the dialog
                                         LoadingDialog.hide();
 
-                                        // Error deploying the app
-                                        // TODO - Show an error
                                         // Call the update event
                                         onUpdate();
-                                    });
+                                    }
+                                }, () => {
+                                    // Hide the dialog
+                                    LoadingDialog.hide();
+
+                                    // Error deploying the app
+                                    // TODO - Show an error
+                                    // Call the update event
+                                    onUpdate();
                                 });
                             });
                         });
@@ -316,91 +308,88 @@ export class AppActions {
         LoadingDialog.setBody("Uploading the spfx package to the site collection app catalog.");
         LoadingDialog.show();
 
-        // Get the package file
-        DataSource.DocSetItem.Folder().Files().execute(files => {
-            let appFile = null;
+        let appFile = null;
 
-            // Find the package file
-            for (let i = 0; i < files.results.length; i++) {
-                let file = files.results[i];
+        // Find the package file
+        for (let i = 0; i < DataSource.DocSetFolder.Files.results.length; i++) {
+            let file = DataSource.DocSetFolder.Files.results[i];
 
-                // See if this is the package
-                if (file.Name.endsWith(".sppkg")) {
-                    // Set the file
-                    appFile = file;
-                    break;
-                }
+            // See if this is the package
+            if (file.Name.endsWith(".sppkg")) {
+                // Set the file
+                appFile = file;
+                break;
             }
+        }
 
-            // Ensure a file exists
-            if (appFile == null) {
-                // This shouldn't happen
-                LoadingDialog.hide();
-                return;
-            }
+        // Ensure a file exists
+        if (appFile == null) {
+            // This shouldn't happen
+            LoadingDialog.hide();
+            return;
+        }
 
-            // Upload the package file
-            appFile.content().execute(content => {
-                // Load the context of the app catalog
-                ContextInfo.getWeb(siteUrl).execute(context => {
-                    let requestDigest = context.GetContextWebInformation.FormDigestValue;
+        // Upload the package file
+        Web(Strings.SourceUrl).getFileByServerRelativeUrl(appFile.ServerRelativeUrl).content().execute(content => {
+            // Load the context of the app catalog
+            ContextInfo.getWeb(siteUrl).execute(context => {
+                let requestDigest = context.GetContextWebInformation.FormDigestValue;
 
-                    // Retract the app
-                    this.retract(item, false, true, () => {
+                // Retract the app
+                this.retract(item, false, true, () => {
+                    // Update the dialog
+                    LoadingDialog.setHeader("Uploading the Package");
+                    LoadingDialog.setBody("This will close after the app is uploaded.");
+                    LoadingDialog.show();
+
+                    // Upload the file to the app catalog
+                    Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().add(item.FileLeafRef, true, content).execute(file => {
                         // Update the dialog
-                        LoadingDialog.setHeader("Uploading the Package");
-                        LoadingDialog.setBody("This will close after the app is uploaded.");
-                        LoadingDialog.show();
+                        LoadingDialog.setHeader("Deploying the Package");
+                        LoadingDialog.setBody("This will close after the app is deployed.");
 
-                        // Upload the file to the app catalog
-                        Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().add(item.FileLeafRef, true, content).execute(file => {
-                            // Update the dialog
-                            LoadingDialog.setHeader("Deploying the Package");
-                            LoadingDialog.setBody("This will close after the app is deployed.");
+                        // Get the app item
+                        file.ListItemAllFields().execute(appItem => {
+                            // Update the metadata
+                            this.updateAppMetadata(item, appItem.Id, false, siteUrl, requestDigest).then(() => {
+                                // Deploy the app
+                                Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(item.AppProductID).deploy().execute(app => {
+                                    // See if we are updating the metadata
+                                    if (updateSitesFl) {
+                                        // Append the url to the list of sites the solution has been deployed to
+                                        let sites = (item.AppSiteDeployments || "").trim();
 
-                            // Get the app item
-                            file.ListItemAllFields().execute(appItem => {
-                                // Update the metadata
-                                this.updateAppMetadata(item, appItem.Id, false, siteUrl, requestDigest).then(() => {
-                                    // Deploy the app
-                                    Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(item.AppProductID).deploy().execute(app => {
-                                        // See if we are updating the metadata
-                                        if (updateSitesFl) {
-                                            // Append the url to the list of sites the solution has been deployed to
-                                            let sites = (item.AppSiteDeployments || "").trim();
+                                        // Ensure it doesn't contain the url already
+                                        if (sites.indexOf(context.GetContextWebInformation.WebFullUrl) < 0) {
+                                            // Append the url
+                                            sites = (sites.length > 0 ? "\r\n" : "") + context.GetContextWebInformation.WebFullUrl;
+                                        }
 
-                                            // Ensure it doesn't contain the url already
-                                            if (sites.indexOf(context.GetContextWebInformation.WebFullUrl) < 0) {
-                                                // Append the url
-                                                sites = (sites.length > 0 ? "\r\n" : "") + context.GetContextWebInformation.WebFullUrl;
-                                            }
-
-                                            // Update the metadata
-                                            item.update({
-                                                AppSiteDeployments: sites
-                                            }).execute(() => {
-                                                // Hide the dialog
-                                                LoadingDialog.hide();
-
-                                                // Call the update event
-                                                onUpdate();
-                                            });
-                                        } else {
+                                        // Update the metadata
+                                        item.update({
+                                            AppSiteDeployments: sites
+                                        }).execute(() => {
                                             // Hide the dialog
                                             LoadingDialog.hide();
 
                                             // Call the update event
                                             onUpdate();
-                                        }
-                                    }, () => {
+                                        });
+                                    } else {
                                         // Hide the dialog
                                         LoadingDialog.hide();
 
-                                        // Error deploying the app
-                                        // TODO - Show an error
                                         // Call the update event
                                         onUpdate();
-                                    });
+                                    }
+                                }, () => {
+                                    // Hide the dialog
+                                    LoadingDialog.hide();
+
+                                    // Error deploying the app
+                                    // TODO - Show an error
+                                    // Call the update event
+                                    onUpdate();
                                 });
                             });
                         });

@@ -29,6 +29,7 @@ export interface IAppItem extends Types.SP.ListItem {
     AppStatus: string;
     AppVersion: string;
     AuthorId: number;
+    AppPackageErrorMessage?: string;
     FileLeafRef: string;
 
     AppImageURL1: Types.SP.FieldUrlValue;
@@ -59,11 +60,14 @@ export interface IAssessmentItem extends Types.SP.ListItem {
 export class DataSource {
     // Loads the document set item
     private static _docSetInfo: Helper.IListFormResult = null;
+    static get DocSetFolder(): Types.SP.FolderOData { return this.DocSetItem ? this.DocSetItem.Folder as any : null; }
     static get DocSetInfo(): Helper.IListFormResult { return this._docSetInfo; }
     static get DocSetItem(): IAppItem { return this.DocSetInfo ? this.DocSetInfo.item as any : null; }
     static get DocSetItemId(): number { return this.DocSetItem ? this.DocSetItem.Id : 0; }
     private static _docSetSCApp: Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata = null;
     static get DocSetSCApp(): Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata { return this._docSetSCApp; }
+    private static _docSetSCAppItem: IAppItem = null;
+    static get DocSetSCAppItem(): IAppItem { return this._docSetSCAppItem; }
     private static _docSetTenantApp: Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata = null;
     static get DocSetTenantApp(): Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata { return this._docSetTenantApp; }
     static loadDocSetFromQS(): number {
@@ -98,7 +102,10 @@ export class DataSource {
                 contentType: "App",
                 webUrl: Strings.SourceUrl,
                 query: {
-                    Expand: ["AppDevelopers", "AppSponsor", "CheckoutUser"],
+                    Expand: [
+                        "AppDevelopers", "AppSponsor", "CheckoutUser",
+                        "Folder/Files", "Folder/Folders"
+                    ],
                     Select: [
                         "*", "Id", "FileLeafRef", "ContentTypeId",
                         "AppDevelopers/Id", "AppDevelopers/EMail", "AppDevelopers/Title",
@@ -470,6 +477,44 @@ export class DataSource {
                     // Resolve the request
                     resolve();
                 }, () => {
+                    // Query the app catalog and try to find it by file name
+                    Web(AppConfig.Configuration.appCatalogUrl).Lists("Apps for SharePoint").Items().query({
+                        Expand: ["File"]
+                    }).execute(
+                        // Success
+                        items => {
+                            // Parse the docset items
+                            for (let i = 0; i < this.DocSetFolder.Files.results.length; i++) {
+                                let file = this.DocSetFolder.Files.results[i];
+
+                                // Ensure this is the package file
+                                if (!file.Name.endsWith(".sppkg")) { continue; }
+
+                                // Parse the items
+                                for (let j = 0; j < items.results.length; j++) {
+                                    let item = items.results[i];
+
+                                    // See if the item matches
+                                    if (item.File.Name == file.Name) {
+                                        // Item found
+                                        this._docSetSCAppItem = item as any;
+                                        break;
+                                    }
+                                }
+
+                                // Break from the loop
+                                break;
+                            }
+
+                            // Resolve the request
+                            resolve();
+                        },
+                        // Error
+                        () => {
+                            // App not found, resolve the request
+                            resolve();
+                        }
+                    );
                     // App not found, resolve the request
                     resolve();
                 });

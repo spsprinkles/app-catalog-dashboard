@@ -167,9 +167,27 @@ export class AppDashboard {
                 content: DataSource.DocSetItem.AppComments,
                 type: Components.AlertTypes.Danger
             });
-        } else {
+        }
+        else {
             // Hide the element
             elAlert.classList.add("d-none");
+        }
+
+        // See if the app is deployed and has an error message
+        let errorMessage = DataSource.DocSetSCApp ? DataSource.DocSetSCApp.ErrorMessage : null;
+        errorMessage = DataSource.DocSetSCAppItem ? DataSource.DocSetSCAppItem.AppPackageErrorMessage : errorMessage;
+        if (errorMessage && errorMessage != "No errors.") {
+            // Show the element
+            elAlert.classList.remove("d-none");
+
+            // Render an alert
+            Components.Alert({
+                el: elAlert,
+                className: "m-0 rounded-0",
+                header: "App Deployment Error",
+                content: errorMessage,
+                type: Components.AlertTypes.Danger
+            });
         }
     }
 
@@ -183,8 +201,9 @@ export class AppDashboard {
             templatesUrl: AppConfig.Configuration.templatesLibraryUrl,
             webUrl: Strings.SourceUrl,
             onActionsRendered: (el, col, file) => {
-                // See if this is a package file
-                if (file.ServerRelativeUrl.endsWith(".sppkg")) {
+                // See if this is a package file and not archived
+                let fileUrl = file.ServerRelativeUrl.toLowerCase();
+                if (fileUrl.indexOf("/archive/") < 0 && fileUrl.endsWith(".sppkg")) {
                     // Disable the view & delete button
                     el.querySelectorAll(".btn-actions-view, .btn-actions-delete").forEach((el: HTMLElement) => {
                         el.setAttribute("disabled", "");
