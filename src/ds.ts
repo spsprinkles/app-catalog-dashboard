@@ -282,7 +282,7 @@ export class DataSource {
 
                 // See if the security groups exist
                 let securityGroupsExist = true;
-                if (AppSecurity.ApproverGroup == null || AppSecurity.DevGroup == null) {
+                if (AppSecurity.ApproverGroup == null || AppSecurity.DevGroup == null || AppSecurity.SponsorGroup) {
                     // Set the flag
                     securityGroupsExist = false;
 

@@ -35,7 +35,7 @@ const GlobalVariable = {
             // Success
             () => {
                 // Ensure the security groups exist
-                if (AppSecurity.ApproverGroup == null || AppSecurity.DevGroup == null) {
+                if (AppSecurity.ApproverGroup == null || AppSecurity.DevGroup == null || AppSecurity.SponsorGroup) {
                     // See if an install is required
                     DataSource.InstallRequired(el);
                 } else {

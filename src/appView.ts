@@ -91,6 +91,13 @@ export class AppView {
                             // Show the group in a new tab
                             window.open(AppSecurity.DevUrl, "_blank");
                         }
+                    },
+                    {
+                        text: "Manage Sponsor Group",
+                        onClick: () => {
+                            // Show the group in a new tab
+                            window.open(AppSecurity.SponsorUrl, "_blank");
+                        }
                     }
                 ]
             });

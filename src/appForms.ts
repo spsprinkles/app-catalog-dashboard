@@ -1,8 +1,9 @@
 import { ItemForm, LoadingDialog, Modal } from "dattatable";
-import { Components, ContextInfo, Helper, List, SPTypes, Types, Web } from "gd-sprest-bs";
+import { Components, ContextInfo, Helper, List, SPTypes, Web } from "gd-sprest-bs";
 import { AppActions } from "./appActions";
 import { AppConfig, IStatus } from "./appCfg";
 import { AppNotifications } from "./appNotifications";
+import { AppSecurity } from "./appSecurity";
 import { DataSource, IAppItem, IAssessmentItem } from "./ds";
 import Strings from "./strings";
 
@@ -1391,11 +1392,30 @@ export class AppForms {
                                     AppIsRejected: false,
                                     AppStatus: newStatus
                                 }).execute(() => {
-                                    // Send an email
-                                    AppNotifications.sendEmail(newStatus, item).then(() => {
-                                        // Call the update event
-                                        onUpdate();
-                                    });
+                                    // Code to run after the sponsor is added to the security group
+                                    let onComplete = () => {
+                                        // Send an email
+                                        AppNotifications.sendEmail(newStatus, item).then(() => {
+                                            // Call the update event
+                                            onUpdate();
+
+                                            // Hide the dialog
+                                            LoadingDialog.hide();
+                                        });
+                                    }
+
+                                    // Get the sponsor
+                                    let sponsor = AppSecurity.getSponsor(item.AppSponsorId);
+                                    if (sponsor == null && item.AppSponsorId > 0) {
+                                        // Add the user as a sponsor
+                                        AppSecurity.addSponsor(ContextInfo.userId).then(() => {
+                                            // Complete the request
+                                            onComplete();
+                                        });
+                                    } else {
+                                        // Complete the request
+                                        onComplete();
+                                    }
                                 });
                             }
                         });

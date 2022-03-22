@@ -24,23 +24,6 @@ export class UserAgreement {
         }
     }
 
-    // Add the user to the developer group
-    private addUserToGroup() {
-        // Show a loading dialog
-        LoadingDialog.setHeader("Adding User");
-        LoadingDialog.setBody("Adding the user to the developer's security group. This will close after the user is added.");
-        LoadingDialog.show();
-
-        // Add the user
-        AppSecurity.DevGroup.Users.addUserById(ContextInfo.userId).execute(() => {
-            // Close the dialog
-            LoadingDialog.hide();
-
-            // Refresh the page
-            window.location.reload();
-        });
-    }
-
     // Renders the user agreement modal
     private render() {
         // Clear the modal
@@ -62,8 +45,19 @@ export class UserAgreement {
                 text: "Agree",
                 type: Components.ButtonTypes.OutlinePrimary,
                 onClick: () => {
+                    // Show a loading dialog
+                    LoadingDialog.setHeader("Adding User");
+                    LoadingDialog.setBody("Adding the user to the developer's security group. This will close after the user is added.");
+                    LoadingDialog.show();
+
                     // Add the user to the group
-                    this.addUserToGroup();
+                    AppSecurity.addDeveloper(ContextInfo.userId).then(() => {
+                        // Close the dialog
+                        LoadingDialog.hide();
+
+                        // Refresh the page
+                        window.location.reload();
+                    });
                 }
             },
             placement: Components.TooltipPlacements.Left

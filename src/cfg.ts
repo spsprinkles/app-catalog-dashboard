@@ -943,6 +943,7 @@ export const createSecurityGroups = (): PromiseLike<void> => {
     return new Promise((resolve, reject) => {
         let approveGroup: Types.SP.Group = null;
         let devGroup: Types.SP.Group = null;
+        let sponsorGroup: Types.SP.Group = null;
         let webMembersGroup: Types.SP.Group = null;
         let webOwnersGroup: Types.SP.Group = null;
         let webVisitorsGroup: Types.SP.Group = null;
@@ -967,7 +968,7 @@ export const createSecurityGroups = (): PromiseLike<void> => {
         });
 
         // Parse the groups to create
-        Helper.Executor([Strings.Groups.Approvers, Strings.Groups.Developers], groupName => {
+        Helper.Executor([Strings.Groups.Approvers, Strings.Groups.Developers, Strings.Groups.Sponsors], groupName => {
             // Return a promise
             return new Promise((resolve, reject) => {
                 // Get the group
@@ -978,9 +979,14 @@ export const createSecurityGroups = (): PromiseLike<void> => {
                         if (group.Title == Strings.Groups.Approvers) {
                             // Set the approver group
                             approveGroup = group;
-                        } else {
+                        }
+                        // Else, see if it's the developer group
+                        else if (group.Title == Strings.Groups.Developers) {
                             // Set the dev group
                             devGroup = group;
+                        } else {
+                            // Set the sponsor group
+                            sponsorGroup = group;
                         }
 
                         // Resolve the request
@@ -990,12 +996,13 @@ export const createSecurityGroups = (): PromiseLike<void> => {
                     // Doesn't exist
                     () => {
                         let isDevGroup = groupName == Strings.Groups.Developers;
+                        let isSponsorGroup = groupName == Strings.Groups.Sponsors;
 
                         // Create the group
                         Web().SiteGroups().add({
                             AllowMembersEditMembership: true,
-                            AllowRequestToJoinLeave: isDevGroup,
-                            AutoAcceptRequestToJoinLeave: isDevGroup,
+                            AllowRequestToJoinLeave: isDevGroup || isSponsorGroup,
+                            AutoAcceptRequestToJoinLeave: isDevGroup || isSponsorGroup,
                             Title: groupName,
                             Description: "Group contains the '" + groupName + "' users.",
                             OnlyAllowMembersViewMembership: false
@@ -1003,12 +1010,17 @@ export const createSecurityGroups = (): PromiseLike<void> => {
                             // Successful
                             group => {
                                 // See if this is the approver group
-                                if (isDevGroup) {
+                                if (group.Title == Strings.Groups.Approvers) {
+                                    // Set the approver group
+                                    approveGroup = group;
+                                }
+                                // Else, see if it's the developer group
+                                else if (group.Title == Strings.Groups.Developers) {
                                     // Set the dev group
                                     devGroup = group;
                                 } else {
-                                    // Set the approver group
-                                    approveGroup = group;
+                                    // Set the sponsor group
+                                    sponsorGroup = group;
                                 }
 
                                 // Resolve the request
@@ -1118,6 +1130,19 @@ export const createSecurityGroups = (): PromiseLike<void> => {
                             listAssessments.RoleAssignments().addRoleAssignment(devGroup.Id, permissions[SPTypes.RoleType.Contributor]).execute(() => {
                                 // Log
                                 console.log("[Assessments List] The dev permission was added successfully.");
+                            });
+                        }
+
+                        // Ensure the dev group exists
+                        if (sponsorGroup) {
+                            // Set the list permissions
+                            listApps.RoleAssignments().addRoleAssignment(sponsorGroup.Id, permissions[SPTypes.RoleType.Administrator]).execute(() => {
+                                // Log
+                                console.log("[Apps List] The sponsor permission was added successfully.");
+                            });
+                            listAssessments.RoleAssignments().addRoleAssignment(sponsorGroup.Id, permissions[SPTypes.RoleType.Administrator]).execute(() => {
+                                // Log
+                                console.log("[Assessments List] The sponsor permission was added successfully.");
                             });
                         }
 
