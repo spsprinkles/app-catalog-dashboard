@@ -36,7 +36,7 @@
     "@types/datatables.net": "^1.10.21",
     "@types/jquery": "^3.5.14",
     "babel-loader": "^8.2.4",
-    "css-loader": "^6.7.1",
+    "css-loader": "^5.2.7",
     "html-loader": "^3.1.0",
     "moment-locales-webpack-plugin": "^1.2.0",
     "sass": "^1.49.9",
