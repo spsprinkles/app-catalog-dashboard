@@ -211,7 +211,6 @@ export class AppNotifications {
                         // Resolve the request
                         resolve();
                     });
-
                 } else {
                     // Resolve the request
                     resolve();
