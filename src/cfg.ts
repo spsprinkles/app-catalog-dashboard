@@ -1,4 +1,5 @@
 import { Helper, List, SPTypes, Types, Web } from "gd-sprest-bs";
+import { AppConfig } from "./appCfg";
 import Strings from "./strings";
 
 /**
@@ -1053,10 +1054,11 @@ export const createSecurityGroups = (): PromiseLike<void> => {
                     } else {
                         // Create the custom permission
                         Helper.copyPermissionLevel({
-                            BasePermission: "Contributor",
-                            Name: "Contributor and Manage Subwebs",
+                            BasePermission: "Contribute",
+                            Name: "Contribute and Manage Subwebs",
                             Description: "Extends the contribute permission level and adds the ability to create a subweb.",
-                            AddPermissions: [SPTypes.BasePermissionTypes.ManageSubwebs]
+                            AddPermissions: [SPTypes.BasePermissionTypes.ManageSubwebs],
+                            WebUrl: AppConfig.Configuration.appCatalogUrl
                         }).then(role => {
                             // Update the mapper
                             roles[customName] = role;
@@ -1085,10 +1087,22 @@ export const createSecurityGroups = (): PromiseLike<void> => {
                         }
 
                         // Create the custom permission level
-                        createPermissionLevel(roles).then(() => {
-                            // Resolve the request
-                            resolve(roles);
-                        });
+                        createPermissionLevel(roles).then(
+                            // Success
+                            () => {
+                                // Resolve the request
+                                resolve(roles);
+                            },
+
+                            // Error
+                            () => {
+                                // Log the error
+                                console.error("[" + Strings.ProjectName + "] Error creating the custom permission level.");
+
+                                // Resolve the request
+                                resolve(roles);
+                            }
+                        );
                     });
                 });
             }
