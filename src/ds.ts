@@ -337,7 +337,7 @@ export class DataSource {
                             }
 
                             // See if the security group doesn't exist
-                            if (!securityGroupsExist) {
+                            if (!securityGroupsExist || showFl) {
                                 // Add the custom install button
                                 Components.Tooltip({
                                     el,
