@@ -1040,6 +1040,34 @@ export const createSecurityGroups = (): PromiseLike<void> => {
                 );
             });
         }).then(() => {
+            // Creates the custom permission level
+            let createPermissionLevel = (roles): PromiseLike<void> => {
+                // Return a promise
+                return new Promise(resolve => {
+                    let customName = "Contribute and Manage Subwebs";
+
+                    // See if the roles contain the custom permission
+                    if (roles[customName]) {
+                        // Resolve the request
+                        resolve();
+                    } else {
+                        // Create the custom permission
+                        Helper.copyPermissionLevel({
+                            BasePermission: "Contributor",
+                            Name: "Contributor and Manage Subwebs",
+                            Description: "Extends the contribute permission level and adds the ability to create a subweb.",
+                            AddPermissions: [SPTypes.BasePermissionTypes.ManageSubwebs]
+                        }).then(role => {
+                            // Update the mapper
+                            roles[customName] = role;
+
+                            // Resolve the request
+                            resolve();
+                        }, reject);
+                    }
+                });
+            }
+
             // Gets the role definitions for the permission types
             let getPermissionTypes = () => {
                 // Return a promise
@@ -1056,8 +1084,11 @@ export const createSecurityGroups = (): PromiseLike<void> => {
                             roles[roleDef.RoleTypeKind] = roleDef.Id;
                         }
 
-                        // Resolve the request
-                        resolve(roles);
+                        // Create the custom permission level
+                        createPermissionLevel(roles).then(() => {
+                            // Resolve the request
+                            resolve(roles);
+                        });
                     });
                 });
             }
