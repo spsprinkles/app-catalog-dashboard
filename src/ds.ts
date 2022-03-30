@@ -45,7 +45,6 @@ export interface IAppItem extends Types.SP.ListItem {
     ContentTypeId: string;
     IsDefaultAppMetadataLocale: boolean;
     IsAppPackageEnabled: boolean;
-    SharePointAppCategory: string;
 }
 
 // Assessment Item

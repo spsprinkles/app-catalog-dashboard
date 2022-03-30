@@ -16,14 +16,15 @@ module.exports = (env, argv) => {
         // Output information
         output: {
             path: path.resolve(__dirname, "dist"),
-            filename: project.name + (isDev ? "" : ".min") + ".js"
+            filename: project.name + (isDev ? "" : ".min") + ".js",
+            publicPath: ""
         },
 
         // Keep only 'en' locales with Moment.js
         plugins: [
             new MomentLocalesPlugin(),
         ],
-        
+
         // Resolve the file names
         resolve: {
             extensions: [".js", ".css", ".scss", ".ts"]
@@ -43,7 +44,12 @@ module.exports = (env, argv) => {
                         // Translate css to CommonJS
                         { loader: "css-loader" },
                         // Compile sass to css
-                        { loader: "sass-loader" }
+                        {
+                            loader: "sass-loader",
+                            options: {
+                                implementation: require("sass")
+                            }
+                        }
                     ]
                 },
                 // Handle Image Files

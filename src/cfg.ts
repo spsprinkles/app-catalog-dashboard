@@ -312,14 +312,7 @@ export const Configuration = Helper.SPConfig({
                     type: Helper.SPCfgFieldType.Boolean,
                     allowDeletion: false,
                     defaultValue: "1"
-                },
-                {
-                    name: "SharePointAppCategory",
-                    title: "Category",
-                    type: Helper.SPCfgFieldType.Choice,
-                    allowDeletion: false,
-                    fillInChoice: true
-                } as Helper.IFieldInfoChoice,
+                }
             ],
             ViewInformation: [{
                 ViewName: "All Documents",
