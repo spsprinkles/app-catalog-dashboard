@@ -211,8 +211,17 @@ export class AppSecurity {
                     // resolve the request
                     resolve();
                 }, () => {
-                    // Resolve the request
-                    resolve();
+                    // Get the user
+                    Web(appCatalogUrl).SiteUsers().getByEmail(ContextInfo.userEmail).execute(user => {
+                        // See if they are an admin
+                        if (user.IsSiteAdmin) {
+                            // Set the flag
+                            this._isSiteAppCatalogOwner = true;
+                        }
+                    }, () => {
+                        // Resolve the request
+                        resolve();
+                    });
                 });
             } else {
                 // Resolve the request
@@ -316,8 +325,17 @@ export class AppSecurity {
                     // Resolve the request
                     resolve();
                 }, () => {
-                    // Resolve the request
-                    resolve();
+                    // Get the user
+                    Web(tenantAppCatalogUrl).SiteUsers().getByEmail(ContextInfo.userEmail).execute(user => {
+                        // See if they are an admin
+                        if (user.IsSiteAdmin) {
+                            // Set the flag
+                            this._isSiteAppCatalogOwner = true;
+                        }
+                    }, () => {
+                        // Resolve the request
+                        resolve();
+                    });
                 });
             } else {
                 // Resolve the request

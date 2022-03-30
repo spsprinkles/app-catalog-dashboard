@@ -66,8 +66,8 @@ export class AppForms {
                                                 DataSource.loadTestSite(item).then(
                                                     // Exists
                                                     webInfo => {
-                                                        // See if the version match
-                                                        if (webInfo.versionMatchFl) {
+                                                        // See if the current version is deployed
+                                                        if (item.AppVersion == webInfo.app.InstalledVersion && !webInfo.app.SkipDeploymentFeature) {
                                                             // Call the update event
                                                             onUpdate();
                                                         } else {
@@ -1429,7 +1429,7 @@ export class AppForms {
     }
 
     // Updates the app
-    updateApp(item: IAppItem, siteUrl: string, onUpdate: () => void) {
+    updateApp(item: IAppItem, appCatalogUrl: string, siteUrl: string, onUpdate: () => void) {
         // Set the header
         Modal.setHeader("Update App");
 
@@ -1444,13 +1444,10 @@ export class AppForms {
                 // Close the modal
                 Modal.hide();
 
-                // Deploy the app
-                AppActions.deployAppToSite(item, siteUrl, false, () => {
-                    // Update the app
-                    AppActions.updateApp(item, siteUrl).then(() => {
-                        // Call the update event
-                        onUpdate();
-                    });
+                // Update the app
+                AppActions.updateApp(item, siteUrl).then(() => {
+                    // Call the update event
+                    onUpdate();
                 });
             }
         }).el);
