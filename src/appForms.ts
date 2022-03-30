@@ -66,17 +66,20 @@ export class AppForms {
                                                 DataSource.loadTestSite(item).then(
                                                     // Exists
                                                     webInfo => {
-                                                        // See if the version match
-                                                        if (webInfo.versionMatchFl) {
-                                                            // Call the update event
-                                                            onUpdate();
-                                                        } else {
-                                                            // Update the app
-                                                            AppActions.updateApp(item, webInfo.web.ServerRelativeUrl).then(() => {
+                                                        // Ensure the test site is configured
+                                                        AppActions.configureTestSite(webInfo.web.ServerRelativeUrl, item).then(() => {
+                                                            // See if the version match
+                                                            if (webInfo.versionMatchFl) {
                                                                 // Call the update event
                                                                 onUpdate();
-                                                            });
-                                                        }
+                                                            } else {
+                                                                // Update the app
+                                                                AppActions.updateApp(item, webInfo.web.ServerRelativeUrl).then(() => {
+                                                                    // Call the update event
+                                                                    onUpdate();
+                                                                });
+                                                            }
+                                                        });
                                                     },
 
                                                     // Doesn't exist

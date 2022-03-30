@@ -85,6 +85,63 @@ export class AppActions {
         });
     }
 
+    // Configures the test site collection
+    static configureTestSite(webUrl: string, item: IAppItem): PromiseLike<void> {
+        // Show a loading dialog
+        LoadingDialog.setHeader("Configuring the Test Web");
+        LoadingDialog.setBody("Configuring the permissions of the test web.");
+        LoadingDialog.show();
+
+        // Return a promise
+        return new Promise((resolve, reject) => {
+            // Load the context of the app catalog
+            ContextInfo.getWeb(AppConfig.Configuration.appCatalogUrl).execute(context => {
+                let web = Web(webUrl, { requestDigest: context.GetContextWebInformation.FormDigestValue });
+
+                // Reset the permissions
+                web.resetRoleInheritance().execute();
+
+                // Clear the permissions
+                web.breakRoleInheritance(true, false).execute(true);
+
+                // Parse the developers
+                let developers = item.AppDevelopers.results || [];
+                for (let i = 0; i < developers.length; i++) {
+                    // Ensure the user exists in this site collection
+                    web.ensureUser(developers[i].EMail).execute(user => {
+                        // Update the developers user id
+                        for (let j = 0; j < developers.length; j++) {
+                            // See if this is the target user
+                            if (developers[j].EMail == user.Email) {
+                                // Update the id
+                                developers[j].Id = user.Id;
+                                break;
+                            }
+                        }
+                    }, true);
+                }
+
+                // Get the owner role definition
+                web.RoleDefinitions().getByType(SPTypes.RoleType.Administrator).execute(role => {
+                    // Parse the developers
+                    for (let i = 0; i < developers.length; i++) {
+                        // Add the user
+                        web.RoleAssignments().addRoleAssignment(developers[i].Id, role.Id).execute(true);
+                    }
+
+                    // Wait for the requests to complete
+                    web.done(() => {
+                        // Hide the loading dialog
+                        LoadingDialog.hide();
+
+                        // Resolve the request
+                        resolve();
+                    });
+                }, true);
+            });
+        });
+    }
+
     // Creates the test site for the application
     static createTestSite(item: IAppItem, onComplete: () => void) {
         // Show a loading dialog
@@ -112,62 +169,66 @@ export class AppActions {
                 }).execute(
                     // Success
                     web => {
-                        // Update the loading dialog
-                        LoadingDialog.setHeader("Installing the App");
-                        LoadingDialog.setBody("Installing the application to the test site.");
+                        // Configure the web
+                        this.configureTestSite(web.ServerRelativeUrl, item).then(() => {
+                            // Update the loading dialog
+                            LoadingDialog.setHeader("Installing the App");
+                            LoadingDialog.setBody("Installing the application to the test site.");
+                            LoadingDialog.show();
 
-                        // Install the application to the test site
-                        Web(web.ServerRelativeUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(item.AppProductID).install().execute(
-                            // Success
-                            () => {
-                                // Update the loading dialog
-                                LoadingDialog.setHeader("Sending Email Notifications");
-                                LoadingDialog.setBody("Everything is done. Sending an email to the developer poc(s).");
+                            // Install the application to the test site
+                            Web(web.ServerRelativeUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(item.AppProductID).install().execute(
+                                // Success
+                                () => {
+                                    // Update the loading dialog
+                                    LoadingDialog.setHeader("Sending Email Notifications");
+                                    LoadingDialog.setBody("Everything is done. Sending an email to the developer poc(s).");
 
-                                // Get the app developers
-                                let to = [];
-                                let pocs = item.AppDevelopers && item.AppDevelopers.results ? item.AppDevelopers.results : [];
-                                for (let i = 0; i < pocs.length; i++) {
-                                    // Append the email
-                                    to.push(pocs[i].EMail);
-                                }
+                                    // Get the app developers
+                                    let to = [];
+                                    let pocs = item.AppDevelopers && item.AppDevelopers.results ? item.AppDevelopers.results : [];
+                                    for (let i = 0; i < pocs.length; i++) {
+                                        // Append the email
+                                        to.push(pocs[i].EMail);
+                                    }
 
-                                // Ensure emails exist
-                                if (to.length > 0) {
-                                    // Send an email
-                                    Utility().sendEmail({
-                                        To: to,
-                                        Subject: "Test Site Created",
-                                        Body: "<p>App Developers,</p><br />" +
-                                            "<p>The '" + item.Title + "' app test site has been created.</p>"
-                                    }).execute(() => {
+                                    // Ensure emails exist
+                                    if (to.length > 0) {
+                                        // Send an email
+                                        Utility().sendEmail({
+                                            To: to,
+                                            Subject: "Test Site Created",
+                                            Body: "<p>App Developers,</p><br />" +
+                                                "<p>The '" + item.Title + "' app test site has been created.</p>"
+                                        }).execute(() => {
+                                            // Close the dialog
+                                            LoadingDialog.hide();
+
+                                            // Notify the parent this process is complete
+                                            onComplete();
+                                        });
+                                    } else {
                                         // Close the dialog
                                         LoadingDialog.hide();
 
                                         // Notify the parent this process is complete
                                         onComplete();
-                                    });
-                                } else {
-                                    // Close the dialog
+                                    }
+                                },
+
+                                // Error
+                                () => {
+                                    // Hide the loading dialog
                                     LoadingDialog.hide();
 
-                                    // Notify the parent this process is complete
-                                    onComplete();
+                                    // Error creating the site
+                                    Modal.clear();
+                                    Modal.setHeader("Error Deploying Application");
+                                    Modal.setBody("There was an error deploying the application to the test site.");
+                                    Modal.show();
                                 }
-                            },
-
-                            // Error
-                            () => {
-                                // Hide the loading dialog
-                                LoadingDialog.hide();
-
-                                // Error creating the site
-                                Modal.clear();
-                                Modal.setHeader("Error Deploying Application");
-                                Modal.setBody("There was an error deploying the application to the test site.");
-                                Modal.show();
-                            }
-                        )
+                            )
+                        });
                     },
                     // Error
                     () => {
