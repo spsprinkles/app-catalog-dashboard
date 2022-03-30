@@ -308,9 +308,8 @@ export class AppActions {
         LoadingDialog.setBody("Uploading the spfx package to the site collection app catalog.");
         LoadingDialog.show();
 
-        let appFile = null;
-
         // Find the package file
+        let appFile = null;
         for (let i = 0; i < DataSource.DocSetFolder.Files.results.length; i++) {
             let file = DataSource.DocSetFolder.Files.results[i];
 

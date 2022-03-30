@@ -1444,10 +1444,13 @@ export class AppForms {
                 // Close the modal
                 Modal.hide();
 
-                // Update the app
-                AppActions.updateApp(item, siteUrl).then(() => {
-                    // Call the update event
-                    onUpdate();
+                // Deploy the app
+                AppActions.deployAppToSite(item, siteUrl, false, () => {
+                    // Update the app
+                    AppActions.updateApp(item, siteUrl).then(() => {
+                        // Call the update event
+                        onUpdate();
+                    });
                 });
             }
         }).el);
