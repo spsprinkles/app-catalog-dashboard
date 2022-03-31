@@ -189,7 +189,7 @@ export class DataSource {
     }
 
     // Loads the app test site
-    static loadTestSite(item: IAppItem): PromiseLike<{ web: Types.SP.Web, versionMatchFl: boolean }> {
+    static loadTestSite(item: IAppItem): PromiseLike<{ app: Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata, web: Types.SP.Web }> {
         // Return a promise
         return new Promise((resolve, reject) => {
             // Get the url to the test site
@@ -204,7 +204,7 @@ export class DataSource {
                         // App exists
                         app => {
                             // Resolve the request
-                            resolve({ web, versionMatchFl: app.InstalledVersion == item.AppVersion });
+                            resolve({ app, web });
                         },
                         // App doesn't exist
                         () => {

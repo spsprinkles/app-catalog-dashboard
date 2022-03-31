@@ -453,8 +453,8 @@ export class ButtonActions {
                                 }
                             });
 
-                            // See if the versions do not match
-                            if (!webInfo.versionMatchFl) {
+                            // See if the current version is not deployed
+                            if (this._item.AppVersion != webInfo.app.InstalledVersion && !webInfo.app.SkipDeploymentFeature) {
                                 // Render the update button
                                 tooltips.add({
                                     content: "Versions do not match. Click to update the test site.",
@@ -463,11 +463,12 @@ export class ButtonActions {
                                         iconClassName: "me-1",
                                         iconSize: 20,
                                         iconType: chatSquareDots,
+                                        isDisabled: !AppSecurity.IsSiteAppCatalogOwner,
                                         isSmall: true,
                                         type: Components.ButtonTypes.OutlinePrimary,
                                         onClick: () => {
                                             // Show the update form
-                                            this._forms.updateApp(this._item, webInfo.web.Url, () => {
+                                            this._forms.updateApp(this._item, AppConfig.Configuration.appCatalogUrl, webInfo.web.Url, () => {
                                                 // Call the update event
                                                 this._onUpdate();
                                             });

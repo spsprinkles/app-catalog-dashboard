@@ -78,9 +78,9 @@ export class AppActions {
             }
 
             // Create the folder
-            rootFolder.Folders.add("archive").execute(folder => {
+            Web(Strings.SourceUrl).getFolderByServerRelativeUrl(rootFolder.ServerRelativeUrl).addSubFolder("archive").execute(folder => {
                 // Resolve the request
-                resolve(Web(Strings.SourceUrl).getFolderByServerRelativeUrl(folder.ServerRelativeUrl));
+                resolve(Web(Strings.SourceUrl).getFolderByServerRelativeUrl(rootFolder.ServerRelativeUrl + "/archive"));
             });
         });
     }
@@ -150,7 +150,7 @@ export class AppActions {
         LoadingDialog.show();
 
         // Deploy the solution
-        this.deploy(item, false, false, () => {
+        this.deploy(item, false, item.AppSkipFeatureDeployment, () => {
             // Update the loading dialog
             LoadingDialog.setHeader("Creating the Test Site");
             LoadingDialog.setBody("Creating the sub-web for testing the application.");
@@ -169,65 +169,76 @@ export class AppActions {
                 }).execute(
                     // Success
                     web => {
-                        // Configure the web
-                        this.configureTestSite(web.ServerRelativeUrl, item).then(() => {
+                        // Method to send an email
+                        let sendEmail = () => {
                             // Update the loading dialog
-                            LoadingDialog.setHeader("Installing the App");
-                            LoadingDialog.setBody("Installing the application to the test site.");
-                            LoadingDialog.show();
+                            LoadingDialog.setHeader("Sending Email Notifications");
+                            LoadingDialog.setBody("Everything is done. Sending an email to the developer poc(s).");
 
-                            // Install the application to the test site
-                            Web(web.ServerRelativeUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(item.AppProductID).install().execute(
-                                // Success
-                                () => {
-                                    // Update the loading dialog
-                                    LoadingDialog.setHeader("Sending Email Notifications");
-                                    LoadingDialog.setBody("Everything is done. Sending an email to the developer poc(s).");
+                            // Get the app developers
+                            let to = [];
+                            let pocs = item.AppDevelopers && item.AppDevelopers.results ? item.AppDevelopers.results : [];
+                            for (let i = 0; i < pocs.length; i++) {
+                                // Append the email
+                                to.push(pocs[i].EMail);
+                            }
 
-                                    // Get the app developers
-                                    let to = [];
-                                    let pocs = item.AppDevelopers && item.AppDevelopers.results ? item.AppDevelopers.results : [];
-                                    for (let i = 0; i < pocs.length; i++) {
-                                        // Append the email
-                                        to.push(pocs[i].EMail);
-                                    }
-
-                                    // Ensure emails exist
-                                    if (to.length > 0) {
-                                        // Send an email
-                                        Utility().sendEmail({
-                                            To: to,
-                                            Subject: "Test Site Created",
-                                            Body: "<p>App Developers,</p><br />" +
-                                                "<p>The '" + item.Title + "' app test site has been created.</p>"
-                                        }).execute(() => {
-                                            // Close the dialog
-                                            LoadingDialog.hide();
-
-                                            // Notify the parent this process is complete
-                                            onComplete();
-                                        });
-                                    } else {
-                                        // Close the dialog
-                                        LoadingDialog.hide();
-
-                                        // Notify the parent this process is complete
-                                        onComplete();
-                                    }
-                                },
-
-                                // Error
-                                () => {
-                                    // Hide the loading dialog
+                            // Ensure emails exist
+                            if (to.length > 0) {
+                                // Send an email
+                                Utility().sendEmail({
+                                    To: to,
+                                    Subject: "Test Site Created",
+                                    Body: "<p>App Developers,</p><br />" +
+                                        "<p>The '" + item.Title + "' app test site has been created.</p>"
+                                }).execute(() => {
+                                    // Close the dialog
                                     LoadingDialog.hide();
 
-                                    // Error creating the site
-                                    Modal.clear();
-                                    Modal.setHeader("Error Deploying Application");
-                                    Modal.setBody("There was an error deploying the application to the test site.");
-                                    Modal.show();
-                                }
-                            )
+                                    // Notify the parent this process is complete
+                                    onComplete();
+                                });
+                            } else {
+                                // Close the dialog
+                                LoadingDialog.hide();
+
+                                // Notify the parent this process is complete
+                                onComplete();
+                            }
+                        }
+
+                        // Get the app
+                        Web(web.ServerRelativeUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(item.AppProductID).execute(app => {
+                            // See if the app is already installed
+                            if (app.SkipDeploymentFeature) {
+                                // Send the email
+                                sendEmail();
+                            } else {
+                                // Update the loading dialog
+                                LoadingDialog.setHeader("Installing the App");
+                                LoadingDialog.setBody("Installing the application to the test site.");
+
+                                // Install the application to the test site
+                                app.install().execute(
+                                    // Success
+                                    () => {
+                                        // Send the email
+                                        sendEmail();
+                                    },
+
+                                    // Error
+                                    () => {
+                                        // Hide the loading dialog
+                                        LoadingDialog.hide();
+
+                                        // Error creating the site
+                                        Modal.clear();
+                                        Modal.setHeader("Error Deploying Application");
+                                        Modal.setBody("There was an error deploying the application to the test site.");
+                                        Modal.show();
+                                    }
+                                );
+                            }
                         });
                     },
                     // Error
@@ -369,9 +380,8 @@ export class AppActions {
         LoadingDialog.setBody("Uploading the spfx package to the site collection app catalog.");
         LoadingDialog.show();
 
-        let appFile = null;
-
         // Find the package file
+        let appFile = null;
         for (let i = 0; i < DataSource.DocSetFolder.Files.results.length; i++) {
             let file = DataSource.DocSetFolder.Files.results[i];
 
@@ -414,7 +424,7 @@ export class AppActions {
                             // Update the metadata
                             this.updateAppMetadata(item, appItem.Id, false, siteUrl, requestDigest).then(() => {
                                 // Deploy the app
-                                Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(item.AppProductID).deploy().execute(app => {
+                                Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(item.AppProductID).deploy(item.AppSkipFeatureDeployment).execute(app => {
                                     // See if we are updating the metadata
                                     if (updateSitesFl) {
                                         // Append the url to the list of sites the solution has been deployed to
@@ -639,17 +649,43 @@ export class AppActions {
                 let requestDigest = context.GetContextWebInformation.FormDigestValue;
 
                 // Update the dialog
-                LoadingDialog.setHeader("Upgrading the Solution");
+                LoadingDialog.setHeader("Uninstalling the Solution");
                 LoadingDialog.setBody("This will close after the app is upgraded.");
                 LoadingDialog.show();
 
-                // Upload the file to the app catalog
-                Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(item.AppProductID).upgrade().execute(() => {
-                    // Close the dialog
-                    LoadingDialog.hide();
+                // Uninstall the app
+                Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(item.AppProductID).uninstall().execute(() => {
+                    // Update the dialog
+                    LoadingDialog.setHeader("Upgrading the Solution");
 
-                    // Resolve the requst
-                    resolve();
+                    // Deploy the solution
+                    this.deploy(item, false, item.AppSkipFeatureDeployment, () => {
+                        // Update the dialog
+                        LoadingDialog.setHeader("Upgrading the Solution");
+
+                        // Get the app
+                        Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(item.AppProductID).execute(app => {
+                            // See if the app is already installed
+                            if (app.SkipDeploymentFeature) {
+                                // Resolve the requst
+                                resolve();
+                            } else {
+                                // Update the dialog
+                                LoadingDialog.setHeader("Installing the Solution");
+                                LoadingDialog.setBody("This will close after the app is upgraded.");
+                                LoadingDialog.show();
+
+                                // Install the app
+                                Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(item.AppProductID).install().execute(() => {
+                                    // Close the dialog
+                                    LoadingDialog.hide();
+
+                                    // Resolve the requst
+                                    resolve();
+                                });
+                            }
+                        });
+                    });
                 });
             });
         });
