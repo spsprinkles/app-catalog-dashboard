@@ -218,6 +218,9 @@ export class AppSecurity {
                             // Set the flag
                             this._isSiteAppCatalogOwner = true;
                         }
+
+                        // Resolve the request
+                        resolve();
                     }, () => {
                         // Resolve the request
                         resolve();
@@ -332,6 +335,9 @@ export class AppSecurity {
                             // Set the flag
                             this._isSiteAppCatalogOwner = true;
                         }
+
+                        // Resolve the request
+                        resolve();
                     }, () => {
                         // Resolve the request
                         resolve();
