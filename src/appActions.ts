@@ -18,7 +18,7 @@ export class AppActions {
         LoadingDialog.setBody("The current app package is being archived.");
         LoadingDialog.show();
 
-        let appFile = null;
+        let appFile: Types.SP.File = null;
 
         // Find the package file
         for (let i = 0; i < DataSource.DocSetFolder.Files.results.length; i++) {
@@ -44,7 +44,7 @@ export class AppActions {
             // Get the package file contents
             Web(Strings.SourceUrl).getFileByServerRelativeUrl(appFile.ServerRelativeUrl).content().execute(content => {
                 // Get the file name
-                let fileName = item.FileLeafRef.split('.sppkg')[0] + "_" + item.AppVersion + ".sppkg"
+                let fileName = appFile.Name.split(".sppkg")[0] + "_" + item.AppVersion + ".sppkg"
 
                 // Update the dialog
                 LoadingDialog.setBody("Copying the file package.")
