@@ -75,8 +75,14 @@ export class AppForms {
                                                             AppActions.updateApp(item, webInfo.web.ServerRelativeUrl).then(() => {
                                                                 // Call the update event
                                                                 onUpdate();
-                                                            });
-                                                        }
+                                                            } else {
+                                                                // Update the app
+                                                                AppActions.updateApp(item, webInfo.web.ServerRelativeUrl).then(() => {
+                                                                    // Call the update event
+                                                                    onUpdate();
+                                                                });
+                                                            }
+                                                        });
                                                     },
 
                                                     // Doesn't exist

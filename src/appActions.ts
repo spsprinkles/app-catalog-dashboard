@@ -85,6 +85,63 @@ export class AppActions {
         });
     }
 
+    // Configures the test site collection
+    static configureTestSite(webUrl: string, item: IAppItem): PromiseLike<void> {
+        // Show a loading dialog
+        LoadingDialog.setHeader("Configuring the Test Web");
+        LoadingDialog.setBody("Configuring the permissions of the test web.");
+        LoadingDialog.show();
+
+        // Return a promise
+        return new Promise((resolve, reject) => {
+            // Load the context of the app catalog
+            ContextInfo.getWeb(AppConfig.Configuration.appCatalogUrl).execute(context => {
+                let web = Web(webUrl, { requestDigest: context.GetContextWebInformation.FormDigestValue });
+
+                // Reset the permissions
+                web.resetRoleInheritance().execute();
+
+                // Clear the permissions
+                web.breakRoleInheritance(true, false).execute(true);
+
+                // Parse the developers
+                let developers = item.AppDevelopers.results || [];
+                for (let i = 0; i < developers.length; i++) {
+                    // Ensure the user exists in this site collection
+                    web.ensureUser(developers[i].EMail).execute(user => {
+                        // Update the developers user id
+                        for (let j = 0; j < developers.length; j++) {
+                            // See if this is the target user
+                            if (developers[j].EMail == user.Email) {
+                                // Update the id
+                                developers[j].Id = user.Id;
+                                break;
+                            }
+                        }
+                    }, true);
+                }
+
+                // Get the owner role definition
+                web.RoleDefinitions().getByType(SPTypes.RoleType.Administrator).execute(role => {
+                    // Parse the developers
+                    for (let i = 0; i < developers.length; i++) {
+                        // Add the user
+                        web.RoleAssignments().addRoleAssignment(developers[i].Id, role.Id).execute(true);
+                    }
+
+                    // Wait for the requests to complete
+                    web.done(() => {
+                        // Hide the loading dialog
+                        LoadingDialog.hide();
+
+                        // Resolve the request
+                        resolve();
+                    });
+                }, true);
+            });
+        });
+    }
+
     // Creates the test site for the application
     static createTestSite(item: IAppItem, onComplete: () => void) {
         // Show a loading dialog
