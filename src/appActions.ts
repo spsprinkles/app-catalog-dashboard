@@ -25,7 +25,7 @@ export class AppActions {
             let file = DataSource.DocSetFolder.Files.results[i];
 
             // See if this is the package
-            if (file.Name.endsWith(".sppkg")) {
+            if (file.Name.toLowerCase().endsWith(".sppkg")) {
                 // Set the file
                 appFile = file;
                 break;
@@ -43,13 +43,13 @@ export class AppActions {
         this.createArchiveFolder(DataSource.DocSetFolder).then(archiveFolder => {
             // Get the package file contents
             Web(Strings.SourceUrl).getFileByServerRelativeUrl(appFile.ServerRelativeUrl).content().execute(content => {
-                // Get the file name
-                let fileName = appFile.Name.split(".sppkg")[0] + "_" + item.AppVersion + ".sppkg"
-
                 // Update the dialog
                 LoadingDialog.setBody("Copying the file package.")
 
-                // Upload the file to the app catalog
+                // Get the name of the file
+                let fileName = appFile.Name.toLowerCase().split(".sppkg")[0] + "_" + item.AppVersion + ".sppkg"
+
+                // Copy the file to the archive folder
                 archiveFolder.Files().add(fileName, true, content).execute(file => {
                     // Hide the dialog
                     LoadingDialog.hide();
