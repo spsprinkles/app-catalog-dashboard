@@ -218,4 +218,62 @@ export class AppNotifications {
             }
         });
     }
+
+
+    // Sends an email notification
+    static sendNotification(item: IAppItem, userTypes: string[], subject: string, body: string): PromiseLike<void> {
+        // Return a promise
+        return new Promise(resolve => {
+            let To: string[] = [];
+
+            // Parse the user types
+            for (let i = 0; i < userTypes.length; i++) {
+                // Append the email addresses
+                let emails = this.getEmails(userTypes[i], item);
+                To = To.concat(emails);
+            }
+
+            // Parse the email content and find [[Key]] instances w/in it.
+            let Body = body || "";
+            let startIdx = Body.indexOf("[[");
+            let endIdx = Body.indexOf("]]");
+            while (startIdx > 0 && endIdx > startIdx) {
+                // Get the key value
+                let key = Body.substring(startIdx + 2, endIdx);
+                let value = this.getValue(key, item, item.AppStatus);
+
+                // Replace the value
+                let oldContent = Body;
+                Body = Body.substring(0, startIdx) + value + Body.substring(endIdx + 2);
+
+                // Find the next instance of it
+                startIdx = oldContent.indexOf("[[", endIdx);
+                endIdx = oldContent.indexOf("]]", endIdx + 2);
+            }
+
+            // Ensure emails exist
+            if (To.length > 0) {
+                // Display a loading dialog
+                LoadingDialog.setHeader("Sending Notification");
+                LoadingDialog.setBody("This dialog will close after the notification is sent.");
+                LoadingDialog.show();
+
+                // Send an email
+                Utility(Strings.SourceUrl).sendEmail({
+                    To,
+                    Body,
+                    Subject: subject,
+                }).execute(() => {
+                    // Close the loading dialog
+                    LoadingDialog.hide();
+
+                    // Resolve the request
+                    resolve();
+                });
+            } else {
+                // Resolve the request
+                resolve();
+            }
+        });
+    }
 }
