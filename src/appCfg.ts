@@ -88,7 +88,7 @@ export class AppConfig {
     }
 
     // Load the configuration file
-    static loadConfiguration(cfgUrl?: string): PromiseLike<void> {
+    static loadConfiguration(cfgWebUrl?: string, cfgUrl?: string): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve, reject) => {
             let completeRequest = () => {
@@ -115,11 +115,14 @@ export class AppConfig {
                 }
             }
 
-            // Update the configuration url
-            cfgUrl = cfgUrl ? Common.updateUrl(cfgUrl) : cfgUrl;
+            // Update the configuration web url
+            cfgWebUrl = '/' + (cfgWebUrl || Strings.SourceUrl).replace(/^\//, '');
+
+            // Update the configuration file url
+            cfgUrl = (cfgUrl ? Common.updateUrl(cfgUrl) : Strings.ConfigUrl).replace(/^\//, '');
 
             // Get the current web
-            Web(Strings.SourceUrl).getFileByServerRelativeUrl(cfgUrl || Strings.ConfigUrl).content().execute(
+            Web(cfgWebUrl).getFileByUrl(cfgUrl).content().execute(
                 // Success
                 file => {
                     // Convert the string to a json object

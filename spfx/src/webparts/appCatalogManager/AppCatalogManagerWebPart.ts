@@ -10,7 +10,8 @@ import styles from './AppCatalogManagerWebPart.module.scss';
 import * as strings from 'AppCatalogManagerWebPartStrings';
 
 export interface IAppCatalogManagerWebPartProps {
-  configurationUrl: string;
+  configurationFileUrl: string;
+  configurationWebUrl: string;
 }
 
 // Reference the solution
@@ -21,7 +22,7 @@ export default class AppCatalogManagerWebPart extends BaseClientSideWebPart<IApp
 
   public render(): void {
     // Render the application
-    AppDashboard.render(this.domElement, this.context, this.properties.configurationUrl);
+    AppDashboard.render(this.domElement, this.context, this.properties.configurationWebUrl, this.properties.configurationFileUrl);
   }
 
   protected get dataVersion(): Version { return Version.parse('1.0'); }
@@ -35,7 +36,8 @@ export default class AppCatalogManagerWebPart extends BaseClientSideWebPart<IApp
           groups: [
             {
               groupFields: [
-                PropertyPaneTextField('configurationUrl', { label: strings.ConfigFieldUrlLabel })
+                PropertyPaneTextField('configurationWebUrl', { label: strings.ConfigWebUrlLabel }),
+                PropertyPaneTextField('configurationFileUrl', { label: strings.ConfigFieldUrlLabel })
               ]
             }
           ]
