@@ -1322,6 +1322,93 @@ export class AppForms {
         // Show the modal
         Modal.show();
     }
+
+
+    // Form to send a notification
+    sendNotification(item: IAppItem) {
+        // Set the header
+        Modal.setHeader("Send Notification");
+
+        // Create a form
+        let form = Components.Form({
+            controls: [
+                {
+                    name: "UserTypes",
+                    label: "Send To",
+                    type: Components.FormControlTypes.MultiSwitch,
+                    required: true,
+                    items: [
+                        {
+                            label: "Approver's Group",
+                            data: "ApproversGroup"
+                        },
+                        {
+                            label: "App Developers",
+                            data: "Developers"
+                        },
+                        {
+                            label: "Developer's Group",
+                            data: "DevelopersGroup"
+                        },
+                        {
+                            label: "App Sponsor",
+                            data: "Sponsor"
+                        },
+                        {
+                            label: "Sponsor's Group",
+                            data: "SponsorsGroup"
+                        }
+                    ]
+                } as Components.IFormControlPropsMultiCheckbox,
+                {
+                    name: "EmailSubject",
+                    label: "Email Subject",
+                    type: Components.FormControlTypes.TextField,
+                    required: true
+                },
+                {
+                    name: "EmailBody",
+                    label: "Email Body",
+                    type: Components.FormControlTypes.TextArea,
+                    required: true
+                }
+            ]
+        });
+
+        // Set the body
+        Modal.setBody(form.el);
+
+        // Render the footer
+        Modal.setFooter(Components.Button({
+            text: "Send",
+            type: Components.ButtonTypes.OutlineSuccess,
+            onClick: () => {
+                // Ensure the form is valid
+                if (form.isValid()) {
+                    let values = form.getValues();
+
+                    // Parse the user types
+                    let userTypes = [];
+                    for (let i = 0; i < values["UserTypes"].length; i++) {
+                        let cbValue = values["UserTypes"][i] as Components.ICheckboxGroupItem;
+
+                        // Append the value
+                        userTypes.push(cbValue.data);
+                    }
+
+                    // Send an email
+                    AppNotifications.sendNotification(item, userTypes, values["EmailSubject"], values["EmailBody"]).then(() => {
+                        // Close the modal
+                        Modal.hide();
+                    });
+                }
+            }
+        }).el);
+
+        // Show the modal
+        Modal.show();
+    }
+
     // Submit Form
     submit(item: IAppItem, onUpdate: () => void) {
         // Clear the modal

@@ -405,6 +405,26 @@ export class ButtonActions {
                     });
                     break;
 
+                // Notification
+                case "Notification":
+                    // Render the button
+                    tooltips.add({
+                        content: "Sends a notification to user(s).",
+                        btnProps: {
+                            text: "Notification",
+                            iconClassName: "me-1",
+                            iconSize: 20,
+                            iconType: appIndicator,
+                            isSmall: true,
+                            type: Components.ButtonTypes.OutlinePrimary,
+                            onClick: () => {
+                                // Display the send notification form
+                                this._forms.sendNotification(this._item);
+                            }
+                        }
+                    });
+                    break;
+
                 // Submit
                 case "Submit":
                     // Render the button
