@@ -284,14 +284,14 @@ export class AppActions {
         LoadingDialog.setBody("Uploading the spfx package to the app catalog.");
         LoadingDialog.show();
 
-        let appFile = null;
+        let appFile: Types.SP.File = null;
 
         // Find the package file
         for (let i = 0; i < DataSource.DocSetFolder.Files.results.length; i++) {
             let file = DataSource.DocSetFolder.Files.results[i];
 
             // See if this is the package
-            if (file.Name.endsWith(".sppkg")) {
+            if (file.Name.toLowerCase().endsWith(".sppkg")) {
                 // Set the file
                 appFile = file;
                 break;
@@ -322,7 +322,7 @@ export class AppActions {
                     LoadingDialog.show();
 
                     // Upload the file to the app catalog
-                    (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog()).add(item.FileLeafRef, true, content).execute(file => {
+                    (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog()).add(appFile.Name, true, content).execute(file => {
                         // Update the dialog
                         LoadingDialog.setHeader("Deploying the Package");
                         LoadingDialog.setBody("This will close after the app is deployed.");
@@ -381,12 +381,12 @@ export class AppActions {
         LoadingDialog.show();
 
         // Find the package file
-        let appFile = null;
+        let appFile: Types.SP.File = null;
         for (let i = 0; i < DataSource.DocSetFolder.Files.results.length; i++) {
             let file = DataSource.DocSetFolder.Files.results[i];
 
             // See if this is the package
-            if (file.Name.endsWith(".sppkg")) {
+            if (file.Name.toLowerCase().endsWith(".sppkg")) {
                 // Set the file
                 appFile = file;
                 break;
@@ -414,7 +414,7 @@ export class AppActions {
                     LoadingDialog.show();
 
                     // Upload the file to the app catalog
-                    Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().add(item.FileLeafRef, true, content).execute(file => {
+                    Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().add(appFile.Name, true, content).execute(file => {
                         // Update the dialog
                         LoadingDialog.setHeader("Deploying the Package");
                         LoadingDialog.setBody("This will close after the app is deployed.");
@@ -531,7 +531,8 @@ export class AppActions {
                     /** Should we convert this to use the doc set dashboard solution? */
 
                     // See if this is an image
-                    if (fileInfo.name.endsWith(".png") || fileInfo.name.endsWith(".jpg") || fileInfo.name.endsWith(".jpeg") || fileInfo.name.endsWith(".gif")) {
+                    let fileName = fileInfo.name.toLowerCase();
+                    if (fileName.endsWith(".png") || fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") || fileName.endsWith(".gif")) {
                         // Save a reference to the iamge
                         image = fileInfo;
 
@@ -540,7 +541,7 @@ export class AppActions {
                     }
 
                     // See if this is the app manifest
-                    if (fileInfo.name != "AppManifest.xml") { return; }
+                    if (fileName != "appmanifest.xml") { return; }
 
                     // Read the file
                     fileInfo.async("string").then(content => {
