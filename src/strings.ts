@@ -25,7 +25,6 @@ export const setContext = (context, sourceUrl?: string) => {
     AssetsUrl = Strings.SourceUrl + "/SiteAssets/";
 
     // Update the values
-    Strings.ConfigUrl = AssetsUrl + "config.json";
     Strings.DashboardUrl = AssetsUrl + "dashboard.aspx";
     Strings.SolutionUrl = AssetsUrl + "index.html"; 
 }
@@ -33,7 +32,7 @@ export const setContext = (context, sourceUrl?: string) => {
 // Strings
 const Strings = {
     AppElementId: "app-catalog-dashboard",
-    ConfigUrl: AssetsUrl + "config.json",
+    ConfigUrl: "siteassets/config.json",
     DashboardUrl: AssetsUrl + "dashboard.aspx",
     GlobalVariable: "AppDashboard",
     Groups: {
