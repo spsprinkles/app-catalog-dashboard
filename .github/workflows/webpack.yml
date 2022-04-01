@@ -3,6 +3,8 @@ name: Build & Package
 on:
   project:
     types: [ closed ]
+  pull_request:
+    types: [ closed ]
   release:
     types: [ published ]
   workflow_dispatch:
