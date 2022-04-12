@@ -41,13 +41,15 @@ export class ButtonActions {
         if (approvers.length == 0) { return false; }
 
         // Parse the approver
+        let isApprover = false;
         for (let i = 0; i < approvers.length; i++) {
             // See which approver type it is
             switch (approvers[i]) {
                 // Approver's Group
                 case UserTypes.ApproversGroup:
                     // See if this user is an approver
-                    return AppSecurity.IsApprover;
+                    isApprover = isApprover || AppSecurity.IsApprover;
+                    break;
 
                 // Developers of the application
                 case UserTypes.DevelopersGroup:
@@ -55,28 +57,36 @@ export class ButtonActions {
                     let developerIds = this._item.AppDevelopersId ? this._item.AppDevelopersId.results : [];
                     for (let j = 0; j < developerIds.length; i++) {
                         // See if the user is a developer
-                        if (developerIds[j] == ContextInfo.userId) { return true; }
+                        if (developerIds[j] == ContextInfo.userId) {
+                            // Set the flag
+                            isApprover = true;
+                            break;
+                        }
                     }
-
-                    // Not a developer of the app
-                    return false;
+                    break;
 
                 // Developer's Group
                 case UserTypes.DevelopersGroup:
                     // See if this user is a developer
-                    return AppSecurity.IsDeveloper;
+                    isApprover = isApprover || AppSecurity.IsDeveloper;
+                    break;
 
                 // Sponsor
                 case UserTypes.Sponsor:
                     // See if this user is a sponsor
-                    return this._item.AppSponsorId == ContextInfo.userId;
+                    isApprover = isApprover || this._item.AppSponsorId == ContextInfo.userId;
+                    break;
 
                 // Sponsor's Group
                 case UserTypes.SponsorsGroup:
                     // See if this user is a sponsor
-                    return AppSecurity.IsSponsor;
+                    isApprover = isApprover || AppSecurity.IsSponsor;
+                    break;
             }
         }
+
+        // Return the flag
+        return isApprover;
     }
 
     // Renders the actions
