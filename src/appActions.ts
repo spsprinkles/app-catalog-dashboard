@@ -207,38 +207,41 @@ export class AppActions {
                             }
                         }
 
-                        // Get the app
-                        Web(web.ServerRelativeUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(item.AppProductID).execute(app => {
-                            // See if the app is already installed
-                            if (app.SkipDeploymentFeature) {
-                                // Send the email
-                                sendEmail();
-                            } else {
-                                // Update the loading dialog
-                                LoadingDialog.setHeader("Installing the App");
-                                LoadingDialog.setBody("Installing the application to the test site.");
+                        // Configure the test site
+                        this.configureTestSite(web.ServerRelativeUrl, item).then(() => {
+                            // Get the app
+                            Web(web.ServerRelativeUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(item.AppProductID).execute(app => {
+                                // See if the app is already installed
+                                if (app.SkipDeploymentFeature) {
+                                    // Send the email
+                                    sendEmail();
+                                } else {
+                                    // Update the loading dialog
+                                    LoadingDialog.setHeader("Installing the App");
+                                    LoadingDialog.setBody("Installing the application to the test site.");
 
-                                // Install the application to the test site
-                                app.install().execute(
-                                    // Success
-                                    () => {
-                                        // Send the email
-                                        sendEmail();
-                                    },
+                                    // Install the application to the test site
+                                    app.install().execute(
+                                        // Success
+                                        () => {
+                                            // Send the email
+                                            sendEmail();
+                                        },
 
-                                    // Error
-                                    () => {
-                                        // Hide the loading dialog
-                                        LoadingDialog.hide();
+                                        // Error
+                                        () => {
+                                            // Hide the loading dialog
+                                            LoadingDialog.hide();
 
-                                        // Error creating the site
-                                        Modal.clear();
-                                        Modal.setHeader("Error Deploying Application");
-                                        Modal.setBody("There was an error deploying the application to the test site.");
-                                        Modal.show();
-                                    }
-                                );
-                            }
+                                            // Error creating the site
+                                            Modal.clear();
+                                            Modal.setHeader("Error Deploying Application");
+                                            Modal.setBody("There was an error deploying the application to the test site.");
+                                            Modal.show();
+                                        }
+                                    );
+                                }
+                            });
                         });
                     },
                     // Error
