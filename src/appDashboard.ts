@@ -30,8 +30,9 @@ export class AppDashboard {
         this._el.classList.add("bs");
         this._el.innerHTML = `
             <div id="app-dashboard" class="row">
+                <div id="app-status-info" class="col-12"></div>
                 <div id="app-nav" class="col-12"></div>
-                <div id="app-alert" class="col-12"></div>
+                <div id="app-error" class="col-12"></div>
                 <div id="app-info" class="col-12"></div>
                 <div id="app-docs" class="col-12 d-none"></div>
             </div>
@@ -41,7 +42,8 @@ export class AppDashboard {
         this.renderNav();
 
         // Render the alert
-        this.renderAlert();
+        this.renderAlertStatus();
+        this.renderAlertError();
 
         // Render the info
         this.renderInfo();
@@ -108,8 +110,9 @@ export class AppDashboard {
 
         // Load the the document set information
         DataSource.loadDocSet().then(() => {
-            // Render the alert
-            this.renderAlert();
+            // Render the alerts
+            this.renderAlertStatus();
+            this.renderAlertError();
 
             // Render the info
             this.renderInfo();
@@ -148,10 +151,38 @@ export class AppDashboard {
         });
     }
 
-    // Renders the alert
-    private renderAlert() {
+    // Renders the status information from the configuration
+    private renderAlertStatus() {
         // Clear the element
-        let elAlert = this._el.querySelector("#app-alert");
+        let elAlert = this._el.querySelector("#app-status-info");
+        while (elAlert.firstChild) { elAlert.removeChild(elAlert.firstChild); }
+
+        // See if an alert exists
+        let cfg = AppConfig.Status[DataSource.DocSetItem.AppStatus];
+        if (cfg && cfg.alert) {
+            // Show the element
+            elAlert.classList.remove("d-none");
+
+            // Render an alert
+            Components.Alert({
+                el: elAlert,
+                className: "m-0 rounded-0",
+                header: cfg.alert.header || "",
+                content: cfg.alert.content || "",
+                isDismissible: false,
+                type: Components.AlertTypes.Info
+            });
+        }
+        else {
+            // Hide the element
+            elAlert.classList.add("d-none");
+        }
+    }
+
+    // Renders the error in an alert
+    private renderAlertError() {
+        // Clear the element
+        let elAlert = this._el.querySelector("#app-error");
         while (elAlert.firstChild) { elAlert.removeChild(elAlert.firstChild); }
 
         // See if an alert exists
