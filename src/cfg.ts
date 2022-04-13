@@ -1034,27 +1034,27 @@ export const createSecurityGroups = (): PromiseLike<void> => {
                 );
             });
         }).then(() => {
+            let customPermissionLevel = "Contribute and Manage Subwebs";
+
             // Creates the custom permission level
             let createPermissionLevel = (roles): PromiseLike<void> => {
                 // Return a promise
                 return new Promise(resolve => {
-                    let customName = "Contribute and Manage Subwebs";
-
                     // See if the roles contain the custom permission
-                    if (roles[customName]) {
+                    if (roles[customPermissionLevel]) {
                         // Resolve the request
                         resolve();
                     } else {
                         // Create the custom permission
                         Helper.copyPermissionLevel({
                             BasePermission: "Contribute",
-                            Name: "Contribute and Manage Subwebs",
+                            Name: customPermissionLevel,
                             Description: "Extends the contribute permission level and adds the ability to create a subweb.",
                             AddPermissions: [SPTypes.BasePermissionTypes.ManageSubwebs],
                             WebUrl: AppConfig.Configuration.appCatalogUrl
                         }).then(role => {
                             // Update the mapper
-                            roles[customName] = role;
+                            roles[customPermissionLevel] = role;
 
                             // Resolve the request
                             resolve();
@@ -1076,7 +1076,7 @@ export const createSecurityGroups = (): PromiseLike<void> => {
                             let roleDef = roleDefs.results[i];
 
                             // Add the role by type
-                            roles[roleDef.RoleTypeKind] = roleDef.Id;
+                            roles[roleDef.RoleTypeKind > 0 ? roleDef.RoleTypeKind : roleDef.Name] = roleDef.Id;
                         }
 
                         // Create the custom permission level
@@ -1174,11 +1174,11 @@ export const createSecurityGroups = (): PromiseLike<void> => {
                         // Ensure the dev group exists
                         if (sponsorGroup) {
                             // Set the list permissions
-                            listApps.RoleAssignments().addRoleAssignment(sponsorGroup.Id, permissions[SPTypes.RoleType.Administrator]).execute(() => {
+                            listApps.RoleAssignments().addRoleAssignment(sponsorGroup.Id, permissions[customPermissionLevel]).execute(() => {
                                 // Log
                                 console.log("[Apps List] The sponsor permission was added successfully.");
                             });
-                            listAssessments.RoleAssignments().addRoleAssignment(sponsorGroup.Id, permissions[SPTypes.RoleType.Administrator]).execute(() => {
+                            listAssessments.RoleAssignments().addRoleAssignment(sponsorGroup.Id, permissions[customPermissionLevel]).execute(() => {
                                 // Log
                                 console.log("[Assessments List] The sponsor permission was added successfully.");
                             });
