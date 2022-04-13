@@ -28,6 +28,7 @@ export interface IEmail {
 // Status
 export interface IStatus {
     actions?: string[];
+    alert?: IStatusAlert;
     approval?: string[];
     checklists?: string[];
     createTestSite?: boolean;
@@ -39,6 +40,12 @@ export interface IStatus {
     requiresTechReview?: boolean;
     requiresTestCases?: boolean;
     stepNumber: number;
+}
+
+// Status Alert
+export interface IStatusAlert {
+    header: string;
+    content: string;
 }
 
 // User Types

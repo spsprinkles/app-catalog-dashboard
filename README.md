@@ -27,13 +27,14 @@ The `status` configuration value is an object consisting of the following proper
 
 | Name | Description |
 | --- | --- |
-| requiresTechReview | If set to true, will validate the technical review form as part of the approval process. |
-| requiresTestCases | If set to true, will validate the test cases form as part of the approval process. |
 | actions | An array of buttons to be displayed on the app dashboard. |
+| alert | The alert content that is displayed at the top of the app dashboard for the status. |
 | approval | An array of user type values that can approve the item. |
 | checklists | Displayed on the approval/submission form. |
 | createTestSite | If set to true, will create the test site for the application. |
 | notification | The email information to notify users on submission/approval of the item. |
+| requiresTechReview | If set to true, will validate the technical review form as part of the approval process. |
+| requiresTestCases | If set to true, will validate the test cases form as part of the approval process. |
 
 #### Actions
 
@@ -56,6 +57,15 @@ The available values for the `actions` status property.
 | View | Displays the app metadata view form. |
 | ViewTechReview | Displays the last technical review for the application. |
 | ViewTestCases | Displays the last test cases for the application. |
+
+#### Alert
+
+The alert property will have the following options.
+
+| Name | Description |
+| --- | --- |
+| header | The alert header. |
+| content | The alert content. |
 
 #### Notification
 
