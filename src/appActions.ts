@@ -190,7 +190,9 @@ export class AppActions {
                                     To: to,
                                     Subject: "Test Site Created",
                                     Body: "<p>App Developers,</p><br />" +
-                                        "<p>The '" + item.Title + "' app test site has been created.</p>"
+                                        "<p>The '" + item.Title + "' app test site has been created. Click the link below to access the site:</p>" +
+                                        "<p>" + window.location.origin + web.ServerRelativeUrl + "</p>" +
+                                        "<p>App Team</p>"
                                 }).execute(() => {
                                     // Close the dialog
                                     LoadingDialog.hide();
