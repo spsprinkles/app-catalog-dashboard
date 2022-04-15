@@ -62,6 +62,12 @@ export class AppNotifications {
                 value = "<a href='" + pageUrl + "'>" + pageUrl + "</a>";
                 break;
 
+            // Url to the dashboard page
+            case "PageUrlText":
+                // Set the value
+                value = window.location.origin + AppConfig.Configuration.dashboardUrl + "?app-id=" + item.Id;
+                break;
+
             // Current user's name
             case "User.Name":
                 // Set the value
