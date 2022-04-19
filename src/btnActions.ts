@@ -584,7 +584,6 @@ export class ButtonActions {
                             iconClassName: "me-1",
                             iconSize: 20,
                             iconType: chatSquareDots,
-                            isDisabled: !canEdit,
                             isSmall: true,
                             type: Components.ButtonTypes.OutlinePrimary,
                             onClick: () => {
