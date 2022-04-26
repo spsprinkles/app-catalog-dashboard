@@ -89,6 +89,8 @@ The notification email content can be dynamically set by using the `[[Internal F
 | Internal Field Name | The item's metadata. |
 | PageUrl | The html link to display the item. |
 | PageUrlText | The text link to display the item. |
+| TestSiteUrl | The html link to the app's test site. |
+| TestSiteUrlText | The text link to the app's test site. |
 
 #### User Types
 

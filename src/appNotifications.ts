@@ -68,6 +68,19 @@ export class AppNotifications {
                 value = window.location.origin + AppConfig.Configuration.dashboardUrl + "?app-id=" + item.Id;
                 break;
 
+            // Url to the test site
+            case "TestSiteUrl":
+                // Set the value
+                let testSiteUrl = (AppConfig.Configuration.appCatalogUrl || ContextInfo.webAbsoluteUrl) + "/" + item.AppProductID;
+                value = "<a href='" + testSiteUrl + "'>" + testSiteUrl + "</a>";
+                break;
+
+            // Url to the test site
+            case "TestSiteUrlText":
+                // Set the value
+                value = (AppConfig.Configuration.appCatalogUrl || ContextInfo.webAbsoluteUrl) + "/" + item.AppProductID;
+                break;
+
             // Current user's name
             case "User.Name":
                 // Set the value
