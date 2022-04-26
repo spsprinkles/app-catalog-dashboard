@@ -58,8 +58,8 @@ export class AppForms {
                                         // Close the dialog
                                         LoadingDialog.hide();
 
-                                        // Send the notification
-                                        AppNotifications.sendEmail(status.nextStep, item).then(() => {
+                                        // Send the notifications
+                                        AppNotifications.sendEmail(status.notification, item).then(() => {
                                             // See if the test app catalog exists and we are creating the test site
                                             if (DataSource.SiteCollectionAppCatalogExists && status.createTestSite) {
                                                 // Load the test site
@@ -1481,8 +1481,8 @@ export class AppForms {
                                 }).execute(() => {
                                     // Code to run after the sponsor is added to the security group
                                     let onComplete = () => {
-                                        // Send an email
-                                        AppNotifications.sendEmail(newStatus, item).then(() => {
+                                        // Send the notifications
+                                        AppNotifications.sendEmail(status.notification, item, false).then(() => {
                                             // Call the update event
                                             onUpdate();
 

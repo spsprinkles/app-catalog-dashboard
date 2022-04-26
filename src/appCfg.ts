@@ -19,10 +19,12 @@ export interface IConfiguration {
 
 // Email
 export interface IEmail {
+    approval?: boolean;
     content: string;
     to: string[];
     cc: string[];
     subject: string;
+    submission?: boolean;
 }
 
 // Status
