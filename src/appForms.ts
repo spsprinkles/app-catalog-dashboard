@@ -1494,8 +1494,8 @@ export class AppForms {
                                     // Get the sponsor
                                     let sponsor = AppSecurity.getSponsor(item.AppSponsorId);
                                     if (sponsor == null && item.AppSponsorId > 0) {
-                                        // Add the user as a sponsor
-                                        AppSecurity.addSponsor(ContextInfo.userId).then(() => {
+                                        // Add the sponsor to the group
+                                        AppSecurity.addSponsor(item.AppSponsorId).then(() => {
                                             // Complete the request
                                             onComplete();
                                         });
