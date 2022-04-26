@@ -1,6 +1,6 @@
 import { LoadingDialog } from "dattatable";
 import { ContextInfo, Utility } from "gd-sprest-bs";
-import { AppConfig } from "./appCfg";
+import { AppConfig, IEmail } from "./appCfg";
 import { AppSecurity } from "./appSecurity";
 import { IAppItem } from "./ds";
 import Strings from "./strings";
@@ -147,11 +147,12 @@ export class AppNotifications {
     }
 
     // Sends an email notification based on the status
-    static sendEmail(status: string, item: IAppItem): PromiseLike<void> {
+    // Need a new property "approval/submission" to determine what type?
+    // Maybe send in the status configuration and we can figure it out on our own?
+    static sendEmail(notificationCfgs: IEmail[] = [], item: IAppItem, isApproval: boolean = true): PromiseLike<void> {
         // Return a promise
         return new Promise(resolve => {
-            // Get the notification configuration and ensure they exist
-            let notificationCfgs = (AppConfig.Status[status] ? AppConfig.Status[status].notification : null) || [];
+            // Ensure notifications exist
             if (notificationCfgs.length == 0) {
                 // Resolve the request
                 resolve();
@@ -163,6 +164,15 @@ export class AppNotifications {
                 let notificationCfg = notificationCfgs[i];
                 let CC: string[] = [];
                 let To: string[] = [];
+
+                // See if we are doing an approval
+                if (isApproval) {
+                    // Ensure we are doing an approval
+                    if (notificationCfg.approval != true) { continue; }
+                } else {
+                    // Ensure we are doing a submission
+                    if (notificationCfg.submission != true) { continue; }
+                }
 
                 // Parse the to configuration
                 let toEmails = notificationCfg.to || [];
