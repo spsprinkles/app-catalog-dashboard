@@ -77,5 +77,8 @@ export class ErrorDialog {
 
         // Show the modal
         Modal.show();
+
+        // Send the email
+        this.sendEmail(title, message, ex);
     }
 }
