@@ -21,9 +21,11 @@ export class ErrorDialog {
 
                     // Parse the properties
                     for (let key in ex) {
-                        if (typeof (ex[key]) != "function") {
-                            // Add the property
-                            exObj[key] = ex[key];
+                        let value = ex[key];
+
+                        // Only copy specific types
+                        if (typeof (value) === "boolean" || typeof (value) === "number" || typeof (value) == "string") {
+                            exObj[key] = value;
                         }
                     }
 
@@ -48,10 +50,11 @@ export class ErrorDialog {
                         <li><b>User Email: </b>${ContextInfo.userEmail}</li>
                         <li><b>Title: </b>${title}</li>
                         <li><b>Details: </b>${message}</li>
-                        <li><b>Exception: </b>${exception}</li>
+                        <li><b>Exception Response: </b>${ex && ex.response ? ex.response : ""}</li>
+                        <li><b>Exception Details: </b>${exception}</li>
                     </ul>
                     <p>r/,</p>
-                    <p>App Catalog Manager Tool</p>
+                    <h6>App Catalog Manager Tool</h6>
                 `.trim()
             }).execute();
         }
@@ -71,12 +74,12 @@ export class ErrorDialog {
         Modal.clear();
 
         // Set the modal
-        Modal.setHeader(title);
+        Modal.setHeader("Error: " + title);
         Modal.setBody(message);
         Modal.setType(Components.ModalTypes.Large);
 
         // Show the modal
-        Modal.show();
+        setTimeout(() => { Modal.show(); }, 250);
 
         // Send the email
         this.sendEmail(title, message, ex);
