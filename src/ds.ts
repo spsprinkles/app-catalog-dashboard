@@ -3,7 +3,7 @@ import { Components, ContextInfo, Helper, Site, Types, Web } from "gd-sprest-bs"
 import { AppConfig } from "./appCfg";
 import { AppSecurity } from "./appSecurity";
 import { Configuration, createSecurityGroups } from "./cfg";
-import * as Common from "./common";
+import { ErrorDialog } from "./errorDialog";
 import Strings from "./strings";
 
 // App Item
@@ -328,6 +328,10 @@ export class DataSource {
 
                                                     // Refresh the page
                                                     window.location.reload();
+                                                },
+                                                ex => {
+                                                    // Show the error
+                                                    ErrorDialog.show("Enable Feature", "There was an error enabling the document set site collection feature.", ex);
                                                 }
                                             );
                                         }

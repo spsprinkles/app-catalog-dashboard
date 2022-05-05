@@ -3,6 +3,7 @@ import { ContextInfo, Utility } from "gd-sprest-bs";
 import { AppConfig, IEmail } from "./appCfg";
 import { AppSecurity } from "./appSecurity";
 import { IAppItem } from "./ds";
+import { ErrorDialog } from "./errorDialog";
 import Strings from "./strings";
 
 /**
@@ -145,13 +146,19 @@ export class AppNotifications {
                     Subject: "App '" + item.Title + "' Sent Back",
                     Body: "App Developers,<br /><br />The '" + item.Title +
                         "' app has been sent back based on the comments below.<br /><br />" + comments
-                }).execute(() => {
-                    // Close the loading dialog
-                    LoadingDialog.hide();
+                }).execute(
+                    () => {
+                        // Close the loading dialog
+                        LoadingDialog.hide();
 
-                    // Resolve the request
-                    resolve();
-                });
+                        // Resolve the request
+                        resolve();
+                    },
+                    ex => {
+                        // Log the error
+                        ErrorDialog.show("Sending Email", "There was an error sending the notification email.", ex);
+                    }
+                );
             } else {
                 // Resolve the request
                 resolve();
@@ -233,13 +240,19 @@ export class AppNotifications {
                         To, CC,
                         Body,
                         Subject: notificationCfg.subject,
-                    }).execute(() => {
-                        // Close the loading dialog
-                        LoadingDialog.hide();
+                    }).execute(
+                        () => {
+                            // Close the loading dialog
+                            LoadingDialog.hide();
 
-                        // Resolve the request
-                        resolve();
-                    });
+                            // Resolve the request
+                            resolve();
+                        },
+                        ex => {
+                            // Log the error
+                            ErrorDialog.show("Sending Email", "There was an error sending the notification email.", ex);
+                        }
+                    );
                 } else {
                     // Resolve the request
                     resolve();
@@ -292,13 +305,19 @@ export class AppNotifications {
                     To,
                     Body,
                     Subject: subject,
-                }).execute(() => {
-                    // Close the loading dialog
-                    LoadingDialog.hide();
+                }).execute(
+                    () => {
+                        // Close the loading dialog
+                        LoadingDialog.hide();
 
-                    // Resolve the request
-                    resolve();
-                });
+                        // Resolve the request
+                        resolve();
+                    },
+                    ex => {
+                        // Log the error
+                        ErrorDialog.show("Sending Email", "There was an error sending the notification email.", ex);
+                    }
+                );
             } else {
                 // Resolve the request
                 resolve();

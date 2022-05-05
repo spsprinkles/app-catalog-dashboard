@@ -24,28 +24,28 @@
   "dependencies": {
     "datatables.net": "^1.11.5",
     "datatables.net-bs5": "^1.11.5",
-    "dattatable": "^1.7.5",
-    "gd-sprest-bs": "^9.4.1",
+    "dattatable": "^1.7.8",
+    "gd-sprest-bs": "^9.5.7",
     "jquery": "^3.6.0",
-    "jszip": "^3.9.0",
-    "moment": "^2.29.2"
+    "jszip": "^3.9.1",
+    "moment": "^2.29.3"
   },
   "devDependencies": {
-    "@babel/core": "^7.17.8",
-    "@babel/preset-env": "^7.16.11",
+    "@babel/core": "^7.17.10",
+    "@babel/preset-env": "^7.17.10",
     "@types/datatables.net": "^1.10.21",
     "@types/jquery": "^3.5.14",
-    "babel-loader": "^8.2.4",
+    "babel-loader": "^8.2.5",
     "css-loader": "^5.2.7",
     "html-loader": "^3.1.0",
     "moment-locales-webpack-plugin": "^1.2.0",
-    "sass": "^1.49.11",
+    "sass": "^1.51.0",
     "sass-loader": "^12.6.0",
     "style-loader": "^3.3.1",
-    "ts-loader": "^9.2.8",
-    "typescript": "^4.6.3",
+    "ts-loader": "^9.3.0",
+    "typescript": "^4.6.4",
     "url-loader": "^4.1.1",
-    "webpack": "^5.71.0",
+    "webpack": "^5.72.0",
     "webpack-cli": "^4.9.2"
   }
 }

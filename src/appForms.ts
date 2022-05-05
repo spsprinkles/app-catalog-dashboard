@@ -1,10 +1,11 @@
 import { ItemForm, LoadingDialog, Modal } from "dattatable";
-import { Components, ContextInfo, Helper, List, SPTypes, Web } from "gd-sprest-bs";
+import { Components, Helper, List, SPTypes, Web } from "gd-sprest-bs";
 import { AppActions } from "./appActions";
 import { AppConfig, IStatus } from "./appCfg";
 import { AppNotifications } from "./appNotifications";
 import { AppSecurity } from "./appSecurity";
 import { DataSource, IAppItem, IAssessmentItem } from "./ds";
+import { ErrorDialog } from "./errorDialog";
 import Strings from "./strings";
 
 /**
@@ -54,43 +55,49 @@ export class AppForms {
                                     // Update the item
                                     item.update({
                                         AppStatus: status.nextStep
-                                    }).execute(() => {
-                                        // Close the dialog
-                                        LoadingDialog.hide();
+                                    }).execute(
+                                        () => {
+                                            // Close the dialog
+                                            LoadingDialog.hide();
 
-                                        // Send the notifications
-                                        AppNotifications.sendEmail(status.notification, item).then(() => {
-                                            // See if the test app catalog exists and we are creating the test site
-                                            if (DataSource.SiteCollectionAppCatalogExists && status.createTestSite) {
-                                                // Load the test site
-                                                DataSource.loadTestSite(item).then(
-                                                    // Exists
-                                                    webInfo => {
-                                                        // See if the current version is deployed
-                                                        if (item.AppVersion == webInfo.app.InstalledVersion && !webInfo.app.SkipDeploymentFeature) {
-                                                            // Call the update event
-                                                            onUpdate();
-                                                        } else {
-                                                            // Update the app
-                                                            AppActions.updateApp(item, webInfo.web.ServerRelativeUrl).then(() => {
+                                            // Send the notifications
+                                            AppNotifications.sendEmail(status.notification, item).then(() => {
+                                                // See if the test app catalog exists and we are creating the test site
+                                                if (DataSource.SiteCollectionAppCatalogExists && status.createTestSite) {
+                                                    // Load the test site
+                                                    DataSource.loadTestSite(item).then(
+                                                        // Exists
+                                                        webInfo => {
+                                                            // See if the current version is deployed
+                                                            if (item.AppVersion == webInfo.app.InstalledVersion && !webInfo.app.SkipDeploymentFeature) {
                                                                 // Call the update event
                                                                 onUpdate();
-                                                            });
-                                                        }
-                                                    },
+                                                            } else {
+                                                                // Update the app
+                                                                AppActions.updateApp(item, webInfo.web.ServerRelativeUrl).then(() => {
+                                                                    // Call the update event
+                                                                    onUpdate();
+                                                                });
+                                                            }
+                                                        },
 
-                                                    // Doesn't exist
-                                                    () => {
-                                                        // Create the test site
-                                                        AppActions.createTestSite(item, onUpdate);
-                                                    }
-                                                );
-                                            } else {
-                                                // Call the update event
-                                                onUpdate();
-                                            }
+                                                        // Doesn't exist
+                                                        () => {
+                                                            // Create the test site
+                                                            AppActions.createTestSite(item, onUpdate);
+                                                        }
+                                                    );
+                                                } else {
+                                                    // Call the update event
+                                                    onUpdate();
+                                                }
+                                            },
+                                                ex => {
+                                                    // Log the error
+                                                    ErrorDialog.show("Updating Status", "There was an error updating the status.", ex);
+                                                }
+                                            );
                                         });
-                                    });
 
                                 }
                             });
@@ -210,19 +217,25 @@ export class AppForms {
             // Get the assoicated item
             List(Strings.Lists.Assessments).Items().query({
                 Filter: "RelatedAppId eq " + item.Id
-            }).execute(items => {
-                // Parse the items
-                Helper.Executor(items.results, item => {
-                    // Return a promise
-                    return new Promise(resolve => {
-                        // Delete the item
-                        item.delete().execute(() => { resolve(null); });
+            }).execute(
+                items => {
+                    // Parse the items
+                    Helper.Executor(items.results, item => {
+                        // Return a promise
+                        return new Promise(resolve => {
+                            // Delete the item
+                            item.delete().execute(() => { resolve(null); });
+                        });
+                    }).then(() => {
+                        // Resolve the request
+                        resolve();
                     });
-                }).then(() => {
-                    // Resolve the request
-                    resolve();
-                });
-            }, reject);
+                },
+                ex => {
+                    // Log the error
+                    ErrorDialog.show("Deleting Assessments", "There was an error deleting the assessments", ex);
+                }
+            );
         });
     }
 
@@ -696,13 +709,6 @@ export class AppForms {
                     "AppImageURL3", "AppImageURL4", "AppImageURL5", "AppSupportURL",
                     "AppVideoURL"
                 ];
-                /*
-                props.query.Select = [
-                    "AppDescription", "AppThumbnailURL", "AppImageURL1", "AppImageURL2",
-                    "AppImageURL3", "AppImageURL4", "AppImageURL5", "AppSupportURL",
-                    "AppVideoURL"
-                ];
-                */
 
                 // Return the properties
                 return props;
@@ -845,10 +851,16 @@ export class AppForms {
                 Web(Strings.SourceUrl).Lists(Strings.Lists.Assessments).Items().add({
                     RelatedAppId: item.Id,
                     Title: item.Title + " Review " + (new Date(Date.now()).toDateString())
-                }).execute(item => {
-                    // Show the assessment form
-                    displayForm(item as any);
-                });
+                }).execute(
+                    item => {
+                        // Show the assessment form
+                        displayForm(item as any);
+                    },
+                    ex => {
+                        // Log the error
+                        ErrorDialog.show("Adding Assessment", "There was an error adding the assessment.", ex);
+                    }
+                );
             }
         });
     }
@@ -976,10 +988,16 @@ export class AppForms {
                         ContentTypeId: ct ? ct.StringId : null,
                         RelatedAppId: item.Id,
                         Title: item.Title + " Tests " + (new Date(Date.now()).toDateString())
-                    }).execute(item => {
-                        // Show the assessment form
-                        displayForm(item as any);
-                    });
+                    }).execute(
+                        item => {
+                            // Show the assessment form
+                            displayForm(item as any);
+                        },
+                        ex => {
+                            // Log the error
+                            ErrorDialog.show("Adding Assessment", "There was an error adding the assessment.", ex);
+                        }
+                    );
                 });
             }
         });
@@ -1280,13 +1298,19 @@ export class AppForms {
                         AppComments: comments,
                         AppIsRejected: true,
                         AppStatus: newStatus
-                    }).execute(() => {
-                        // Send the notification
-                        AppNotifications.rejectEmail(newStatus, item, comments).then(() => {
-                            // Call the update event
-                            onUpdate();
-                        });
-                    });
+                    }).execute(
+                        () => {
+                            // Send the notification
+                            AppNotifications.rejectEmail(newStatus, item, comments).then(() => {
+                                // Call the update event
+                                onUpdate();
+                            });
+                        },
+                        ex => {
+                            // Log the error
+                            ErrorDialog.show("Updating Request", "There was an error updating the item.", ex);
+                        }
+                    );
                 }
             }
         }).el);
