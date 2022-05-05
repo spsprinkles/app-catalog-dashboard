@@ -6,6 +6,7 @@ import Strings from "./strings";
 export interface IConfiguration {
     appCatalogUrl?: string;
     dashboardUrl?: string;
+    errorEmails?: string[];
     helpPageUrl?: string;
     templatesLibraryUrl?: string;
     tenantAppCatalogUrl?: string;
