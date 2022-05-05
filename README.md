@@ -19,6 +19,12 @@ The [configuration file](https://github.com/spsprinkles/app-catalog-dashboard/ra
 | helpPageUrl | The url to the help page button located in the navigation bar. If not provided, the help button will not be rendered. |
 | templatesLibraryUrl | The url to the folder containing the templates. If not provided, the templates dropdown will not be rendered. |
 | tenantAppCatalogUrl | The url to the tenant app catalog. |
+
+### Other
+
+| Name | Description |
+| --- | --- |
+| errorEmails | An array of email addresses to send to when a user has an error when using the application. This will help with troubleshooting issues in production. |
 | userAgreement | The user agreement displayed to the developers adding packages. |
 
 ### Status
