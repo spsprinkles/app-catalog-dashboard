@@ -1,5 +1,5 @@
-import { LoadingDialog } from "dattatable";
 import { ContextInfo, Types, Web } from "gd-sprest-bs";
+import { ErrorDialog } from "./errorDialog";
 import Strings from "./strings";
 
 /**
@@ -102,13 +102,19 @@ export class AppSecurity {
         // Return a promise
         return new Promise((resolve, reject) => {
             // Add the user
-            this.DevGroup.Users.addUserById(userId).execute(user => {
-                // Append the user
-                this.DevGroup.Users.results.push(user);
+            this.DevGroup.Users.addUserById(userId).execute(
+                user => {
+                    // Append the user
+                    this.DevGroup.Users.results.push(user);
 
-                // Resolve the request
-                resolve();
-            }, reject);
+                    // Resolve the request
+                    resolve();
+                },
+                ex => {
+                    // Log the error
+                    ErrorDialog.show("Adding Developer", "There was an error adding the developer.", ex);
+                }
+            );
         });
     }
     private static loadDevGroup(): PromiseLike<void> {

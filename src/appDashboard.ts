@@ -10,6 +10,7 @@ import { AppView } from "./appView";
 import { ButtonActions } from "./btnActions";
 import * as Common from "./common";
 import { DataSource } from "./ds";
+import { ErrorDialog } from "./errorDialog";
 import Strings from "./strings";
 
 /**
@@ -285,14 +286,8 @@ export class AppDashboard {
                                 // Deny the file upload
                                 resolve(false);
 
-                                // Clear the modal
-                                Modal.clear();
-
-                                // Set the header
-                                Modal.setHeader("Error Uploading File");
-
-                                // Set the body
-                                Modal.setBody("<p>The app package being uploaded has been denied for the following reason:</p><br/>" + errorMessage)
+                                // Log the error
+                                ErrorDialog.show("Uploading Package", "<p>The app package being uploaded has been denied for the following reason:</p><br/>" + errorMessage);
 
                                 // Show the modal
                                 Modal.show();
@@ -300,22 +295,28 @@ export class AppDashboard {
                                 // Update the status and set it back to the testing status
                                 let itemInfo = pkgInfo.item;
                                 itemInfo.AppStatus = AppConfig.TestCasesStatus;
-                                DataSource.DocSetItem.update(itemInfo).execute(() => {
-                                    // See if the item is currently approved
-                                    if (DataSource.DocSetItem.AppStatus == AppConfig.TestCasesStatus) {
-                                        // Archive the file
-                                        AppActions.archivePackage(DataSource.DocSetItem, () => {
+                                DataSource.DocSetItem.update(itemInfo).execute(
+                                    () => {
+                                        // See if the item is currently approved
+                                        if (DataSource.DocSetItem.AppStatus == AppConfig.TestCasesStatus) {
+                                            // Archive the file
+                                            AppActions.archivePackage(DataSource.DocSetItem, () => {
+                                                // Add the file
+                                                resolve(true);
+                                            });
+                                        } else {
                                             // Add the file
                                             resolve(true);
-                                        });
-                                    } else {
-                                        // Add the file
-                                        resolve(true);
-                                    }
+                                        }
 
-                                    // Refresh the dashboard
-                                    this.refresh();
-                                });
+                                        // Refresh the dashboard
+                                        this.refresh();
+                                    },
+                                    ex => {
+                                        // Log the error
+                                        ErrorDialog.show("Updating Package", "There was an error updating the package.", ex);
+                                    }
+                                );
                             }
                         });
                     } else {
@@ -456,7 +457,6 @@ export class AppDashboard {
                     elNavInfo.classList.remove("d-none");
 
                     // Hide the actions
-
                     crumb.setItems([
                         {
                             text: "App Dashboard",

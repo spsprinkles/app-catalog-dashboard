@@ -1,5 +1,6 @@
 import { Helper, List, SPTypes, Types, Web } from "gd-sprest-bs";
 import { AppConfig } from "./appCfg";
+import { ErrorDialog } from "./errorDialog";
 import Strings from "./strings";
 
 /**
@@ -1022,9 +1023,9 @@ export const createSecurityGroups = (): PromiseLike<void> => {
                             },
 
                             // Error
-                            () => {
-                                // The user is probably not an admin
-                                console.error("Error creating the security group.");
+                            ex => {
+                                // Log the error
+                                ErrorDialog.show("Security Group", "There was an error creating the security group.", ex);
 
                                 // Reject the request
                                 reject();
@@ -1052,13 +1053,19 @@ export const createSecurityGroups = (): PromiseLike<void> => {
                             Description: "Extends the contribute permission level and adds the ability to create a subweb.",
                             AddPermissions: [SPTypes.BasePermissionTypes.ManageSubwebs],
                             WebUrl: AppConfig.Configuration.appCatalogUrl
-                        }).then(role => {
-                            // Update the mapper
-                            roles[customPermissionLevel] = role;
+                        }).then(
+                            role => {
+                                // Update the mapper
+                                roles[customPermissionLevel] = role;
 
-                            // Resolve the request
-                            resolve();
-                        }, reject);
+                                // Resolve the request
+                                resolve();
+                            },
+                            ex => {
+                                // Log the error
+                                ErrorDialog.show("Permission Level", "There was an error creating the contribute and manage subwebs custom permission level.", ex);
+                            }
+                        );
                     }
                 });
             }
@@ -1080,22 +1087,10 @@ export const createSecurityGroups = (): PromiseLike<void> => {
                         }
 
                         // Create the custom permission level
-                        createPermissionLevel(roles).then(
-                            // Success
-                            () => {
-                                // Resolve the request
-                                resolve(roles);
-                            },
-
-                            // Error
-                            () => {
-                                // Log the error
-                                console.error("[" + Strings.ProjectName + "] Error creating the custom permission level.");
-
-                                // Resolve the request
-                                resolve(roles);
-                            }
-                        );
+                        createPermissionLevel(roles).then(() => {
+                            // Resolve the request
+                            resolve(roles);
+                        });
                     });
                 });
             }
