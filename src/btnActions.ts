@@ -89,6 +89,27 @@ export class ButtonActions {
         return isApprover;
     }
 
+    // Determines if the user is an app developer
+    private isDeveloper() {
+        let isDeveloper = false;
+
+        // See if there is an approver setting for this status
+        let developers = (this._item.AppDevelopersId ? this._item.AppDevelopersId.results : null) || [];
+
+        // Parse the developers
+        for (let i = 0; i < developers.length; i++) {
+            // See if the current user is the app developer
+            if (developers[i] == ContextInfo.userId) {
+                // Set the flag and break from the loop
+                isDeveloper = true;
+                break;
+            }
+        }
+
+        // Return the flag
+        return isDeveloper;
+    }
+
     // Renders the actions
     render() {
         // Ensure actions exist
@@ -136,8 +157,33 @@ export class ButtonActions {
 
                 // Approve/Reject
                 case "ApproveReject":
-                    // Ensure this user can approve this item
-                    if (this.isApprover()) {
+                    // See if the app is rejected
+                    if (this._item.AppIsRejected) {
+                        // See if this is an approver or developer
+                        if (this.isApprover() || this.isDeveloper()) {
+                            // Render the resubmit button
+                            tooltips.add({
+                                content: "Resubmits the app for approval.",
+                                btnProps: {
+                                    text: "Resubmit",
+                                    iconClassName: "me-1",
+                                    iconSize: 20,
+                                    iconType: chatSquareDots,
+                                    isSmall: true,
+                                    type: Components.ButtonTypes.OutlineSuccess,
+                                    onClick: () => {
+                                        // Display the approval form
+                                        this._forms.submit(this._item, () => {
+                                            // Call the update event
+                                            this._onUpdate();
+                                        });
+                                    }
+                                }
+                            });
+                        }
+                    }
+                    // Else, ensure this user can approve this item
+                    else if (this.isApprover()) {
                         // Render the approval button
                         tooltips.add({
                             content: "Approves the application.",
