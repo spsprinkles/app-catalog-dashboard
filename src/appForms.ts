@@ -1439,7 +1439,7 @@ export class AppForms {
         Modal.clear();
 
         // Set the header
-        Modal.setHeader("Submit App for Approval");
+        Modal.setHeader((item.AppIsRejected ? "Resubmit" : "Submit") + " App for Approval");
 
         // Create the body element
         let elBody = document.createElement("div");
@@ -1501,7 +1501,7 @@ export class AppForms {
                                 let newStatus = status ? status.nextStep : AppConfig.Status[0].name;
                                 item.update({
                                     AppIsRejected: false,
-                                    AppStatus: newStatus
+                                    AppStatus: item.AppIsRejected ? item.AppStatus : newStatus
                                 }).execute(() => {
                                     // Code to run after the sponsor is added to the security group
                                     let onComplete = () => {
