@@ -48,6 +48,28 @@ export class AppNotifications {
         // Default the value
         let value = item[key];
 
+        // See if the value is complex
+        if (key.indexOf('.') > 0) {
+            // See if it's the user name
+            if (key == "User.Name") {
+                // Set the value
+                value = ContextInfo.userDisplayName;
+            } else {
+                // Get the sub-keys and update the value
+                let keys = key.split('.');
+                value = item[keys[0]]
+
+                // Parse the properties of complex fields
+                for (let j = 1; j < keys.length; j++) {
+                    // Set the value
+                    value = value && value[keys[j]] ? value[keys[j]] : null;
+                }
+            }
+
+            // Return the value
+            return value;
+        }
+
         // Return the value
         switch (key) {
             // See if this is the status field
@@ -80,12 +102,6 @@ export class AppNotifications {
             case "TestSiteUrlText":
                 // Set the value
                 value = (AppConfig.Configuration.appCatalogUrl || ContextInfo.webAbsoluteUrl) + "/" + item.AppProductID;
-                break;
-
-            // Current user's name
-            case "User.Name":
-                // Set the value
-                value = ContextInfo.userDisplayName;
                 break;
 
             // Item Metadata
@@ -220,12 +236,11 @@ export class AppNotifications {
                     let value = this.getValue(key, item, status);
 
                     // Replace the value
-                    let oldContent = Body;
                     Body = Body.substring(0, startIdx) + value + Body.substring(endIdx + 2);
 
                     // Find the next instance of it
-                    startIdx = oldContent.indexOf("[[", endIdx);
-                    endIdx = oldContent.indexOf("]]", endIdx + 2);
+                    startIdx = Body.indexOf("[[");
+                    endIdx = Body.indexOf("]]");
                 }
 
                 // Ensure emails exist
