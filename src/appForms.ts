@@ -326,6 +326,8 @@ export class AppForms {
 
     // Deploys the solution to a site collection app catalog
     deployToSite(item: IAppItem, onUpdate: () => void) {
+        let isOwner = null;
+
         // Set the header
         Modal.setHeader("Deploy to App Catalog");
 
@@ -352,7 +354,16 @@ export class AppForms {
 
                             // Set the error message
                             results.invalidMessage = "The site does not contain an app catalog.";
-                        } else {
+                        }
+                        // Else, see if the user is not an owner
+                        else if (isOwner === false) {
+                            // Set the flag
+                            results.isValid = false;
+
+                            // Set the error message
+                            results.invalidMessage = "You do not have the appropriate rights to deploy to this site collection.";
+                        }
+                        else {
                             // Set the flag
                             results.isValid = false;
 
@@ -381,6 +392,9 @@ export class AppForms {
                         text: "Load Site",
                         type: Components.ButtonTypes.OutlinePrimary,
                         onClick: () => {
+                            // Clear the owner flag
+                            isOwner = null;
+
                             // Validate the form
                             let url = form.getValues()["Url"];
                             if (url) {
@@ -389,30 +403,42 @@ export class AppForms {
                                 LoadingDialog.setBody("This dialog will close after the app catalog is loaded.");
                                 LoadingDialog.show();
 
-                                // Load the app catalog
-                                hasAppCatalog = false;
-                                Web(url).SiteCollectionAppCatalog().AvailableApps().execute(
-                                    // Success
-                                    apps => {
-                                        // Set the flag
-                                        hasAppCatalog = apps.results && typeof (apps.results.length) === "number" ? true : false;
+                                // Ensure the user is an owner of the site
+                                DataSource.isOwner(url).then(isOwnerFl => {
+                                    // Set the flag
+                                    isOwner = isOwnerFl;
 
-                                        // Validate the form and disable/enable the deploy button
-                                        form.isValid() ? btnDeploy.enable() : btnDeploy.disable();
+                                    // See if the user has the rights to deploy the solution
+                                    if (isOwner) {
+                                        // Load the app catalog
+                                        hasAppCatalog = false;
+                                        Web(url).SiteCollectionAppCatalog().AvailableApps().execute(
+                                            // Success
+                                            apps => {
+                                                // Set the flag
+                                                hasAppCatalog = apps.results && typeof (apps.results.length) === "number" ? true : false;
 
-                                        // Hide the dialog
-                                        LoadingDialog.hide();
-                                    },
+                                                // Validate the form and disable/enable the deploy button
+                                                form.isValid() ? btnDeploy.enable() : btnDeploy.disable();
 
-                                    // The app catalog doesn't exist
-                                    () => {
-                                        // Validate the form
+                                                // Hide the dialog
+                                                LoadingDialog.hide();
+                                            },
+
+                                            // The app catalog doesn't exist
+                                            () => {
+                                                // Validate the form
+                                                form.isValid();
+
+                                                // Hide the dialog
+                                                LoadingDialog.hide();
+                                            }
+                                        );
+                                    } else {
+                                        // Show the error message
                                         form.isValid();
-
-                                        // Hide the dialog
-                                        LoadingDialog.hide();
                                     }
-                                )
+                                });
                             } else {
                                 // Show the default error message
                                 form.isValid();
@@ -1304,6 +1330,9 @@ export class AppForms {
                             AppNotifications.rejectEmail(newStatus, item, comments).then(() => {
                                 // Call the update event
                                 onUpdate();
+
+                                // Hide the dialog
+                                LoadingDialog.hide();
                             });
                         },
                         ex => {
