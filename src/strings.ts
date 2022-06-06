@@ -21,7 +21,7 @@ export const setContext = (context, sourceUrl?: string) => {
     Strings.IsTeams = SPFxContext.sdks.microsoftTeams ? true : false;
 
     // Update the global path
-    Strings.SourceUrl = sourceUrl || ContextInfo.webServerRelativeUrl;
+    Strings.SourceUrl = sourceUrl || ContextInfo.webAbsoluteUrl;
     AssetsUrl = Strings.SourceUrl + "/SiteAssets/";
 
     // Update the values

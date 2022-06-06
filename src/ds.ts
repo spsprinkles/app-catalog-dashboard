@@ -399,6 +399,51 @@ export class DataSource {
         });
     }
 
+    // Determines if the user is an admin of a site
+    static isOwner(url: string): PromiseLike<{ url: string; isOwner: boolean }> {
+        // Return a promise
+        return new Promise(resolve => {
+            let isOwner = false;
+            let userId = null;
+            let web = Web(url);
+            let webUrl: string = null;
+
+            // Get the web
+            web.query({ Expand: ["CurrentUser"], Select: ["Url"] }).execute(web => {
+                // Set the web url
+                webUrl = web.Url;
+
+                // Set the user id
+                userId = web.CurrentUser.Id;
+
+                // See if the user is a SCA
+                if (web.CurrentUser.IsSiteAdmin) {
+                    // Set the flag
+                    isOwner = true;
+                }
+            });
+
+            // Get the owners group
+            web.AssociatedOwnerGroup().Users().execute(users => {
+                // Parse the users
+                for (let i = 0; i < users.results.length; i++) {
+                    // See if the user is in the group
+                    if (users.results[i].Id == userId) {
+                        // Set the flag and break from the loop
+                        isOwner = true;
+                        break;
+                    }
+                }
+            });
+
+            // Wait for the requests to complete
+            web.done(() => {
+                // Resolve the request
+                resolve({ url: webUrl, isOwner });
+            });
+        });
+    }
+
     // Loads the list data
     private static _items: IAppItem[] = null;
     static get Items(): IAppItem[] { return this._items; }
