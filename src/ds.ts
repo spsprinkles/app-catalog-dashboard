@@ -400,22 +400,26 @@ export class DataSource {
     }
 
     // Determines if the user is an admin of a site
-    static isOwner(url: string): PromiseLike<boolean> {
+    static isOwner(url: string): PromiseLike<{ url: string; isOwner: boolean }> {
         // Return a promise
         return new Promise(resolve => {
-            let isAdmin = false;
+            let isOwner = false;
             let userId = null;
             let web = Web(url);
+            let webUrl: string = null;
 
-            // Get the current user
-            web.CurrentUser().execute(user => {
+            // Get the web
+            web.query({ Expand: ["CurrentUser"], Select: ["Url"] }).execute(web => {
+                // Set the web url
+                webUrl = web.Url;
+
                 // Set the user id
-                userId = user.Id;
+                userId = web.CurrentUser.Id;
 
                 // See if the user is a SCA
-                if (user.IsSiteAdmin) {
+                if (web.CurrentUser.IsSiteAdmin) {
                     // Set the flag
-                    isAdmin = true;
+                    isOwner = true;
                 }
             });
 
@@ -426,7 +430,7 @@ export class DataSource {
                     // See if the user is in the group
                     if (users.results[i].Id == userId) {
                         // Set the flag and break from the loop
-                        isAdmin = true;
+                        isOwner = true;
                         break;
                     }
                 }
@@ -435,7 +439,7 @@ export class DataSource {
             // Wait for the requests to complete
             web.done(() => {
                 // Resolve the request
-                resolve(isAdmin);
+                resolve({ url: webUrl, isOwner });
             });
         });
     }

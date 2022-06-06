@@ -1,5 +1,5 @@
 import { ItemForm, LoadingDialog, Modal } from "dattatable";
-import { Components, Helper, List, SPTypes, Web } from "gd-sprest-bs";
+import { Components, ContextInfo, Helper, List, SPTypes, Web } from "gd-sprest-bs";
 import { AppActions } from "./appActions";
 import { AppConfig, IStatus } from "./appCfg";
 import { AppNotifications } from "./appNotifications";
@@ -327,6 +327,7 @@ export class AppForms {
     // Deploys the solution to a site collection app catalog
     deployToSite(item: IAppItem, onUpdate: () => void) {
         let isOwner = null;
+        let webUrl = null;
 
         // Set the header
         Modal.setHeader("Deploy to App Catalog");
@@ -342,8 +343,9 @@ export class AppForms {
                     required: true,
                     onControlRendering: ctrl => {
                         (ctrl as Components.IFormControlPropsTextField).onChange = () => {
-                            // Disable the deploy button
+                            // Disable the buttons
                             btnDeploy.disable();
+                            btnRequest.disable();
                         }
                     },
                     onValidate: (ctrl, results) => {
@@ -354,6 +356,9 @@ export class AppForms {
 
                             // Set the error message
                             results.invalidMessage = "The site does not contain an app catalog.";
+
+                            // Enable the button
+                            btnRequest.enable();
                         }
                         // Else, see if the user is not an owner
                         else if (isOwner === false) {
@@ -384,6 +389,7 @@ export class AppForms {
         // Render the footer
         let hasAppCatalog: boolean = false;
         let btnDeploy: Components.IButton = null;
+        let btnRequest: Components.IButton = null;
         Modal.setFooter(Components.TooltipGroup({
             tooltips: [
                 {
@@ -392,8 +398,9 @@ export class AppForms {
                         text: "Load Site",
                         type: Components.ButtonTypes.OutlinePrimary,
                         onClick: () => {
-                            // Clear the owner flag
+                            // Clear the owner flag and url
                             isOwner = null;
+                            webUrl = null;
 
                             // Validate the form
                             let url = form.getValues()["Url"];
@@ -404,9 +411,10 @@ export class AppForms {
                                 LoadingDialog.show();
 
                                 // Ensure the user is an owner of the site
-                                DataSource.isOwner(url).then(isOwnerFl => {
-                                    // Set the flag
-                                    isOwner = isOwnerFl;
+                                DataSource.isOwner(url).then(info => {
+                                    // Set the flag and url
+                                    isOwner = info.isOwner;
+                                    webUrl = info.url;
 
                                     // See if the user has the rights to deploy the solution
                                     if (isOwner) {
@@ -464,7 +472,28 @@ export class AppForms {
                             });
                         }
                     }
-                }
+                },
+                {
+                    content: "Creates a request for an app catalog.",
+                    btnProps: {
+                        assignTo: btn => { btnRequest = btn; },
+                        isDisabled: true,
+                        text: "Request",
+                        type: Components.ButtonTypes.OutlineInfo,
+                        onClick: () => {
+                            // Display the notification modal
+                            this.sendNotification(item, AppConfig.Configuration.appCatalogRequests, "Request for Site Collection App Catalog",
+`App Catalog Admins,
+
+We are requesting an app catalog to be created on the following site(s):
+
+${webUrl}
+
+r/,
+${ContextInfo.userDisplayName}`.trim());
+                        }
+                    }
+                },
             ]
         }).el);
 
@@ -1378,9 +1407,40 @@ export class AppForms {
 
 
     // Form to send a notification
-    sendNotification(item: IAppItem) {
+    sendNotification(item: IAppItem, to?: string[], subject?: string, body?: string) {
         // Set the header
         Modal.setHeader("Send Notification");
+
+        // See if the to value exists
+        let sendToValue = [];
+        if (to && to.length > 0) {
+            // Parse the options
+            for (let i = 0; i < to.length; i++) {
+                // Copy the value
+                switch (to[i]) {
+                    case "ApproversGroup":
+                        // Add the value
+                        sendToValue.push("Approver's Group");
+                        break;
+                    case "Developers":
+                        // Add the value
+                        sendToValue.push("App Developers");
+                        break;
+                    case "DevelopersGroup":
+                        // Add the value
+                        sendToValue.push("Developer's Group");
+                        break;
+                    case "Sponsor":
+                        // Add the value
+                        sendToValue.push("App Sponsor");
+                        break;
+                    case "SponsorsGroup":
+                        // Add the value
+                        sendToValue.push("Sponsor's Group");
+                        break;
+                }
+            }
+        }
 
         // Create a form
         let form = Components.Form({
@@ -1390,6 +1450,7 @@ export class AppForms {
                     label: "Send To",
                     type: Components.FormControlTypes.MultiSwitch,
                     required: true,
+                    value: sendToValue,
                     items: [
                         {
                             label: "Approver's Group",
@@ -1417,14 +1478,17 @@ export class AppForms {
                     name: "EmailSubject",
                     label: "Email Subject",
                     type: Components.FormControlTypes.TextField,
-                    required: true
+                    required: true,
+                    value: subject
                 },
                 {
                     name: "EmailBody",
                     label: "Email Body",
                     type: Components.FormControlTypes.TextArea,
-                    required: true
-                }
+                    required: true,
+                    rows: 10,
+                    value: body
+                } as Components.IFormControlPropsTextField
             ]
         });
 

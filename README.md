@@ -24,6 +24,7 @@ The [configuration file](https://github.com/spsprinkles/app-catalog-dashboard/ra
 
 | Name | Description |
 | --- | --- |
+| appCatalogRequests | An array of user types to send notification requests to for app catalog creation. |
 | errorEmails | An array of email addresses to send to when a user has an error when using the application. This will help with troubleshooting issues in production. |
 | userAgreement | The user agreement displayed to the developers adding packages. |
 

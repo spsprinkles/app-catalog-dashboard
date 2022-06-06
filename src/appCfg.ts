@@ -4,6 +4,7 @@ import Strings from "./strings";
 
 // Configuration
 export interface IConfiguration {
+    appCatalogRequests?: string[];
     appCatalogUrl?: string;
     dashboardUrl?: string;
     errorEmails?: string[];
