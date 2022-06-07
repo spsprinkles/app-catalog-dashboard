@@ -399,29 +399,33 @@ export class DataSource {
         });
     }
 
-    // Determines if the user is an admin of a site
-    static isOwner(url: string): PromiseLike<{ url: string; isOwner: boolean }> {
+    // Determines if the user is an admin of a site collection
+    static isOwner(url: string): PromiseLike<{ url: string; isOwner: boolean; isRoot: boolean; }> {
         // Return a promise
-        return new Promise(resolve => {
+        return new Promise((resolve, reject) => {
             let isOwner = false;
+            let isRoot = false;
             let userId = null;
             let web = Web(url);
             let webUrl: string = null;
 
             // Get the web
-            web.query({ Expand: ["CurrentUser"], Select: ["Url"] }).execute(web => {
+            web.query({ Expand: ["CurrentUser", "ParentWeb"], Select: ["Id", "Url"] }).execute(web => {
                 // Set the web url
                 webUrl = web.Url;
 
                 // Set the user id
                 userId = web.CurrentUser.Id;
 
+                // Set the flag
+                isRoot = web.ParentWeb.Id == null || web.ParentWeb.Id == web.Id;
+
                 // See if the user is a SCA
                 if (web.CurrentUser.IsSiteAdmin) {
                     // Set the flag
                     isOwner = true;
                 }
-            });
+            }, reject);
 
             // Get the owners group
             web.AssociatedOwnerGroup().Users().execute(users => {
@@ -434,12 +438,13 @@ export class DataSource {
                         break;
                     }
                 }
-            });
+            }, reject);
 
             // Wait for the requests to complete
             web.done(() => {
-                // Resolve the request
-                resolve({ url: webUrl, isOwner });
+                // Ensure the web url was set and resolve the request
+                // Otherwise, the url entered is not valid
+                webUrl ? resolve({ url: webUrl, isOwner, isRoot }) : null;
             });
         });
     }
