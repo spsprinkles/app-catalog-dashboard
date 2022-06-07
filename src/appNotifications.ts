@@ -198,6 +198,8 @@ export class AppNotifications {
     static sendEmail(notificationCfgs: IEmail[] = [], item: IAppItem, isApproval: boolean = true): PromiseLike<void> {
         // Return a promise
         return new Promise(resolve => {
+            let emailsToSend = 0;
+
             // Ensure notifications exist
             if (notificationCfgs.length == 0) {
                 // Resolve the request
@@ -255,6 +257,9 @@ export class AppNotifications {
 
                 // Ensure emails exist
                 if (To.length > 0 || CC.length > 0) {
+                    // Increment the send counter
+                    emailsToSend++;
+
                     // Display a loading dialog
                     LoadingDialog.setHeader("Sending Notification");
                     LoadingDialog.setBody("This dialog will close after the notification is sent.");
@@ -282,6 +287,12 @@ export class AppNotifications {
                     // Resolve the request
                     resolve();
                 }
+            }
+
+            // See if no emails were sent
+            if (emailsToSend == 0) {
+                // Resolve the request
+                resolve();
             }
         });
     }
