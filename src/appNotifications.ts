@@ -93,8 +93,14 @@ export class AppNotifications {
 
             // Url to the test site
             case "TestSiteUrl":
-                // Set the value
+                // Set the url
                 let testSiteUrl = (AppConfig.Configuration.appCatalogUrl || ContextInfo.webAbsoluteUrl) + "/" + item.AppProductID;
+                if (testSiteUrl.toLowerCase().indexOf("http") != 0) {
+                    // Prepend the origin
+                    testSiteUrl = window.location.origin + testSiteUrl;
+                }
+
+                // Set the value
                 value = "<a href='" + testSiteUrl + "'>" + testSiteUrl + "</a>";
                 break;
 
@@ -102,6 +108,10 @@ export class AppNotifications {
             case "TestSiteUrlText":
                 // Set the value
                 value = (AppConfig.Configuration.appCatalogUrl || ContextInfo.webAbsoluteUrl) + "/" + item.AppProductID;
+                if (value.toLowerCase().indexOf("http") != 0) {
+                    // Prepend the origin
+                    value = window.location.origin + value;
+                }
                 break;
 
             // Item Metadata
