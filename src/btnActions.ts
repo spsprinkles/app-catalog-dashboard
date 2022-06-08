@@ -485,9 +485,9 @@ export class ButtonActions {
                 case "Submit":
                     // Render the button
                     tooltips.add({
-                        content: "Submits the app for approval",
+                        content: "Submits the app for approval/review",
                         btnProps: {
-                            text: "Submit for Approval",
+                            text: "Submit",
                             iconClassName: "me-1",
                             iconSize: 20,
                             iconType: appIndicator,
