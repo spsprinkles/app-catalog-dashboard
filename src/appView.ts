@@ -131,7 +131,7 @@ export class AppView {
                         items: DataSource.StatusFilters,
                         onFilter: (value: string) => {
                             // Filter the dashboard
-                            this._dashboard.filter(4, value);
+                            this._dashboard.filter(3, value);
                         },
                     },
                 ],
