@@ -325,6 +325,18 @@ export class AppView {
                         onRenderCell: (el, column, item: IAppItem) => {
                             // Set the status
                             el.innerHTML = Common.appStatus(item);
+
+                            // Ensure it doesn't contain the url already
+                            if (item.AppSiteDeployments && item.AppSiteDeployments.length > 0) {
+                                // Append a badge indicating that the app is deployed
+                                Components.Badge({
+                                    el,
+                                    className: "ms-1",
+                                    isPill: true,
+                                    content: "Deployed",
+                                    type: Components.BadgeTypes.Success
+                                });
+                            }
                         }
                     },
                     {
