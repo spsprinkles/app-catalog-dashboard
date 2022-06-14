@@ -169,7 +169,8 @@ export class AppActions {
         LoadingDialog.show();
 
         // Deploy the solution
-        this.deploy(item, false, item.AppSkipFeatureDeployment, () => {
+        // Force the skip feature deployment to be false for a test site.
+        this.deploy(item, false, false, () => {
             // Update the loading dialog
             LoadingDialog.setHeader("Creating the Test Site");
             LoadingDialog.setBody("Creating the sub-web for testing the application.");
