@@ -329,12 +329,25 @@ export class AppView {
                             // Ensure it doesn't contain the url already
                             if (item.AppSiteDeployments && item.AppSiteDeployments.length > 0) {
                                 // Append a badge indicating that the app is deployed
-                                Components.Badge({
+                                let badge = Components.Badge({
                                     el,
                                     className: "ms-1",
                                     isPill: true,
                                     content: "Deployed",
                                     type: Components.BadgeTypes.Success
+                                });
+
+                                // Create the popover element
+                                let elSiteInfo = document.createElement("div");
+                                elSiteInfo.classList.add("m-2");
+                                elSiteInfo.innerHTML = item.AppSiteDeployments;
+
+                                // Set the popover
+                                Components.Popover({
+                                    target: badge.el,
+                                    options: {
+                                        content: elSiteInfo
+                                    }
                                 });
                             }
                         }
