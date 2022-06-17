@@ -49,6 +49,6 @@ const Strings = {
     ProjectDescription: "App Dashboard for Developers",
     SolutionUrl: AssetsUrl + "index.html",
     SourceUrl: ContextInfo.webServerRelativeUrl,
-    Version: "0.0.3.6",
+    Version: "0.0.3.7",
 };
 export default Strings;
