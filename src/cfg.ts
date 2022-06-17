@@ -1056,7 +1056,7 @@ export const createSecurityGroups = (): PromiseLike<void> => {
                         }).then(
                             role => {
                                 // Update the mapper
-                                roles[customPermissionLevel] = role;
+                                roles[customPermissionLevel] = role.Id;
 
                                 // Resolve the request
                                 resolve();
