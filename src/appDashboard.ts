@@ -1,5 +1,5 @@
 import { Documents, LoadingDialog, Modal } from "dattatable";
-import { Components } from "gd-sprest-bs";
+import { Components, Types } from "gd-sprest-bs";
 import { caretRightFill } from "gd-sprest-bs/build/icons/svgs/caretRightFill";
 import { folderSymlink } from "gd-sprest-bs/build/icons/svgs/folderSymlink";
 import { layoutTextWindow } from "gd-sprest-bs/build/icons/svgs/layoutTextWindow";
@@ -342,6 +342,31 @@ export class AppDashboard {
         let elInfo = this._el.querySelector("#app-info");
         while (elInfo.firstChild) { elInfo.removeChild(elInfo.firstChild); }
 
+        // Update the fields before rendering them
+        let preUpdateFields = (ctrl: Components.IFormControlProps, field: Types.SP.Field) => {
+            // See if this is the status field and the item is rejected
+            if (field.InternalName == "AppStatus") {
+                // Set the status value
+                ctrl.value = Common.appStatus(DataSource.DocSetItem);
+            }
+        }
+
+        // Update the fields after rendering them
+        let postUpdateFields = (ctrl: Components.IFormControl, field: Types.SP.Field) => {
+            // See if this is the API permission field
+            if (field.InternalName == "AppAPIPermissions") {
+                // Check if a value exists
+                if (ctrl.getValue()) {
+                    // Select the textarea element
+                    let textarea = ctrl.el.querySelector("textarea");
+                    // Shrink the text size
+                    textarea.style.fontSize = "0.75rem";
+                    // Extend the textarea number of rows
+                    textarea.setAttribute("rows", "4");
+                }
+            }
+        }
+
         // Render a card
         Components.CardGroup({
             el: elInfo,
@@ -353,7 +378,7 @@ export class AppDashboard {
                             Components.ListForm.renderDisplayForm({
                                 info: DataSource.DocSetInfo,
                                 el,
-                                includeFields: [
+                                includeFields: AppConfig.Configuration.appDetails && AppConfig.Configuration.appDetails.left ? AppConfig.Configuration.appDetails.left : [
                                     "AppStatus",
                                     "AppDevelopers",
                                     "AppSponsor",
@@ -361,11 +386,12 @@ export class AppDashboard {
                                     "AppIsClientSideSolution"
                                 ],
                                 onControlRendering: (ctrl, field) => {
-                                    // See if this is the status field and the item is rejected
-                                    if (field.InternalName == "AppStatus") {
-                                        // Set the status value
-                                        ctrl.value = Common.appStatus(DataSource.DocSetItem);
-                                    }
+                                    // Update the field
+                                    preUpdateFields(ctrl, field);
+                                },
+                                onControlRendered: (ctrl, field) => {
+                                    // Update the fields
+                                    postUpdateFields(ctrl, field);
                                 }
                             });
                         }
@@ -378,26 +404,20 @@ export class AppDashboard {
                             Components.ListForm.renderDisplayForm({
                                 info: DataSource.DocSetInfo,
                                 el,
-                                includeFields: [
+                                includeFields: AppConfig.Configuration.appDetails && AppConfig.Configuration.appDetails.right ? AppConfig.Configuration.appDetails.right : [
                                     "AppVersion",
                                     "AppSharePointMinVersion",
                                     "AppIsDomainIsolated",
                                     "AppSkipFeatureDeployment",
                                     "AppAPIPermissions"
                                 ],
+                                onControlRendering: (ctrl, field) => {
+                                    // Update the fields
+                                    preUpdateFields(ctrl, field);
+                                },
                                 onControlRendered: (ctrl, field) => {
-                                    // See if this is the API permission field
-                                    if (field.InternalName == "AppAPIPermissions") {
-                                        // Check if a value exists
-                                        if (ctrl.getValue()) {
-                                            // Select the textarea element
-                                            let textarea = ctrl.el.querySelector("textarea");
-                                            // Shrink the text size
-                                            textarea.style.fontSize = "0.75rem";
-                                            // Extend the textarea number of rows
-                                            textarea.setAttribute("rows", "4");
-                                        }
-                                    }
+                                    // Update the fields
+                                    postUpdateFields(ctrl, field);
                                 }
                             });
                         }
