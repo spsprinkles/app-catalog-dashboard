@@ -491,6 +491,9 @@ export class AppForms {
                             } else {
                                 // Show the default error message
                                 form.isValid();
+
+                                // Hide the dialog
+                                LoadingDialog.hide();
                             }
                         }
                     }
