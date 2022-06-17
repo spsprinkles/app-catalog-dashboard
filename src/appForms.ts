@@ -471,6 +471,9 @@ export class AppForms {
                                         } else {
                                             // Show the error message
                                             form.isValid();
+
+                                            // Hide the dialog
+                                            LoadingDialog.hide();
                                         }
                                     },
                                     // Error loading site
