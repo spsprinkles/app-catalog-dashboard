@@ -739,7 +739,7 @@ export class AppActions {
     }
 
     // Updates the app
-    static updateApp(item: IAppItem, siteUrl: string): PromiseLike<void> {
+    static updateApp(item: IAppItem, siteUrl: string, isTestSite: boolean): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve) => {
             // Load the context of the app catalog
@@ -759,7 +759,7 @@ export class AppActions {
                             LoadingDialog.setHeader("Upgrading the Solution");
 
                             // Deploy the solution
-                            this.deploy(item, false, item.AppSkipFeatureDeployment, () => {
+                            this.deploy(item, false, isTestSite ? false : item.AppSkipFeatureDeployment, () => {
                                 // Update the dialog
                                 LoadingDialog.setHeader("Upgrading the Solution");
 

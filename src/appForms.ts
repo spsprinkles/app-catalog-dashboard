@@ -74,7 +74,7 @@ export class AppForms {
                                                                 onUpdate();
                                                             } else {
                                                                 // Update the app
-                                                                AppActions.updateApp(item, webInfo.web.ServerRelativeUrl).then(() => {
+                                                                AppActions.updateApp(item, webInfo.web.ServerRelativeUrl, true).then(() => {
                                                                     // Call the update event
                                                                     onUpdate();
                                                                 });
@@ -1693,7 +1693,7 @@ ${ContextInfo.userDisplayName}`.trim());
                 Modal.hide();
 
                 // Update the app
-                AppActions.updateApp(item, siteUrl).then(() => {
+                AppActions.updateApp(item, siteUrl, true).then(() => {
                     // Call the update event
                     onUpdate();
                 });
