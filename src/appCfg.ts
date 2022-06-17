@@ -6,6 +6,7 @@ import Strings from "./strings";
 export interface IConfiguration {
     appCatalogRequests?: string[];
     appCatalogUrl?: string;
+    appDetails?: IAppDetails;
     dashboardUrl?: string;
     errorEmails?: string[];
     helpPageUrl?: string;
@@ -17,6 +18,12 @@ export interface IConfiguration {
         techReview: { [key: string]: string[]; }
         testCases: { [key: string]: string[]; }
     }
+}
+
+// App Details
+export interface IAppDetails {
+    left?: string[];
+    right?: string[];
 }
 
 // Email

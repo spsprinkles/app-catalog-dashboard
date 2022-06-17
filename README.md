@@ -25,8 +25,18 @@ The [configuration file](https://github.com/spsprinkles/app-catalog-dashboard/ra
 | Name | Description |
 | --- | --- |
 | appCatalogRequests | An array of user types to send notification requests to for app catalog creation. |
+| appDetails | The app details information to display. |
 | errorEmails | An array of email addresses to send to when a user has an error when using the application. This will help with troubleshooting issues in production. |
 | userAgreement | The user agreement displayed to the developers adding packages. |
+
+### App Details
+
+The `app metadata` to display on the app details page. If the columns are not defined, then the default fields will be displayed.
+
+| Name | Description |
+| --- | --- |
+| left | An array of internal field names to display in the left column. |
+| right | An array of internal field names to display in the right column. |
 
 ### Status
 
