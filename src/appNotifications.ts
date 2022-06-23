@@ -130,9 +130,10 @@ export class AppNotifications {
                     if (result) {
                         // Parse the properties of complex fields
                         let keys = key.split('.');
-                        for (let j = 0; j < keys.length; j++) {
+                        value = result[keys[0]];
+                        for (let j = 1; j < keys.length; j++) {
                             // Set the value
-                            value = result[key] ? value[keys[j]] : null;
+                            value = value[keys[j]] ? value[keys[j]] : null;
                         }
 
                         // Append the value if it exists
