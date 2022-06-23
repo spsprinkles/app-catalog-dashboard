@@ -54,7 +54,20 @@ export class AppNotifications {
             if (key == "User.Name") {
                 // Set the value
                 value = ContextInfo.userDisplayName;
-            } else {
+            }
+            // Else, see if it's the current user
+            else if (key.indexOf("CurrentUser") == 0) {
+                // Get the sub-keys and update the value
+                let keys = key.split('.');
+                value = AppSecurity.CurrentUser;
+
+                // Parse the properties of complex fields
+                for (let j = 1; j < keys.length; j++) {
+                    // Set the value
+                    value = value && value[keys[j]] ? value[keys[j]] : null;
+                }
+            }
+            else {
                 // Get the sub-keys and update the value
                 let keys = key.split('.');
                 value = item[keys[0]]
@@ -76,6 +89,12 @@ export class AppNotifications {
             case "AppStatus":
                 // Set the value
                 value = status;
+                break;
+
+            // See if it's the current user
+            case "CurrentUser":
+                // Default to the user name
+                value = AppSecurity.CurrentUser.Title;
                 break;
 
             // Url to the dashboard page
