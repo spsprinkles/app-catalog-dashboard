@@ -529,8 +529,7 @@ export class ButtonActions {
                             });
 
                             // See if the current version is not deployed
-                            let appVersion = webInfo.app.SkipDeploymentFeature ? webInfo.app.AppCatalogVersion : webInfo.app.InstalledVersion;
-                            if (this._item.AppVersion != appVersion) {
+                            if (this._item.AppVersion != webInfo.app.InstalledVersion) {
                                 // Render the update button
                                 tooltips.add({
                                     content: "Versions do not match. Click to update the test site.",
