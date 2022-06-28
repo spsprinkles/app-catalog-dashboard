@@ -55,6 +55,18 @@ export class AppNotifications {
                 // Set the value
                 value = ContextInfo.userDisplayName;
             }
+            // Else, see if it's the current user
+            else if (key.indexOf("CurrentUser") == 0) {
+                // Get the sub-keys and update the value
+                let keys = key.split('.');
+                value = AppSecurity.CurrentUser;
+
+                // Parse the properties of complex fields
+                for (let j = 1; j < keys.length; j++) {
+                    // Set the value
+                    value = value && value[keys[j]] ? value[keys[j]] : null;
+                }
+            }
             else {
                 // Get the sub-keys and update the value
                 let keys = key.split('.');
@@ -77,6 +89,12 @@ export class AppNotifications {
             case "AppStatus":
                 // Set the value
                 value = status;
+                break;
+
+            // See if it's the current user
+            case "CurrentUser":
+                // Default to the user name
+                value = AppSecurity.CurrentUser.Title;
                 break;
 
             // Url to the dashboard page
@@ -163,7 +181,7 @@ export class AppNotifications {
             }
 
             // Ensure emails exist
-            if (To.length > 0 || AppSecurity.DeveloperEmails.length > 0) {
+            if (To.length > 0) {
                 // Display a loading dialog
                 LoadingDialog.setHeader("Sending Notification");
                 LoadingDialog.setBody("This dialog will close after the notification is sent.");
@@ -171,7 +189,7 @@ export class AppNotifications {
 
                 // Send an email
                 Utility(Strings.SourceUrl).sendEmail({
-                    To, CC: AppSecurity.DeveloperEmails,
+                    To,
                     Subject: "App '" + item.Title + "' Sent Back",
                     Body: "App Developers,<br /><br />The '" + item.Title +
                         "' app has been sent back based on the comments below.<br /><br />" + comments

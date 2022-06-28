@@ -116,6 +116,7 @@ The available values for the user type property values.
 | Name | Description |
 | --- | --- |
 | ApproversGroup | A reference to the approver's security group. |
+| CurrentUser | A reference to the current user. |
 | Developers | The developers of the application. _Linked to the AppOwners metadata field._ |
 | DevelopersGroup | A reference to the developer's security group. |
 | Sponsor | The sponsor of the application. _Linked to the AppSponsor metadata field._ |

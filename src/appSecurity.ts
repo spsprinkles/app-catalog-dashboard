@@ -63,6 +63,23 @@ export class AppSecurity {
         });
     }
 
+    // Current User
+    private static _currentUser: Types.SP.User = null;
+    static get CurrentUser(): Types.SP.User { return this._currentUser; }
+    static loadCurrentUser(): PromiseLike<void> {
+        // Return a promise
+        return new Promise((resolve, reject) => {
+            // Get the current user
+            Web(Strings.SourceUrl).CurrentUser().execute(user => {
+                // Set the user
+                this._currentUser = user;
+
+                // Resolve the request
+                resolve();
+            }, reject);
+        });
+    }
+
     // Developer Security Group
     private static _devGroup: Types.SP.GroupOData = null;
     static get DevGroup(): Types.SP.GroupOData { return this._devGroup; }
@@ -137,25 +154,25 @@ export class AppSecurity {
     static init(appCatalogUrl: string, tenantAppCatalogUrl: string): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve, reject) => {
-            // Initialize the SC Owner
-            this.initSCOwner(appCatalogUrl).then(() => {
+            // Execute the requests
+            Promise.all([
+                // Load the current user
+                this.loadCurrentUser(),
+                // Initialize the SC Owner
+                this.initSCOwner(appCatalogUrl),
                 // Initialize the tenant owner
-                this.initTenantOwner(tenantAppCatalogUrl).then(() => {
-                    // Load the approver's group
-                    this.loadApproverGroup().then(() => {
-                        // Load the developer's group
-                        this.loadDevGroup().then(() => {
-                            // Load the owner's group
-                            this.loadOwnerGroup().then(() => {
-                                // Load the sponsor's group
-                                this.loadSponsorGroup().then(() => {
-                                    // Resolve the request
-                                    resolve();
-                                }, reject);
-                            }, reject);
-                        }, reject);
-                    }, reject);
-                }, reject);
+                this.initTenantOwner(tenantAppCatalogUrl),
+                // Load the approver's group
+                this.loadApproverGroup(),
+                // Load the developer's group
+                this.loadDevGroup(),
+                // Load the owner's group
+                this.loadOwnerGroup(),
+                // Load the sponsor's group
+                this.loadSponsorGroup()
+            ]).then(() => {
+                // Resolve the request
+                resolve();
             }, reject);
         });
     }
