@@ -156,6 +156,8 @@ export class AppSecurity {
         return new Promise((resolve, reject) => {
             // Execute the requests
             Promise.all([
+                // Load the current user
+                this.loadCurrentUser(),
                 // Initialize the SC Owner
                 this.initSCOwner(appCatalogUrl),
                 // Initialize the tenant owner
