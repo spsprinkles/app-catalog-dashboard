@@ -160,7 +160,7 @@ export class AppNotifications {
             }
 
             // Ensure emails exist
-            if (To.length > 0 || AppSecurity.DeveloperEmails.length > 0) {
+            if (To.length > 0) {
                 // Display a loading dialog
                 LoadingDialog.setHeader("Sending Notification");
                 LoadingDialog.setBody("This dialog will close after the notification is sent.");
@@ -168,7 +168,7 @@ export class AppNotifications {
 
                 // Send an email
                 Utility(Strings.SourceUrl).sendEmail({
-                    To, CC: AppSecurity.DeveloperEmails,
+                    To,
                     Subject: "App '" + item.Title + "' Sent Back",
                     Body: "App Developers,<br /><br />The '" + item.Title +
                         "' app has been sent back based on the comments below.<br /><br />" + comments
