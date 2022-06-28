@@ -137,8 +137,9 @@ export class AppNotifications {
             default:
                 let values = [];
 
-                // Default the value to be a collection if it's not one
-                let results = value && value.results ? value.results : [value];
+                // See if we are dealing with a collection
+                // Otherwise, revert to the item
+                let results = value && value.results ? value.results : [item];
                 value = "";
 
                 // Parse the collection
@@ -147,9 +148,10 @@ export class AppNotifications {
                     if (result) {
                         // Parse the properties of complex fields
                         let keys = key.split('.');
-                        for (let j = 0; j < keys.length; j++) {
+                        value = result[keys[0]];
+                        for (let j = 1; j < keys.length; j++) {
                             // Set the value
-                            value = result[key] ? value[keys[j]] : null;
+                            value = value[keys[j]] ? value[keys[j]] : null;
                         }
 
                         // Append the value if it exists
