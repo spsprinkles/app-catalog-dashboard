@@ -1703,4 +1703,124 @@ ${ContextInfo.userDisplayName}`.trim());
         // Show the modal
         Modal.show();
     }
+
+    // Displays the ugprade from
+    upgrade(appItem: IAppItem) {
+        // Clear the modal
+        Modal.clear();
+
+        // Set the header
+        Modal.setHeader("Upgrade App to v" + appItem.AppVersion);
+
+        // Display a loading dialog
+        LoadingDialog.setHeader("Loading Deployment Information");
+        LoadingDialog.setBody("Gathering the app deployment information...");
+        LoadingDialog.show();
+
+        // Parse the site collection urls and generate the check group items
+        let items: Components.ICheckboxGroupItem[] = [];
+        let urls = (appItem.AppSiteDeployments || "").split('\n');
+        Helper.Executor(urls, url => {
+            // Return a promise
+            return new Promise(resolve => {
+                // Ensure the url exists
+                if (url) {
+                    // Load the web containing this app
+                    Web(url).SiteCollectionAppCatalog().AvailableApps(appItem.AppProductID).execute(
+                        // Exists
+                        (app) => {
+                            let appVersion = app.InstalledVersion || app.AppCatalogVersion;
+
+                            // Append the item
+                            items.push({
+                                data: url,
+                                label: url + " (v" + appVersion + ")",
+                                type: Components.CheckboxGroupTypes.Switch,
+                                isDisabled: appItem.AppVersion == appVersion
+                            });
+
+                            // Check the next web
+                            resolve(null);
+                        },
+
+                        // Denied Access
+                        () => {
+                            // Append the item
+                            items.push({
+                                label: url,
+                                type: Components.CheckboxGroupTypes.Switch,
+                                isDisabled: true
+                            });
+
+                            // Check the next web
+                            resolve(null);
+                        }
+                    );
+                } else {
+                    // Check the next web
+                    resolve(null);
+                }
+            });
+        }).then(() => {
+            // Hide the loading dialog
+            LoadingDialog.hide();
+
+            // Render a form
+            let form = Components.Form({
+                el: Modal.BodyElement,
+                controls: [
+                    {
+                        items,
+                        name: "urls",
+                        required: true,
+                        type: Components.FormControlTypes.MultiCheckbox,
+                        errorMessage: "Please select one or more site collections to upgrade."
+                    } as Components.IFormControlPropsMultiCheckbox
+                ]
+            });
+
+            // Render the footer
+            Components.Button({
+                el: Modal.FooterElement,
+                text: "Upgrade",
+                type: Components.ButtonTypes.OutlineSuccess,
+                onClick: () => {
+                    // Validate the form
+                    if (form.isValid()) {
+                        let counter = 0;
+                        let items = form.getValues()["urls"] as Components.ICheckboxGroupItem[];
+
+                        // Close the modal
+                        Modal.hide();
+
+                        // Show a loading dialog
+                        LoadingDialog.setHeader("Upgrading Apps");
+                        LoadingDialog.setBody("Upgrading " + (++counter) + " of " + items.length);
+                        LoadingDialog.show();
+
+                        // Parse the items
+                        Helper.Executor(items, item => {
+                            // Return a promise
+                            return new Promise(resolve => {
+                                // Upgrade the app
+                                AppActions.updateApp(appItem, item.data, false).then(() => {
+                                    // Update the loading dialog
+                                    LoadingDialog.setBody("Upgrading " + (++counter) + " of " + items.length);
+
+                                    // Upgrade the next site
+                                    resolve(null);
+                                });
+                            });
+                        }).then(() => {
+                            // Close the dialog
+                            LoadingDialog.hide();
+                        });
+                    }
+                }
+            });
+
+            // Show the modal
+            Modal.show();
+        });
+    }
 }
