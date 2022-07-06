@@ -1805,6 +1805,7 @@ ${ContextInfo.userDisplayName}`.trim());
                                 // Upgrade the app
                                 AppActions.updateApp(appItem, item.data, false).then(() => {
                                     // Update the loading dialog
+                                    LoadingDialog.setHeader("Upgrading Apps");
                                     LoadingDialog.setBody("Upgrading " + (++counter) + " of " + items.length);
 
                                     // Upgrade the next site
