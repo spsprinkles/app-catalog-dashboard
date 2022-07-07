@@ -10,6 +10,7 @@ export interface IConfiguration {
     dashboardUrl?: string;
     errorEmails?: string[];
     helpPageUrl?: string;
+    paging?: number;
     templatesLibraryUrl?: string;
     tenantAppCatalogUrl?: string;
     status: { [key: string]: IStatus };
