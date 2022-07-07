@@ -6,6 +6,7 @@ import { layoutTextWindow } from "gd-sprest-bs/build/icons/svgs/layoutTextWindow
 import { questionLg } from "gd-sprest-bs/build/icons/svgs/questionLg";
 import { AppActions } from "./appActions";
 import { AppConfig } from "./appCfg";
+import { AppNotifications } from "./appNotifications";
 import { AppView } from "./appView";
 import { ButtonActions } from "./btnActions";
 import * as Common from "./common";
@@ -258,6 +259,7 @@ export class AppDashboard {
                         // Read the package
                         AppActions.readPackage(fileInfo.data).then(pkgInfo => {
                             let errorMessage = null;
+                            let appUpgraded = false;
 
                             // Deny if the product id doesn't match
                             if (pkgInfo.item.AppProductID != DataSource.DocSetItem.AppProductID) {
@@ -279,6 +281,9 @@ export class AppDashboard {
                                         break;
                                     }
                                 }
+
+                                // Set the flag
+                                appUpgraded = errorMessage ? false : true;
                             }
 
                             // See if an error message exists
@@ -297,16 +302,30 @@ export class AppDashboard {
                                 itemInfo.AppStatus = AppConfig.TestCasesStatus;
                                 DataSource.DocSetItem.update(itemInfo).execute(
                                     () => {
-                                        // See if the item is currently approved
-                                        if (DataSource.DocSetItem.AppStatus == AppConfig.TestCasesStatus) {
-                                            // Archive the file
-                                            AppActions.archivePackage(DataSource.DocSetItem, () => {
+                                        let archiveApp = () => {
+                                            // See if the item is currently approved
+                                            if (DataSource.DocSetItem.AppStatus == AppConfig.TestCasesStatus) {
+                                                // Archive the file
+                                                AppActions.archivePackage(DataSource.DocSetItem, () => {
+                                                    // Add the file
+                                                    resolve(true);
+                                                });
+                                            } else {
                                                 // Add the file
                                                 resolve(true);
+                                            }
+                                        }
+
+                                        // See if the app was upgraded
+                                        if (appUpgraded) {
+                                            // Send the notifications
+                                            AppNotifications.sendAppUpgradedEmail(DataSource.DocSetItem).then(() => {
+                                                // Archive the app
+                                                archiveApp();
                                             });
                                         } else {
-                                            // Add the file
-                                            resolve(true);
+                                            // Archive the app
+                                            archiveApp();
                                         }
 
                                         // Refresh the dashboard

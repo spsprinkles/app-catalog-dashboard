@@ -7,6 +7,7 @@ export interface IConfiguration {
     appCatalogRequests?: string[];
     appCatalogUrl?: string;
     appDetails?: IAppDetails;
+    appNotifications?: IAppNotifications;
     dashboardUrl?: string;
     errorEmails?: string[];
     helpPageUrl?: string;
@@ -25,6 +26,12 @@ export interface IConfiguration {
 export interface IAppDetails {
     left?: string[];
     right?: string[];
+}
+
+// App Notifications
+export interface IAppNotifications {
+    deploy?: IEmail[];
+    upgrade?: IEmail[];
 }
 
 // Email

@@ -213,10 +213,41 @@ export class AppNotifications {
         });
     }
 
+    // Sends an email when an app is deployed
+    static sendAppDeployedEmail(item: IAppItem): PromiseLike<void> {
+        // Return a promise
+        return new Promise(resolve => {
+            // See if a configuration exists
+            if (AppConfig.Configuration.appNotifications && AppConfig.Configuration.appNotifications.deploy) {
+                // Send the email
+                this.sendEmail(AppConfig.Configuration.appNotifications.deploy, item, false, true);
+            } else {
+                // Resolve the requst
+                resolve();
+            }
+        });
+    }
+
+    // Sends an email when an app is upgraded
+    static sendAppUpgradedEmail(item: IAppItem): PromiseLike<void> {
+        // Return a promise
+        return new Promise(resolve => {
+            // See if a configuration exists
+            if (AppConfig.Configuration.appNotifications && AppConfig.Configuration.appNotifications.upgrade) {
+                // Send the email
+                this.sendEmail(AppConfig.Configuration.appNotifications.upgrade, item, false, true);
+            } else {
+                // Resolve the requst
+                resolve();
+            }
+        });
+    }
+
     // Sends an email notification based on the status
     // Need a new property "approval/submission" to determine what type?
     // Maybe send in the status configuration and we can figure it out on our own?
-    static sendEmail(notificationCfgs: IEmail[] = [], item: IAppItem, isApproval: boolean = true): PromiseLike<void> {
+    // New property for the app notification configuration required.
+    static sendEmail(notificationCfgs: IEmail[] = [], item: IAppItem, isApproval: boolean = true, isAppAction: boolean = false): PromiseLike<void> {
         // Return a promise
         return new Promise(resolve => {
             let emailsToSend = 0;
