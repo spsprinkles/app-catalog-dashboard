@@ -507,7 +507,7 @@ export class AppActions {
                                                             // Ensure it doesn't contain the url already
                                                             if (sites.indexOf(context.GetContextWebInformation.WebFullUrl) < 0) {
                                                                 // Append the url
-                                                                sites = (sites.length > 0 ? "\r\n" : "") + context.GetContextWebInformation.WebFullUrl;
+                                                                sites += (sites.length > 0 ? "\r\n" : "") + context.GetContextWebInformation.WebFullUrl;
                                                             }
 
                                                             // Update the metadata
