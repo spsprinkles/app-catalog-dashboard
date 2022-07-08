@@ -82,6 +82,7 @@ The available values for the `actions` status property.
 | Notification | Displays a button to notify user types. |
 | Submit | Displays the submission form to request approval. |
 | TestSite | Displays a `create` or `view` button to the test site collection. |
+| Upgrade | Displays an upgrade button if site collection url(s) exist. |
 | View | Displays the app metadata view form. |
 | ViewTechReview | Displays the last technical review for the application. |
 | ViewTestCases | Displays the last test cases for the application. |

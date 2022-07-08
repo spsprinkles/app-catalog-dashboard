@@ -579,6 +579,30 @@ export class ButtonActions {
                     );
                     break;
 
+                // Upgrade
+                case "Upgrade":
+                    // See if site collection urls exist
+                    let urls = (this._item.AppSiteDeployments || "").trim();
+                    if (urls.length > 0) {
+                        // Render the button
+                        tooltips.add({
+                            content: "Upgrades the apps in the site collections currently deployed to.",
+                            btnProps: {
+                                text: "Upgrade",
+                                iconClassName: "me-1",
+                                iconSize: 20,
+                                iconType: pencilSquare,
+                                isSmall: true,
+                                type: Components.ButtonTypes.OutlineSecondary,
+                                onClick: () => {
+                                    // Display the upgrade form
+                                    this._forms.upgrade(this._item);
+                                }
+                            }
+                        });
+                    }
+                    break;
+
                 // View
                 case "View":
                     // Render the button
