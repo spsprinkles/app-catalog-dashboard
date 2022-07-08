@@ -269,7 +269,9 @@ export class AppNotifications {
                 if (isApproval) {
                     // Ensure we are doing an approval
                     if (notificationCfg.approval != true) { continue; }
-                } else {
+                }
+                // Else, see if this isn't an app action
+                else if(!isAppAction) {
                     // Ensure we are doing a submission
                     if (notificationCfg.submission != true) { continue; }
                 }
