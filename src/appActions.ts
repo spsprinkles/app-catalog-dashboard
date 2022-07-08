@@ -2,6 +2,7 @@ import { LoadingDialog, Modal } from "dattatable";
 import { ContextInfo, Helper, SPTypes, Types, Utility, Web } from "gd-sprest-bs";
 import * as JSZip from "jszip";
 import { AppConfig } from "./appCfg";
+import { AppNotifications } from "./appNotifications";
 import { DataSource, IAppItem } from "./ds";
 import { ErrorDialog } from "./errorDialog";
 import Strings from "./strings";
@@ -496,34 +497,37 @@ export class AppActions {
                                             this.updateAppMetadata(item, appItem.Id, false, siteUrl, requestDigest).then(() => {
                                                 // Deploy the app
                                                 Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(item.AppProductID).deploy(item.AppSkipFeatureDeployment).execute(app => {
-                                                    // See if we are updating the metadata
-                                                    if (updateSitesFl) {
-                                                        // Append the url to the list of sites the solution has been deployed to
-                                                        let sites = (item.AppSiteDeployments || "").trim();
+                                                    // Send the notifications
+                                                    AppNotifications.sendAppDeployedEmail(item).then(() => {
+                                                        // See if we are updating the metadata
+                                                        if (updateSitesFl) {
+                                                            // Append the url to the list of sites the solution has been deployed to
+                                                            let sites = (item.AppSiteDeployments || "").trim();
 
-                                                        // Ensure it doesn't contain the url already
-                                                        if (sites.indexOf(context.GetContextWebInformation.WebFullUrl) < 0) {
-                                                            // Append the url
-                                                            sites = (sites.length > 0 ? "\r\n" : "") + context.GetContextWebInformation.WebFullUrl;
-                                                        }
+                                                            // Ensure it doesn't contain the url already
+                                                            if (sites.indexOf(context.GetContextWebInformation.WebFullUrl) < 0) {
+                                                                // Append the url
+                                                                sites = (sites.length > 0 ? "\r\n" : "") + context.GetContextWebInformation.WebFullUrl;
+                                                            }
 
-                                                        // Update the metadata
-                                                        item.update({
-                                                            AppSiteDeployments: sites
-                                                        }).execute(() => {
+                                                            // Update the metadata
+                                                            item.update({
+                                                                AppSiteDeployments: sites
+                                                            }).execute(() => {
+                                                                // Hide the dialog
+                                                                LoadingDialog.hide();
+
+                                                                // Call the update event
+                                                                onUpdate();
+                                                            });
+                                                        } else {
                                                             // Hide the dialog
                                                             LoadingDialog.hide();
 
                                                             // Call the update event
                                                             onUpdate();
-                                                        });
-                                                    } else {
-                                                        // Hide the dialog
-                                                        LoadingDialog.hide();
-
-                                                        // Call the update event
-                                                        onUpdate();
-                                                    }
+                                                        }
+                                                    });
                                                 }, () => {
                                                     // Hide the dialog
                                                     LoadingDialog.hide();
@@ -749,7 +753,7 @@ export class AppActions {
 
                     // Update the dialog
                     LoadingDialog.setHeader("Uninstalling the Solution");
-                    LoadingDialog.setBody("This will close after the app is upgraded.");
+                    LoadingDialog.setBody("Uninstalling in site: " + siteUrl + "<br/>This will close after the app is upgraded.");
                     LoadingDialog.show();
 
                     // Uninstall the app
@@ -773,7 +777,7 @@ export class AppActions {
                                         } else {
                                             // Update the dialog
                                             LoadingDialog.setHeader("Installing the Solution");
-                                            LoadingDialog.setBody("This will close after the app is upgraded.");
+                                            LoadingDialog.setBody("Installing in site: " + siteUrl + "<br/>This will close after the app is upgraded.");
                                             LoadingDialog.show();
 
                                             // Install the app
