@@ -753,7 +753,7 @@ export class AppActions {
 
                     // Update the dialog
                     LoadingDialog.setHeader("Uninstalling the Solution");
-                    LoadingDialog.setBody("This will close after the app is upgraded.");
+                    LoadingDialog.setBody("Uninstalling in site: " + siteUrl + "<br/>This will close after the app is upgraded.");
                     LoadingDialog.show();
 
                     // Uninstall the app
@@ -777,7 +777,7 @@ export class AppActions {
                                         } else {
                                             // Update the dialog
                                             LoadingDialog.setHeader("Installing the Solution");
-                                            LoadingDialog.setBody("This will close after the app is upgraded.");
+                                            LoadingDialog.setBody("Installing in site: " + siteUrl + "<br/>This will close after the app is upgraded.");
                                             LoadingDialog.show();
 
                                             // Install the app
