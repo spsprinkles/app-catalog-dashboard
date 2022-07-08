@@ -7,9 +7,11 @@ export interface IConfiguration {
     appCatalogRequests?: string[];
     appCatalogUrl?: string;
     appDetails?: IAppDetails;
+    appNotifications?: IAppNotifications;
     dashboardUrl?: string;
     errorEmails?: string[];
     helpPageUrl?: string;
+    paging?: number;
     templatesLibraryUrl?: string;
     tenantAppCatalogUrl?: string;
     status: { [key: string]: IStatus };
@@ -24,6 +26,12 @@ export interface IConfiguration {
 export interface IAppDetails {
     left?: string[];
     right?: string[];
+}
+
+// App Notifications
+export interface IAppNotifications {
+    deploy?: IEmail[];
+    upgrade?: IEmail[];
 }
 
 // Email

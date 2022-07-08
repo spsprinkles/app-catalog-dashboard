@@ -261,6 +261,7 @@ export class AppView {
                 rows: DataSource.Items,
                 dtProps: {
                     dom: 'rt<"row"<"col-sm-4"l><"col-sm-4"i><"col-sm-4"p>>',
+                    pageLength: AppConfig.Configuration.paging,
                     columnDefs: [
                         {
                             targets: [0, 6],
