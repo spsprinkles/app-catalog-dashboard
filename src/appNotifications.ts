@@ -220,7 +220,7 @@ export class AppNotifications {
             // See if a configuration exists
             if (AppConfig.Configuration.appNotifications && AppConfig.Configuration.appNotifications.deploy) {
                 // Send the email
-                this.sendEmail(AppConfig.Configuration.appNotifications.deploy, item, false, true);
+                this.sendEmail(AppConfig.Configuration.appNotifications.deploy, item, false, true).then(resolve);
             } else {
                 // Resolve the requst
                 resolve();
@@ -235,7 +235,7 @@ export class AppNotifications {
             // See if a configuration exists
             if (AppConfig.Configuration.appNotifications && AppConfig.Configuration.appNotifications.upgrade) {
                 // Send the email
-                this.sendEmail(AppConfig.Configuration.appNotifications.upgrade, item, false, true);
+                this.sendEmail(AppConfig.Configuration.appNotifications.upgrade, item, false, true).then(resolve);
             } else {
                 // Resolve the requst
                 resolve();
@@ -271,7 +271,7 @@ export class AppNotifications {
                     if (notificationCfg.approval != true) { continue; }
                 }
                 // Else, see if this isn't an app action
-                else if(!isAppAction) {
+                else if (!isAppAction) {
                     // Ensure we are doing a submission
                     if (notificationCfg.submission != true) { continue; }
                 }
