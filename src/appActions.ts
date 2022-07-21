@@ -498,7 +498,7 @@ export class AppActions {
                                                 // Deploy the app
                                                 Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(item.AppProductID).deploy(item.AppSkipFeatureDeployment).execute(app => {
                                                     // Send the notifications
-                                                    AppNotifications.sendAppDeployedEmail(item).then(() => {
+                                                    AppNotifications.sendAppDeployedEmail(item, context.GetContextWebInformation.WebFullUrl).then(() => {
                                                         // See if we are updating the metadata
                                                         if (updateSitesFl) {
                                                             // Append the url to the list of sites the solution has been deployed to

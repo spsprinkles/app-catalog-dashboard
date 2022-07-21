@@ -115,6 +115,8 @@ The notification email content can be dynamically set by using the `[[Internal F
 
 | Name | Description |
 | --- | --- |
+| DeploySiteUrl | The html link to the site the app was deployed to, for the `appNotifications` deploy configuration. |
+| DeploySiteUrlText | The text link to the site the app was deployed to, for the `appNotifications` deploy configuration. |
 | Internal Field Name | The item's metadata. |
 | PageUrl | The html link to display the item. |
 | PageUrlText | The text link to display the item. |

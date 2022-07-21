@@ -44,7 +44,7 @@ export class AppNotifications {
     }
 
     // Gets the value
-    private static getValue(key: string, item: IAppItem, status: string) {
+    private static getValue(key: string, item: IAppItem, status: string, deploySiteUrl: string) {
         // Default the value
         let value = item[key];
 
@@ -95,6 +95,18 @@ export class AppNotifications {
             case "CurrentUser":
                 // Default to the user name
                 value = AppSecurity.CurrentUser.Title;
+                break;
+
+            // Url to the site the app was deployed to
+            case "DeploySiteUrl":
+                // Set the value
+                value = "<a href='" + deploySiteUrl + "?app-id=" + item.Id + "'>" + deploySiteUrl + "</a>";
+                break;
+
+            // Url to the site the app was deployed to
+            case "DeploySiteUrlText":
+                // Set the value
+                value = deploySiteUrl + "?app-id=" + item.Id;
                 break;
 
             // Url to the dashboard page
@@ -214,13 +226,13 @@ export class AppNotifications {
     }
 
     // Sends an email when an app is deployed
-    static sendAppDeployedEmail(item: IAppItem): PromiseLike<void> {
+    static sendAppDeployedEmail(item: IAppItem, siteUrl: string): PromiseLike<void> {
         // Return a promise
         return new Promise(resolve => {
             // See if a configuration exists
             if (AppConfig.Configuration.appNotifications && AppConfig.Configuration.appNotifications.deploy) {
                 // Send the email
-                this.sendEmail(AppConfig.Configuration.appNotifications.deploy, item, false, true).then(resolve);
+                this.sendEmail(AppConfig.Configuration.appNotifications.deploy, item, false, true, siteUrl).then(resolve);
             } else {
                 // Resolve the requst
                 resolve();
@@ -247,7 +259,7 @@ export class AppNotifications {
     // Need a new property "approval/submission" to determine what type?
     // Maybe send in the status configuration and we can figure it out on our own?
     // New property for the app notification configuration required.
-    static sendEmail(notificationCfgs: IEmail[] = [], item: IAppItem, isApproval: boolean = true, isAppAction: boolean = false): PromiseLike<void> {
+    static sendEmail(notificationCfgs: IEmail[] = [], item: IAppItem, isApproval: boolean = true, isAppAction: boolean = false, deploySiteUrl: string = ""): PromiseLike<void> {
         // Return a promise
         return new Promise(resolve => {
             let emailsToSend = 0;
@@ -299,7 +311,7 @@ export class AppNotifications {
                 while (startIdx > 0 && endIdx > startIdx) {
                     // Get the key value
                     let key = Body.substring(startIdx + 2, endIdx);
-                    let value = this.getValue(key, item, status);
+                    let value = this.getValue(key, item, status, deploySiteUrl);
 
                     // Replace the value
                     Body = Body.substring(0, startIdx) + value + Body.substring(endIdx + 2);
@@ -372,7 +384,7 @@ export class AppNotifications {
             while (startIdx > 0 && endIdx > startIdx) {
                 // Get the key value
                 let key = Body.substring(startIdx + 2, endIdx);
-                let value = this.getValue(key, item, item.AppStatus);
+                let value = this.getValue(key, item, item.AppStatus, "");
 
                 // Replace the value
                 let oldContent = Body;
