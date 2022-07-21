@@ -8,7 +8,8 @@
     "build": "webpack --mode development",
     "clean": "node ./clean.js",
     "prod": "webpack --mode production",
-    "spfx": "cd spfx && npm run package"
+    "spfx": "cd spfx && npm run package",
+    "update-version": "node ./updateVersion.js"
   },
   "repository": {
     "type": "git",
