@@ -9,7 +9,7 @@
     "clean": "node ./clean.js",
     "prod": "webpack --mode production",
     "spfx": "cd spfx && npm run package",
-    "update-version": "node ./updateVersion.js"
+    "increment-version": "node ./incrementVersion.js"
   },
   "repository": {
     "type": "git",
