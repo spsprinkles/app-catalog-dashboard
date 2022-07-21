@@ -100,13 +100,13 @@ export class AppNotifications {
             // Url to the site the app was deployed to
             case "DeploySiteUrl":
                 // Set the value
-                value = "<a href='" + deploySiteUrl + "?app-id=" + item.Id + "'>" + deploySiteUrl + "</a>";
+                value = "<a href='" + deploySiteUrl + "'>" + deploySiteUrl + "</a>";
                 break;
 
             // Url to the site the app was deployed to
             case "DeploySiteUrlText":
                 // Set the value
-                value = deploySiteUrl + "?app-id=" + item.Id;
+                value = deploySiteUrl;
                 break;
 
             // Url to the dashboard page
