@@ -364,7 +364,7 @@ export class AppDashboard {
         // Update the fields before rendering them
         let preUpdateFields = (ctrl: Components.IFormControlProps, field: Types.SP.Field) => {
             // See if this is the status field and the item is rejected
-            if (field.InternalName == "AppStatus") {
+            if (field && field.InternalName == "AppStatus") {
                 // Set the status value
                 ctrl.value = Common.appStatus(DataSource.DocSetItem);
             }
@@ -373,7 +373,7 @@ export class AppDashboard {
         // Update the fields after rendering them
         let postUpdateFields = (ctrl: Components.IFormControl, field: Types.SP.Field) => {
             // See if this is the API permission field
-            if (field.InternalName == "AppAPIPermissions") {
+            if (field && field.InternalName == "AppAPIPermissions") {
                 // Check if a value exists
                 if (ctrl.getValue()) {
                     // Select the textarea element
