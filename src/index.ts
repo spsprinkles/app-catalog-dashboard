@@ -4,6 +4,7 @@ import { AppSecurity } from "./appSecurity";
 import { AppView } from "./appView";
 import { Configuration } from "./cfg";
 import { DataSource } from "./ds";
+import { ErrorDialog } from "./errorDialog";
 import Strings, { setContext } from "./strings";
 
 // Styling
@@ -12,7 +13,17 @@ import "./styles.scss";
 // Create the global variable for this solution
 const GlobalVariable = {
     Configuration,
-    render: (el: HTMLElement, context?, cfgWebUrl?: string, cfgUrl?: string, sourceUrl?: string) => {
+    render: (el: HTMLElement, context?, log?, cfgWebUrl?: string, cfgUrl?: string, sourceUrl?: string) => {
+        // See if the log is set
+        if (log) {
+            // Set the log and scope
+            ErrorDialog.Log = log;
+            ErrorDialog.Scope = context.serviceScope;
+        }
+
+        // Log
+        ErrorDialog.logInfo("App Catalog Manager", "Initializing the solution...");
+
         // See if the page context exists
         if (context) {
             // Set the context

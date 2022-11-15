@@ -7,6 +7,38 @@ import Strings from "./strings";
  * Error Dialog
  */
 export class ErrorDialog {
+    private static _log = null;
+    static get Log() { return this._log; }
+    static set Log(value) { this._log = value; }
+
+    private static _scope = null;
+    static get Scope() { return this._scope; }
+    static set Scope(value) { this._scope = value; }
+
+    // Logs the message to the console
+    static logError(message: string) {
+        // See if the log exists
+        if (this.Log) {
+            // Log to the dev dashboard
+            this.Log.error(Strings.ProjectName, message, this.Scope);
+        } else {
+            // Log to the console
+            console.error(message);
+        }
+    }
+
+    // Logs the message to the console
+    static logInfo(message: string, ...args) {
+        // See if the log exists
+        if (this.Log) {
+            // Log to the dev dashboard
+            this.Log.info(Strings.ProjectName, message, this.Scope);
+        } else {
+            // Log to the console
+            console.info(message);
+        }
+    }
+
     // Sends an email, based on the configuration
     private static sendEmail(title: string, message: string, ex?: any) {
         // Ensure a configuration exists
@@ -63,7 +95,7 @@ export class ErrorDialog {
     // Shows an error
     static show(title: string, message: string, ex?: any) {
         // Log the exception
-        console.error(`[${Strings.ProjectName}][${title}] ${message}`, ex);
+        this.logError(`[${Strings.ProjectName}][${title}] ${message} ${ex}`)
 
         // Close the dialogs/forms
         CanvasForm.hide();
@@ -79,7 +111,7 @@ export class ErrorDialog {
         Modal.setType(Components.ModalTypes.Large);
 
         // Show the modal
-        setTimeout(() => { Modal.show(); }, 250);
+        Modal.show();
 
         // Send the email
         this.sendEmail(title, message, ex);
