@@ -150,17 +150,32 @@ export class DataSource {
             // Get the url to the test site
             let url = [AppConfig.Configuration.appCatalogUrl, item.AppProductID].join('/');
 
+            // Log
+            ErrorDialog.logInfo(`Getting test site: ${url}`);
+
             // Get the web context
             ContextInfo.getWeb(url).execute(context => {
+                // Log
+                ErrorDialog.logInfo(`Deleting test site: ${url}`);
+
                 // Delete the web
                 Web(url, { requestDigest: context.GetContextWebInformation.FormDigestValue }).delete().execute(() => {
+                    // Log
+                    ErrorDialog.logInfo(`The test site '${url}' was deleted successfully...`);
+
                     // Resolve the request
                     resolve();
                 }, () => {
+                    // Log
+                    ErrorDialog.logInfo(`The test site '${url}' doesn't exist...`);
+
                     // Web doesn't exist
                     resolve();
                 });
             }, () => {
+                // Log
+                ErrorDialog.logInfo(`Error deleting the test site: ${url}`);
+
                 // Error getting the context
                 resolve();
             });

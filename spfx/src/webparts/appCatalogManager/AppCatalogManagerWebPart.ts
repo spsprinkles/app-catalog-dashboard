@@ -1,10 +1,9 @@
-import { Version } from '@microsoft/sp-core-library';
+import { Log, Version } from '@microsoft/sp-core-library';
 import {
   IPropertyPaneConfiguration,
   PropertyPaneTextField
 } from '@microsoft/sp-property-pane';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
-import { escape } from '@microsoft/sp-lodash-subset';
 
 import styles from './AppCatalogManagerWebPart.module.scss';
 import * as strings from 'AppCatalogManagerWebPartStrings';
@@ -22,7 +21,7 @@ export default class AppCatalogManagerWebPart extends BaseClientSideWebPart<IApp
 
   public render(): void {
     // Render the application
-    AppDashboard.render(this.domElement, this.context, this.properties.configurationWebUrl, this.properties.configurationFileUrl);
+    AppDashboard.render(this.domElement, this.context, Log, this.properties.configurationWebUrl, this.properties.configurationFileUrl);
   }
 
   protected get dataVersion(): Version { return Version.parse('1.0'); }
