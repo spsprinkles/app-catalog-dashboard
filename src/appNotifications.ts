@@ -30,7 +30,7 @@ export class AppNotifications {
                 let developers = item.AppDevelopers.results;
                 for (let i = 0; i < developers.length; i++) {
                     // Append the email
-                    emails.push(developers[i].EMail);
+                    developers[i].EMail ? emails.push(developers[i].EMail) : null;
                 }
 
                 // Return the emails
@@ -39,7 +39,7 @@ export class AppNotifications {
             // Sponsor
             case "Sponsor":
                 // Return the email
-                return item.AppSponsor ? [item.AppSponsor.EMail] : [];
+                return item.AppSponsor && item.AppSponsor.EMail ? [item.AppSponsor.EMail] : [];
         }
     }
 
@@ -215,7 +215,7 @@ export class AppNotifications {
                     },
                     ex => {
                         // Log the error
-                        ErrorDialog.show("Sending Email", "There was an error sending the notification email.", ex);
+                        ErrorDialog.show("Sending Email", "There was an error sending the reject notification email.", ex);
                     }
                 );
             } else {
@@ -417,7 +417,7 @@ export class AppNotifications {
                     },
                     ex => {
                         // Log the error
-                        ErrorDialog.show("Sending Email", "There was an error sending the notification email.", ex);
+                        ErrorDialog.show("Sending Email", "There was an error sending the user's notification to the system.", ex);
                     }
                 );
             } else {
