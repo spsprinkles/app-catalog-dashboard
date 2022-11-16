@@ -30,7 +30,7 @@ export class AppNotifications {
                 let developers = item.AppDevelopers.results;
                 for (let i = 0; i < developers.length; i++) {
                     // Append the email
-                    emails.push(developers[i].EMail);
+                    developers[i].EMail ? emails.push(developers[i].EMail) : null;
                 }
 
                 // Return the emails
@@ -39,7 +39,7 @@ export class AppNotifications {
             // Sponsor
             case "Sponsor":
                 // Return the email
-                return item.AppSponsor ? [item.AppSponsor.EMail] : [];
+                return item.AppSponsor && item.AppSponsor.EMail ? [item.AppSponsor.EMail] : [];
         }
     }
 
@@ -199,13 +199,16 @@ export class AppNotifications {
                 LoadingDialog.setBody("This dialog will close after the notification is sent.");
                 LoadingDialog.show();
 
-                // Send an email
-                Utility(Strings.SourceUrl).sendEmail({
+                // Set the email properties
+                let emailProps = {
                     To,
                     Subject: "App '" + item.Title + "' Sent Back",
                     Body: "App Developers,<br /><br />The '" + item.Title +
                         "' app has been sent back based on the comments below.<br /><br />" + comments
-                }).execute(
+                };
+
+                // Send an email
+                Utility(Strings.SourceUrl).sendEmail(emailProps).execute(
                     () => {
                         // Close the loading dialog
                         LoadingDialog.hide();
@@ -214,8 +217,11 @@ export class AppNotifications {
                         resolve();
                     },
                     ex => {
+                        // Log
+                        ErrorDialog.logError(`The rejectEmail method failed with properties: ${JSON.stringify(emailProps)}`);
+
                         // Log the error
-                        ErrorDialog.show("Sending Email", "There was an error sending the notification email.", ex);
+                        ErrorDialog.show("Sending Email", "There was an error sending the reject notification email.", ex);
                     }
                 );
             } else {
@@ -331,12 +337,15 @@ export class AppNotifications {
                     LoadingDialog.setBody("This dialog will close after the notification is sent.");
                     LoadingDialog.show();
 
-                    // Send an email
-                    Utility(Strings.SourceUrl).sendEmail({
+                    // Set the email properties
+                    let emailProps = {
                         To, CC,
                         Body,
                         Subject: notificationCfg.subject,
-                    }).execute(
+                    };
+
+                    // Send an email
+                    Utility(Strings.SourceUrl).sendEmail(emailProps).execute(
                         () => {
                             // Close the loading dialog
                             LoadingDialog.hide();
@@ -345,6 +354,9 @@ export class AppNotifications {
                             resolve();
                         },
                         ex => {
+                            // Log
+                            ErrorDialog.logError(`The sendEmail method failed with properties: ${JSON.stringify(emailProps)}`);
+
                             // Log the error
                             ErrorDialog.show("Sending Email", "There was an error sending the notification email.", ex);
                         }
@@ -402,12 +414,15 @@ export class AppNotifications {
                 LoadingDialog.setBody("This dialog will close after the notification is sent.");
                 LoadingDialog.show();
 
-                // Send an email
-                Utility(Strings.SourceUrl).sendEmail({
+                // Set the email properties
+                let emailProps = {
                     To,
                     Body,
                     Subject: subject,
-                }).execute(
+                };
+
+                // Send an email
+                Utility(Strings.SourceUrl).sendEmail(emailProps).execute(
                     () => {
                         // Close the loading dialog
                         LoadingDialog.hide();
@@ -416,8 +431,11 @@ export class AppNotifications {
                         resolve();
                     },
                     ex => {
+                        // Log
+                        ErrorDialog.logError(`The sendNotification method failed with properties: ${JSON.stringify(emailProps)}`);
+
                         // Log the error
-                        ErrorDialog.show("Sending Email", "There was an error sending the notification email.", ex);
+                        ErrorDialog.show("Sending Email", "There was an error sending the user's notification to the system.", ex);
                     }
                 );
             } else {
