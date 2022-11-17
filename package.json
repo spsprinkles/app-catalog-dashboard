@@ -23,20 +23,20 @@
   },
   "homepage": "https://github.com/spsprinkles/app-catalog-dashboard#readme",
   "dependencies": {
-    "datatables.net": "^1.12.1",
-    "datatables.net-bs5": "^1.12.1",
+    "datatables.net": "^1.13.1",
+    "datatables.net-bs5": "^1.13.1",
     "dattatable": "^2.1.7",
     "gd-sprest-bs": "^10.9.0",
-    "jquery": "^3.6.0",
-    "jszip": "^3.10.0",
-    "moment": "^2.29.3"
+    "jquery": "^3.6.1",
+    "jszip": "^3.10.1",
+    "moment": "^2.29.4"
   },
   "devDependencies": {
-    "@babel/core": "^7.18.5",
-    "@babel/preset-env": "^7.18.2",
-    "@types/datatables.net": "^1.10.22",
+    "@babel/core": "^7.20.2",
+    "@babel/preset-env": "^7.20.2",
+    "@types/datatables.net": "^1.10.24",
     "@types/jquery": "^3.5.14",
-    "babel-loader": "^8.2.5",
+    "babel-loader": "^8.3.0",
     "css-loader": "^5.2.7",
     "html-loader": "^3.1.2",
     "moment-locales-webpack-plugin": "^1.2.0",
@@ -44,9 +44,9 @@
     "sass-loader": "^12.6.0",
     "style-loader": "^3.3.1",
     "ts-loader": "^9.3.0",
-    "typescript": "^4.7.3",
+    "typescript": "^4.9.3",
     "url-loader": "^4.1.1",
-    "webpack": "^5.73.0",
+    "webpack": "^5.75.0",
     "webpack-cli": "^4.10.0"
   }
 }
