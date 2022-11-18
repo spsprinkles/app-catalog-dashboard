@@ -208,6 +208,7 @@ export class AppDashboard {
 
         // See if the app is deployed and has an error message
         let errorMessage = DataSource.DocSetSCApp ? DataSource.DocSetSCApp.ErrorMessage : null;
+        errorMessage = DataSource.DocSetSCAppCatalogItem ? DataSource.DocSetSCAppCatalogItem.AppPackageErrorMessage : errorMessage;
         errorMessage = DataSource.DocSetSCAppItem ? DataSource.DocSetSCAppItem.AppPackageErrorMessage : errorMessage;
         if (errorMessage && errorMessage != "No errors.") {
             // Show the element

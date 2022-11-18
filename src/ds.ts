@@ -47,6 +47,38 @@ export interface IAppItem extends Types.SP.ListItem {
     IsAppPackageEnabled: boolean;
 }
 
+// App Catalog Item
+export interface IAppCatalogItem extends Types.SP.ListItemOData {
+    AppCatalog_IsNewVersionAvailable: boolean;
+    ApPDescription: string;
+    AppImageURL1: string;
+    AppImageURL2: string;
+    AppImageURL3: string;
+    AppImageURL4: string;
+    AppImageURL5: string;
+    AppMetadataLocale: string;
+    AppPackageErrorMessage: string;
+    AppProductID: string;
+    AppPublisher: string;
+    AppShortDescription: string;
+    AppSupportURL: string;
+    AppThumbnailURL: string;
+    AppVersion: string;
+    AppVideoURL: string;
+    AssetID: string;
+    GUID: string;
+    IsAppPackageEnabled: boolean;
+    IsClientSideSolution: boolean;
+    IsClientSideSolutionCurrentVersionDeployed: boolean;
+    IsClientSideSolutionDeployed: boolean;
+    IsDefaultAppMetadataLocalte: boolean;
+    IsFeaturedApp: boolean;
+    IsValidAppPackage: boolean;
+    SkipFeatureDeployment: boolean;
+    StoreAssetId: string;
+    SupportsTeamsTabs: boolean;
+}
+
 // Assessment Item
 export interface IAssessmentItem extends Types.SP.ListItem {
     Completed?: string;
@@ -67,6 +99,8 @@ export class DataSource {
     static get DocSetSCApp(): Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata { return this._docSetSCApp; }
     private static _docSetSCAppItem: IAppItem = null;
     static get DocSetSCAppItem(): IAppItem { return this._docSetSCAppItem; }
+    private static _docSetSCAppCatalogItem: IAppCatalogItem = null;
+    static get DocSetSCAppCatalogItem(): IAppCatalogItem { return this._docSetSCAppCatalogItem; }
     private static _docSetTenantApp: Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata = null;
     static get DocSetTenantApp(): Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata { return this._docSetTenantApp; }
     static loadDocSetFromQS(): number {
@@ -115,6 +149,18 @@ export class DataSource {
             }).then(info => {
                 // Save the info
                 this._docSetInfo = info;
+
+                // Find the package file
+                for (let i = 0; i < this.DocSetFolder.Files.results.length; i++) {
+                    let file = this.DocSetFolder.Files.results[i];
+
+                    // See if this is the package
+                    if (file.Name.toLowerCase().endsWith(".sppkg")) {
+                        // Set the app catalog item
+                        this._docSetSCAppCatalogItem = this.getSiteCollectionAppItem(file.Name);
+                        break;
+                    }
+                }
 
                 // Ensure items exist
                 if (this._items) {
@@ -518,8 +564,10 @@ export class DataSource {
 
     // Site Collection Apps
     private static _siteCollectionApps: Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata[] = null;
+    private static _siteCollectionItems: IAppCatalogItem[] = null;
     static get SiteCollectionAppCatalogExists(): boolean { return this._siteCollectionApps != null; }
     static get SiteCollectionApps(): Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata[] { return this._siteCollectionApps; }
+    static get SiteCollectionItems(): IAppCatalogItem[] { return this._siteCollectionItems; }
     static getSiteCollectionAppById(appId: string): Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata {
         // Parse the apps
         for (let i = 0; i < this._siteCollectionApps.length; i++) {
@@ -530,6 +578,18 @@ export class DataSource {
         }
 
         // App not found
+        return null;
+    }
+    static getSiteCollectionAppItem(value: string): IAppCatalogItem {
+        // Parse the apps
+        for (let i = 0; i < this._siteCollectionItems.length; i++) {
+            let item = this._siteCollectionItems[i];
+
+            // See if this is the target app
+            if (item.AppProductID == value || item.File.Name == value) { return item; }
+        }
+
+        // App item not found
         return null;
     }
     static loadSiteCollectionApp(id: string): PromiseLike<void> {
@@ -617,6 +677,38 @@ export class DataSource {
             }
         });
     }
+    static loadSiteCollectionItems(): PromiseLike<void> {
+        // Return a promise
+        return new Promise((resolve) => {
+            // See if the app catalog is defined
+            if (AppConfig.Configuration.appCatalogUrl) {
+                // Load the available apps
+                Web(AppConfig.Configuration.appCatalogUrl).Lists("Apps for SharePoint").Items().query({
+                    Expand: ["File"],
+                    GetAllItems: true,
+                    Top: 5000
+                }).execute(items => {
+                    // Set the apps
+                    this._siteCollectionItems = items.results as any;
+
+                    // Resolve the request
+                    resolve();
+                }, () => {
+                    // No access to the site collection app catalog
+                    this._siteCollectionItems = [];
+
+                    // Resolve the request
+                    resolve();
+                });
+            } else {
+                // Default the site collection apps
+                this._siteCollectionItems = [];
+
+                // Resolve the request
+                resolve();
+            }
+        });
+    }
 
     // Tenant Apps
     private static _tenantApps: Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata[] = null;
@@ -687,25 +779,28 @@ export class DataSource {
         return new Promise((resolve, reject) => {
             // Load the site collection apps
             this.loadSiteCollectionApps().then(() => {
-                // Load the tenant apps
-                this.loadTenantApps().then(() => {
-                    // See if this is a document set id is set
-                    if (docSetId > 0) {
-                        // Load the document set item
-                        this.loadDocSet(docSetId).then(() => {
-                            // Resolve the request
-                            resolve();
-                        }, reject);
-                    } else {
-                        // Load all the items
-                        this.load().then(() => {
-                            // Load the status filters
-                            this.loadStatusFilters().then(() => {
+                // Load the site collection items
+                this.loadSiteCollectionItems().then(() => {
+                    // Load the tenant apps
+                    this.loadTenantApps().then(() => {
+                        // See if this is a document set id is set
+                        if (docSetId > 0) {
+                            // Load the document set item
+                            this.loadDocSet(docSetId).then(() => {
                                 // Resolve the request
                                 resolve();
                             }, reject);
-                        }, reject);
-                    }
+                        } else {
+                            // Load all the items
+                            this.load().then(() => {
+                                // Load the status filters
+                                this.loadStatusFilters().then(() => {
+                                    // Resolve the request
+                                    resolve();
+                                }, reject);
+                            }, reject);
+                        }
+                    }, reject);
                 }, reject);
             }, reject);
         });

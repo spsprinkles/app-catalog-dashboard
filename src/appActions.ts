@@ -507,13 +507,24 @@ export class AppActions {
                                                         onUpdate();
                                                     }
                                                 }, () => {
-                                                    // Log the error
-                                                    ErrorDialog.show("Getting Apps", "There was an error getting the available apps from the app catalog.");
-
-                                                    // Error deploying the app
-                                                    // TODO - Show an error
-                                                    // Call the update event
-                                                    onUpdate();
+                                                    // See if this isn't the tenant
+                                                    if (!tenantFl) {
+                                                        // Refresh the apps
+                                                        DataSource.loadSiteCollectionItems().then(() => {
+                                                            // See if the app item exists
+                                                            let appItem = DataSource.getSiteCollectionAppItem(item.AppProductID);
+                                                            if (appItem) {
+                                                                // Log the error
+                                                                ErrorDialog.show("Deploy Error", "The app was added to the catalog successfully, but there was an error with it.");
+                                                            } else {
+                                                                // Log the error
+                                                                ErrorDialog.show("Getting Apps", "There was an error getting the available apps from the app catalog.");
+                                                            }
+                                                        });
+                                                    } else {
+                                                        // Log the error
+                                                        ErrorDialog.show("Getting Apps", "There was an error getting the available apps from the app catalog.");
+                                                    }
                                                 });
                                             });
                                         },

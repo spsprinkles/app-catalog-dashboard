@@ -556,26 +556,29 @@ export class ButtonActions {
 
                         // Test site doesn't exist
                         () => {
-                            // Render the create button
-                            tooltips.add({
-                                content: "Creates the test site for the app.",
-                                btnProps: {
-                                    text: "Create Test Site",
-                                    iconClassName: "me-1",
-                                    iconSize: 20,
-                                    iconType: chatSquareDots,
-                                    isDisabled: !AppSecurity.IsSiteAppCatalogOwner,
-                                    isSmall: true,
-                                    type: Components.ButtonTypes.OutlinePrimary,
-                                    onClick: () => {
-                                        // Display the create test site form
-                                        this._forms.createTestSite(this._item, () => {
-                                            // Call the update event
-                                            this._onUpdate();
-                                        });
+                            // Ensure the app item exists
+                            if (DataSource.DocSetSCAppCatalogItem) {
+                                // Render the create button
+                                tooltips.add({
+                                    content: "Creates the test site for the app.",
+                                    btnProps: {
+                                        text: "Create Test Site",
+                                        iconClassName: "me-1",
+                                        iconSize: 20,
+                                        iconType: chatSquareDots,
+                                        isDisabled: !AppSecurity.IsSiteAppCatalogOwner || !DataSource.DocSetSCAppCatalogItem.IsValidAppPackage,
+                                        isSmall: true,
+                                        type: Components.ButtonTypes.OutlinePrimary,
+                                        onClick: () => {
+                                            // Display the create test site form
+                                            this._forms.createTestSite(this._item, () => {
+                                                // Call the update event
+                                                this._onUpdate();
+                                            });
+                                        }
                                     }
-                                }
-                            });
+                                });
+                            }
                         }
                     );
                     break;
