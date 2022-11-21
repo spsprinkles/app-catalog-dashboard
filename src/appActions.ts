@@ -228,7 +228,7 @@ export class AppActions {
 
         // Deploy the solution
         // Force the skip feature deployment to be false for a test site.
-        this.deploy(item, false, false, () => {
+        this.deploy(item, false, false, onComplete, () => {
             // Update the loading dialog
             LoadingDialog.setHeader("Creating the Test Site");
             LoadingDialog.setBody("Creating the sub-web for testing the application.");
@@ -388,7 +388,7 @@ export class AppActions {
     }
 
     // Deploys the solution to the app catalog
-    static deploy(item: IAppItem, tenantFl: boolean, skipFeatureDeployment: boolean, onUpdate: () => void) {
+    static deploy(item: IAppItem, tenantFl: boolean, skipFeatureDeployment: boolean, onError: () => void, onUpdate: () => void) {
         let appFile: Types.SP.File = null;
 
         // Log
@@ -498,6 +498,9 @@ export class AppActions {
                                                         }, () => {
                                                             // Log the error
                                                             ErrorDialog.show("Updating App", "There was an error setting the tenant deployed flag.");
+
+                                                            // Call the event
+                                                            onError();
                                                         });
                                                     } else {
                                                         // Hide the dialog
@@ -507,25 +510,48 @@ export class AppActions {
                                                         onUpdate();
                                                     }
                                                 }, () => {
-                                                    // Log the error
-                                                    ErrorDialog.show("Getting Apps", "There was an error getting the available apps from the app catalog.");
+                                                    // See if this isn't the tenant
+                                                    if (!tenantFl) {
+                                                        // Refresh the apps
+                                                        DataSource.loadSiteCollectionItems().then(() => {
+                                                            // See if the app item exists
+                                                            let appItem = DataSource.getSiteCollectionAppItem(appFile.Name);
+                                                            if (appItem) {
+                                                                // Log the error
+                                                                ErrorDialog.show("Deploy Error", "The app was added to the catalog successfully, but there was an error with it.");
+                                                            } else {
+                                                                // Log the error
+                                                                ErrorDialog.show("Getting Apps", "There was an error getting the available apps from the app catalog.");
+                                                            }
 
-                                                    // Error deploying the app
-                                                    // TODO - Show an error
-                                                    // Call the update event
-                                                    onUpdate();
+                                                            // Call the event
+                                                            onError();
+                                                        });
+                                                    } else {
+                                                        // Log the error
+                                                        ErrorDialog.show("Getting Apps", "There was an error getting the available apps from the app catalog.");
+
+                                                        // Call the event
+                                                        onError();
+                                                    }
                                                 });
                                             });
                                         },
                                         ex => {
                                             // Log the error
                                             ErrorDialog.show("Loading App", "There was an error loading the app item.", ex);
+
+                                            // Call the event
+                                            onError();
                                         }
                                     );
                                 },
                                 ex => {
                                     // Log the error
                                     ErrorDialog.show("Adding App", "There was an error adding the app to the app catalog.", ex);
+
+                                    // Call the event
+                                    onError();
                                 }
                             );
                         });
@@ -533,12 +559,18 @@ export class AppActions {
                     ex => {
                         // Log the error
                         ErrorDialog.show("Getting Context", "There was an error getting the web context", ex);
+
+                        // Call the event
+                        onError();
                     }
                 );
             },
             ex => {
                 // Log the error
                 ErrorDialog.show("Reading File", "There was an error reading the app package file.", ex);
+
+                // Call the event
+                onError();
             }
         );
     }
@@ -941,7 +973,7 @@ export class AppActions {
     }
 
     // Updates the app
-    static updateApp(item: IAppItem, siteUrl: string, isTestSite: boolean): PromiseLike<void> {
+    static updateApp(item: IAppItem, siteUrl: string, isTestSite: boolean, onError: () => void): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve) => {
             // Log
@@ -970,7 +1002,7 @@ export class AppActions {
                             ErrorDialog.logInfo(`Upgrading the app '${item.Title}' with id ${item.AppProductID}...`);
 
                             // Deploy the solution
-                            this.deploy(item, false, isTestSite ? false : item.AppSkipFeatureDeployment, () => {
+                            this.deploy(item, false, isTestSite ? false : item.AppSkipFeatureDeployment, onError, () => {
                                 // Update the dialog
                                 LoadingDialog.setHeader("Upgrading the Solution");
 

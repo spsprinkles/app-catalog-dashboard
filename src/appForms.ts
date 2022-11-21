@@ -74,7 +74,7 @@ export class AppForms {
                                                                 onUpdate();
                                                             } else {
                                                                 // Update the app
-                                                                AppActions.updateApp(item, webInfo.web.ServerRelativeUrl, true).then(() => {
+                                                                AppActions.updateApp(item, webInfo.web.ServerRelativeUrl, true, onUpdate).then(() => {
                                                                     // Call the update event
                                                                     onUpdate();
                                                                 });
@@ -313,7 +313,7 @@ export class AppForms {
                 let skipFeatureDeployment = form ? form.getValues()["SkipFeatureDeployment"] : false;
 
                 // Deploy the app
-                AppActions.deploy(item, tenantFl, skipFeatureDeployment, () => {
+                AppActions.deploy(item, tenantFl, skipFeatureDeployment, onUpdate, () => {
                     // Call the update event
                     onUpdate();
                 });
@@ -1693,7 +1693,7 @@ ${ContextInfo.userDisplayName}`.trim());
                 Modal.hide();
 
                 // Update the app
-                AppActions.updateApp(item, siteUrl, true).then(() => {
+                AppActions.updateApp(item, siteUrl, true, onUpdate).then(() => {
                     // Call the update event
                     onUpdate();
                 });
@@ -1803,7 +1803,7 @@ ${ContextInfo.userDisplayName}`.trim());
                             // Return a promise
                             return new Promise(resolve => {
                                 // Upgrade the app
-                                AppActions.updateApp(appItem, item.data, false).then(() => {
+                                AppActions.updateApp(appItem, item.data, false, () => { resolve(null); }).then(() => {
                                     // Update the loading dialog
                                     LoadingDialog.setHeader("Upgrading Apps");
                                     LoadingDialog.setBody("Upgrading " + (++counter) + " of " + items.length);
