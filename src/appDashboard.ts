@@ -305,7 +305,7 @@ export class AppDashboard {
                                     () => {
                                         let archiveApp = () => {
                                             // See if the item is currently approved
-                                            if (DataSource.DocSetItem.AppStatus == AppConfig.TestCasesStatus) {
+                                            if (DataSource.DocSetItem.AppStatus == AppConfig.ApprovedStatus) {
                                                 // Archive the file
                                                 AppActions.archivePackage(DataSource.DocSetItem, () => {
                                                     // Add the file
