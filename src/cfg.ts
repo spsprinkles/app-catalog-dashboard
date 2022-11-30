@@ -1122,11 +1122,11 @@ export const createSecurityGroups = (): PromiseLike<void> => {
             let updateOwners = () => {
                 // Return a promise
                 return new Promise((resolve, reject) => {
-                    // Execute against the groups
-                    Helper.Executor([devGroup], group => {
-                        // Set the site owner
-                        return Helper.setGroupOwner(group.Title, approveGroup.Title, Strings.SourceUrl);
-                    }).then(resolve, reject);
+                    // Set the dev group owner
+                    Helper.setGroupOwner(devGroup.Title, approveGroup.Title, Strings.SourceUrl).then(() => {
+                        // Set the sponsor group owner
+                        Helper.setGroupOwner(sponsorGroup.Title, devGroup.Title, Strings.SourceUrl).then(resolve, reject);
+                    }, reject);
                 });
             }
 
