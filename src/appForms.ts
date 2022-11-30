@@ -766,9 +766,40 @@ ${ContextInfo.userDisplayName}`.trim());
                 // Return the properties
                 return props;
             },
-            onUpdate: () => {
-                // Call the update event
-                onUpdate();
+            onUpdate: (item: IAppItem) => {
+                // See if this is a new item
+                if (item.AppStatus == "New") {
+                    // Log
+                    ErrorDialog.logInfo(`Validating the app sponsor id: '${item.AppSponsorId}'`);
+
+                    // Get the sponsor
+                    let sponsor = AppSecurity.getSponsor(item.AppSponsorId);
+                    if (sponsor == null && item.AppSponsorId > 0) {
+                        // Log
+                        ErrorDialog.logInfo(`App sponsor not in group. Adding the user...`);
+
+                        // Add the sponsor to the group
+                        AppSecurity.addSponsor(item.AppSponsorId).then(() => {
+                            // Get the status
+                            let status = AppConfig.Status[item.AppStatus];
+
+                            // Send the notifications
+                            AppNotifications.sendEmail(status.notification, item, false).then(() => {
+                                // Call the update event
+                                onUpdate();
+
+                                // Hide the dialog
+                                LoadingDialog.hide();
+                            });
+                        });
+                    } else {
+                        // Call the update event
+                        onUpdate();
+                    }
+                } else {
+                    // Call the update event
+                    onUpdate();
+                }
             }
         });
     }
@@ -1652,9 +1683,15 @@ ${ContextInfo.userDisplayName}`.trim());
                                         });
                                     }
 
+                                    // Log
+                                    ErrorDialog.logInfo(`Validating the app sponsor id: '${item.AppSponsorId}'`);
+
                                     // Get the sponsor
                                     let sponsor = AppSecurity.getSponsor(item.AppSponsorId);
                                     if (sponsor == null && item.AppSponsorId > 0) {
+                                        // Log
+                                        ErrorDialog.logInfo(`App sponsor not in group. Adding the user...`);
+
                                         // Add the sponsor to the group
                                         AppSecurity.addSponsor(item.AppSponsorId).then(() => {
                                             // Complete the request

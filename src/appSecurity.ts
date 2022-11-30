@@ -276,6 +276,9 @@ export class AppSecurity {
     }
     // Add the user to the sponsor group
     static addSponsor(userId: number): PromiseLike<void> {
+        // Log
+        ErrorDialog.logInfo(`Adding the user with id '${userId}' to the App Sponsor site group...`);
+
         // Return a promise
         return new Promise((resolve, reject) => {
             // Add the user
@@ -285,7 +288,16 @@ export class AppSecurity {
 
                 // Resolve the request
                 resolve();
-            }, reject);
+            },
+                // Error
+                ex => {
+                    // Log
+                    ErrorDialog.logError(`Error adding the app sponsor not added to the group.`);
+                    ErrorDialog.logError(`Error Message: ${ex.response}`)
+
+                    // Reject the request
+                    reject();
+                });
         });
     }
     static getSponsor(userId: number): Types.SP.User {
