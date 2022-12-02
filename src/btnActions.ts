@@ -461,6 +461,34 @@ export class ButtonActions {
                     });
                     break;
 
+                // Get Help
+                case "GetHelp":
+                    // Render the button
+                    tooltips.add({
+                        content: "Sends a notification to the app owners.",
+                        btnProps: {
+                            text: "Get Help",
+                            iconClassName: "me-1",
+                            iconSize: 20,
+                            iconType: appIndicator,
+                            isSmall: true,
+                            type: Components.ButtonTypes.OutlinePrimary,
+                            onClick: () => {
+                                this._forms.sendNotification(this._item, ["Developers", "Sponsor"], "Request for Help",
+`App Developers,
+
+We are requesting help for the app ${this._item.Title}.
+
+(Enter Details Here)
+
+r/,
+${ContextInfo.userDisplayName}`.trim()
+                                );
+                            }
+                        }
+                    });
+                    break;
+
                 // Notification
                 case "Notification":
                     // Render the button
