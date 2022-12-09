@@ -189,6 +189,9 @@ export class AppActions {
                         // Log
                         ErrorDialog.logInfo(`Updating the web's permissions...`);
 
+                        // Add the app sponsor
+                        item.AppSponsorId > 0 ? web.RoleAssignments().addRoleAssignment(item.AppSponsorId, role.Id).execute() : null;
+
                         // Parse the developers
                         for (let i = 0; i < developers.length; i++) {
                             // Add the user
