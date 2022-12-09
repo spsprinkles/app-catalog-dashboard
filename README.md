@@ -79,6 +79,7 @@ The available values for the `actions` status property.
 | Edit | Displays the edit form to modify the app metadata. |
 | EditTechReview | Displays the edit form to modify the technical review assessment. |
 | EditTestCases | Displays the edit form to modify the test cases assessment. |
+| GetHelp | Displays a `help` button to send a notification to the app developers and app sponsor. |
 | Notification | Displays a button to notify user types. |
 | Submit | Displays the submission form to request approval. |
 | TestSite | Displays a `create` or `view` button to the test site collection. |

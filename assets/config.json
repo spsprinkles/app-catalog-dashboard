@@ -29,6 +29,7 @@
         "Deployed": {
             "actions": [
                 "AppData",
+                "GetHelp",
                 "View",
                 "ViewTestCases",
                 "ViewTechReview",
