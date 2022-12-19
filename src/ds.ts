@@ -16,6 +16,7 @@ export interface IAppItem extends Types.SP.ListItem {
     AppIsClientSideSolution?: boolean;
     AppIsDomainIsolated?: boolean;
     AppIsRejected: boolean;
+    AppIsTenant: boolean;
     AppIsTenantDeployed: boolean;
     AppJustification: string;
     AppPermissionsJustification: string;

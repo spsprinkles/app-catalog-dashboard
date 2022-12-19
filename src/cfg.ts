@@ -45,6 +45,7 @@ export const Configuration = Helper.SPConfig({
                         { Name: "AppSkipFeatureDeployment", ReadOnly: true },
                         { Name: "AppVersion", ReadOnly: true },
                         { Name: "AppSiteDeployments", ReadOnly: true },
+                        "AppIsTenant",
                         "AppPublisher",
                         "AppSponsor",
                         "AppDevelopers",
@@ -109,6 +110,13 @@ export const Configuration = Helper.SPConfig({
                     allowDeletion: false,
                     defaultValue: "0",
                     showInNewForm: false
+                },
+                {
+                    name: "AppIsTenant",
+                    title: "Is Tenant App?",
+                    type: Helper.SPCfgFieldType.Boolean,
+                    allowDeletion: false,
+                    defaultValue: "1"
                 },
                 {
                     name: "AppIsTenantDeployed",
