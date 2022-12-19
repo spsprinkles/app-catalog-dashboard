@@ -1731,8 +1731,11 @@ ${ContextInfo.userDisplayName}`.trim());
 
                 // Update the app
                 AppActions.updateApp(item, siteUrl, true, onUpdate).then(() => {
-                    // Call the update event
-                    onUpdate();
+                    // Send the notifications
+                    AppNotifications.sendAppTestSiteUpgradedEmail(DataSource.DocSetItem).then(() => {
+                        // Call the update event
+                        onUpdate();
+                    });
                 });
             }
         }).el);

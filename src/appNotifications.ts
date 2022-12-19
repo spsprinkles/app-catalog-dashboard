@@ -246,6 +246,21 @@ export class AppNotifications {
         });
     }
 
+    // Sends an email when an app is upgraded in the test site
+    static sendAppTestSiteUpgradedEmail(item: IAppItem): PromiseLike<void> {
+        // Return a promise
+        return new Promise(resolve => {
+            // See if a configuration exists
+            if (AppConfig.Configuration.appNotifications && AppConfig.Configuration.appNotifications.test) {
+                // Send the email
+                this.sendEmail(AppConfig.Configuration.appNotifications.test, item, false, true).then(resolve);
+            } else {
+                // Resolve the requst
+                resolve();
+            }
+        });
+    }
+
     // Sends an email when an app is upgraded
     static sendAppUpgradedEmail(item: IAppItem): PromiseLike<void> {
         // Return a promise

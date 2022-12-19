@@ -15,6 +15,15 @@
                 "content": "The app [[Title]] was deployed."
             }
         ],
+        "test": [
+            {
+                "to": [
+                    "Sponsor", "Developers"
+                ],
+                "subject": "App Updated",
+                "content": "The app [[Title]] was upgraded in the test site."
+            }
+        ],
         "upgrade": [
             {
                 "to": [
