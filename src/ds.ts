@@ -16,7 +16,6 @@ export interface IAppItem extends Types.SP.ListItem {
     AppIsClientSideSolution?: boolean;
     AppIsDomainIsolated?: boolean;
     AppIsRejected: boolean;
-    AppIsTenant: boolean;
     AppIsTenantDeployed: boolean;
     AppJustification: string;
     AppPermissionsJustification: string;
@@ -545,14 +544,10 @@ export class DataSource {
         return new Promise((resolve, reject) => {
             // Get the status field
             Web(Strings.SourceUrl).Lists(Strings.Lists.Apps).Fields("AppStatus").execute((fld: Types.SP.FieldChoice) => {
-                let containsDeployedStatus = false;
                 let items: Components.ICheckboxGroupItem[] = [];
 
                 // Parse the choices
                 for (let i = 0; i < fld.Choices.results.length; i++) {
-                    // Set the flag
-                    containsDeployedStatus = containsDeployedStatus || fld.Choices.results[i] == "Deployed";
-
                     // Add an item
                     items.push({
                         label: fld.Choices.results[i],
@@ -560,24 +555,9 @@ export class DataSource {
                     });
                 }
 
-                // See if we are adding the deployed status
-                if (!containsDeployedStatus) {
-                    // Add the item
-                    items.push({
-                        label: "Deployed",
-                        type: Components.CheckboxGroupTypes.Switch
-                    });
-                }
-
                 // Set the filters and resolve the promise
-                this._statusFilters = items.sort((a, b) => {
-                    if (a.label < b.label) { return -1; }
-                    if (a.label > b.label) { return 1; }
-                    return 0;
-                });
-
-                // Resolve the request
-                resolve(this._statusFilters);
+                this._statusFilters = items;
+                resolve(items);
             }, reject);
         });
     }
