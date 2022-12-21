@@ -47,6 +47,7 @@ During the approval process, the app will go through different actions. This con
 | Name | Description |
 | --- | --- |
 | deploy | An array of notifications to be sent when an app is deployed to the site collection or tenant app catalog. |
+| test | An array of notifications to be sent when the app is upgraded in the test site. |
 | upgrade | An array of notifications to be sent when a new app is uploaded with a new version. |
 
 ### Status

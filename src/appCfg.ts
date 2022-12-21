@@ -31,6 +31,7 @@ export interface IAppDetails {
 // App Notifications
 export interface IAppNotifications {
     deploy?: IEmail[];
+    test?: IEmail[];
     upgrade?: IEmail[];
 }
 
