@@ -399,6 +399,7 @@ export class AppDashboard {
                                 info: DataSource.DocSetInfo,
                                 el,
                                 includeFields: AppConfig.Configuration.appDetails && AppConfig.Configuration.appDetails.left ? AppConfig.Configuration.appDetails.left : [
+                                    "AppIsTenant",
                                     "AppStatus",
                                     "AppDevelopers",
                                     "AppSponsor",
