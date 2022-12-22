@@ -27,6 +27,7 @@ export class AppView {
     private _elAppDetails: HTMLElement = null;
     private _elFilterButtons: HTMLElement[] = [];
     private _forms: AppForms = null;
+    private _isClearing: boolean = false;
 
     // Constructor
     constructor(el: HTMLElement, elAppDetails: HTMLElement) {
@@ -41,6 +42,12 @@ export class AppView {
 
     // Clears the filters
     private clearFilters() {
+        // See if we are currently clearing the filters
+        if (this._isClearing) { return; }
+
+        // Set the flag
+        this._isClearing = true;
+
         // Parse the filters
         for (let i = 0; i < this._elFilterButtons.length; i++) {
             let elButton = this._elFilterButtons[i];
@@ -52,7 +59,13 @@ export class AppView {
 
         // Clear the filters
         this._dashboard.filter(0, "");
-        this._dashboard.filter(3, "");
+        this._dashboard.setFilterValue("App Status", "");
+
+        // Wait to clear the flag
+        setTimeout(() => {
+            // Clear the flag
+            this._isClearing = false;
+        }, 250);
     }
 
     // Determines if an app belongs to the user
