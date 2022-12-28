@@ -84,7 +84,7 @@ export interface IAppCatalogRequestItem extends Types.SP.ListItem {
     RequestersId: { results: number[] };
     RequestNotes: string;
     RequestStatus: string;
-    SiteCollectionUrl: string;
+    SiteCollectionUrl: Types.SP.FieldUrlValue;
 }
 
 // Assessment Item

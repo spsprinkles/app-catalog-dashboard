@@ -26,6 +26,13 @@ export class AppCatalogRequests {
                 rows: items,
                 dtProps: {
                     dom: 'rt<"row"<"col-sm-4"l><"col-sm-4"i><"col-sm-4"p>>',
+                    columnDefs: [
+                        {
+                            targets: [3],
+                            orderable: false,
+                            searchable: false
+                        }
+                    ],
                     createdRow: function (row, data, index) {
                         jQuery('td', row).addClass('align-middle');
                     },
@@ -58,17 +65,40 @@ export class AppCatalogRequests {
                             // Display the url
                             if (item.SiteCollectionUrl) {
                                 // Display the url
-                                el.innerHTML = item.SiteCollectionUrl;
+                                el.innerHTML = item.SiteCollectionUrl.Url;
                             }
                         }
+                    },
+                    {
+                        name: "RequestStatus",
+                        title: "Status",
                     },
                     {
                         name: "RequestNotes",
                         title: "Notes",
                     },
                     {
-                        name: "RequestStatus",
-                        title: "Status",
+                        name: "",
+                        title: "",
+                        onRenderCell: (el, col, item: IAppCatalogRequestItem) => {
+                            // Render a delete button
+                            let btn = Components.Button({
+                                el,
+                                text: "Delete",
+                                type: Components.ButtonTypes.OutlineDanger,
+                                isSmall: true,
+                                onClick: () => {
+                                    // Disable the button
+                                    btn.disable();
+
+                                    // Delete the item
+                                    item.delete().execute(() => {
+                                        // Update the button text
+                                        btn.setText("Deleted");
+                                    });
+                                }
+                            });
+                        }
                     }
                 ]
             });

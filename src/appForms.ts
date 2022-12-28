@@ -331,9 +331,6 @@ export class AppForms {
         let isRoot = null;
         let webUrl = null;
 
-        // Method to get the url
-        let getUrl = () => { return (form.getValues()["Url"] || "").trim().replace(/\/$/, ""); }
-
         // Set the header
         Modal.setHeader("Deploy to App Catalog");
 
@@ -430,7 +427,7 @@ export class AppForms {
 
                             // Validate the url
                             // Note - trim the '/' from the end of the url. It can cause the web query to fail.
-                            let url = getUrl();
+                            let url = (form.getValues()["Url"] || "").trim().replace(/\/$/, "");
                             if (url) {
                                 // Show a loading dialog
                                 LoadingDialog.setHeader("Loading App Catalog");
@@ -530,7 +527,7 @@ export class AppForms {
                         type: Components.ButtonTypes.OutlineInfo,
                         onClick: () => {
                             // Display the request form
-                            this.requestAppCatalog(getUrl());
+                            this.requestAppCatalog(webUrl);
                         }
                     }
                 },
@@ -1458,7 +1455,6 @@ export class AppForms {
         ItemForm.create({
             webUrl: Strings.SourceUrl,
             onSetHeader(el) {
-                debugger;
                 el.innerHTML = el.innerHTML;
             },
             onCreateEditForm: props => {
