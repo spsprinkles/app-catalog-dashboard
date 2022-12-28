@@ -79,6 +79,14 @@ export interface IAppCatalogItem extends Types.SP.ListItemOData {
     SupportsTeamsTabs: boolean;
 }
 
+// App Catalog Request Item
+export interface IAppCatalogRequestItem extends Types.SP.ListItem {
+    RequestersId: { results: number[] };
+    RequestNotes: string;
+    RequestStatus: string;
+    SiteCollectionUrl: string;
+}
+
 // Assessment Item
 export interface IAssessmentItem extends Types.SP.ListItem {
     Completed?: string;
@@ -533,6 +541,20 @@ export class DataSource {
                 // Resolve the promise
                 resolve();
             }, reject);
+        });
+    }
+
+    // App Catalog Requests
+    static loadAppCatalogRequests(): PromiseLike<IAppCatalogRequestItem[]> {
+        // Return a promise
+        return new Promise((resolve, reject) => {
+            // Load the list items
+            Web(Strings.SourceUrl).Lists(Strings.Lists.AppCatalogRequests).Items().query({
+                Filter: "Requesters/Id eq " + ContextInfo.userId
+            }).execute(items => {
+                // Resolve the request
+                resolve(items.results as any);
+            }, reject)
         });
     }
 
