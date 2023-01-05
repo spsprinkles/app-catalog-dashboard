@@ -1170,7 +1170,7 @@ export const createSecurityGroups = (): PromiseLike<void> => {
             let resetListPermissions = () => {
                 // Return a promise
                 return new Promise(resolve => {
-                    Helper.Executor([Strings.Lists.Apps, Strings.Lists.Assessments], listName => {
+                    Helper.Executor([Strings.Lists.Apps, Strings.Lists.Assessments, Strings.Lists.AppCatalogRequests], listName => {
                         // Return a promise
                         return new Promise(resolve => {
                             // Get the list
