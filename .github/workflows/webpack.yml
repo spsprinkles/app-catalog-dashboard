@@ -1,13 +1,13 @@
 name: Build & Package
 
 on:
+  workflow_dispatch:
   project:
     types: [ closed ]
   pull_request:
     types: [ closed ]
   release:
     types: [ published ]
-  workflow_dispatch
 
 jobs:
   build:
