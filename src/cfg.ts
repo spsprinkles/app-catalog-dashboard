@@ -11,6 +11,70 @@ export const Configuration = Helper.SPConfig({
     ListCfg: [
         {
             ListInformation: {
+                BaseTemplate: SPTypes.ListTemplateType.GenericList,
+                Description: "List to contain the app catalog requests for site collections.",
+                NoCrawl: true,
+                Title: Strings.Lists.AppCatalogRequests
+            },
+            ContentTypes: [
+                {
+                    Name: "Item",
+                    FieldRefs: [
+                        "RequestStatus",
+                        "SiteCollectionUrl",
+                        "Requesters",
+                        "RequestNotes"
+                    ]
+                }
+            ],
+            CustomFields: [
+                {
+                    name: "SiteCollectionUrl",
+                    title: "Site Collection Url",
+                    type: Helper.SPCfgFieldType.Url,
+                    description: "The url to the site collection requesting an app catalog.",
+                    allowDeletion: false,
+                    format: SPTypes.UrlFormatType.Hyperlink,
+                    required: true
+                } as Helper.IFieldInfoUrl,
+                {
+                    name: "Requesters",
+                    title: "Requesters",
+                    type: Helper.SPCfgFieldType.User,
+                    allowDeletion: false,
+                    defaultValue: "[Me]",
+                    description: "The users to notify when this request is updated.",
+                    multi: true,
+                    required: true,
+                    selectionMode: SPTypes.FieldUserSelectionType.PeopleOnly,
+                    showField: "ImnName",
+                    sortable: false
+                } as Helper.IFieldInfoUser,
+                {
+                    name: "RequestNotes",
+                    title: "Notes",
+                    type: Helper.SPCfgFieldType.Note,
+                    allowDeletion: false,
+                    noteType: SPTypes.FieldNoteType.TextOnly
+                } as Helper.IFieldInfoNote,
+                {
+                    name: "RequestStatus",
+                    title: "Request Status",
+                    type: Helper.SPCfgFieldType.Choice,
+                    allowDeletion: false,
+                    defaultValue: "New",
+                    format: SPTypes.ChoiceFormatType.Dropdown,
+                    required: true,
+                    showInEditForm: false,
+                    showInNewForm: false,
+                    choices: [
+                        "New", "Approved", "Rejected"
+                    ]
+                } as Helper.IFieldInfoChoice,
+            ]
+        },
+        {
+            ListInformation: {
                 AllowContentTypes: true,
                 BaseTemplate: SPTypes.ListTemplateType.DocumentLibrary,
                 Description: "Used by developers to submit their solutions to the App Catalog",
@@ -1146,6 +1210,7 @@ export const createSecurityGroups = (): PromiseLike<void> => {
                         // Get the lists to update
                         let listApps = Web().Lists(Strings.Lists.Apps);
                         let listAssessments = Web().Lists(Strings.Lists.Assessments);
+                        let listRequests = Web().Lists(Strings.Lists.AppCatalogRequests);
 
                         // Ensure the approver group exists
                         if (approveGroup) {
@@ -1157,6 +1222,10 @@ export const createSecurityGroups = (): PromiseLike<void> => {
                             listAssessments.RoleAssignments().addRoleAssignment(approveGroup.Id, permissions[SPTypes.RoleType.WebDesigner]).execute(() => {
                                 // Log
                                 console.log("[Assessments List] The approver permission was added successfully.");
+                            });
+                            listRequests.RoleAssignments().addRoleAssignment(approveGroup.Id, permissions[SPTypes.RoleType.WebDesigner]).execute(() => {
+                                // Log
+                                console.log("[App Catalog Requests List] The approver permission was added successfully.");
                             });
                         }
 
@@ -1171,6 +1240,10 @@ export const createSecurityGroups = (): PromiseLike<void> => {
                                 // Log
                                 console.log("[Assessments List] The dev permission was added successfully.");
                             });
+                            listRequests.RoleAssignments().addRoleAssignment(devGroup.Id, permissions[SPTypes.RoleType.Contributor]).execute(() => {
+                                // Log
+                                console.log("[App Catalog Requests List] The dev permission was added successfully.");
+                            });
                         }
 
                         // Ensure the dev group exists
@@ -1183,6 +1256,10 @@ export const createSecurityGroups = (): PromiseLike<void> => {
                             listAssessments.RoleAssignments().addRoleAssignment(sponsorGroup.Id, permissions[customPermissionLevel]).execute(() => {
                                 // Log
                                 console.log("[Assessments List] The sponsor permission was added successfully.");
+                            });
+                            listRequests.RoleAssignments().addRoleAssignment(sponsorGroup.Id, permissions[SPTypes.RoleType.Contributor]).execute(() => {
+                                // Log
+                                console.log("[App Catalog Requests List] The sponsor permission was added successfully.");
                             });
                         }
 
@@ -1197,6 +1274,10 @@ export const createSecurityGroups = (): PromiseLike<void> => {
                                 // Log
                                 console.log("[Assessments List] The default members permission was added successfully.");
                             });
+                            listRequests.RoleAssignments().addRoleAssignment(webMembersGroup.Id, permissions[SPTypes.RoleType.Reader]).execute(() => {
+                                // Log
+                                console.log("[App Catalog Requests List] The default members permission was added successfully.");
+                            });
                         }
 
                         // Ensure the default owners group exists
@@ -1209,6 +1290,10 @@ export const createSecurityGroups = (): PromiseLike<void> => {
                             listAssessments.RoleAssignments().addRoleAssignment(webOwnersGroup.Id, permissions[SPTypes.RoleType.Reader]).execute(() => {
                                 // Log
                                 console.log("[Assessments List] The default owners permission was added successfully.");
+                            });
+                            listRequests.RoleAssignments().addRoleAssignment(webOwnersGroup.Id, permissions[SPTypes.RoleType.Reader]).execute(() => {
+                                // Log
+                                console.log("[App Catalog Requests List] The default owners permission was added successfully.");
                             });
                         }
 
@@ -1223,14 +1308,21 @@ export const createSecurityGroups = (): PromiseLike<void> => {
                                 // Log
                                 console.log("[Assessments List] The default visitors permission was added successfully.");
                             });
+                            listRequests.RoleAssignments().addRoleAssignment(webVisitorsGroup.Id, permissions[SPTypes.RoleType.Reader]).execute(() => {
+                                // Log
+                                console.log("[App Catalog Requests List] The default visitors permission was added successfully.");
+                            });
                         }
 
                         // Wait for the app list updates to complete
                         listApps.done(() => {
                             // Wait for the assessment list updates to complete
                             listAssessments.done(() => {
-                                // Resolve the request
-                                resolve();
+                                // Wait for the requests list updates to complete
+                                listRequests.done(() => {
+                                    // Resolve the request
+                                    resolve();
+                                });
                             });
                         });
                     });

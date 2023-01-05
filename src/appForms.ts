@@ -425,8 +425,9 @@ export class AppForms {
                             loadError = null;
                             webUrl = null;
 
-                            // Validate the form
-                            let url = form.getValues()["Url"];
+                            // Validate the url
+                            // Note - trim the '/' from the end of the url. It can cause the web query to fail.
+                            let url = (form.getValues()["Url"] || "").trim().replace(/\/$/, "");
                             if (url) {
                                 // Show a loading dialog
                                 LoadingDialog.setHeader("Loading App Catalog");
@@ -525,16 +526,8 @@ export class AppForms {
                         text: "Request",
                         type: Components.ButtonTypes.OutlineInfo,
                         onClick: () => {
-                            // Display the notification modal
-                            this.sendNotification(item, AppConfig.Configuration.appCatalogRequests, "Request for Site Collection App Catalog",
-                                `App Catalog Admins,
-
-We are requesting an app catalog to be created on the following site(s):
-
-${webUrl}
-
-r/,
-${ContextInfo.userDisplayName}`.trim());
+                            // Display the request form
+                            this.requestAppCatalog(webUrl);
                         }
                     }
                 },
@@ -1450,6 +1443,51 @@ ${ContextInfo.userDisplayName}`.trim());
 
         // Show the modal
         Modal.show();
+    }
+
+    // Displays the list form for requesting an app catalog
+    requestAppCatalog(url: string) {
+        // Set the list name
+        ItemForm.AutoClose = false;
+        ItemForm.ListName = Strings.Lists.AppCatalogRequests;
+
+        // Show the edit form
+        ItemForm.create({
+            webUrl: Strings.SourceUrl,
+            onSetHeader(el) {
+                el.innerHTML = el.innerHTML;
+            },
+            onCreateEditForm: props => {
+                props.onSetFieldDefaultValue = (field, value) => {
+                    // See if this is the url field
+                    if (field.InternalName == "SiteCollectionUrl") {
+                        // Set the default value
+                        return {
+                            Description: url,
+                            Url: url
+                        };
+                    }
+                    // Else, see if this is the user field
+                    else if (field.InternalName == "Requesters") {
+                        // Set the default value to the current user
+                        return [ContextInfo.userId];
+                    }
+
+                    // Return the default value
+                    return value;
+                }
+
+                // Return the properties
+                return props;
+            },
+            onSave: (values) => {
+                // Set the default status
+                values["RequestStatus"] = "New";
+
+                // Return the values
+                return values;
+            }
+        });
     }
 
     // Retracts the solution from the tenant app catalog

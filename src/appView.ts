@@ -10,6 +10,7 @@ import { layoutTextWindow } from "gd-sprest-bs/build/icons/svgs/layoutTextWindow
 import { personBoundingBox } from "gd-sprest-bs/build/icons/svgs/personBoundingBox";
 import { questionLg } from "gd-sprest-bs/build/icons/svgs/questionLg";
 import { AppActions } from "./appActions";
+import { AppCatalogRequests } from "./appCatalogRequests";
 import { AppConfig } from "./appCfg";
 import { AppDashboard } from "./appDashboard";
 import { AppForms } from "./appForms";
@@ -151,6 +152,20 @@ export class AppView {
                         }
                     }
                 ]
+            });
+        }
+
+        // See if this is a developer/sponsor/owner
+        if (AppSecurity.IsAdmin || AppSecurity.IsApprover || AppSecurity.IsDeveloper) {
+            // Add the requests button
+            navLinks.push({
+                className: "btn-outline-light mx-2 ps-1 pt-1",
+                isButton: true,
+                text: "My Requests",
+                onClick: () => {
+                    // Display in app catalog requests
+                    AppCatalogRequests.viewAppCatalogRequests();
+                }
             });
         }
 

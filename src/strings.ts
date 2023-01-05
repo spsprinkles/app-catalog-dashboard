@@ -43,6 +43,7 @@ const Strings = {
     IsTeams: false,
     Lists: {
         Apps: "Developer Apps",
+        AppCatalogRequests: "App Catalog Requests",
         Assessments: "Dev App Assessments"
     },
     ProjectName: "App Dashboard",
