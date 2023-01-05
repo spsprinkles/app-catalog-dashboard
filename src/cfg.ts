@@ -173,8 +173,8 @@ export const Configuration = Helper.SPConfig({
                     showInNewForm: false,
                     choices: [
                         "New", "Pending Sponsor Approval", "In Testing",
-                        "Pending Peer Review", "Pending Approval", "Pending Deployment",
-                        "Deployed"
+                        "Pending Peer Review", "Pending Approval", "Approved",
+                        "Pending Deployment", "Deployed"
                     ]
                 } as Helper.IFieldInfoChoice,
                 /** Fields extracted from the SPFx package */
