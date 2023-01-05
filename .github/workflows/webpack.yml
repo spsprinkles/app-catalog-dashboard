@@ -7,7 +7,7 @@ on:
     types: [ closed ]
   release:
     types: [ published ]
-  workflow_dispatch:
+  workflow_dispatch
 
 jobs:
   build:
