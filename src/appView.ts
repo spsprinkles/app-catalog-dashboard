@@ -9,6 +9,7 @@ import { gearWideConnected } from "gd-sprest-bs/build/icons/svgs/gearWideConnect
 import { layoutTextWindow } from "gd-sprest-bs/build/icons/svgs/layoutTextWindow";
 import { personBoundingBox } from "gd-sprest-bs/build/icons/svgs/personBoundingBox";
 import { questionLg } from "gd-sprest-bs/build/icons/svgs/questionLg";
+import { ticketDetailed } from "gd-sprest-bs/build/icons/svgs/ticketDetailed";
 import { AppActions } from "./appActions";
 import { AppCatalogRequests } from "./appCatalogRequests";
 import { AppConfig } from "./appCfg";
@@ -116,7 +117,7 @@ export class AppView {
         if (AppSecurity.IsOwner) {
             // Set the admin buttons
             navLinks.push({
-                className: "btn-outline-light ms-2 pt-1",
+                className: "btn-outline-light ms-2 ps-2 pt-1",
                 text: "Settings",
                 iconClassName: "me-1",
                 iconSize: 24,
@@ -159,7 +160,10 @@ export class AppView {
         if (AppSecurity.IsAdmin || AppSecurity.IsApprover || AppSecurity.IsDeveloper) {
             // Add the requests button
             navLinks.push({
-                className: "btn-outline-light mx-2 ps-1 pt-1",
+                className: "btn-outline-light ms-2 ps-2 pt-1",
+                iconClassName: "me-1",
+                iconSize: 24,
+                iconType: ticketDetailed,
                 isButton: true,
                 text: "My Requests",
                 onClick: () => {
