@@ -109,6 +109,7 @@ export const Configuration = Helper.SPConfig({
                         { Name: "AppSkipFeatureDeployment", ReadOnly: true },
                         { Name: "AppVersion", ReadOnly: true },
                         { Name: "AppSiteDeployments", ReadOnly: true },
+                        "AppIsTenant",
                         "AppPublisher",
                         "AppSponsor",
                         "AppDevelopers",
@@ -175,6 +176,13 @@ export const Configuration = Helper.SPConfig({
                     showInNewForm: false
                 },
                 {
+                    name: "AppIsTenant",
+                    title: "Is Tenant App?",
+                    type: Helper.SPCfgFieldType.Boolean,
+                    allowDeletion: false,
+                    defaultValue: "1"
+                },
+                {
                     name: "AppIsTenantDeployed",
                     title: "Is Tenant Deployed?",
                     type: Helper.SPCfgFieldType.Boolean,
@@ -236,9 +244,8 @@ export const Configuration = Helper.SPConfig({
                     showInEditForm: false,
                     showInNewForm: false,
                     choices: [
-                        "New", "Pending Sponsor Approval", "In Testing",
-                        "Pending Peer Review", "Pending Approval", "Pending Deployment",
-                        "Deployed"
+                        "New", "Pending Sponsor Approval", "Pending Approval", 
+                        "In Testing", "Pending Review", "Approved", "Deployed"
                     ]
                 } as Helper.IFieldInfoChoice,
                 /** Fields extracted from the SPFx package */
