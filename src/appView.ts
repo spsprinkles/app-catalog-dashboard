@@ -1,10 +1,10 @@
 import { Dashboard, LoadingDialog } from "dattatable";
 import { Components, ContextInfo } from "gd-sprest-bs";
-import { arrowClockwise } from "gd-sprest-bs/build/icons/svgs/arrowClockwise";
 import { boxArrowRight } from "gd-sprest-bs/build/icons/svgs/boxArrowRight";
 import { chatSquareDots } from "gd-sprest-bs/build/icons/svgs/chatSquareDots";
 import { check2Square } from "gd-sprest-bs/build/icons/svgs/check2Square";
 import { fileEarmarkArrowUp } from "gd-sprest-bs/build/icons/svgs/fileEarmarkArrowUp";
+import { filterSquare } from "gd-sprest-bs/build/icons/svgs/filterSquare";
 import { gearWideConnected } from "gd-sprest-bs/build/icons/svgs/gearWideConnected";
 import { layoutTextWindow } from "gd-sprest-bs/build/icons/svgs/layoutTextWindow";
 import { personBoundingBox } from "gd-sprest-bs/build/icons/svgs/personBoundingBox";
@@ -405,7 +405,7 @@ export class AppView {
                 ],
                 itemsEnd: [
                     {
-                        text: "Add/Update App",
+                        text: "Add or Update an App",
                         onRender: (el, item) => {
                             // Clear the existing button
                             el.innerHTML = "";
@@ -420,9 +420,12 @@ export class AppView {
                                 content: item.text,
                                 btnProps: {
                                     // Render the icon button
-                                    className: "p-1",
+                                    className: "p-1 pe-2",
+                                    iconClassName: "me-1",
                                     iconType: fileEarmarkArrowUp,
                                     iconSize: 24,
+                                    isSmall: true,
+                                    text: "Upload App",
                                     type: Components.ButtonTypes.OutlineSecondary,
                                     onClick: () => {
                                         // Ensure the user is not an approver or developer
@@ -448,7 +451,7 @@ export class AppView {
                         }
                     },
                     {
-                        text: "Refresh",
+                        text: "Filters",
                         onRender: (el, item) => {
                             // Clear the existing button
                             el.innerHTML = "";
@@ -460,40 +463,30 @@ export class AppView {
                             // Render a tooltip
                             Components.Tooltip({
                                 el: span,
-                                content: item.text,
+                                content: "Show " + item.text,
                                 btnProps: {
                                     // Render the icon button
-                                    className: "p-1",
-                                    iconType: arrowClockwise,
+                                    className: "p-1 pe-2",
+                                    iconClassName: "me-1",
+                                    iconType: filterSquare,
                                     iconSize: 24,
+                                    isSmall: true,
+                                    text: item.text,
                                     type: Components.ButtonTypes.OutlineSecondary,
                                     onClick: () => {
-                                        // Refresh the dashboard
-                                        this.refresh();
+                                        // Show the filter panel
+                                        this._dashboard.showFilter();
                                     }
                                 },
                             });
                         }
                     }
-                ],
-                // Move the filter icon in front of the last icon
-                onRendered: (el) => {
-                    let filter = el.querySelector(".filter-icon");
-                    if (filter) {
-                        let filterItem = document.createElement("li");
-                        filterItem.className = "nav-item";
-                        filterItem.appendChild(filter);
-                        let ul = el.querySelector("#navbar_content ul:last-child");
-                        let li = ul.querySelector("li:last-child");
-                        ul.insertBefore(filterItem, li);
-                    }
-                },
-                showFilter: true,
+                ]
             },
             footer: {
                 itemsEnd: [
                     {
-                        className: "pe-none",
+                        className: "pe-none text-dark",
                         text: "v" + Strings.Version,
                     },
                 ],
@@ -616,7 +609,7 @@ export class AppView {
                     },
                     {
                         name: "",
-                        title: "AppDevelopers",
+                        title: "App Developers",
                         onRenderCell: (el, column, item: IAppItem) => {
                             var owners = item.AppDevelopers && item.AppDevelopers.results || [];
 
