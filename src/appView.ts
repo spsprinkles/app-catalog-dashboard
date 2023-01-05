@@ -1,10 +1,13 @@
 import { Dashboard, LoadingDialog } from "dattatable";
-import { Components } from "gd-sprest-bs";
+import { Components, ContextInfo } from "gd-sprest-bs";
 import { arrowClockwise } from "gd-sprest-bs/build/icons/svgs/arrowClockwise";
+import { boxArrowRight } from "gd-sprest-bs/build/icons/svgs/boxArrowRight";
 import { chatSquareDots } from "gd-sprest-bs/build/icons/svgs/chatSquareDots";
+import { check2Square } from "gd-sprest-bs/build/icons/svgs/check2Square";
 import { fileEarmarkArrowUp } from "gd-sprest-bs/build/icons/svgs/fileEarmarkArrowUp";
 import { gearWideConnected } from "gd-sprest-bs/build/icons/svgs/gearWideConnected";
 import { layoutTextWindow } from "gd-sprest-bs/build/icons/svgs/layoutTextWindow";
+import { personBoundingBox } from "gd-sprest-bs/build/icons/svgs/personBoundingBox";
 import { questionLg } from "gd-sprest-bs/build/icons/svgs/questionLg";
 import { AppActions } from "./appActions";
 import { AppConfig } from "./appCfg";
@@ -25,7 +28,9 @@ export class AppView {
     private _dashboard: Dashboard = null;
     private _el: HTMLElement = null;
     private _elAppDetails: HTMLElement = null;
+    private _elFilterButtons: HTMLButtonElement[] = [];
     private _forms: AppForms = null;
+    private _isClearing: boolean = false;
 
     // Constructor
     constructor(el: HTMLElement, elAppDetails: HTMLElement) {
@@ -36,6 +41,52 @@ export class AppView {
 
         // Render the dashboard
         this.render();
+    }
+
+    // Clears the filters
+    private clearFilters() {
+        // See if we are currently clearing the filters
+        if (this._isClearing) { return; }
+
+        // Set the flag
+        this._isClearing = true;
+
+        // Parse the filters
+        for (let i = 0; i < this._elFilterButtons.length; i++) {
+            let elButton = this._elFilterButtons[i];
+
+            // Update the styling
+            elButton.classList.remove("active");
+
+            // Update the tooltip
+            (elButton as any)._tippy.setContent("Show " + elButton.innerText);
+        }
+
+        // Clear the filters
+        this._dashboard.filter(0, "");
+        this._dashboard.setFilterValue("App Status", "");
+
+        // Wait to clear the flag
+        setTimeout(() => {
+            // Clear the flag
+            this._isClearing = false;
+        }, 250);
+    }
+
+    // Determines if an app belongs to the user
+    private isMyApp(item: IAppItem) {
+        // See if the user is a sponsor
+        if (item.AppSponsorId == ContextInfo.userId) { return true; }
+
+        // Parse the developers
+        let userIds = item.AppDevelopersId ? item.AppDevelopersId.results : [];
+        for (let i = 0; i < userIds.length; i++) {
+            // See if the user is a developer
+            if (userIds[i] == ContextInfo.userId) { return true; }
+        }
+
+        // Not the user's app
+        return false;
     }
 
     // Refreshes the dashboard
@@ -125,11 +176,15 @@ export class AppView {
             hideHeader: true,
             useModal: true,
             filters: {
+                onClear: this.clearFilters.bind(this),
                 items: [
                     {
                         header: "App Status",
                         items: DataSource.StatusFilters,
                         onFilter: (value: string) => {
+                            // Clear the filters
+                            this.clearFilters();
+
                             // Filter the dashboard
                             this._dashboard.filter(3, value);
                         },
@@ -162,6 +217,173 @@ export class AppView {
                 showFilter: false
             },
             subNavigation: {
+                items: [
+                    {
+                        text: "My Apps",
+                        onRender: (el, item) => {
+                            // Clear the existing button
+                            el.innerHTML = "";
+                            // Create a span to wrap the icon in
+                            let span = document.createElement("span");
+                            span.className = "bg-white d-inline-flex rounded";
+                            el.appendChild(span);
+    
+                            // Render a tooltip
+                            Components.Tooltip({
+                                el: span,
+                                content: "Show " + item.text,
+                                btnProps: {
+                                    // Render the icon button
+                                    className: "p-1 pe-2",
+                                    iconClassName: "me-1",
+                                    iconType: personBoundingBox,
+                                    iconSize: 24,
+                                    isSmall: true,
+                                    text: item.text,
+                                    type: Components.ButtonTypes.OutlineSecondary,
+                                    onClick: (item, ev) => {
+                                        // See if we are setting the filter
+                                        let elButton = ev.currentTarget as HTMLButtonElement;
+                                        if (elButton.classList.contains("active")) {
+                                            // Clear the filters
+                                            this.clearFilters();
+
+                                            // Update the styling
+                                            elButton.classList.remove("active");
+
+                                            // Update the tooltip
+                                            (elButton as any)._tippy.setContent("Show " + item.text);
+                                        } else {
+                                            // Clear the filters
+                                            this.clearFilters();
+
+                                            // Filter the data for apps belonging to the current user
+                                            this._dashboard.filter(0, "MyApp");
+
+                                            // Update the styling
+                                            elButton.classList.add("active");
+
+                                            // Update the tooltip
+                                            (elButton as any)._tippy.setContent("Hide " + item.text);
+                                        }
+                                    }
+                                },
+                            });
+                            // Add the element
+                            this._elFilterButtons.push(el.querySelector(".btn"));
+                        }
+                    },
+                    {
+                        text: "Approved Apps",
+                        onRender: (el, item) => {
+                            // Clear the existing button
+                            el.innerHTML = "";
+                            // Create a span to wrap the icon in
+                            let span = document.createElement("span");
+                            span.className = "bg-white d-inline-flex ms-2 rounded";
+                            el.appendChild(span);
+    
+                            // Render a tooltip
+                            Components.Tooltip({
+                                el: span,
+                                content: "Show " + item.text,
+                                btnProps: {
+                                    // Render the icon button
+                                    className: "p-1 pe-2",
+                                    iconClassName: "me-1",
+                                    iconType: check2Square,
+                                    iconSize: 24,
+                                    isSmall: true,
+                                    text: item.text,
+                                    type: Components.ButtonTypes.OutlineSecondary,
+                                    onClick: (item, ev) => {
+                                        // See if we are setting the filter
+                                        let elButton = ev.currentTarget as HTMLButtonElement;
+                                        if (elButton.classList.contains("active")) {
+                                            // Clear the filters
+                                            this.clearFilters();
+
+                                            // Update the styling
+                                            elButton.classList.remove("active");
+
+                                            // Update the tooltip
+                                            (elButton as any)._tippy.setContent("Show " + item.text);
+                                        } else {
+                                            // Clear the filters
+                                            this.clearFilters();
+
+                                            // Filter for the approved apps
+                                            this._dashboard.setFilterValue("App Status", "Approved");
+
+                                            // Update the styling
+                                            elButton.classList.add("active");
+
+                                            // Update the tooltip
+                                            (elButton as any)._tippy.setContent("Hide " + item.text);
+                                        }
+                                    }
+                                },
+                            });
+                            // Add the element
+                            this._elFilterButtons.push(el.querySelector(".btn"));
+                        }
+                    },
+                    {
+                        text: "Deployed Apps",
+                        onRender: (el, item) => {
+                            // Clear the existing button
+                            el.innerHTML = "";
+                            // Create a span to wrap the icon in
+                            let span = document.createElement("span");
+                            span.className = "bg-white d-inline-flex ms-2 rounded";
+                            el.appendChild(span);
+    
+                            // Render a tooltip
+                            Components.Tooltip({
+                                el: span,
+                                content: "Show " + item.text,
+                                btnProps: {
+                                    // Render the icon button
+                                    className: "p-1 pe-2",
+                                    iconClassName: "me-1",
+                                    iconType: boxArrowRight,
+                                    iconSize: 24,
+                                    isSmall: true,
+                                    text: item.text,
+                                    type: Components.ButtonTypes.OutlineSecondary,
+                                    onClick: (item, ev) => {
+                                        // See if we are setting the filter
+                                        let elButton = ev.currentTarget as HTMLButtonElement;
+                                        if (elButton.classList.contains("active")) {
+                                            // Clear the filters
+                                            this.clearFilters();
+
+                                            // Update the styling
+                                            elButton.classList.remove("active");
+
+                                            // Update the tooltip
+                                            (elButton as any)._tippy.setContent("Show " + item.text);
+                                        } else {
+                                            // Clear the filters
+                                            this.clearFilters();
+
+                                            // Filter for the deployed apps
+                                            this._dashboard.setFilterValue("App Status", "Deployed");
+
+                                            // Update the styling
+                                            elButton.classList.add("active");
+
+                                            // Update the tooltip
+                                            (elButton as any)._tippy.setContent("Hide " + item.text);
+                                        }
+                                    }
+                                },
+                            });
+                            // Add the element
+                            this._elFilterButtons.push(el.querySelector(".btn"));
+                        }
+                    }
+                ],
                 itemsEnd: [
                     {
                         text: "Add/Update App",
@@ -264,7 +486,11 @@ export class AppView {
                     pageLength: AppConfig.Configuration.paging,
                     columnDefs: [
                         {
-                            targets: [0, 6],
+                            targets: [0],
+                            orderable: false
+                        },
+                        {
+                            targets: [6],
                             orderable: false,
                             searchable: false
                         }
@@ -298,6 +524,9 @@ export class AppView {
                         name: "",
                         title: "Icon",
                         onRenderCell: (el, column, item: IAppItem) => {
+                            // Set the filter value
+                            el.setAttribute("data-filter", this.isMyApp(item) ? "MyApp" : "");
+
                             // Ensure a url exists
                             if (item.AppThumbnailURL && item.AppThumbnailURL.Url) {
                                 // Render the link
@@ -325,7 +554,12 @@ export class AppView {
                         title: "Status",
                         onRenderCell: (el, column, item: IAppItem) => {
                             // Set the status
-                            el.innerHTML = Common.appStatus(item);
+                            let status = Common.appStatus(item);
+                            el.innerHTML = status;
+
+                            // Set the filter
+                            el.setAttribute("data-filter", status);
+                            el.setAttribute("data-sort", status);
 
                             // Ensure it doesn't contain the url already
                             if (item.AppSiteDeployments && item.AppSiteDeployments.length > 0) {
