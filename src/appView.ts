@@ -1,10 +1,13 @@
 import { Dashboard, LoadingDialog } from "dattatable";
 import { Components, ContextInfo } from "gd-sprest-bs";
 import { arrowClockwise } from "gd-sprest-bs/build/icons/svgs/arrowClockwise";
+import { boxArrowRight } from "gd-sprest-bs/build/icons/svgs/boxArrowRight";
 import { chatSquareDots } from "gd-sprest-bs/build/icons/svgs/chatSquareDots";
+import { check2Square } from "gd-sprest-bs/build/icons/svgs/check2Square";
 import { fileEarmarkArrowUp } from "gd-sprest-bs/build/icons/svgs/fileEarmarkArrowUp";
 import { gearWideConnected } from "gd-sprest-bs/build/icons/svgs/gearWideConnected";
 import { layoutTextWindow } from "gd-sprest-bs/build/icons/svgs/layoutTextWindow";
+import { personBoundingBox } from "gd-sprest-bs/build/icons/svgs/personBoundingBox";
 import { questionLg } from "gd-sprest-bs/build/icons/svgs/questionLg";
 import { AppActions } from "./appActions";
 import { AppConfig } from "./appCfg";
@@ -25,7 +28,7 @@ export class AppView {
     private _dashboard: Dashboard = null;
     private _el: HTMLElement = null;
     private _elAppDetails: HTMLElement = null;
-    private _elFilterButtons: HTMLElement[] = [];
+    private _elFilterButtons: HTMLButtonElement[] = [];
     private _forms: AppForms = null;
     private _isClearing: boolean = false;
 
@@ -53,8 +56,10 @@ export class AppView {
             let elButton = this._elFilterButtons[i];
 
             // Update the styling
-            elButton.classList.remove("btn-success");
-            elButton.classList.add("btn-outline-secondary");
+            elButton.classList.remove("active");
+
+            // Update the tooltip
+            (elButton as any)._tippy.setContent("Show " + elButton.innerText);
         }
 
         // Clear the filters
@@ -215,95 +220,167 @@ export class AppView {
                 items: [
                     {
                         text: "My Apps",
-                        className: "btn-outline-secondary ms-2 pt-1",
-                        isButton: true,
-                        onRender: (el) => {
+                        onRender: (el, item) => {
+                            // Clear the existing button
+                            el.innerHTML = "";
+                            // Create a span to wrap the icon in
+                            let span = document.createElement("span");
+                            span.className = "bg-white d-inline-flex rounded";
+                            el.appendChild(span);
+    
+                            // Render a tooltip
+                            Components.Tooltip({
+                                el: span,
+                                content: "Show " + item.text,
+                                btnProps: {
+                                    // Render the icon button
+                                    className: "p-1 pe-2",
+                                    iconClassName: "me-1",
+                                    iconType: personBoundingBox,
+                                    iconSize: 24,
+                                    isSmall: true,
+                                    text: item.text,
+                                    type: Components.ButtonTypes.OutlineSecondary,
+                                    onClick: (item, ev) => {
+                                        // See if we are setting the filter
+                                        let elButton = ev.currentTarget as HTMLButtonElement;
+                                        if (elButton.classList.contains("active")) {
+                                            // Clear the filters
+                                            this.clearFilters();
+
+                                            // Update the styling
+                                            elButton.classList.remove("active");
+
+                                            // Update the tooltip
+                                            (elButton as any)._tippy.setContent("Show " + item.text);
+                                        } else {
+                                            // Clear the filters
+                                            this.clearFilters();
+
+                                            // Filter the data for apps belonging to the current user
+                                            this._dashboard.filter(0, "MyApp");
+
+                                            // Update the styling
+                                            elButton.classList.add("active");
+
+                                            // Update the tooltip
+                                            (elButton as any)._tippy.setContent("Hide " + item.text);
+                                        }
+                                    }
+                                },
+                            });
                             // Add the element
                             this._elFilterButtons.push(el.querySelector(".btn"));
-                        },
-                        onClick: (item, ev) => {
-                            // See if we are setting the filter
-                            let elButton = (ev.currentTarget as HTMLElement).querySelector(".btn");
-                            if (elButton.classList.contains("btn-outline-secondary")) {
-                                // Clear the filters
-                                this.clearFilters();
-
-                                // Filter the data for apps belonging to the current user
-                                this._dashboard.filter(0, "MyApp");
-
-                                // Update the styling
-                                elButton.classList.remove("btn-outline-secondary");
-                                elButton.classList.add("btn-success");
-                            } else {
-                                // Clear the filters
-                                this.clearFilters();
-
-                                // Update the styling
-                                elButton.classList.remove("btn-success");
-                                elButton.classList.add("btn-outline-secondary");
-                            }
                         }
                     },
                     {
                         text: "Approved Apps",
-                        className: "btn-outline-secondary ms-2 pt-1",
-                        isButton: true,
-                        onRender: (el) => {
+                        onRender: (el, item) => {
+                            // Clear the existing button
+                            el.innerHTML = "";
+                            // Create a span to wrap the icon in
+                            let span = document.createElement("span");
+                            span.className = "bg-white d-inline-flex ms-2 rounded";
+                            el.appendChild(span);
+    
+                            // Render a tooltip
+                            Components.Tooltip({
+                                el: span,
+                                content: "Show " + item.text,
+                                btnProps: {
+                                    // Render the icon button
+                                    className: "p-1 pe-2",
+                                    iconClassName: "me-1",
+                                    iconType: check2Square,
+                                    iconSize: 24,
+                                    isSmall: true,
+                                    text: item.text,
+                                    type: Components.ButtonTypes.OutlineSecondary,
+                                    onClick: (item, ev) => {
+                                        // See if we are setting the filter
+                                        let elButton = ev.currentTarget as HTMLButtonElement;
+                                        if (elButton.classList.contains("active")) {
+                                            // Clear the filters
+                                            this.clearFilters();
+
+                                            // Update the styling
+                                            elButton.classList.remove("active");
+
+                                            // Update the tooltip
+                                            (elButton as any)._tippy.setContent("Show " + item.text);
+                                        } else {
+                                            // Clear the filters
+                                            this.clearFilters();
+
+                                            // Filter for the approved apps
+                                            this._dashboard.setFilterValue("App Status", "Approved");
+
+                                            // Update the styling
+                                            elButton.classList.add("active");
+
+                                            // Update the tooltip
+                                            (elButton as any)._tippy.setContent("Hide " + item.text);
+                                        }
+                                    }
+                                },
+                            });
                             // Add the element
                             this._elFilterButtons.push(el.querySelector(".btn"));
-                        },
-                        onClick: (item, ev) => {
-                            // See if we are setting the filter
-                            let elButton = (ev.currentTarget as HTMLElement).querySelector(".btn");
-                            if (elButton.classList.contains("btn-outline-secondary")) {
-                                // Clear the filters
-                                this.clearFilters();
-
-                                // Filter for the approved apps
-                                this._dashboard.setFilterValue("App Status", "Approved");
-
-                                // Update the styling
-                                elButton.classList.remove("btn-outline-secondary");
-                                elButton.classList.add("btn-success");
-                            } else {
-                                // Clear the filters
-                                this.clearFilters();
-
-                                // Update the styling
-                                elButton.classList.remove("btn-success");
-                                elButton.classList.add("btn-outline-secondary");
-                            }
                         }
                     },
                     {
                         text: "Deployed Apps",
-                        className: "btn-outline-secondary ms-2 pt-1",
-                        isButton: true,
-                        onRender: (el) => {
+                        onRender: (el, item) => {
+                            // Clear the existing button
+                            el.innerHTML = "";
+                            // Create a span to wrap the icon in
+                            let span = document.createElement("span");
+                            span.className = "bg-white d-inline-flex ms-2 rounded";
+                            el.appendChild(span);
+    
+                            // Render a tooltip
+                            Components.Tooltip({
+                                el: span,
+                                content: "Show " + item.text,
+                                btnProps: {
+                                    // Render the icon button
+                                    className: "p-1 pe-2",
+                                    iconClassName: "me-1",
+                                    iconType: boxArrowRight,
+                                    iconSize: 24,
+                                    isSmall: true,
+                                    text: item.text,
+                                    type: Components.ButtonTypes.OutlineSecondary,
+                                    onClick: (item, ev) => {
+                                        // See if we are setting the filter
+                                        let elButton = ev.currentTarget as HTMLButtonElement;
+                                        if (elButton.classList.contains("active")) {
+                                            // Clear the filters
+                                            this.clearFilters();
+
+                                            // Update the styling
+                                            elButton.classList.remove("active");
+
+                                            // Update the tooltip
+                                            (elButton as any)._tippy.setContent("Show " + item.text);
+                                        } else {
+                                            // Clear the filters
+                                            this.clearFilters();
+
+                                            // Filter for the deployed apps
+                                            this._dashboard.setFilterValue("App Status", "Deployed");
+
+                                            // Update the styling
+                                            elButton.classList.add("active");
+
+                                            // Update the tooltip
+                                            (elButton as any)._tippy.setContent("Hide " + item.text);
+                                        }
+                                    }
+                                },
+                            });
                             // Add the element
                             this._elFilterButtons.push(el.querySelector(".btn"));
-                        },
-                        onClick: (item, ev) => {
-                            // See if we are setting the filter
-                            let elButton = (ev.currentTarget as HTMLElement).querySelector(".btn");
-                            if (elButton.classList.contains("btn-outline-secondary")) {
-                                // Clear the filters
-                                this.clearFilters();
-
-                                // Filter for the deployed apps
-                                this._dashboard.setFilterValue("App Status", "Deployed");
-
-                                // Update the styling
-                                elButton.classList.remove("btn-outline-secondary");
-                                elButton.classList.add("btn-success");
-                            } else {
-                                // Clear the filters
-                                this.clearFilters();
-
-                                // Update the styling
-                                elButton.classList.remove("btn-success");
-                                elButton.classList.add("btn-outline-secondary");
-                            }
                         }
                     }
                 ],
