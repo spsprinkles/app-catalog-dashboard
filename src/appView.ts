@@ -146,6 +146,13 @@ export class AppView {
                         }
                     },
                     {
+                        text: "Manage Final Approver Group",
+                        onClick: () => {
+                            // Show the group in a new tab
+                            window.open(AppSecurity.FinalApproverUrl, "_blank");
+                        }
+                    },
+                    {
                         text: "Manage Sponsor Group",
                         onClick: () => {
                             // Show the group in a new tab
@@ -157,7 +164,7 @@ export class AppView {
         }
 
         // See if this is a developer/sponsor/owner
-        if (AppSecurity.IsAdmin || AppSecurity.IsApprover || AppSecurity.IsDeveloper) {
+        if (AppSecurity.IsAdmin || AppSecurity.IsFinalApprover || AppSecurity.IsApprover || AppSecurity.IsDeveloper) {
             // Add the requests button
             navLinks.push({
                 className: "btn-outline-light ms-2 ps-2 pt-1",
@@ -246,7 +253,7 @@ export class AppView {
                             let span = document.createElement("span");
                             span.className = "bg-white d-inline-flex rounded";
                             el.appendChild(span);
-    
+
                             // Render a tooltip
                             Components.Tooltip({
                                 el: span,
@@ -301,7 +308,7 @@ export class AppView {
                             let span = document.createElement("span");
                             span.className = "bg-white d-inline-flex ms-2 rounded";
                             el.appendChild(span);
-    
+
                             // Render a tooltip
                             Components.Tooltip({
                                 el: span,
@@ -356,7 +363,7 @@ export class AppView {
                             let span = document.createElement("span");
                             span.className = "bg-white d-inline-flex ms-2 rounded";
                             el.appendChild(span);
-    
+
                             // Render a tooltip
                             Components.Tooltip({
                                 el: span,
