@@ -244,7 +244,7 @@ export const Configuration = Helper.SPConfig({
                     showInEditForm: false,
                     showInNewForm: false,
                     choices: [
-                        "New", "Pending Sponsor Approval", "Pending Approval", 
+                        "New", "Pending Sponsor Approval", "Pending Approval",
                         "In Testing", "Pending Review", "Approved", "Deployed"
                     ]
                 } as Helper.IFieldInfoChoice,
@@ -1009,6 +1009,7 @@ export const createSecurityGroups = (): PromiseLike<void> => {
     return new Promise((resolve, reject) => {
         let approveGroup: Types.SP.Group = null;
         let devGroup: Types.SP.Group = null;
+        let finalApproveGroup: Types.SP.Group = null;
         let sponsorGroup: Types.SP.Group = null;
         let webMembersGroup: Types.SP.Group = null;
         let webOwnersGroup: Types.SP.Group = null;
@@ -1034,7 +1035,10 @@ export const createSecurityGroups = (): PromiseLike<void> => {
         });
 
         // Parse the groups to create
-        Helper.Executor([Strings.Groups.Approvers, Strings.Groups.Developers, Strings.Groups.Sponsors], groupName => {
+        Helper.Executor([
+            Strings.Groups.Approvers, Strings.Groups.Developers,
+            Strings.Groups.FinalApprovers, Strings.Groups.Sponsors
+        ], groupName => {
             // Return a promise
             return new Promise((resolve, reject) => {
                 // Get the group
@@ -1050,6 +1054,11 @@ export const createSecurityGroups = (): PromiseLike<void> => {
                         else if (group.Title == Strings.Groups.Developers) {
                             // Set the dev group
                             devGroup = group;
+                        }
+                        // Else, see if it's the final approver's group
+                        else if (group.Title == Strings.Groups.FinalApprovers) {
+                            // Set the dev group
+                            finalApproveGroup = group;
                         } else {
                             // Set the sponsor group
                             sponsorGroup = group;
@@ -1243,6 +1252,23 @@ export const createSecurityGroups = (): PromiseLike<void> => {
                             listRequests.RoleAssignments().addRoleAssignment(devGroup.Id, permissions[SPTypes.RoleType.Contributor]).execute(() => {
                                 // Log
                                 console.log("[App Catalog Requests List] The dev permission was added successfully.");
+                            });
+                        }
+
+                        // Ensure the final approver group exists
+                        if (finalApproveGroup) {
+                            // Set the list permissions
+                            listApps.RoleAssignments().addRoleAssignment(finalApproveGroup.Id, permissions[SPTypes.RoleType.WebDesigner]).execute(() => {
+                                // Log
+                                console.log("[Apps List] The approver permission was added successfully.");
+                            });
+                            listAssessments.RoleAssignments().addRoleAssignment(finalApproveGroup.Id, permissions[SPTypes.RoleType.WebDesigner]).execute(() => {
+                                // Log
+                                console.log("[Assessments List] The approver permission was added successfully.");
+                            });
+                            listRequests.RoleAssignments().addRoleAssignment(finalApproveGroup.Id, permissions[SPTypes.RoleType.WebDesigner]).execute(() => {
+                                // Log
+                                console.log("[App Catalog Requests List] The approver permission was added successfully.");
                             });
                         }
 
