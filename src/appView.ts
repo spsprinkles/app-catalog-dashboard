@@ -157,7 +157,7 @@ export class AppView {
         }
 
         // See if this is a developer/sponsor/owner
-        if (!AppConfig.Configuration.hideMyRequests && (AppSecurity.IsAdmin || AppSecurity.IsApprover || AppSecurity.IsDeveloper)) {
+        if (DataSource.HasAppCatalogRequests) {
             // Add the requests button
             navLinks.push({
                 className: "btn-outline-light ms-2 ps-2 pt-1",

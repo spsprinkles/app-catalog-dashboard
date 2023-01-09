@@ -29,7 +29,6 @@ The [configuration file](https://github.com/spsprinkles/app-catalog-dashboard/ra
 | appNotifications | The ability to send notifications based on app actions. |
 | errorEmails | An array of email addresses to send to when a user has an error when using the application. This will help with troubleshooting issues in production. |
 | paging | The default # of apps to display on the dashboard. Valid values are `10, 25, 50, 100`. |
-| hideMyRequests | Flag to hide the `My Requests` navigation button on the dashboard. |
 | userAgreement | The user agreement displayed to the developers adding packages. |
 
 ### App Details

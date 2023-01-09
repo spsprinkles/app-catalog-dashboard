@@ -11,7 +11,6 @@ export interface IConfiguration {
     dashboardUrl?: string;
     errorEmails?: string[];
     helpPageUrl?: string;
-    hideMyRequests?: boolean;
     paging?: number;
     templatesLibraryUrl?: string;
     tenantAppCatalogUrl?: string;
@@ -128,9 +127,6 @@ export class AppConfig {
                     this._cfg.helpPageUrl = this._cfg.helpPageUrl ? Common.updateUrl(this._cfg.helpPageUrl) : this._cfg.helpPageUrl;
                     this._cfg.templatesLibraryUrl = this._cfg.templatesLibraryUrl ? Common.updateUrl(this._cfg.templatesLibraryUrl) : this._cfg.templatesLibraryUrl;
                     this._cfg.tenantAppCatalogUrl = this.Configuration.tenantAppCatalogUrl ? Common.updateUrl(this._cfg.tenantAppCatalogUrl) : this._cfg.tenantAppCatalogUrl;
-
-                    // Default the values
-                    this._cfg.hideMyRequests = typeof (this._cfg.hideMyRequests) == "boolean" ? this._cfg.hideMyRequests : false;
 
                     // Ensure the configuration is valid
                     if (this.IsValid) {

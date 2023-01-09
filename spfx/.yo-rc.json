@@ -5,7 +5,7 @@
     "version": "1.12.1",
     "libraryName": "app-catalog-mgr",
     "libraryId": "fedf9867-a1dc-4204-8a07-f4c2cf162359",
-    "packageManager": "npm",
+    "packageManager": "pnpm",
     "isDomainIsolated": false,
     "componentType": "webpart"
   }
