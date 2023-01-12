@@ -508,7 +508,7 @@ export class DataSource {
                         break;
                     }
                 }
-            }, reject);
+            }, reject, true);
 
             // Wait for the requests to complete
             web.done(() => {
