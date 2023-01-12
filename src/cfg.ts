@@ -110,6 +110,7 @@ export const Configuration = Helper.SPConfig({
                         { Name: "AppVersion", ReadOnly: true },
                         { Name: "AppSiteDeployments", ReadOnly: true },
                         "AppIsTenant",
+                        "AppIsTeams",
                         "AppPublisher",
                         "AppSponsor",
                         "AppDevelopers",
@@ -181,6 +182,13 @@ export const Configuration = Helper.SPConfig({
                     type: Helper.SPCfgFieldType.Boolean,
                     allowDeletion: false,
                     defaultValue: "1"
+                },
+                {
+                    name: "AppIsTeams",
+                    title: "Is Teams App?",
+                    type: Helper.SPCfgFieldType.Boolean,
+                    allowDeletion: false,
+                    defaultValue: "0"
                 },
                 {
                     name: "AppIsTenantDeployed",
