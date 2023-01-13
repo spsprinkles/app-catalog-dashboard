@@ -146,6 +146,13 @@ export class AppView {
                         }
                     },
                     {
+                        text: "Manage Final Approver Group",
+                        onClick: () => {
+                            // Show the group in a new tab
+                            window.open(AppSecurity.FinalApproverUrl, "_blank");
+                        }
+                    },
+                    {
                         text: "Manage Sponsor Group",
                         onClick: () => {
                             // Show the group in a new tab
