@@ -1486,6 +1486,10 @@ export class AppForms {
 
                 // Return the values
                 return values;
+            },
+            onUpdate: () => {
+                // Reload the app catalog items
+                DataSource.loadAppCatalogRequests();
             }
         });
     }

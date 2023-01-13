@@ -1300,7 +1300,7 @@ export const createSecurityGroups = (): PromiseLike<void> => {
                                 // Log
                                 console.log("[Assessments List] The default members permission was added successfully.");
                             });
-                            listRequests.RoleAssignments().addRoleAssignment(webMembersGroup.Id, permissions[SPTypes.RoleType.Reader]).execute(() => {
+                            listRequests.RoleAssignments().addRoleAssignment(webMembersGroup.Id, permissions[SPTypes.RoleType.Contributor]).execute(() => {
                                 // Log
                                 console.log("[App Catalog Requests List] The default members permission was added successfully.");
                             });
@@ -1317,7 +1317,7 @@ export const createSecurityGroups = (): PromiseLike<void> => {
                                 // Log
                                 console.log("[Assessments List] The default owners permission was added successfully.");
                             });
-                            listRequests.RoleAssignments().addRoleAssignment(webOwnersGroup.Id, permissions[SPTypes.RoleType.Reader]).execute(() => {
+                            listRequests.RoleAssignments().addRoleAssignment(webOwnersGroup.Id, permissions[SPTypes.RoleType.Contributor]).execute(() => {
                                 // Log
                                 console.log("[App Catalog Requests List] The default owners permission was added successfully.");
                             });
@@ -1334,7 +1334,7 @@ export const createSecurityGroups = (): PromiseLike<void> => {
                                 // Log
                                 console.log("[Assessments List] The default visitors permission was added successfully.");
                             });
-                            listRequests.RoleAssignments().addRoleAssignment(webVisitorsGroup.Id, permissions[SPTypes.RoleType.Reader]).execute(() => {
+                            listRequests.RoleAssignments().addRoleAssignment(webVisitorsGroup.Id, permissions[SPTypes.RoleType.Contributor]).execute(() => {
                                 // Log
                                 console.log("[App Catalog Requests List] The default visitors permission was added successfully.");
                             });
