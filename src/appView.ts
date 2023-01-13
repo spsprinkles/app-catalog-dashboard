@@ -157,7 +157,7 @@ export class AppView {
         }
 
         // See if this is a developer/sponsor/owner
-        if (AppSecurity.IsAdmin || AppSecurity.IsApprover || AppSecurity.IsDeveloper) {
+        if (DataSource.HasAppCatalogRequests) {
             // Add the requests button
             navLinks.push({
                 className: "btn-outline-light ms-2 ps-2 pt-1",
@@ -246,7 +246,7 @@ export class AppView {
                             let span = document.createElement("span");
                             span.className = "bg-white d-inline-flex rounded";
                             el.appendChild(span);
-    
+
                             // Render a tooltip
                             Components.Tooltip({
                                 el: span,
@@ -301,7 +301,7 @@ export class AppView {
                             let span = document.createElement("span");
                             span.className = "bg-white d-inline-flex ms-2 rounded";
                             el.appendChild(span);
-    
+
                             // Render a tooltip
                             Components.Tooltip({
                                 el: span,
@@ -356,7 +356,7 @@ export class AppView {
                             let span = document.createElement("span");
                             span.className = "bg-white d-inline-flex ms-2 rounded";
                             el.appendChild(span);
-    
+
                             // Render a tooltip
                             Components.Tooltip({
                                 el: span,
