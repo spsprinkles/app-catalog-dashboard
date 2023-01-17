@@ -4,7 +4,10 @@ import { IAppItem } from "./ds";
 // Determines the current application status
 export function appStatus(item: IAppItem) {
     // See if item is rejected
-    return item.AppIsRejected ? "Rejected" : (item.AppIsTenantDeployed ? "Deployed" : item.AppStatus);
+    if (item.AppIsRejected) { return "Rejected"; }
+    if (item.AppIsTenantDeployed) { return "Tenant Deployed"; }
+    if (item.AppSiteDeployments && item.AppSiteDeployments.length > 0) { return "Site Collection Deployed"; }
+    return item.AppStatus;
 }
 
 // Determines if the user can edit the item

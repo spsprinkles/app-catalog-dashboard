@@ -567,26 +567,13 @@ export class DataSource {
         return new Promise((resolve, reject) => {
             // Get the status field
             Web(Strings.SourceUrl).Lists(Strings.Lists.Apps).Fields("AppStatus").execute((fld: Types.SP.FieldChoice) => {
-                let containsDeployedStatus = false;
                 let items: Components.ICheckboxGroupItem[] = [];
 
                 // Parse the choices
                 for (let i = 0; i < fld.Choices.results.length; i++) {
-                    // Set the flag
-                    containsDeployedStatus = containsDeployedStatus || fld.Choices.results[i] == "Deployed";
-
                     // Add an item
                     items.push({
                         label: fld.Choices.results[i],
-                        type: Components.CheckboxGroupTypes.Switch
-                    });
-                }
-
-                // See if we are adding the deployed status
-                if (!containsDeployedStatus) {
-                    // Add the item
-                    items.push({
-                        label: "Deployed",
                         type: Components.CheckboxGroupTypes.Switch
                     });
                 }
