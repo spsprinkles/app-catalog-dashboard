@@ -113,6 +113,13 @@ export class AppView {
                         }
                     },
                     {
+                        text: "Manage Final Approver Group",
+                        onClick: () => {
+                            // Show the group in a new tab
+                            window.open(AppSecurity.FinalApproverUrl, "_blank");
+                        }
+                    },
+                    {
                         text: "Manage Sponsor Group",
                         onClick: () => {
                             // Show the group in a new tab
@@ -124,7 +131,7 @@ export class AppView {
         }
 
         // See if this is a developer/sponsor/owner
-        if (AppSecurity.IsAdmin || AppSecurity.IsApprover || AppSecurity.IsDeveloper) {
+        if (DataSource.HasAppCatalogRequests) {
             // Add the requests button
             navLinks.push({
                 className: "btn-outline-light ms-2 ps-2 pt-1",
