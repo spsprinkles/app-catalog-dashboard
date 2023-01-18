@@ -74,6 +74,7 @@ export const UserTypes = {
     ApproversGroup: "ApproversGroup",
     Developers: "Developers",
     DevelopersGroup: "DevelopersGroup",
+    FinalApproversGroup: "FinalApproversGroup",
     Sponsor: "Sponsor",
     SponsorsGroup: "SponsorsGroup"
 }

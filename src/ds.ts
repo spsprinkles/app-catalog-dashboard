@@ -351,7 +351,7 @@ export class DataSource {
 
                 // See if the security groups exist
                 let securityGroupsExist = true;
-                if (AppSecurity.ApproverGroup == null || AppSecurity.DevGroup == null || AppSecurity.SponsorGroup == null) {
+                if (AppSecurity.ApproverGroup == null || AppSecurity.DevGroup == null || AppSecurity.FinalApproverGroup == null || AppSecurity.SponsorGroup == null) {
                     // Set the flag
                     securityGroupsExist = false;
 
@@ -508,7 +508,7 @@ export class DataSource {
                         break;
                     }
                 }
-            }, reject);
+            }, reject, true);
 
             // Wait for the requests to complete
             web.done(() => {
@@ -546,15 +546,21 @@ export class DataSource {
     }
 
     // App Catalog Requests
-    static loadAppCatalogRequests(): PromiseLike<IAppCatalogRequestItem[]> {
+    private static _appCatalogRequestitems: IAppCatalogRequestItem[] = null;
+    static get AppCatalogRequestItems(): IAppCatalogRequestItem[] { return this._appCatalogRequestitems; }
+    static get HasAppCatalogRequests(): boolean { return this.AppCatalogRequestItems && this.AppCatalogRequestItems.length > 0; }
+    static loadAppCatalogRequests(): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve, reject) => {
             // Load the list items
             Web(Strings.SourceUrl).Lists(Strings.Lists.AppCatalogRequests).Items().query({
                 Filter: "Requesters/Id eq " + ContextInfo.userId
             }).execute(items => {
+                // Save the items
+                this._appCatalogRequestitems = items.results as any;
+
                 // Resolve the request
-                resolve(items.results as any);
+                resolve();
             }, reject)
         });
     }
@@ -567,26 +573,13 @@ export class DataSource {
         return new Promise((resolve, reject) => {
             // Get the status field
             Web(Strings.SourceUrl).Lists(Strings.Lists.Apps).Fields("AppStatus").execute((fld: Types.SP.FieldChoice) => {
-                let containsDeployedStatus = false;
                 let items: Components.ICheckboxGroupItem[] = [];
 
                 // Parse the choices
                 for (let i = 0; i < fld.Choices.results.length; i++) {
-                    // Set the flag
-                    containsDeployedStatus = containsDeployedStatus || fld.Choices.results[i] == "Deployed";
-
                     // Add an item
                     items.push({
                         label: fld.Choices.results[i],
-                        type: Components.CheckboxGroupTypes.Switch
-                    });
-                }
-
-                // See if we are adding the deployed status
-                if (!containsDeployedStatus) {
-                    // Add the item
-                    items.push({
-                        label: "Deployed",
                         type: Components.CheckboxGroupTypes.Switch
                     });
                 }
@@ -825,23 +818,26 @@ export class DataSource {
                 this.loadSiteCollectionItems().then(() => {
                     // Load the tenant apps
                     this.loadTenantApps().then(() => {
-                        // See if this is a document set id is set
-                        if (docSetId > 0) {
-                            // Load the document set item
-                            this.loadDocSet(docSetId).then(() => {
-                                // Resolve the request
-                                resolve();
-                            }, reject);
-                        } else {
-                            // Load all the items
-                            this.load().then(() => {
-                                // Load the status filters
-                                this.loadStatusFilters().then(() => {
+                        // Load the app catalog requests
+                        this.loadAppCatalogRequests().then(() => {
+                            // See if this is a document set id is set
+                            if (docSetId > 0) {
+                                // Load the document set item
+                                this.loadDocSet(docSetId).then(() => {
                                     // Resolve the request
                                     resolve();
                                 }, reject);
-                            }, reject);
-                        }
+                            } else {
+                                // Load all the items
+                                this.load().then(() => {
+                                    // Load the status filters
+                                    this.loadStatusFilters().then(() => {
+                                        // Resolve the request
+                                        resolve();
+                                    }, reject);
+                                }, reject);
+                            }
+                        });
                     }, reject);
                 }, reject);
             }, reject);

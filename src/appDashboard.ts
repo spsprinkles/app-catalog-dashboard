@@ -364,7 +364,7 @@ export class AppDashboard {
 
         // Update the fields before rendering them
         let preUpdateFields = (ctrl: Components.IFormControlProps, field: Types.SP.Field) => {
-            // See if this is the status field and the item is rejected
+            // See if this is the status field
             if (field && field.InternalName == "AppStatus") {
                 // Set the status value
                 ctrl.value = Common.appStatus(DataSource.DocSetItem);

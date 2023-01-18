@@ -52,7 +52,7 @@ export class ButtonActions {
                     break;
 
                 // Developers of the application
-                case UserTypes.DevelopersGroup:
+                case UserTypes.Developers:
                     // See if this user is an owner of the app'
                     let developerIds = this._item.AppDevelopersId ? this._item.AppDevelopersId.results : [];
                     for (let j = 0; j < developerIds.length; i++) {
@@ -69,6 +69,12 @@ export class ButtonActions {
                 case UserTypes.DevelopersGroup:
                     // See if this user is a developer
                     isApprover = isApprover || AppSecurity.IsDeveloper;
+                    break;
+
+                // Final Approver's Group
+                case UserTypes.FinalApproversGroup:
+                    // See if this user is a final approver
+                    isApprover = isApprover || AppSecurity.IsFinalApprover;
                     break;
 
                 // Sponsor
@@ -475,7 +481,7 @@ export class ButtonActions {
                             type: Components.ButtonTypes.OutlinePrimary,
                             onClick: () => {
                                 this._forms.sendNotification(this._item, ["Developers", "Sponsor"], "Request for Help",
-`App Developers,
+                                    `App Developers,
 
 We are requesting help for the app ${this._item.Title}.
 

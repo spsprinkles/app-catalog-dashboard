@@ -150,6 +150,59 @@ export class AppSecurity {
         });
     }
 
+    // Approver Security Group
+    private static _finalApproverGroup: Types.SP.GroupOData = null;
+    static get FinalApproverGroup(): Types.SP.GroupOData { return this._finalApproverGroup; }
+    static get FinalApproverUrl(): string { return ContextInfo.webServerRelativeUrl + "/_layouts/15/people.aspx?MembershipGroupId=" + this._finalApproverGroup.Id; }
+    static get FinalApproverEmails(): string[] {
+        let emails = [];
+
+        // Parse the approvers
+        for (let i = 0; i < this.FinalApproverGroup.Users.results.length; i++) {
+            let email = this.FinalApproverGroup.Users.results[i].Email;
+
+            // Append the email
+            email ? emails.push(email) : null;
+        }
+
+        // Return the emails
+        return emails;
+    }
+    static get IsFinalApprover(): boolean {
+        // See if the user is a site admin
+        if (this.IsAdmin) { return true; }
+
+        // See if the group doesn't exist
+        if (this.FinalApproverGroup == null) { return false; }
+
+        // Parse the group
+        for (let i = 0; i < this.FinalApproverGroup.Users.results.length; i++) {
+            // See if this is the current user
+            if (this.FinalApproverGroup.Users.results[i].Id == ContextInfo.userId) {
+                // Found
+                return true;
+            }
+        }
+
+        // Return false by default
+        return false;
+    }
+    private static loadFinalApproverGroup(): PromiseLike<void> {
+        // Return a promise
+        return new Promise((resolve, reject) => {
+            // Load the security group
+            Web(Strings.SourceUrl).SiteGroups().getByName(Strings.Groups.FinalApprovers).query({
+                Expand: ["Users"]
+            }).execute(group => {
+                // Set the group
+                this._finalApproverGroup = group;
+
+                // Resolve the request
+                resolve();
+            }, reject);
+        });
+    }
+
     // Initialization
     static init(appCatalogUrl: string, tenantAppCatalogUrl: string): PromiseLike<void> {
         // Return a promise
@@ -164,6 +217,8 @@ export class AppSecurity {
                 this.initTenantOwner(tenantAppCatalogUrl),
                 // Load the approver's group
                 this.loadApproverGroup(),
+                // Load the final approver's group
+                this.loadFinalApproverGroup(),
                 // Load the developer's group
                 this.loadDevGroup(),
                 // Load the owner's group
