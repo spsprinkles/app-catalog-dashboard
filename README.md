@@ -61,6 +61,7 @@ The `status` configuration value is an object consisting of the following proper
 | approval | An array of user type values that can approve the item. |
 | checklists | Displayed on the approval/submission form. |
 | createTestSite | If set to true, will create the test site for the application. |
+| flowId | The flow id to trigger for the list item, on approval/submission of the item. |
 | notification | The email information to notify users on submission/approval of the item. |
 | requiresTechReview | If set to true, will validate the technical review form as part of the approval process. |
 | requiresTestCases | If set to true, will validate the test cases form as part of the approval process. |

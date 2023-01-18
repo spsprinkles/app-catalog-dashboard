@@ -60,6 +60,9 @@ export class AppForms {
                                             // Close the dialog
                                             LoadingDialog.hide();
 
+                                            // Run the flow associated for this status
+                                            AppActions.runFlow(item, status);
+
                                             // Send the notifications
                                             AppNotifications.sendEmail(status.notification, item).then(() => {
                                                 // See if the test app catalog exists and we are creating the test site
@@ -1711,6 +1714,9 @@ export class AppForms {
                                 }).execute(() => {
                                     // Code to run after the sponsor is added to the security group
                                     let onComplete = () => {
+                                        // Run the flow associated for this status
+                                        AppActions.runFlow(item, status);
+
                                         // Send the notifications
                                         AppNotifications.sendEmail(status.notification, item, false).then(() => {
                                             // Call the update event
