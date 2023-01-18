@@ -52,6 +52,7 @@ export interface IStatus {
     approval?: string[];
     checklists?: string[];
     createTestSite?: boolean;
+    flowId?: string;
     lastStep: boolean;
     name: string;
     notification?: IEmail[];
