@@ -61,6 +61,7 @@ The `status` configuration value is an object consisting of the following proper
 | approval | An array of user type values that can approve the item. |
 | checklists | Displayed on the approval/submission form. |
 | createTestSite | If set to true, will create the test site for the application. |
+| flowId | The flow id to trigger for the list item, on approval/submission of the item. |
 | notification | The email information to notify users on submission/approval of the item. |
 | requiresTechReview | If set to true, will validate the technical review form as part of the approval process. |
 | requiresTestCases | If set to true, will validate the test cases form as part of the approval process. |
@@ -135,6 +136,7 @@ The available values for the user type property values.
 | CurrentUser | A reference to the current user. |
 | Developers | The developers of the application. _Linked to the AppOwners metadata field._ |
 | DevelopersGroup | A reference to the developer's security group. |
+| FinalApproversGroup | A reference to the final approver's security group. |
 | Sponsor | The sponsor of the application. _Linked to the AppSponsor metadata field._ |
 | SponsorsGroup | A reference to the sponsor's security group. |
 

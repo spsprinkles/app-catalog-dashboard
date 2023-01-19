@@ -362,15 +362,6 @@ export class AppDashboard {
         let elInfo = this._el.querySelector("#app-info");
         while (elInfo.firstChild) { elInfo.removeChild(elInfo.firstChild); }
 
-        // Update the fields before rendering them
-        let preUpdateFields = (ctrl: Components.IFormControlProps, field: Types.SP.Field) => {
-            // See if this is the status field and the item is rejected
-            if (field && field.InternalName == "AppStatus") {
-                // Set the status value
-                ctrl.value = Common.appStatus(DataSource.DocSetItem);
-            }
-        }
-
         // Update the fields after rendering them
         let postUpdateFields = (ctrl: Components.IFormControl, field: Types.SP.Field) => {
             // See if this is the API permission field
@@ -406,10 +397,6 @@ export class AppDashboard {
                                     "AppProductID",
                                     "AppIsClientSideSolution"
                                 ],
-                                onControlRendering: (ctrl, field) => {
-                                    // Update the field
-                                    preUpdateFields(ctrl, field);
-                                },
                                 onControlRendered: (ctrl, field) => {
                                     // Update the fields
                                     postUpdateFields(ctrl, field);
@@ -432,10 +419,6 @@ export class AppDashboard {
                                     "AppSkipFeatureDeployment",
                                     "AppAPIPermissions"
                                 ],
-                                onControlRendering: (ctrl, field) => {
-                                    // Update the fields
-                                    preUpdateFields(ctrl, field);
-                                },
                                 onControlRendered: (ctrl, field) => {
                                     // Update the fields
                                     postUpdateFields(ctrl, field);

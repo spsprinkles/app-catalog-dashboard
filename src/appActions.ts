@@ -1,7 +1,7 @@
 import { LoadingDialog, Modal } from "dattatable";
-import { ContextInfo, Helper, SPTypes, Types, Utility, Web } from "gd-sprest-bs";
+import { ContextInfo, Graph, Helper, SPTypes, Types, Utility, Web } from "gd-sprest-bs";
 import * as JSZip from "jszip";
-import { AppConfig } from "./appCfg";
+import { AppConfig, IStatus } from "./appCfg";
 import { AppNotifications } from "./appNotifications";
 import { DataSource, IAppItem } from "./ds";
 import { ErrorDialog } from "./errorDialog";
@@ -973,6 +973,53 @@ export class AppActions {
                 ErrorDialog.show("Getting Context", "There was an error getting the web context", ex);
             }
         );
+    }
+
+    // Runs the flow for the item
+    static runFlow(item: IAppItem, status: IStatus) {
+        // See if a flow exists
+        if (status.flowId) {
+            // Get the flow information
+            Web().Lists(Strings.Lists.Apps).syncFlowInstance(status.flowId).execute(
+                flowData => {
+                    let flowInfo = JSON.parse(flowData.SynchronizationData);
+
+                    // Get the token
+                    Graph.getAccessToken(SPTypes.CloudEnvironment.Flow).execute(
+                        auth => {
+                            // Create the request
+                            var xhr = new XMLHttpRequest();
+                            xhr.open("POST", flowInfo.properties.flowTriggerUri, true);
+
+                            // Set the headers
+                            xhr.setRequestHeader("Accept", "application/json");
+                            xhr.setRequestHeader("Content-Type", "application/json");
+                            xhr.setRequestHeader("authorization", "Bearer " + auth.access_token);
+
+                            // Execute the request
+                            xhr.send(JSON.stringify({
+                                rows: [{
+                                    entity: {
+                                        ID: item.Id
+                                    }
+                                }]
+                            }));
+
+                            // Log
+                            ErrorDialog.logInfo(`Flow '${status.flowId} was triggered for item '${item.Title}' with id '${item.Id}'.`);
+                        },
+                        () => {
+                            // Log
+                            ErrorDialog.logError(`Error getting the access token from flow.`);
+                        }
+                    );
+                },
+                () => {
+                    // Log
+                    ErrorDialog.logError(`Error getting the flow '${status.flowId}.`);
+                }
+            );
+        }
     }
 
     // Updates the app

@@ -52,6 +52,7 @@ export interface IStatus {
     approval?: string[];
     checklists?: string[];
     createTestSite?: boolean;
+    flowId?: string;
     lastStep: boolean;
     name: string;
     notification?: IEmail[];
@@ -73,6 +74,7 @@ export const UserTypes = {
     ApproversGroup: "ApproversGroup",
     Developers: "Developers",
     DevelopersGroup: "DevelopersGroup",
+    FinalApproversGroup: "FinalApproversGroup",
     Sponsor: "Sponsor",
     SponsorsGroup: "SponsorsGroup"
 }

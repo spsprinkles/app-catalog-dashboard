@@ -38,6 +38,7 @@ const Strings = {
     Groups: {
         Approvers: "App Approvers",
         Developers: "App Developers",
+        FinalApprovers: "App Final Approvers",
         Sponsors: "App Sponsors"
     },
     IsTeams: false,
