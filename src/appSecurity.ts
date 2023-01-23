@@ -252,7 +252,13 @@ export class AppSecurity {
             ]).then(() => {
                 // Resolve the request
                 resolve();
-            }, reject);
+            }, () => {
+                // Log
+                ErrorDialog.logError("[App Security] Error initializing the App Security component.");
+
+                // Reject the request
+                reject();
+            });
         });
     }
 
