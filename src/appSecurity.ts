@@ -59,7 +59,13 @@ export class AppSecurity {
 
                 // Resolve the request
                 resolve();
-            }, reject);
+            }, () => {
+                // Log
+                ErrorDialog.logError("[App Security] Error loading the approver group.");
+
+                // Reject the request
+                reject();
+            });
         });
     }
 
@@ -76,7 +82,13 @@ export class AppSecurity {
 
                 // Resolve the request
                 resolve();
-            }, reject);
+            }, () => {
+                // Log
+                ErrorDialog.logError("[App Security] Error loading the current user.");
+
+                // Reject the request
+                reject();
+            });
         });
     }
 
@@ -146,7 +158,13 @@ export class AppSecurity {
 
                 // Resolve the request
                 resolve();
-            }, reject);
+            }, () => {
+                // Log
+                ErrorDialog.logError("[App Security] Error loading the developer group.");
+
+                // Reject the request
+                reject();
+            });
         });
     }
 
@@ -199,7 +217,13 @@ export class AppSecurity {
 
                 // Resolve the request
                 resolve();
-            }, reject);
+            }, () => {
+                // Log
+                ErrorDialog.logError("[App Security] Error loading the final approver group.");
+
+                // Reject the request
+                reject();
+            });
         });
     }
 
@@ -266,7 +290,13 @@ export class AppSecurity {
 
                 // Resolve the request
                 resolve();
-            }, resolve as any);
+            }, () => {
+                // Log
+                ErrorDialog.logError("[App Security] Error loading the owner group.");
+
+                // Resolve the request
+                resolve();
+            });
         });
     }
 
@@ -395,7 +425,13 @@ export class AppSecurity {
 
                 // Resolve the request
                 resolve();
-            }, reject);
+            }, () => {
+                // Log
+                ErrorDialog.logError("[App Security] Error loading the sponsor group.");
+
+                // Reject the request
+                reject();
+            });
         });
     }
 
