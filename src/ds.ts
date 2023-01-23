@@ -294,11 +294,11 @@ export class DataSource {
     }
 
     // Initializes the application
-    static init(cfgWebUrl?: string, cfgUrl?: string): PromiseLike<void> {
+    static init(appConfiguration?: string): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve, reject) => {
             // Load the configuration
-            AppConfig.loadConfiguration(cfgWebUrl, cfgUrl).then(() => {
+            AppConfig.loadConfiguration(appConfiguration).then(() => {
                 // Load the security information
                 AppSecurity.init(AppConfig.Configuration.appCatalogUrl, AppConfig.Configuration.tenantAppCatalogUrl).then(() => {
                     // Call the refresh method to load the data
@@ -333,7 +333,7 @@ export class DataSource {
 
                     // Add an error
                     errors.push({
-                        content: "App configuration doesn't exist. Edit the webpart and set the configuration property.",
+                        content: "App configuration doesn't exist or is not in the correct JSON format. Please edit the webpart and set the configuration property.",
                         type: featureEnabledFl ? null : Components.ListGroupItemTypes.Danger
                     });
                 }
