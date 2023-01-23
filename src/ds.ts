@@ -333,7 +333,7 @@ export class DataSource {
 
                     // Add an error
                     errors.push({
-                        content: "App configuration doesn't exist. Edit the webpart and set the configuration property.",
+                        content: "App configuration doesn't exist or is not in the correct JSON format. Please edit the webpart and set the configuration property.",
                         type: featureEnabledFl ? null : Components.ListGroupItemTypes.Danger
                     });
                 }
