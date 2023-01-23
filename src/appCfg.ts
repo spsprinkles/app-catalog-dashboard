@@ -1,5 +1,6 @@
 import { Types, Web } from "gd-sprest-bs";
 import * as Common from "./common";
+import { ErrorDialog } from "./errorDialog";
 import Strings from "./strings";
 
 // Configuration
@@ -117,7 +118,7 @@ export class AppConfig {
     }
 
     // Load the configuration file
-    static loadConfiguration(cfgWebUrl?: string, cfgUrl?: string): PromiseLike<void> {
+    static loadConfiguration(appConfiguration?: string): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve, reject) => {
             let completeRequest = () => {
@@ -144,33 +145,55 @@ export class AppConfig {
                 }
             }
 
-            // Update the configuration web url
-            cfgWebUrl = '/' + (cfgWebUrl || Strings.SourceUrl).replace(/^\//, '');
+            // See if the configuration exists
+            if (appConfiguration) {
+                // Log
+                ErrorDialog.logInfo("Loading the app configuration passed into the app", appConfiguration);
 
-            // Update the configuration file url
-            cfgUrl = (cfgUrl ? Common.updateUrl(cfgUrl) : Strings.ConfigUrl).replace(/^\//, '');
-
-            // Get the current web
-            Web(cfgWebUrl).getFileByUrl(cfgUrl).content().execute(
-                // Success
-                file => {
-                    // Convert the string to a json object
-                    try { this._cfg = JSON.parse(String.fromCharCode.apply(null, new Uint8Array(file))); }
-                    catch { this._cfg = null; }
-
-                    // Complete the request
-                    completeRequest();
-                },
-
-                // Error
-                () => {
+                // Convert the string to a json object
+                try { this._cfg = JSON.parse(appConfiguration); }
+                catch {
                     // Clear the configuration
                     this._cfg = null;
 
-                    // Complete the request
-                    completeRequest();
+                    // Log
+                    ErrorDialog.logError("Error parsing the app configuration. Please review and ensure it meets JSON rules.");
                 }
-            );
+
+                // Complete the request
+                completeRequest();
+            } else {
+                // Log
+                ErrorDialog.logInfo("Loading the app configuration from a file.", Strings.SourceUrl + "/" + Strings.ConfigUrl);
+
+                // Load the configuration file
+                Web(Strings.SourceUrl).getFileByUrl(Strings.ConfigUrl).content().execute(
+                    // Success
+                    file => {
+                        // Convert the string to a json object
+                        try { this._cfg = JSON.parse(String.fromCharCode.apply(null, new Uint8Array(file))); }
+                        catch {
+                            // Clear the configuration
+                            this._cfg = null;
+
+                            // Log
+                            ErrorDialog.logError("Error parsing the app configuration. Please review and ensure it meets JSON rules.");
+                        }
+
+                        // Complete the request
+                        completeRequest();
+                    },
+
+                    // Error
+                    () => {
+                        // Clear the configuration
+                        this._cfg = null;
+
+                        // Complete the request
+                        completeRequest();
+                    }
+                );
+            }
         });
     }
 

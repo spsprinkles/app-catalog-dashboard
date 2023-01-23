@@ -1,6 +1,5 @@
 declare interface IAppCatalogManagerWebPartStrings {
-  ConfigFieldUrlLabel: string;
-  ConfigWebUrlLabel: string;
+  ConfigLabel: string;
 }
 
 declare module 'AppCatalogManagerWebPartStrings' {

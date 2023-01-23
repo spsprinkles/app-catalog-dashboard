@@ -6,7 +6,7 @@
   "scripts": {
     "build": "gulp bundle",
     "clean": "gulp clean",
-    "package": "gulp clean && gulp build --ship && gulp bundle --ship && gulp package-solution --ship",
+    "package": "gulp clean --ship && gulp build --ship && gulp bundle --ship && gulp package-solution --ship",
     "test": "gulp test"
   },
   "dependencies": {

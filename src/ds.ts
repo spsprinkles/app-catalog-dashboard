@@ -294,11 +294,11 @@ export class DataSource {
     }
 
     // Initializes the application
-    static init(cfgWebUrl?: string, cfgUrl?: string): PromiseLike<void> {
+    static init(appConfiguration?: string): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve, reject) => {
             // Load the configuration
-            AppConfig.loadConfiguration(cfgWebUrl, cfgUrl).then(() => {
+            AppConfig.loadConfiguration(appConfiguration).then(() => {
                 // Load the security information
                 AppSecurity.init(AppConfig.Configuration.appCatalogUrl, AppConfig.Configuration.tenantAppCatalogUrl).then(() => {
                     // Call the refresh method to load the data

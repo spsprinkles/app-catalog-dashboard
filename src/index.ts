@@ -13,7 +13,7 @@ import "./styles.scss";
 // Create the global variable for this solution
 const GlobalVariable = {
     Configuration,
-    render: (el: HTMLElement, context?, log?, cfgWebUrl?: string, cfgUrl?: string, sourceUrl?: string) => {
+    render: (el: HTMLElement, context?, log?, appConfiguration?: string, sourceUrl?: string) => {
         // See if the log is set
         if (log) {
             // Set the log and scope
@@ -42,7 +42,7 @@ const GlobalVariable = {
         wpZone ? wpZone.style.width = "100%" : null;
 
         // Initialize the solution
-        DataSource.init(cfgWebUrl, cfgUrl).then(
+        DataSource.init(appConfiguration).then(
             // Success
             () => {
                 // Ensure the security groups exist
