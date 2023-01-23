@@ -65,6 +65,6 @@ export function isSubmitter(item: IAppItem) {
 
 // Updates the url
 export function updateUrl(url: string) {
-    return url.replace("~site/", ContextInfo.webServerRelativeUrl + "/")
-        .replace("~sitecollection/", ContextInfo.siteServerRelativeUrl + "/");
+    return url.replace("~sitecollection", ContextInfo.siteServerRelativeUrl)
+        .replace("~site", ContextInfo.webServerRelativeUrl);
 }
