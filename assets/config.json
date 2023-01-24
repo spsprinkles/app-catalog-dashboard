@@ -12,7 +12,7 @@
                     "ApproversGroup"
                 ],
                 "subject": "App Deployed",
-                "content": "The app [[Title]] was deployed."
+                "content": "The app [Title] was deployed."
             }
         ],
         "test": [
@@ -21,7 +21,7 @@
                     "Sponsor", "Developers"
                 ],
                 "subject": "App Updated",
-                "content": "The app [[Title]] was upgraded in the test site."
+                "content": "The app [Title] was upgraded in the test site."
             }
         ],
         "upgrade": [
@@ -30,7 +30,7 @@
                     "ApproversGroup"
                 ],
                 "subject": "App Deployed",
-                "content": "The app [[Title]] was upgraded. Please update the test site."
+                "content": "The app [Title] was upgraded. Please update the test site."
             }
         ]
     },
@@ -75,7 +75,7 @@
                         "DevelopersGroup"
                     ],
                     "subject": "App Testing Completed",
-                    "content": "<p>Approval Group,</p>The application testing was completed and is awaiting approval. Please click on the link below to review this request.</p><p>[[PageUrl]]</p><p>App Team</p>"
+                    "content": "<p>Approval Group,</p>The application testing was completed and is awaiting approval. Please click on the link below to review this request.</p><p>[PageUrl]</p><p>App Team</p>"
                 }
             ]
         },
@@ -103,7 +103,7 @@
                         "Sponsor"
                     ],
                     "subject": "App Submitted",
-                    "content": "<p>[[AppSponsor.Title]],</p>An application was submitted and assigned to you as its sponsor. Please click on the link below to approve this application.</p><p>[[PageUrl]]</p><p>App Team</p>"
+                    "content": "<p>[AppSponsor.Title],</p>An application was submitted and assigned to you as its sponsor. Please click on the link below to approve this application.</p><p>[PageUrl]</p><p>App Team</p>"
                 }
             ]
         },
@@ -134,7 +134,7 @@
                         "Developers"
                     ],
                     "subject": "App Approved for Deployment",
-                    "content": "<p>Your application was approved and is ready for deployment. Please click on the link below to complete the request.</p><p>[[TestSiteUrl]]</p><p>App Team</p>"
+                    "content": "<p>Your application was approved and is ready for deployment. Please click on the link below to complete the request.</p><p>[TestSiteUrl]</p><p>App Team</p>"
                 }
             ]
         },
@@ -167,7 +167,7 @@
                         "Developers"
                     ],
                     "subject": "App Approved for Deployment",
-                    "content": "<p>Your application was approved and is ready for deployment. Please click on the link below to complete the request.</p><p>[[TestSiteUrl]]</p><p>App Team</p>"
+                    "content": "<p>Your application was approved and is ready for deployment. Please click on the link below to complete the request.</p><p>[TestSiteUrl]</p><p>App Team</p>"
                 }
             ]
         },
@@ -199,7 +199,7 @@
                         "ApproversGroup"
                     ],
                     "subject": "App Testing Completed",
-                    "content": "<p>Approval Group,</p>The application testing was completed and is awaiting approval. Please click on the link below to review this request.</p><p>[[PageUrl]]</p><p>App Team</p>"
+                    "content": "<p>Approval Group,</p>The application testing was completed and is awaiting approval. Please click on the link below to review this request.</p><p>[PageUrl]</p><p>App Team</p>"
                 }
             ]
         },
@@ -220,7 +220,7 @@
                         "ApproversGroup"
                     ],
                     "subject": "App Submitted",
-                    "content": "<p>Approval Group,</p>An application was submitted and is awaiting approval. Please click on the link below to review this request.</p><p>[[PageUrl]]</p><p>App Team</p>"
+                    "content": "<p>Approval Group,</p>An application was submitted and is awaiting approval. Please click on the link below to review this request.</p><p>[PageUrl]</p><p>App Team</p>"
                 }
             ]
         }

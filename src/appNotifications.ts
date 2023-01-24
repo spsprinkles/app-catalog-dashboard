@@ -325,10 +325,10 @@ export class AppNotifications {
                     CC = CC.concat(emails);
                 }
 
-                // Parse the email content and find [[Key]] instances w/in it.
+                // Parse the email content and find [Key] instances w/in it.
                 let Body = notificationCfg.content || "";
-                let startIdx = Body.indexOf("[[");
-                let endIdx = Body.indexOf("]]");
+                let startIdx = Body.indexOf("[");
+                let endIdx = Body.indexOf("]");
                 while (startIdx > 0 && endIdx > startIdx) {
                     // Get the key value
                     let key = Body.substring(startIdx + 2, endIdx);
@@ -338,8 +338,8 @@ export class AppNotifications {
                     Body = Body.substring(0, startIdx) + value + Body.substring(endIdx + 2);
 
                     // Find the next instance of it
-                    startIdx = Body.indexOf("[[");
-                    endIdx = Body.indexOf("]]");
+                    startIdx = Body.indexOf("[");
+                    endIdx = Body.indexOf("]");
                 }
 
                 // Ensure emails exist
@@ -404,10 +404,10 @@ export class AppNotifications {
                 To = To.concat(emails);
             }
 
-            // Parse the email content and find [[Key]] instances w/in it.
+            // Parse the email content and find [Key] instances w/in it.
             let Body = body || "";
-            let startIdx = Body.indexOf("[[");
-            let endIdx = Body.indexOf("]]");
+            let startIdx = Body.indexOf("[");
+            let endIdx = Body.indexOf("]");
             while (startIdx > 0 && endIdx > startIdx) {
                 // Get the key value
                 let key = Body.substring(startIdx + 2, endIdx);
@@ -418,8 +418,8 @@ export class AppNotifications {
                 Body = Body.substring(0, startIdx) + value + Body.substring(endIdx + 2);
 
                 // Find the next instance of it
-                startIdx = oldContent.indexOf("[[", endIdx);
-                endIdx = oldContent.indexOf("]]", endIdx + 2);
+                startIdx = oldContent.indexOf("[", endIdx);
+                endIdx = oldContent.indexOf("]", endIdx + 2);
             }
 
             // Ensure emails exist

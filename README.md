@@ -114,7 +114,7 @@ The notification configuration value is an array of objects with the following p
 
 ##### Notification Content
 
-The notification email content can be dynamically set by using the `[[Internal Field Name]]` template as a placeholder within it. Complex field types, like a user field, can be used to access their properties. For example, to set the sponsor's name the value `[[AppSponsor.Title]]` would be used as the placeholder. Other wildcard values that can be used are listed below.
+The notification email content can be dynamically set by using the `[Internal Field Name]` template as a placeholder within it. Complex field types, like a user field, can be used to access their properties. For example, to set the sponsor's name the value `[AppSponsor.Title]` would be used as the placeholder. Other wildcard values that can be used are listed below.
 
 | Name | Description |
 | --- | --- |
