@@ -8,6 +8,49 @@ import { DataSource, IAppItem, IAssessmentItem } from "./ds";
 import { ErrorDialog } from "./errorDialog";
 import Strings from "./strings";
 
+// Define the fields to exclude from the main tab
+const AppExcludeFields = [
+    "AppStatus",
+    "IsAppPackageEnabled",
+    "IsDefaultAppMetadataLocale"
+];
+
+// Define the fields to be read-only in the main tab
+const AppReadOnlyFields = [
+    "FileLeafRef"
+];
+
+// Define the app deployment fields
+const AppDeploymentFields = [
+    "AppIsTenantDeployed",
+    "AppSiteDeployments"
+];
+
+// Define the app package properties
+const AppPackageFields = [
+    "Title",
+    "AppAPIPermissions",
+    "AppIsClientSideSolution",
+    "AppIsDomainIsolated",
+    "AppProductID",
+    "AppSharePointMinVersion",
+    "AppSkipFeatureDeployment",
+    "AppVersion"
+];
+
+// Define the app store properties
+const AppStoreFields = [
+    "AppDescription",
+    "AppThumbnailURL",
+    "AppImageURL1",
+    "AppImageURL2",
+    "AppImageURL3",
+    "AppImageURL4",
+    "AppImageURL5",
+    "AppSupportURL",
+    "AppVideoURL"
+];
+
 /**
  * App Item Forms
  */
@@ -591,16 +634,27 @@ export class AppForms {
                 // Return the properties
                 return props;
             },
+            tabInfo: {
+                tabs: [
+                    {
+                        title: "App Properties",
+                        excludeFields: AppExcludeFields.concat(AppDeploymentFields, AppPackageFields, AppStoreFields)
+                    },
+                    {
+                        title: "App Metadata",
+                        fields: AppPackageFields
+                    },
+                    {
+                        title: "App Store Details",
+                        fields: AppStoreFields
+                    },
+                    {
+                        title: "App Deployment",
+                        fields: AppDeploymentFields
+                    }
+                ]
+            },
             onCreateViewForm: props => {
-                // Exclude fields
-                props.excludeFields = ["AppVideoURL", "AppStatus", "IsAppPackageEnabled", "IsDefaultAppMetadataLocale"];
-
-                // See if the item is not approved
-                if ((props.info.item as IAppItem).AppStatus != "Approved") {
-                    // Exclude the site deployments field
-                    props.excludeFields.push("AppSiteDeployments");
-                }
-
                 // Update the field
                 props.onControlRendering = (ctrl, field) => {
                     // See if this is a url field
@@ -716,16 +770,31 @@ export class AppForms {
                 // Return the properties
                 return props;
             },
+            tabInfo: {
+                tabs: [
+                    {
+                        title: "App Properties",
+                        excludeFields: AppExcludeFields.concat(AppDeploymentFields, AppPackageFields, AppStoreFields)
+                    },
+                    {
+                        title: "App Metadata",
+                        fields: AppPackageFields
+                    },
+                    {
+                        title: "App Store Details",
+                        fields: AppStoreFields
+                    },
+                    {
+                        title: "App Deployment",
+                        fields: AppDeploymentFields
+                    }
+                ]
+            },
             onCreateEditForm: props => {
-                // Exclude fields
-                props.excludeFields = ["AppVideoURL", "AppStatus", "IsAppPackageEnabled", "IsDefaultAppMetadataLocale"];
-
                 // Update the field
                 props.onControlRendering = (ctrl, field) => {
                     // See if this is a read-only field
-                    if (["AppAPIPermissions", "AppIsClientSideSolution", "AppIsDomainIsolated",
-                        "AppProductID", "AppSharePointMinVersion", "AppSkipFeatureDeployment",
-                        "AppVersion", "FileLeafRef", "Title"].indexOf(field.InternalName) >= 0) {
+                    if (AppReadOnlyFields.indexOf(field.InternalName) >= 0 || AppPackageFields.indexOf(field.InternalName) >= 0 || AppDeploymentFields.indexOf(field.InternalName) >= 0) {
                         // Make it read-only
                         ctrl.isReadonly = true;
                     }
@@ -754,9 +823,17 @@ export class AppForms {
 
                     // See if this is a url field
                     if (field.InternalName.indexOf("URL") > 0) {
+                        /* TODO - Dade to customize the image url and video url fields */
                         // Hide the description field
                         (ctrl as Components.IFormControlUrlProps).showDescription = false;
                     }
+                    /* TODO - Need to get the CSS corrected for switches
+                    // Else, see if this is a boolean field
+                    else if(field.FieldTypeKind == SPTypes.FieldType.Boolean) {
+                        // Set the option to display as a switch
+                        (ctrl as Components.IFormControlPropsCheckbox).type = Components.FormControlTypes.Switch;
+                    }
+                    */
                 }
 
                 // Return the properties
