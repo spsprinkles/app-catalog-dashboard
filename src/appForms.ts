@@ -637,19 +637,19 @@ export class AppForms {
             tabInfo: {
                 tabs: [
                     {
-                        title: "App Properties",
+                        title: "Properties",
                         excludeFields: AppExcludeFields.concat(AppDeploymentFields, AppPackageFields, AppStoreFields)
                     },
                     {
-                        title: "App Metadata",
+                        title: "Metadata",
                         fields: AppPackageFields
                     },
                     {
-                        title: "App Store Details",
+                        title: "Store Details",
                         fields: AppStoreFields
                     },
                     {
-                        title: "App Deployment",
+                        title: "Deployment",
                         fields: AppDeploymentFields
                     }
                 ]
@@ -773,19 +773,19 @@ export class AppForms {
             tabInfo: {
                 tabs: [
                     {
-                        title: "App Properties",
+                        title: "Properties",
                         excludeFields: AppExcludeFields.concat(AppDeploymentFields, AppPackageFields, AppStoreFields)
                     },
                     {
-                        title: "App Metadata",
+                        title: "Metadata",
                         fields: AppPackageFields
                     },
                     {
-                        title: "App Store Details",
+                        title: "Store Details",
                         fields: AppStoreFields
                     },
                     {
-                        title: "App Deployment",
+                        title: "Deployment",
                         fields: AppDeploymentFields
                     }
                 ]
