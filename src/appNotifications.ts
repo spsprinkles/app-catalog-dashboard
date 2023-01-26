@@ -331,11 +331,11 @@ export class AppNotifications {
                 let endIdx = Body.indexOf("]");
                 while (startIdx > 0 && endIdx > startIdx) {
                     // Get the key value
-                    let key = Body.substring(startIdx + 2, endIdx);
+                    let key = Body.substring(startIdx + 1, endIdx);
                     let value = this.getValue(key, item, status, deploySiteUrl);
 
                     // Replace the value
-                    Body = Body.substring(0, startIdx) + value + Body.substring(endIdx + 2);
+                    Body = Body.substring(0, startIdx) + value + Body.substring(endIdx + 1);
 
                     // Find the next instance of it
                     startIdx = Body.indexOf("[");
@@ -410,16 +410,16 @@ export class AppNotifications {
             let endIdx = Body.indexOf("]");
             while (startIdx > 0 && endIdx > startIdx) {
                 // Get the key value
-                let key = Body.substring(startIdx + 2, endIdx);
+                let key = Body.substring(startIdx + 1, endIdx);
                 let value = this.getValue(key, item, item.AppStatus, "");
 
                 // Replace the value
                 let oldContent = Body;
-                Body = Body.substring(0, startIdx) + value + Body.substring(endIdx + 2);
+                Body = Body.substring(0, startIdx) + value + Body.substring(endIdx + 1);
 
                 // Find the next instance of it
                 startIdx = oldContent.indexOf("[", endIdx);
-                endIdx = oldContent.indexOf("]", endIdx + 2);
+                endIdx = oldContent.indexOf("]", endIdx + 1);
             }
 
             // Ensure emails exist
