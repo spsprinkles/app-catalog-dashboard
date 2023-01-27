@@ -37,7 +37,6 @@
     "status": {
         "Deployed": {
             "actions": [
-                "AppData",
                 "GetHelp",
                 "View",
                 "ViewTestCases",
@@ -81,7 +80,6 @@
         },
         "New": {
             "actions": [
-                "AppData",
                 "View",
                 "Edit",
                 "Submit"
