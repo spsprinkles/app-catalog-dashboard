@@ -104,7 +104,7 @@ export class AppForms {
                                             LoadingDialog.hide();
 
                                             // Run the flow associated for this status
-                                            AppActions.runFlow(item, status);
+                                            AppActions.runFlow(item, status.flowId);
 
                                             // Send the notifications
                                             AppNotifications.sendEmail(status.notification, item).then(() => {
@@ -360,6 +360,12 @@ export class AppForms {
 
                 // Deploy the app
                 AppActions.deploy(item, tenantFl, skipFeatureDeployment, onUpdate, () => {
+                    // See if there is a flow
+                    if (AppConfig.Configuration.appFlows && AppConfig.Configuration.appFlows.deployToTenant) {
+                        // Execute the flow
+                        AppActions.runFlow(item, AppConfig.Configuration.appFlows.deployToTenant);
+                    }
+
                     // Call the update event
                     onUpdate();
                 });
@@ -558,6 +564,12 @@ export class AppForms {
 
                             // Deploy the app
                             AppActions.deployToSite(item, form.getValues()["Url"], () => {
+                                // See if there is a flow
+                                if (AppConfig.Configuration.appFlows && AppConfig.Configuration.appFlows.deployToSiteCollection) {
+                                    // Execute the flow
+                                    AppActions.runFlow(item, AppConfig.Configuration.appFlows.deployToSiteCollection);
+                                }
+
                                 // Call the update event
                                 onUpdate();
                             });
@@ -602,6 +614,12 @@ export class AppForms {
 
                 // Deploy the app
                 AppActions.deployToTeams(item, () => {
+                    // See if there is a flow
+                    if (AppConfig.Configuration.appFlows && AppConfig.Configuration.appFlows.deployToTeams) {
+                        // Execute the flow
+                        AppActions.runFlow(item, AppConfig.Configuration.appFlows.deployToTeams);
+                    }
+
                     // Call the update event
                     onUpdate();
                 });
@@ -1796,7 +1814,7 @@ export class AppForms {
                                     // Code to run after the sponsor is added to the security group
                                     let onComplete = () => {
                                         // Run the flow associated for this status
-                                        AppActions.runFlow(item, status);
+                                        AppActions.runFlow(item, status.flowId);
 
                                         // Send the notifications
                                         AppNotifications.sendEmail(status.notification, item, false).then(() => {

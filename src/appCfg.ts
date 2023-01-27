@@ -8,6 +8,7 @@ export interface IConfiguration {
     appCatalogRequests?: string[];
     appCatalogUrl?: string;
     appDetails?: IAppDetails;
+    appFlows?: IAppFlows;
     appNotifications?: IAppNotifications;
     dashboardUrl?: string;
     errorEmails?: string[];
@@ -27,6 +28,14 @@ export interface IConfiguration {
 export interface IAppDetails {
     left?: string[];
     right?: string[];
+}
+
+// App Flows
+export interface IAppFlows {
+    deployToSiteCollection?: string;
+    deployToTeams?: string;
+    deployToTenant?: string;
+    upgradeApp?: string;
 }
 
 // App Notifications
