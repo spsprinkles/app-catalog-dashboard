@@ -26,6 +26,7 @@ The [configuration file](https://github.com/spsprinkles/app-catalog-dashboard/ra
 | --- | --- |
 | appCatalogRequests | An array of user types to send notification requests to for app catalog creation. |
 | appDetails | The app details information to display. |
+| appFlows | The flow ids to trigger based on actions of the app. |
 | appNotifications | The ability to send notifications based on app actions. |
 | errorEmails | An array of email addresses to send to when a user has an error when using the application. This will help with troubleshooting issues in production. |
 | paging | The default # of apps to display on the dashboard. Valid values are `10, 25, 50, 100`. |
@@ -39,6 +40,17 @@ The `app metadata` to display on the app details page. If the columns are not de
 | --- | --- |
 | left | An array of internal field names to display in the left column. |
 | right | An array of internal field names to display in the right column. |
+
+### App Flows
+
+The `app actions` outside of the workflow that can be triggered.
+
+| Name | Description |
+| --- | --- |
+| deployToSiteCollection | Triggers a flow when the app is deployed to a site collection. |
+| deployToTeams | Triggers a flow when the app is deployed to teams. |
+| deployToTenant | Triggers a flow when the app is deployed to the tenant. |
+| upgradeApp | Triggers a flow when the app is upgraded. |
 
 ### App Notifications
 

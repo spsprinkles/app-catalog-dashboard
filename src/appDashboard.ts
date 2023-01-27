@@ -319,6 +319,12 @@ export class AppDashboard {
 
                                         // See if the app was upgraded
                                         if (appUpgraded) {
+                                            // See if there is a flow
+                                            if (AppConfig.Configuration.appFlows && AppConfig.Configuration.appFlows.upgradeApp) {
+                                                // Execute the flow
+                                                AppActions.runFlow(DataSource.DocSetItem, AppConfig.Configuration.appFlows.upgradeApp);
+                                            }
+
                                             // Send the notifications
                                             AppNotifications.sendAppUpgradedEmail(DataSource.DocSetItem).then(() => {
                                                 // Archive the app

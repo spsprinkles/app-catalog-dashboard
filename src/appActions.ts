@@ -976,11 +976,11 @@ export class AppActions {
     }
 
     // Runs the flow for the item
-    static runFlow(item: IAppItem, status: IStatus) {
+    static runFlow(item: IAppItem, flowId:string) {
         // See if a flow exists
-        if (status.flowId) {
+        if (flowId) {
             // Get the flow information
-            Web().Lists(Strings.Lists.Apps).syncFlowInstance(status.flowId).execute(
+            Web().Lists(Strings.Lists.Apps).syncFlowInstance(flowId).execute(
                 flowData => {
                     let flowInfo = JSON.parse(flowData.SynchronizationData);
 
@@ -1006,7 +1006,7 @@ export class AppActions {
                             }));
 
                             // Log
-                            ErrorDialog.logInfo(`Flow '${status.flowId} was triggered for item '${item.Title}' with id '${item.Id}'.`);
+                            ErrorDialog.logInfo(`Flow '${flowId} was triggered for item '${item.Title}' with id '${item.Id}'.`);
                         },
                         () => {
                             // Log
@@ -1016,7 +1016,7 @@ export class AppActions {
                 },
                 () => {
                     // Log
-                    ErrorDialog.logError(`Error getting the flow '${status.flowId}.`);
+                    ErrorDialog.logError(`Error getting the flow '${flowId}.`);
                 }
             );
         }
