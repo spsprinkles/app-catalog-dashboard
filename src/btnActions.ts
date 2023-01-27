@@ -137,30 +137,6 @@ export class ButtonActions {
         for (let i = 0; i < btnActions.length; i++) {
             // Render the action button
             switch (btnActions[i]) {
-                // App Metadata
-                case "AppData":
-                    // Render the approval button
-                    tooltips.add({
-                        content: "Edits the metadata copied to the app catalog.",
-                        btnProps: {
-                            text: "App Data",
-                            iconClassName: "me-1",
-                            iconSize: 20,
-                            iconType: chatSquareDots,
-                            isDisabled: !canEdit,
-                            isSmall: true,
-                            type: Components.ButtonTypes.OutlineSuccess,
-                            onClick: () => {
-                                // Display the approval form
-                                this._forms.editAppData(this._item.Id, () => {
-                                    // Call the update event
-                                    this._onUpdate();
-                                });
-                            }
-                        }
-                    });
-                    break;
-
                 // Approve/Reject
                 case "ApproveReject":
                     // See if the app is rejected
