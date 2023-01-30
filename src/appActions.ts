@@ -1002,6 +1002,7 @@ export class AppActions {
                                     } else {
                                         // Log
                                         ErrorDialog.logError(`Flow '${flowId} was triggered failed for item '${item.Title}' with id '${item.Id}'.`);
+                                        ErrorDialog.logError(`Flow '${flowId} failed: ${xhr.responseText}`);
                                     }
                                 }
                             }
