@@ -991,6 +991,21 @@ export class AppActions {
                             var xhr = new XMLHttpRequest();
                             xhr.open("POST", flowInfo.properties.flowTriggerUri, true);
 
+                            // Set the state change event
+                            xhr.onreadystatechange = () => {
+                                // See if the request has completed
+                                if (xhr.readyState == 4) {
+                                    // See if it was successful
+                                    if (xhr.status >= 200 && xhr.status < 300) {
+                                        // Log
+                                        ErrorDialog.logInfo(`Flow '${flowId} was triggered successfully for item '${item.Title}' with id '${item.Id}'.`);
+                                    } else {
+                                        // Log
+                                        ErrorDialog.logError(`Flow '${flowId} was triggered failed for item '${item.Title}' with id '${item.Id}'.`);
+                                    }
+                                }
+                            }
+
                             // Set the headers
                             xhr.setRequestHeader("Accept", "application/json");
                             xhr.setRequestHeader("Content-Type", "application/json");
