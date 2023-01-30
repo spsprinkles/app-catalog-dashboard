@@ -35,6 +35,7 @@ export interface IAppFlows {
     deployToSiteCollection?: string;
     deployToTeams?: string;
     deployToTenant?: string;
+    newApp?: string;
     upgradeApp?: string;
 }
 

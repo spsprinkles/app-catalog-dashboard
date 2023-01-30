@@ -50,6 +50,7 @@ The `app actions` outside of the workflow that can be triggered.
 | deployToSiteCollection | Triggers a flow when the app is deployed to a site collection. |
 | deployToTeams | Triggers a flow when the app is deployed to teams. |
 | deployToTenant | Triggers a flow when the app is deployed to the tenant. |
+| newApp | Triggers a flow when a new app is initially added. |
 | upgradeApp | Triggers a flow when the app is upgraded. |
 
 ### App Notifications
