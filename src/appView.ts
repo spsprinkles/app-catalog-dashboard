@@ -309,6 +309,12 @@ export class AppView {
                                                 // Refresh the dashboard
                                                 this.refresh();
 
+                                                // See if there is a flow
+                                                if (AppConfig.Configuration.appFlows && AppConfig.Configuration.appFlows.newApp) {
+                                                    // Run the flow for this app
+                                                    AppActions.runFlow(item, AppConfig.Configuration.appFlows.newApp);
+                                                }
+
                                                 // Display the edit form
                                                 this._forms.edit(item.Id, () => {
                                                     // Refresh the dashboard
