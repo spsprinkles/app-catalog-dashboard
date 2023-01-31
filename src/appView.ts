@@ -251,6 +251,9 @@ export class AppView {
                                         // See if we are setting the filter
                                         let elButton = ev.currentTarget as HTMLButtonElement;
                                         if (elButton.classList.contains("active")) {
+                                            // Filter the data for apps belonging to the current user
+                                            this._dashboard.filter(0, "");
+
                                             // Update the styling
                                             elButton.classList.remove("active");
 
