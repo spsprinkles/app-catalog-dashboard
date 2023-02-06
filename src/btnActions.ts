@@ -539,7 +539,7 @@ ${ContextInfo.userDisplayName}`.trim()
                             });
 
                             // See if the current version is not deployed
-                            if (this._item.AppVersion != webInfo.app.InstalledVersion &&
+                            if (webInfo.app && this._item.AppVersion != webInfo.app.InstalledVersion &&
                                 this._item.AppVersion != webInfo.app.AppCatalogVersion) {
                                 // Render the update button
                                 tooltips.add({
