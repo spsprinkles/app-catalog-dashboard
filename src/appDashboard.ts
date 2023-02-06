@@ -1,5 +1,5 @@
 import { Documents, LoadingDialog, Modal } from "dattatable";
-import { Components, Types } from "gd-sprest-bs";
+import { Components, Helper, Types } from "gd-sprest-bs";
 import { caretRightFill } from "gd-sprest-bs/build/icons/svgs/caretRightFill";
 import { folderSymlink } from "gd-sprest-bs/build/icons/svgs/folderSymlink";
 import { layoutTextWindow } from "gd-sprest-bs/build/icons/svgs/layoutTextWindow";
@@ -303,6 +303,7 @@ export class AppDashboard {
                                 itemInfo.AppStatus = AppConfig.TestCasesStatus;
                                 DataSource.DocSetItem.update(itemInfo).execute(
                                     () => {
+                                        // Archives the current app
                                         let archiveApp = () => {
                                             // See if the item is currently approved
                                             if (DataSource.DocSetItem.AppStatus == AppConfig.ApprovedStatus) {
@@ -317,26 +318,74 @@ export class AppDashboard {
                                             }
                                         }
 
-                                        // See if the app was upgraded
-                                        if (appUpgraded) {
-                                            // See if there is a flow
-                                            if (AppConfig.Configuration.appFlows && AppConfig.Configuration.appFlows.upgradeApp) {
-                                                // Execute the flow
-                                                AppActions.runFlow(DataSource.DocSetItem, AppConfig.Configuration.appFlows.upgradeApp);
-                                            }
-
-                                            // Send the notifications
-                                            AppNotifications.sendAppUpgradedEmail(DataSource.DocSetItem).then(() => {
-                                                // Archive the app
-                                                archiveApp();
+                                        // Clears the client side assets folder
+                                        let clearClientSideAssets = () => {
+                                            // Return a promise
+                                            return new Promise(resolve => {
+                                                // Get the client side asset files
+                                                DataSource.DocSetItem.Folder().Folders("ClientSideAssets").Files().execute(files => {
+                                                    // Parse the files
+                                                    Helper.Executor(files.results, file => {
+                                                        // Return a promise
+                                                        return new Promise(resolve => {
+                                                            // Delete the file
+                                                            file.delete().execute(resolve, resolve);
+                                                        });
+                                                    }).then(resolve);
+                                                });
                                             });
-                                        } else {
-                                            // Archive the app
-                                            archiveApp();
                                         }
 
-                                        // Refresh the dashboard
-                                        this.refresh();
+                                        // Uploads the client side assets
+                                        let uploadClientSideAssets = () => {
+                                            // Return a promise
+                                            return new Promise(resolve => {
+                                                // Parse the assets
+                                                Helper.Executor(pkgInfo.assets, asset => {
+                                                    // Return a promise
+                                                    return new Promise((resolve) => {
+                                                        // Get the file information
+                                                        asset.async("arraybuffer").then(content => {
+                                                            // Upload the file
+                                                            DataSource.DocSetItem.Folder().Folders("ClientSideAssets").Files().add(asset.name.replace(/clientsideassets\//i, ''), true, content).execute(resolve, () => {
+                                                                // Error uploading the asset
+                                                                ErrorDialog.logError("Error uploading the client side asset file: " + asset.name);
+
+                                                                // Upload the next file
+                                                                resolve(null);
+                                                            });
+                                                        });
+                                                    });
+                                                })
+                                            });
+                                        }
+
+                                        // Clear the client side assets
+                                        clearClientSideAssets().then(() => {
+                                            // Upload the client side assets
+                                            uploadClientSideAssets().then(() => {
+                                                // See if the app was upgraded
+                                                if (appUpgraded) {
+                                                    // See if there is a flow
+                                                    if (AppConfig.Configuration.appFlows && AppConfig.Configuration.appFlows.upgradeApp) {
+                                                        // Execute the flow
+                                                        AppActions.runFlow(DataSource.DocSetItem, AppConfig.Configuration.appFlows.upgradeApp);
+                                                    }
+
+                                                    // Send the notifications
+                                                    AppNotifications.sendAppUpgradedEmail(DataSource.DocSetItem).then(() => {
+                                                        // Archive the app
+                                                        archiveApp();
+                                                    });
+                                                } else {
+                                                    // Archive the app
+                                                    archiveApp();
+                                                }
+
+                                                // Refresh the dashboard
+                                                this.refresh();
+                                            });
+                                        });
                                     },
                                     ex => {
                                         // Log the error
