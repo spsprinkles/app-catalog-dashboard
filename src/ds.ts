@@ -276,10 +276,10 @@ export class DataSource {
                             // Resolve the request
                             resolve({ app, web });
                         },
-                        // App doesn't exist
+                        // App isn't installed on the site
                         () => {
-                            // Reject the request
-                            reject();
+                            // Resolve the request
+                            resolve({ app: null, web });
                         }
                     );
                 },
