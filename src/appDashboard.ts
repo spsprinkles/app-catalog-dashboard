@@ -1,5 +1,5 @@
 import { Documents, LoadingDialog, Modal } from "dattatable";
-import { Components, Helper, Types } from "gd-sprest-bs";
+import { Components, Helper, Types, Web } from "gd-sprest-bs";
 import { caretRightFill } from "gd-sprest-bs/build/icons/svgs/caretRightFill";
 import { folderSymlink } from "gd-sprest-bs/build/icons/svgs/folderSymlink";
 import { layoutTextWindow } from "gd-sprest-bs/build/icons/svgs/layoutTextWindow";
@@ -319,25 +319,31 @@ export class AppDashboard {
                                         }
 
                                         // Clears the client side assets folder
-                                        let clearClientSideAssets = () => {
+                                        let clearClientSideAssets = (): PromiseLike<Types.SP.Folder> => {
                                             // Return a promise
                                             return new Promise(resolve => {
-                                                // Get the client side asset files
-                                                DataSource.DocSetItem.Folder().Folders("ClientSideAssets").Files().execute(files => {
-                                                    // Parse the files
-                                                    Helper.Executor(files.results, file => {
-                                                        // Return a promise
-                                                        return new Promise(resolve => {
-                                                            // Delete the file
-                                                            file.delete().execute(resolve, resolve);
+                                                // Ensure the folder exists
+                                                AppActions.createClientSideAssetsFolder(Web(Strings.SourceUrl).Lists(Strings.Lists.Apps).Items(DataSource.DocSetItemId).Folder()).then(folder => {
+                                                    // Get the client side asset files
+                                                    folder.Files().execute(files => {
+                                                        // Parse the files
+                                                        Helper.Executor(files.results, file => {
+                                                            // Return a promise
+                                                            return new Promise(resolve => {
+                                                                // Delete the file
+                                                                file.delete().execute(resolve, resolve);
+                                                            });
+                                                        }).then(() => {
+                                                            // Resolve the request
+                                                            resolve(folder);
                                                         });
-                                                    }).then(resolve);
+                                                    });
                                                 });
                                             });
                                         }
 
                                         // Uploads the client side assets
-                                        let uploadClientSideAssets = () => {
+                                        let uploadClientSideAssets = (folder: Types.SP.Folder) => {
                                             // Return a promise
                                             return new Promise(resolve => {
                                                 // Parse the assets
@@ -347,7 +353,7 @@ export class AppDashboard {
                                                         // Get the file information
                                                         asset.async("arraybuffer").then(content => {
                                                             // Upload the file
-                                                            DataSource.DocSetItem.Folder().Folders("ClientSideAssets").Files().add(asset.name.replace(/clientsideassets\//i, ''), true, content).execute(resolve, () => {
+                                                            folder.Files().add(asset.name.replace(/clientsideassets\//i, ''), true, content).execute(resolve, () => {
                                                                 // Error uploading the asset
                                                                 ErrorDialog.logError("Error uploading the client side asset file: " + asset.name);
 
@@ -356,14 +362,14 @@ export class AppDashboard {
                                                             });
                                                         });
                                                     });
-                                                })
+                                                }).then(resolve);
                                             });
                                         }
 
                                         // Clear the client side assets
-                                        clearClientSideAssets().then(() => {
+                                        clearClientSideAssets().then(folder => {
                                             // Upload the client side assets
-                                            uploadClientSideAssets().then(() => {
+                                            uploadClientSideAssets(folder).then(() => {
                                                 // See if the app was upgraded
                                                 if (appUpgraded) {
                                                     // See if there is a flow

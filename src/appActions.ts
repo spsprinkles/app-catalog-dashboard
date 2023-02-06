@@ -220,7 +220,7 @@ export class AppActions {
     }
 
     // Creates the archive folder
-    private static createClientSideAssetsFolder(rootFolder: Types.SP.IFolder): PromiseLike<Types.SP.Folder> {
+    static createClientSideAssetsFolder(rootFolder: Types.SP.IFolder): PromiseLike<Types.SP.Folder> {
         // Log
         ErrorDialog.logInfo("Getting the client side assets folder...");
 
