@@ -632,55 +632,47 @@ export class DataSource {
         return new Promise((resolve) => {
             // See if the app catalog is defined
             if (AppConfig.Configuration.appCatalogUrl) {
+                let web = Web(AppConfig.Configuration.appCatalogUrl);
+
                 // Load the available apps
-                Web(AppConfig.Configuration.appCatalogUrl).SiteCollectionAppCatalog().AvailableApps(id).execute(app => {
+                web.SiteCollectionAppCatalog().AvailableApps(id).execute(app => {
                     // Set the app
                     this._docSetSCApp = app;
+                });
 
-                    // Resolve the request
-                    resolve();
-                }, () => {
-                    // Query the app catalog and try to find it by file name
-                    Web(AppConfig.Configuration.appCatalogUrl).Lists("Apps for SharePoint").Items().query({
-                        Expand: ["File"]
-                    }).execute(
-                        // Success
-                        items => {
-                            // Parse the docset items
-                            for (let i = 0; i < this.DocSetFolder.Files.results.length; i++) {
-                                let file = this.DocSetFolder.Files.results[i];
+                // Query the app catalog and try to find it by file name
+                web.Lists("Apps for SharePoint").Items().query({
+                    Expand: ["File"]
+                }).execute(items => {
+                    // Parse the docset items
+                    for (let i = 0; i < this.DocSetFolder.Files.results.length; i++) {
+                        let file = this.DocSetFolder.Files.results[i];
 
-                                // Ensure this is the package file
-                                if (!file.Name.endsWith(".sppkg")) { continue; }
+                        // Ensure this is the package file
+                        if (!file.Name.endsWith(".sppkg")) { continue; }
 
-                                // Parse the items
-                                for (let j = 0; j < items.results.length; j++) {
-                                    let item = items.results[i];
+                        // Parse the items
+                        for (let j = 0; j < items.results.length; j++) {
+                            let item = items.results[j];
 
-                                    // See if the item matches
-                                    if (item.File.Name == file.Name) {
-                                        // Item found
-                                        this._docSetSCAppItem = item as any;
-                                        break;
-                                    }
-                                }
-
-                                // Break from the loop
+                            // See if the item matches
+                            if (item.File.Name == file.Name) {
+                                // Item found
+                                this._docSetSCAppItem = item as any;
                                 break;
                             }
-
-                            // Resolve the request
-                            resolve();
-                        },
-                        // Error
-                        () => {
-                            // App not found, resolve the request
-                            resolve();
                         }
-                    );
-                    // App not found, resolve the request
-                    resolve();
+
+                        // Break from the loop
+                        break;
+                    }
                 });
+
+                // Wait for the requests to complete
+                web.done(resolve);
+            } else {
+                // App catalog url not being used
+                resolve();
             }
         });
     }
