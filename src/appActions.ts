@@ -1057,12 +1057,22 @@ export class AppActions {
                 flowData => {
                     let flowInfo = JSON.parse(flowData.SynchronizationData);
 
+                    // Set the flow authorization url to commercial unless specified by the app configuration
+                    let flowAuthUrl = SPTypes.CloudEnvironment.Flow;
+                    if (AppConfig.Configuration.flowEndpoint) {
+                        // Set the authorization url
+                        flowAuthUrl = SPTypes.CloudEnvironment[AppConfig.Configuration.flowEndpoint] || AppConfig.Configuration.flowEndpoint;
+                    }
+
                     // Get the token
-                    Graph.getAccessToken(SPTypes.CloudEnvironment.Flow).execute(
+                    Graph.getAccessToken(flowAuthUrl).execute(
                         auth => {
+                            // Set the flow url
+                            let flowUrl = flowInfo.properties.flowTriggerUri.split('?')[0] + "?api-version=2016-11-01";
+
                             // Create the request
-                            var xhr = new XMLHttpRequest();
-                            xhr.open("POST", flowInfo.properties.flowTriggerUri, true);
+                            let xhr = new XMLHttpRequest();
+                            xhr.open("POST", flowUrl, true);
 
                             // Set the state change event
                             xhr.onreadystatechange = () => {
@@ -1375,7 +1385,7 @@ export class AppActions {
                                                         // Get the file information
                                                         asset.async("arraybuffer").then(content => {
                                                             // Upload the file
-                                                            clientSideAssetFolder.Files().add(asset.name.replace(/clientsideassets\//i,''), true, content).execute(resolve, () => {
+                                                            clientSideAssetFolder.Files().add(asset.name.replace(/clientsideassets\//i, ''), true, content).execute(resolve, () => {
                                                                 // Error uploading the asset
                                                                 ErrorDialog.logError("Error uploading the client side asset file: " + asset.name);
 
