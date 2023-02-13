@@ -1,4 +1,5 @@
 import { ContextInfo, Types, Web } from "gd-sprest-bs";
+import { AppConfig } from "./appCfg";
 import { ErrorDialog } from "./errorDialog";
 import Strings from "./strings";
 
@@ -227,6 +228,53 @@ export class AppSecurity {
         });
     }
 
+    // Approver Security Group
+    private static _helpdeskGroup: Types.SP.GroupOData = null;
+    static get HelpdeskGroup(): Types.SP.GroupOData { return this._helpdeskGroup; }
+    static get HelpdeskUrl(): string { return ContextInfo.webServerRelativeUrl + "/_layouts/15/people.aspx?MembershipGroupId=" + this._helpdeskGroup.Id; }
+    static get HelpdeskEmails(): string[] {
+        let emails = [];
+
+        // Parse the approvers
+        for (let i = 0; i < this.HelpdeskGroup.Users.results.length; i++) {
+            let email = this.HelpdeskGroup.Users.results[i].Email;
+
+            // Append the email
+            email ? emails.push(email) : null;
+        }
+
+        // Return the emails
+        return emails;
+    }
+    private static loadHelpdeskGroup(): PromiseLike<void> {
+        // Return a promise
+        return new Promise((resolve, reject) => {
+            // Ensure the group name exists
+            if (AppConfig.Configuration.helpdeskGroupName) {
+                // Load the security group
+                Web(Strings.SourceUrl).SiteGroups().getByName(AppConfig.Configuration.helpdeskGroupName).query({
+                    Expand: ["Users"]
+                }).execute(group => {
+                    // Set the group
+                    this._finalApproverGroup = group;
+
+                    // Resolve the request
+                    resolve();
+                }, () => {
+                    // Log
+                    ErrorDialog.logError("[App Security] Error loading the helpdesk group.");
+
+                    // Reject the request
+                    reject();
+                });
+            }
+            else {
+                // Resolve the request
+                resolve();
+            }
+        });
+    }
+
     // Initialization
     static init(appCatalogUrl: string, tenantAppCatalogUrl: string): PromiseLike<void> {
         // Return a promise
@@ -243,6 +291,8 @@ export class AppSecurity {
                 this.loadApproverGroup(),
                 // Load the final approver's group
                 this.loadFinalApproverGroup(),
+                // Load the helpdesk group
+                this.loadHelpdeskGroup(),
                 // Load the developer's group
                 this.loadDevGroup(),
                 // Load the owner's group

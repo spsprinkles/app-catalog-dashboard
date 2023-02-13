@@ -36,6 +36,11 @@ export class AppNotifications {
                 // Return the emails
                 return emails;
 
+            // Helpdesk Group
+            case "HelpdeskGroup":
+                // Return the email
+                return AppSecurity.HelpdeskGroup ? AppSecurity.HelpdeskEmails : [];
+
             // Sponsor
             case "Sponsor":
                 // Return the email
