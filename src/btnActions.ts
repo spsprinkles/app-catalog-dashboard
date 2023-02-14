@@ -562,6 +562,29 @@ ${ContextInfo.userDisplayName}`.trim()
                                     }
                                 });
                             }
+                            // Else, see if the app doesn't exist
+                            else if (webInfo.app == null) {
+                                // Render the update button
+                                tooltips.add({
+                                    content: "App is not installed on the test site. Click to update the test site.",
+                                    btnProps: {
+                                        text: "Update Test Site",
+                                        iconClassName: "me-1",
+                                        iconSize: 20,
+                                        iconType: chatSquareDots,
+                                        isDisabled: !AppSecurity.IsSiteAppCatalogOwner,
+                                        isSmall: true,
+                                        type: Components.ButtonTypes.OutlinePrimary,
+                                        onClick: () => {
+                                            // Show the update form
+                                            this._forms.updateApp(this._item, AppConfig.Configuration.appCatalogUrl, webInfo.web.Url, () => {
+                                                // Call the update event
+                                                this._onUpdate();
+                                            });
+                                        }
+                                    }
+                                });
+                            }
                         },
 
                         // Test site doesn't exist
