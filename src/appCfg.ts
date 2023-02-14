@@ -12,6 +12,7 @@ export interface IConfiguration {
     appNotifications?: IAppNotifications;
     dashboardUrl?: string;
     errorEmails?: string[];
+    flowEndpoint?: string;
     helpdeskGroupName?: string;
     helpPageUrl?: string;
     paging?: number;

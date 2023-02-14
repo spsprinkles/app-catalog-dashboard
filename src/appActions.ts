@@ -1057,45 +1057,85 @@ export class AppActions {
                 flowData => {
                     let flowInfo = JSON.parse(flowData.SynchronizationData);
 
-                    // Get the token
-                    Graph.getAccessToken(SPTypes.CloudEnvironment.Flow).execute(
+                    // Set the flow authorization url to commercial unless specified by the app configuration
+                    let spAuthUrl = SPTypes.CloudEnvironment.Flow;
+                    let flowAuthUrl = SPTypes.CloudEnvironment.FlowAPI;
+                    if (AppConfig.Configuration.flowEndpoint) {
+                        // Set the authorization urls
+                        spAuthUrl = SPTypes.CloudEnvironment[AppConfig.Configuration.flowEndpoint] || AppConfig.Configuration.flowEndpoint;
+                        flowAuthUrl = SPTypes.CloudEnvironment[AppConfig.Configuration.flowEndpoint + "API"] || AppConfig.Configuration.flowEndpoint.replace("service", "api");
+                    }
+
+                    // Get the sp token
+                    Graph.getAccessToken(spAuthUrl).execute(
                         auth => {
-                            // Create the request
-                            var xhr = new XMLHttpRequest();
-                            xhr.open("POST", flowInfo.properties.flowTriggerUri, true);
+                            // Create the request for getting the authentication tokens
+                            let xhrAuthTokens = new XMLHttpRequest();
+                            xhrAuthTokens.open("POST", flowAuthUrl + flowInfo.properties.environment.id + "/users/me/onBehalfOfTokenBundle?api-version=2016-11-01", true);
 
                             // Set the state change event
-                            xhr.onreadystatechange = () => {
+                            xhrAuthTokens.onreadystatechange = () => {
                                 // See if the request has completed
-                                if (xhr.readyState == 4) {
+                                if (xhrAuthTokens.readyState == 4) {
                                     // See if it was successful
-                                    if (xhr.status >= 200 && xhr.status < 300) {
+                                    if (xhrAuthTokens.status >= 200 && xhrAuthTokens.status < 300) {
+                                        // Create the request to trigger the flow
+                                        let xhr = new XMLHttpRequest();
+                                        xhr.open("POST", flowInfo.properties.flowTriggerUri, true);
+
+                                        // Set the state change event
+                                        xhr.onreadystatechange = () => {
+                                            // See if the request has completed
+                                            if (xhr.readyState == 4) {
+                                                // See if it was successful
+                                                if (xhr.status >= 200 && xhr.status < 300) {
+                                                    // Log
+                                                    ErrorDialog.logInfo(`Flow '${flowId} was triggered successfully for item '${item.Title}' with id '${item.Id}'.`);
+                                                } else {
+                                                    // Log
+                                                    ErrorDialog.logError(`Flow '${flowId} was triggered failed for item '${item.Title}' with id '${item.Id}'.`);
+                                                    ErrorDialog.logError(`Flow '${flowId} failed: ${xhr.responseText}`);
+                                                }
+                                            }
+                                        }
+
+                                        // Determine the flow token
+                                        let flowTokens = JSON.parse(xhrAuthTokens.response);
+                                        let flowToken = flowTokens.audienceToToken["https://" + flowInfo.properties.connectionReferences.shared_sharepointonline.swagger.host] || auth.access_token;
+
+                                        // Set the headers
+                                        xhr.setRequestHeader("Accept", "application/json");
+                                        xhr.setRequestHeader("Content-Type", "application/json");
+                                        xhr.setRequestHeader("authorization", "Bearer " + flowToken);
+
+                                        // Execute the request
+                                        xhr.send(JSON.stringify({
+                                            rows: [{
+                                                entity: {
+                                                    ID: item.Id
+                                                }
+                                            }]
+                                        }));
+
                                         // Log
-                                        ErrorDialog.logInfo(`Flow '${flowId} was triggered successfully for item '${item.Title}' with id '${item.Id}'.`);
+                                        ErrorDialog.logInfo(`Flow '${flowId} was triggered for item '${item.Title}' with id '${item.Id}'.`);
                                     } else {
                                         // Log
-                                        ErrorDialog.logError(`Flow '${flowId} was triggered failed for item '${item.Title}' with id '${item.Id}'.`);
-                                        ErrorDialog.logError(`Flow '${flowId} failed: ${xhr.responseText}`);
+                                        ErrorDialog.logError(`Error getting the flow token. ${xhrAuthTokens.responseText}`);
                                     }
                                 }
                             }
 
                             // Set the headers
-                            xhr.setRequestHeader("Accept", "application/json");
-                            xhr.setRequestHeader("Content-Type", "application/json");
-                            xhr.setRequestHeader("authorization", "Bearer " + auth.access_token);
+                            xhrAuthTokens.setRequestHeader("Accept", "application/json");
+                            xhrAuthTokens.setRequestHeader("Content-Type", "application/json");
+                            xhrAuthTokens.setRequestHeader("authorization", "Bearer " + auth.access_token);
 
                             // Execute the request
-                            xhr.send(JSON.stringify({
-                                rows: [{
-                                    entity: {
-                                        ID: item.Id
-                                    }
-                                }]
-                            }));
+                            xhrAuthTokens.send();
 
                             // Log
-                            ErrorDialog.logInfo(`Flow '${flowId} was triggered for item '${item.Title}' with id '${item.Id}'.`);
+                            ErrorDialog.logInfo(`Authentication request for a flow token has been sent.`);
                         },
                         () => {
                             // Log
@@ -1375,7 +1415,7 @@ export class AppActions {
                                                         // Get the file information
                                                         asset.async("arraybuffer").then(content => {
                                                             // Upload the file
-                                                            clientSideAssetFolder.Files().add(asset.name.replace(/clientsideassets\//i,''), true, content).execute(resolve, () => {
+                                                            clientSideAssetFolder.Files().add(asset.name.replace(/clientsideassets\//i, ''), true, content).execute(resolve, () => {
                                                                 // Error uploading the asset
                                                                 ErrorDialog.logError("Error uploading the client side asset file: " + asset.name);
 
