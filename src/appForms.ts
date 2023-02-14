@@ -809,7 +809,7 @@ export class AppForms {
                 ]
             },
             onCreateEditForm: props => {
-                // Update the field
+                // Set the control rendering event
                 props.onControlRendering = (ctrl, field) => {
                     // See if this is a read-only field
                     if (AppReadOnlyFields.indexOf(field.InternalName) >= 0 || AppPackageFields.indexOf(field.InternalName) >= 0 || AppDeploymentFields.indexOf(field.InternalName) >= 0) {
@@ -852,6 +852,128 @@ export class AppForms {
                         (ctrl as Components.IFormControlPropsCheckbox).type = Components.FormControlTypes.Switch;
                     }
                     */
+                }
+
+                // Set the control rendered event
+                props.onControlRendered = (ctrl, field) => {
+                    // See if this is a URL Image or Video field
+                    if (field.InternalName.startsWith("AppImageURL") || field.InternalName == "AppVideoURL") {
+                        let isImage = field.InternalName != "AppVideoURL";
+
+                        // Make this field read-only
+                        ctrl.textbox.elTextbox.readOnly = true;
+
+                        // Set a click event
+                        ctrl.textbox.elTextbox.addEventListener("click", () => {
+                            // Method to upload a file to the docset folder
+                            let uploadFile = (fileName: string, file: Helper.IListFormAttachmentInfo) => {
+                                // Return a promise
+                                return new Promise((resolve, reject) => {
+                                    // Show a loading dialog
+                                    LoadingDialog.setHeader("Uploading File");
+                                    LoadingDialog.setBody("This will close after the file is uploaded");
+                                    LoadingDialog.show();
+
+                                    // Upload the file
+                                    Web(Strings.SourceUrl).Lists(Strings.Lists.Apps).Items(DataSource.DocSetItemId).Folder().Files().add(fileName, true, file.data).execute(
+                                        // Success
+                                        file => {
+                                            // Close the dialog
+                                            LoadingDialog.hide();
+
+                                            // Resolve the request
+                                            resolve(file);
+                                        },
+                                        // Error
+                                        () => {
+                                            // Close the dialog
+                                            LoadingDialog.hide();
+
+                                            // Reject the request
+                                            reject();
+                                        }
+                                    );
+                                });
+                            }
+
+                            // Display a file upload dialog
+                            Helper.ListForm.showFileDialog().then(file => {
+                                // Clear the value
+                                ctrl.textbox.setValue("");
+
+                                // Get the file name
+                                let fileName = file.name.toLowerCase();
+
+                                // Validate the file type
+                                if (isImage) {
+                                    if (fileName.endsWith(".png") || fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") || fileName.endsWith(".gif")) {
+                                        // Upload the file
+                                        let fileInfo = fileName.split('.');
+                                        let dstFileName = "AppImage" + field.InternalName.replace("AppImageURL", '') + "." + fileInfo[fileInfo.length - 1];
+                                        let fileUrl = [DataSource.DocSetFolder.ServerRelativeUrl, dstFileName].join('/');
+                                        uploadFile(dstFileName, file).then(
+                                            () => {
+                                                // Set the value
+                                                ctrl.textbox.setValue(fileUrl);
+
+                                                // Validate the control
+                                                ctrl.updateValidation(ctrl.el, {
+                                                    isValid: true
+                                                });
+                                            },
+                                            // Error
+                                            () => {
+                                                // Display an error message
+                                                ctrl.updateValidation(ctrl.el, {
+                                                    isValid: false,
+                                                    invalidMessage: "Error uploading the file to the app folder. Refresh and try again."
+                                                });
+                                            }
+                                        );
+                                    } else {
+                                        // Display an error message
+                                        ctrl.updateValidation(ctrl.el, {
+                                            isValid: false,
+                                            invalidMessage: "The file must be a valid image file. Valid types: png, jpg, jpeg, gif"
+                                        });
+                                    }
+                                } else {
+                                    // Else, ensure it's a video
+                                    if (fileName.endsWith(".mpg") || fileName.endsWith(".mpeg") || fileName.endsWith(".avi") || fileName.endsWith(".mp4")) {
+                                        // Upload the file
+                                        let fileInfo = fileName.split('.');
+                                        let dstFileName = "AppVideo" + "." + fileInfo[fileInfo.length - 1];
+                                        let fileUrl = [DataSource.DocSetFolder.ServerRelativeUrl, dstFileName].join('/');
+                                        uploadFile(dstFileName, file).then(
+                                            () => {
+                                                // Set the value
+                                                ctrl.textbox.setValue(fileUrl);
+
+                                                // Validate the control
+                                                ctrl.updateValidation(ctrl.el, {
+                                                    isValid: true
+                                                });
+                                            },
+                                            // Error
+                                            () => {
+                                                // Display an error message
+                                                ctrl.updateValidation(ctrl.el, {
+                                                    isValid: false,
+                                                    invalidMessage: "Error uploading the file to the app folder. Refresh and try again."
+                                                });
+                                            }
+                                        );
+                                    } else {
+                                        // Display an error message
+                                        ctrl.updateValidation(ctrl.el, {
+                                            isValid: false,
+                                            invalidMessage: "The file must be a valid video file. Valid types: mpg, mpeg, avi, mp4"
+                                        });
+                                    }
+                                }
+                            });
+                        });
+                    }
                 }
 
                 // Return the properties
