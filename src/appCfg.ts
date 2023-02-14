@@ -13,6 +13,7 @@ export interface IConfiguration {
     dashboardUrl?: string;
     errorEmails?: string[];
     flowEndpoint?: string;
+    helpdeskGroupName?: string;
     helpPageUrl?: string;
     paging?: number;
     templatesLibraryUrl?: string;

@@ -30,6 +30,7 @@ The [configuration file](https://github.com/spsprinkles/app-catalog-dashboard/ra
 | appNotifications | The ability to send notifications based on app actions. |
 | flowEndpoint | The flow authorization endpoint to use when triggering a flow. This is will default to commercial unless specified. Possible values: Flow, FlowChina, FlowDoD, FlowGov, FlowHigh, FlowUSNat, FlowUSSec or the url to the flow authorization endpoint. |
 | errorEmails | An array of email addresses to send to when a user has an error when using the application. This will help with troubleshooting issues in production. |
+| helpdeskGroupName | The site group name to use to send notifications to the `HelpdeskGroup` users. |
 | paging | The default # of apps to display on the dashboard. Valid values are `10, 25, 50, 100`. |
 | userAgreement | The user agreement displayed to the developers adding packages. |
 
@@ -150,6 +151,7 @@ The available values for the user type property values.
 | Developers | The developers of the application. _Linked to the AppOwners metadata field._ |
 | DevelopersGroup | A reference to the developer's security group. |
 | FinalApproversGroup | A reference to the final approver's security group. |
+| HelpdeskGroup | A reference to the configuration's helpdesk group. _This will require the helpdeskGroupName configuration setting to be set._ |
 | Sponsor | The sponsor of the application. _Linked to the AppSponsor metadata field._ |
 | SponsorsGroup | A reference to the sponsor's security group. |
 
