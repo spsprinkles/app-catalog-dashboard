@@ -82,72 +82,77 @@ export class AppForms {
                     // Close the modal
                     Modal.hide();
 
-                    // See if the tech review is valid
-                    this.isValidTechReview(item, status).then(isValid => {
+                    // Ensure the metadata is complete
+                    this.isMetadataComplete(item).then(isValid => {
                         // Ensure it's valid
-                        if (isValid) {
+                        if (!isValid) { return; }
+
+                        // See if the tech review is valid
+                        this.isValidTechReview(item, status).then(isValid => {
+                            // Ensure it's valid
+                            if (!isValid) { return; }
+
                             // See if the test cases are valid
                             this.isValidTestCases(item, status).then(isValid => {
                                 // Ensure it's valid
-                                if (isValid) {
-                                    // Show a loading dialog
-                                    LoadingDialog.setHeader("Updating the Status");
-                                    LoadingDialog.setBody("This dialog will close after the status is updated.");
-                                    LoadingDialog.show();
+                                if (!isValid) { return; }
 
-                                    // Update the item
-                                    item.update({
-                                        AppStatus: status.nextStep
-                                    }).execute(
-                                        () => {
-                                            // Close the dialog
-                                            LoadingDialog.hide();
+                                // Show a loading dialog
+                                LoadingDialog.setHeader("Updating the Status");
+                                LoadingDialog.setBody("This dialog will close after the status is updated.");
+                                LoadingDialog.show();
 
-                                            // Run the flow associated for this status
-                                            AppActions.runFlow(item, status.flowId);
+                                // Update the item
+                                item.update({
+                                    AppStatus: status.nextStep
+                                }).execute(
+                                    () => {
+                                        // Close the dialog
+                                        LoadingDialog.hide();
 
-                                            // Send the notifications
-                                            AppNotifications.sendEmail(status.notification, item).then(() => {
-                                                // See if the test app catalog exists and we are creating the test site
-                                                if (DataSource.SiteCollectionAppCatalogExists && status.createTestSite) {
-                                                    // Load the test site
-                                                    DataSource.loadTestSite(item).then(
-                                                        // Exists
-                                                        webInfo => {
-                                                            // See if the current version is deployed
-                                                            if (item.AppVersion == webInfo.app.InstalledVersion && !webInfo.app.SkipDeploymentFeature) {
+                                        // Run the flow associated for this status
+                                        AppActions.runFlow(item, status.flowId);
+
+                                        // Send the notifications
+                                        AppNotifications.sendEmail(status.notification, item).then(() => {
+                                            // See if the test app catalog exists and we are creating the test site
+                                            if (DataSource.SiteCollectionAppCatalogExists && status.createTestSite) {
+                                                // Load the test site
+                                                DataSource.loadTestSite(item).then(
+                                                    // Exists
+                                                    webInfo => {
+                                                        // See if the current version is deployed
+                                                        if (item.AppVersion == webInfo.app.InstalledVersion && !webInfo.app.SkipDeploymentFeature) {
+                                                            // Call the update event
+                                                            onUpdate();
+                                                        } else {
+                                                            // Update the app
+                                                            AppActions.updateApp(item, webInfo.web.ServerRelativeUrl, true, onUpdate).then(() => {
                                                                 // Call the update event
                                                                 onUpdate();
-                                                            } else {
-                                                                // Update the app
-                                                                AppActions.updateApp(item, webInfo.web.ServerRelativeUrl, true, onUpdate).then(() => {
-                                                                    // Call the update event
-                                                                    onUpdate();
-                                                                });
-                                                            }
-                                                        },
-
-                                                        // Doesn't exist
-                                                        () => {
-                                                            // Create the test site
-                                                            AppActions.createTestSite(item, onUpdate);
+                                                            });
                                                         }
-                                                    );
-                                                } else {
-                                                    // Call the update event
-                                                    onUpdate();
-                                                }
-                                            },
-                                                ex => {
-                                                    // Log the error
-                                                    ErrorDialog.show("Updating Status", "There was an error updating the status.", ex);
-                                                }
-                                            );
-                                        });
+                                                    },
 
-                                }
+                                                    // Doesn't exist
+                                                    () => {
+                                                        // Create the test site
+                                                        AppActions.createTestSite(item, onUpdate);
+                                                    }
+                                                );
+                                            } else {
+                                                // Call the update event
+                                                onUpdate();
+                                            }
+                                        },
+                                            ex => {
+                                                // Log the error
+                                                ErrorDialog.show("Updating Status", "There was an error updating the status.", ex);
+                                            }
+                                        );
+                                    });
                             });
-                        }
+                        });
                     });
                 }
             }
@@ -1295,6 +1300,55 @@ export class AppForms {
         });
     }
 
+    // Method to determine if the required metadata has been completed
+    private isMetadataComplete(item: IAppItem): PromiseLike<boolean> {
+        // Return a promise
+        return new Promise(resolve => {
+            let isValid = true;
+
+            // Show a loading dialog
+            LoadingDialog.setHeader("Validating the Metadata");
+            LoadingDialog.setBody("This dialog will close after the validation completes.");
+            LoadingDialog.show();
+
+            // Parse the fields
+            for (let fieldName in DataSource.DocSetInfo.fields) {
+                let field = DataSource.DocSetInfo.fields[fieldName];
+
+                // See if this is a required field
+                if (field.Required) {
+                    // Ensure a value exists
+                    if (item[fieldName]) { continue; }
+
+                    // Set the flag and break from the loop
+                    isValid = false;
+                    break;
+                }
+            }
+
+            // Hide the dialog
+            LoadingDialog.hide();
+
+            // See if it's not valid
+            if (!isValid) {
+                // Clear the modal
+                Modal.clear();
+
+                // Set the header
+                Modal.setHeader("Error");
+
+                // Set the body
+                Modal.setBody("The metadata hasn't been completed for this app. Please update it and complete the required information.");
+
+                // Show the dialog
+                Modal.show();
+            }
+
+            // Resolve the request
+            resolve(isValid);
+        });
+    }
+
     // Method to determine if the tech review is valid
     private isValidTechReview(item: IAppItem, status: IStatus): PromiseLike<boolean> {
         // Return a promise
@@ -1352,11 +1406,8 @@ export class AppForms {
                             // Set the body
                             Modal.setBody("The technical review is not valid. Please review it and try your request again.");
 
-                            // Wait for the loading dialog to complete it's closing event
-                            setTimeout(() => {
-                                // Show the dialog
-                                Modal.show();
-                            }, 250)
+                            // Show the dialog
+                            Modal.show();
                         }
 
                         // Resolve the request
@@ -1374,11 +1425,8 @@ export class AppForms {
                         // Set the body
                         Modal.setBody("No technical review exists for this application.");
 
-                        // Wait for the loading dialog to complete it's closing event
-                        setTimeout(() => {
-                            // Show the dialog
-                            Modal.show();
-                        }, 250)
+                        // Show the dialog
+                        Modal.show();
 
                         // Not valid
                         resolve(false);
@@ -1448,11 +1496,8 @@ export class AppForms {
                             // Set the body
                             Modal.setBody("The test cases are not valid. Please review them and try your request again.");
 
-                            // Wait for the loading dialog to complete it's closing event
-                            setTimeout(() => {
-                                // Show the dialog
-                                Modal.show();
-                            }, 250)
+                            // Show the dialog
+                            Modal.show();
                         }
 
                         // Resolve the request
@@ -1470,11 +1515,8 @@ export class AppForms {
                         // Set the body
                         Modal.setBody("No test cases were found for this application.");
 
-                        // Wait for the loading dialog to complete it's closing event
-                        setTimeout(() => {
-                            // Show the dialog
-                            Modal.show();
-                        }, 250)
+                        // Show the dialog
+                        Modal.show();
 
                         // Not valid
                         resolve(false);
@@ -1847,63 +1889,69 @@ export class AppForms {
                 // Close the modal
                 Modal.hide();
 
-                // See if the tech review is valid
-                this.isValidTechReview(item, status).then(isValid => {
+                // Ensure the metadata is complete
+                this.isMetadataComplete(item).then(isValid => {
                     // Ensure it's valid
-                    if (isValid) {
+                    if (!isValid) { return; }
+
+                    // See if the tech review is valid
+                    this.isValidTechReview(item, status).then(isValid => {
+                        // Ensure it's valid
+                        if (!isValid) { return; }
+
                         // See if the test cases are valid
                         this.isValidTestCases(item, status).then(isValid => {
                             // Ensure it's valid
-                            if (isValid) {
-                                // Show a loading dialog
-                                LoadingDialog.setHeader("Updating App Submission");
-                                LoadingDialog.setBody("This dialog will close after the app submission is completed.");
-                                LoadingDialog.show();
+                            if (!isValid) { return; }
 
-                                // Update the status
-                                let status = AppConfig.Status[item.AppStatus];
-                                let newStatus = status ? status.nextStep : AppConfig.Status[0].name;
-                                item.update({
-                                    AppIsRejected: false,
-                                    AppStatus: item.AppIsRejected ? item.AppStatus : newStatus
-                                }).execute(() => {
-                                    // Code to run after the sponsor is added to the security group
-                                    let onComplete = () => {
-                                        // Run the flow associated for this status
-                                        AppActions.runFlow(item, status.flowId);
+                            // Show a loading dialog
+                            LoadingDialog.setHeader("Updating App Submission");
+                            LoadingDialog.setBody("This dialog will close after the app submission is completed.");
+                            LoadingDialog.show();
 
-                                        // Send the notifications
-                                        AppNotifications.sendEmail(status.notification, item, false).then(() => {
-                                            // Call the update event
-                                            onUpdate();
+                            // Update the status
+                            let status = AppConfig.Status[item.AppStatus];
+                            let newStatus = status ? status.nextStep : AppConfig.Status[0].name;
+                            item.update({
+                                AppIsRejected: false,
+                                AppStatus: item.AppIsRejected ? item.AppStatus : newStatus
+                            }).execute(() => {
+                                // Code to run after the sponsor is added to the security group
+                                let onComplete = () => {
+                                    // Run the flow associated for this status
+                                    AppActions.runFlow(item, status.flowId);
 
-                                            // Hide the dialog
-                                            LoadingDialog.hide();
-                                        });
-                                    }
+                                    // Send the notifications
+                                    AppNotifications.sendEmail(status.notification, item, false).then(() => {
+                                        // Call the update event
+                                        onUpdate();
 
+                                        // Hide the dialog
+                                        LoadingDialog.hide();
+                                    });
+                                }
+
+                                // Log
+                                ErrorDialog.logInfo(`Validating the app sponsor id: '${item.AppSponsorId}'`);
+
+                                // Get the sponsor
+                                let sponsor = AppSecurity.getSponsor(item.AppSponsorId);
+                                if (sponsor == null && item.AppSponsorId > 0) {
                                     // Log
-                                    ErrorDialog.logInfo(`Validating the app sponsor id: '${item.AppSponsorId}'`);
+                                    ErrorDialog.logInfo(`App sponsor not in group. Adding the user...`);
 
-                                    // Get the sponsor
-                                    let sponsor = AppSecurity.getSponsor(item.AppSponsorId);
-                                    if (sponsor == null && item.AppSponsorId > 0) {
-                                        // Log
-                                        ErrorDialog.logInfo(`App sponsor not in group. Adding the user...`);
-
-                                        // Add the sponsor to the group
-                                        AppSecurity.addSponsor(item.AppSponsorId).then(() => {
-                                            // Complete the request
-                                            onComplete();
-                                        });
-                                    } else {
+                                    // Add the sponsor to the group
+                                    AppSecurity.addSponsor(item.AppSponsorId).then(() => {
                                         // Complete the request
                                         onComplete();
-                                    }
-                                });
-                            }
+                                    });
+                                } else {
+                                    // Complete the request
+                                    onComplete();
+                                }
+                            });
                         });
-                    }
+                    });
                 });
             }
         }).el);
