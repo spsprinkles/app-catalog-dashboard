@@ -294,81 +294,82 @@ export class ButtonActions {
 
                 // Deploy Tenant Catalog
                 case "DeployTenantCatalog":
-                    // See if the app is deployed
-                    if (DataSource.DocSetTenantApp && DataSource.DocSetTenantApp.Deployed) {
-                        // Render the retract button
-                        tooltips.add({
-                            content: "Retracts the solution from the tenant app catalog.",
-                            btnProps: {
-                                text: "Retract from Tenant",
-                                iconClassName: "me-1",
-                                iconSize: 20,
-                                //iconType: trash,
-                                isDisabled: AppSecurity.IsTenantAppCatalogOwner,
-                                isSmall: true,
-                                type: Components.ButtonTypes.OutlineDanger,
-                                onClick: () => {
-                                    // Retract the app
-                                    this._forms.retractFromTenant(this._item, () => {
-                                        // Call the update event
-                                        this._onUpdate();
-                                    });
-                                }
-                            }
-                        });
-
-                        // Load the context of the app catalog
-                        ContextInfo.getWeb(AppConfig.Configuration.tenantAppCatalogUrl).execute(context => {
-                            let requestDigest = context.GetContextWebInformation.FormDigestValue;
-                            let web = Web(AppConfig.Configuration.tenantAppCatalogUrl, { requestDigest });
-
-                            // Ensure this app can be deployed to the tenant
-                            web.TenantAppCatalog().solutionContainsTeamsComponent(DataSource.DocSetTenantApp.ID).execute((resp: any) => {
-                                // See if we can deploy this app to teams
-                                if (resp.SolutionContainsTeamsComponent) {
-                                    // Render the deploy to teams button
-                                    tooltips.add({
-                                        content: "Deploys the solution to Teams.",
-                                        btnProps: {
-                                            text: "Deploy to Teams",
-                                            iconClassName: "me-1",
-                                            iconSize: 20,
-                                            //iconType: trash,
-                                            isDisabled: AppSecurity.IsTenantAppCatalogOwner,
-                                            isSmall: true,
-                                            type: Components.ButtonTypes.OutlineWarning,
-                                            onClick: () => {
-                                                // Deploy the app
-                                                this._forms.deployToTeams(this._item, () => {
-                                                    // Call the update event
-                                                    this._onUpdate();
-                                                });
-                                            }
-                                        }
-                                    });
+                    // Ensure this is a tenant app catalog owner
+                    if (AppSecurity.IsTenantAppCatalogOwner) {
+                        // See if the app is deployed
+                        if (DataSource.DocSetTenantApp && DataSource.DocSetTenantApp.Deployed) {
+                            // Render the retract button
+                            tooltips.add({
+                                content: "Retracts the solution from the tenant app catalog.",
+                                btnProps: {
+                                    text: "Retract from Tenant",
+                                    iconClassName: "me-1",
+                                    iconSize: 20,
+                                    isSmall: true,
+                                    type: Components.ButtonTypes.OutlineDanger,
+                                    onClick: () => {
+                                        // Retract the app
+                                        this._forms.retractFromTenant(this._item, () => {
+                                            // Call the update event
+                                            this._onUpdate();
+                                        });
+                                    }
                                 }
                             });
-                        });
-                    } else {
-                        // Render the deploy button
-                        tooltips.add({
-                            content: "Deploys the application to the tenant app catalog.",
-                            btnProps: {
-                                text: "Deploy to Tenant",
-                                iconClassName: "me-1",
-                                iconSize: 20,
-                                //iconType: trash,
-                                isSmall: true,
-                                type: Components.ButtonTypes.OutlineSuccess,
-                                onClick: () => {
-                                    // Deploy the app
-                                    this._forms.deploy(this._item, true, () => {
-                                        // Call the update event
-                                        this._onUpdate();
-                                    });
+
+                            // Load the context of the app catalog
+                            ContextInfo.getWeb(AppConfig.Configuration.tenantAppCatalogUrl).execute(context => {
+                                let requestDigest = context.GetContextWebInformation.FormDigestValue;
+                                let web = Web(AppConfig.Configuration.tenantAppCatalogUrl, { requestDigest });
+
+                                // Ensure this app can be deployed to the tenant
+                                web.TenantAppCatalog().solutionContainsTeamsComponent(DataSource.DocSetTenantApp.ID).execute((resp: any) => {
+                                    // See if we can deploy this app to teams
+                                    if (resp.SolutionContainsTeamsComponent) {
+                                        // Render the deploy to teams button
+                                        tooltips.add({
+                                            content: "Deploys the solution to Teams.",
+                                            btnProps: {
+                                                text: "Deploy to Teams",
+                                                iconClassName: "me-1",
+                                                iconSize: 20,
+                                                //iconType: trash,
+                                                isDisabled: AppSecurity.IsTenantAppCatalogOwner,
+                                                isSmall: true,
+                                                type: Components.ButtonTypes.OutlineWarning,
+                                                onClick: () => {
+                                                    // Deploy the app
+                                                    this._forms.deployToTeams(this._item, () => {
+                                                        // Call the update event
+                                                        this._onUpdate();
+                                                    });
+                                                }
+                                            }
+                                        });
+                                    }
+                                });
+                            });
+                        } else {
+                            // Render the deploy button
+                            tooltips.add({
+                                content: "Deploys the application to the tenant app catalog.",
+                                btnProps: {
+                                    text: "Deploy to Tenant",
+                                    iconClassName: "me-1",
+                                    iconSize: 20,
+                                    //iconType: trash,
+                                    isSmall: true,
+                                    type: Components.ButtonTypes.OutlineSuccess,
+                                    onClick: () => {
+                                        // Deploy the app
+                                        this._forms.deploy(this._item, true, () => {
+                                            // Call the update event
+                                            this._onUpdate();
+                                        });
+                                    }
                                 }
-                            }
-                        });
+                            });
+                        }
                     }
                     break;
 
