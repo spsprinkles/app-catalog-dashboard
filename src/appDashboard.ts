@@ -1,17 +1,15 @@
-import { Documents, LoadingDialog, Modal } from "dattatable";
-import { Components, Helper, Types, Web } from "gd-sprest-bs";
+import { Documents, LoadingDialog } from "dattatable";
+import { Components, Types } from "gd-sprest-bs";
 import { caretRightFill } from "gd-sprest-bs/build/icons/svgs/caretRightFill";
 import { folderSymlink } from "gd-sprest-bs/build/icons/svgs/folderSymlink";
 import { layoutTextWindow } from "gd-sprest-bs/build/icons/svgs/layoutTextWindow";
 import { questionLg } from "gd-sprest-bs/build/icons/svgs/questionLg";
 import { AppActions } from "./appActions";
 import { AppConfig } from "./appCfg";
-import { AppNotifications } from "./appNotifications";
 import { AppView } from "./appView";
 import { ButtonActions } from "./btnActions";
 import * as Common from "./common";
 import { DataSource } from "./ds";
-import { ErrorDialog } from "./errorDialog";
 import Strings from "./strings";
 
 /**
@@ -19,12 +17,14 @@ import Strings from "./strings";
  * Gives a more detailed overview of the application.
  */
 export class AppDashboard {
+    private _docSetId: number = null;
     private _el: HTMLElement = null;
     private _elDashboard: HTMLElement = null;
 
     // Constructor
     constructor(el: HTMLElement, elDashboard?: HTMLElement, docSetId?: number) {
-        // Initialize the component
+        // Save the properties
+        this._docSetId = docSetId || DataSource.DocSetItemId;
         this._el = el;
         this._elDashboard = elDashboard;
 
@@ -54,7 +54,7 @@ export class AppDashboard {
         this.renderActions();
 
         // Render the documents
-        this.renderDocuments(docSetId);
+        this.renderDocuments();
     }
 
     // Redirects to the dashboard
@@ -121,6 +121,9 @@ export class AppDashboard {
 
             // Render the actions
             this.renderActions();
+
+            // Render the documents
+            this.renderDocuments();
 
             // Hide the dialog
             LoadingDialog.hide();
@@ -226,12 +229,16 @@ export class AppDashboard {
     }
 
     // Renders the documents
-    private renderDocuments(docSetId: number = DataSource.DocSetItemId) {
+    private renderDocuments() {
+        // Clear the docs element
+        let elDocs = this._el.querySelector("#app-docs") as HTMLElement;
+        while (elDocs.firstChild) { elDocs.removeChild(elDocs.firstChild); }
+
         // Render the documents
         new Documents({
-            el: this._el.querySelector("#app-docs"),
+            el: elDocs,
             listName: Strings.Lists.Apps,
-            docSetId,
+            docSetId: this._docSetId,
             templatesUrl: AppConfig.Configuration.templatesLibraryUrl,
             webUrl: Strings.SourceUrl,
             onActionsRendered: (el, col, file) => {
@@ -250,156 +257,11 @@ export class AppDashboard {
                 return new Promise(resolve => {
                     // See if this is an spfx package
                     if (fileInfo.name.toLowerCase().endsWith(".sppkg")) {
-                        // See if the app isn't approved or requires an assessment
-                        if ([AppConfig.ApprovedStatus, AppConfig.TechReviewStatus, AppConfig.TestCasesStatus].indexOf(DataSource.DocSetItem.AppStatus) < 0) {
-                            // Add the file
-                            resolve(true);
-                            return;
-                        }
-
-                        // Read the package
-                        AppActions.readPackage(fileInfo.data).then(pkgInfo => {
-                            let errorMessage = null;
-                            let appUpgraded = false;
-
-                            // Deny if the product id doesn't match
-                            if (pkgInfo.item.AppProductID != DataSource.DocSetItem.AppProductID) {
-                                // Set the error message
-                                errorMessage = "The app's product id doesn't match the current one.";
-                            }
-                            // Else, deny if the version is less than the current
-                            else if (pkgInfo.item.AppVersion != DataSource.DocSetItem.AppVersion) {
-                                // Compare the values
-                                let appVersion = DataSource.DocSetItem.AppVersion.split('.');
-                                let newAppVersion = pkgInfo.item.AppVersion.split('.');
-
-                                // See if the new version is greater
-                                for (let i = 0; i < appVersion.length; i++) {
-                                    // See if this version is not greater than
-                                    if (newAppVersion[0] < appVersion[0]) {
-                                        // Set the error message
-                                        errorMessage = "The app's version is less than the current one."
-                                        break;
-                                    }
-                                }
-
-                                // Set the flag
-                                appUpgraded = errorMessage ? false : true;
-                            }
-
-                            // See if an error message exists
-                            if (errorMessage) {
-                                // Deny the file upload
-                                resolve(false);
-
-                                // Log the error
-                                ErrorDialog.show("Uploading Package", "<p>The app package being uploaded has been denied for the following reason:</p><br/>" + errorMessage);
-
-                                // Show the modal
-                                Modal.show();
-                            } else {
-                                // Update the status and set it back to the testing status
-                                let itemInfo = pkgInfo.item;
-                                itemInfo.AppStatus = AppConfig.TestCasesStatus;
-                                DataSource.DocSetItem.update(itemInfo).execute(
-                                    () => {
-                                        // Archives the current app
-                                        let archiveApp = () => {
-                                            // See if the item is currently approved
-                                            if (DataSource.DocSetItem.AppStatus == AppConfig.ApprovedStatus) {
-                                                // Archive the file
-                                                AppActions.archivePackage(DataSource.DocSetItem, () => {
-                                                    // Add the file
-                                                    resolve(true);
-                                                });
-                                            } else {
-                                                // Add the file
-                                                resolve(true);
-                                            }
-                                        }
-
-                                        // Clears the client side assets folder
-                                        let clearClientSideAssets = (): PromiseLike<Types.SP.Folder> => {
-                                            // Return a promise
-                                            return new Promise(resolve => {
-                                                // Ensure the folder exists
-                                                AppActions.createClientSideAssetsFolder(Web(Strings.SourceUrl).Lists(Strings.Lists.Apps).Items(DataSource.DocSetItemId).Folder()).then(folder => {
-                                                    // Get the client side asset files
-                                                    folder.Files().execute(files => {
-                                                        // Parse the files
-                                                        Helper.Executor(files.results, file => {
-                                                            // Return a promise
-                                                            return new Promise(resolve => {
-                                                                // Delete the file
-                                                                file.delete().execute(resolve, resolve);
-                                                            });
-                                                        }).then(() => {
-                                                            // Resolve the request
-                                                            resolve(folder);
-                                                        });
-                                                    });
-                                                });
-                                            });
-                                        }
-
-                                        // Uploads the client side assets
-                                        let uploadClientSideAssets = (folder: Types.SP.Folder) => {
-                                            // Return a promise
-                                            return new Promise(resolve => {
-                                                // Parse the assets
-                                                Helper.Executor(pkgInfo.assets, asset => {
-                                                    // Return a promise
-                                                    return new Promise((resolve) => {
-                                                        // Get the file information
-                                                        asset.async("arraybuffer").then(content => {
-                                                            // Upload the file
-                                                            folder.Files().add(asset.name.replace(/clientsideassets\//i, ''), true, content).execute(resolve, () => {
-                                                                // Error uploading the asset
-                                                                ErrorDialog.logError("Error uploading the client side asset file: " + asset.name);
-
-                                                                // Upload the next file
-                                                                resolve(null);
-                                                            });
-                                                        });
-                                                    });
-                                                }).then(resolve);
-                                            });
-                                        }
-
-                                        // Clear the client side assets
-                                        clearClientSideAssets().then(folder => {
-                                            // Upload the client side assets
-                                            uploadClientSideAssets(folder).then(() => {
-                                                // See if the app was upgraded
-                                                if (appUpgraded) {
-                                                    // See if there is a flow
-                                                    if (AppConfig.Configuration.appFlows && AppConfig.Configuration.appFlows.upgradeApp) {
-                                                        // Execute the flow
-                                                        AppActions.runFlow(DataSource.DocSetItem, AppConfig.Configuration.appFlows.upgradeApp);
-                                                    }
-
-                                                    // Send the notifications
-                                                    AppNotifications.sendAppUpgradedEmail(DataSource.DocSetItem).then(() => {
-                                                        // Archive the app
-                                                        archiveApp();
-                                                    });
-                                                } else {
-                                                    // Archive the app
-                                                    archiveApp();
-                                                }
-
-                                                // Refresh the dashboard
-                                                this.refresh();
-                                            });
-                                        });
-                                    },
-                                    ex => {
-                                        // Log the error
-                                        ErrorDialog.show("Updating Package", "There was an error updating the package.", ex);
-                                    }
-                                );
-                            }
-                        });
+                        // Upgrade the app
+                        AppActions.uploadAppPackage(fileInfo).then(() => {
+                            // Refresh the dashboard
+                            this.refresh();
+                        })
                     } else {
                         // Resolve the request
                         resolve(true);

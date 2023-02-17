@@ -1519,4 +1519,178 @@ export class AppActions {
             }
         });
     }
+
+    // Method to upload an app package
+    static uploadAppPackage(fileInfo: Helper.IListFormAttachmentInfo) {
+        // Return a promise
+        return new Promise((resolve, reject) => {
+            // Display a loading dialog
+            LoadingDialog.setHeader("Uploading New App Package");
+            LoadingDialog.setBody("Validating the package...");
+            LoadingDialog.show();
+
+            // Read the package
+            AppActions.readPackage(fileInfo.data).then(pkgInfo => {
+                let errorMessage = null;
+                let appUpgraded = false;
+
+                // Deny if the product id doesn't match
+                if (pkgInfo.item.AppProductID != DataSource.DocSetItem.AppProductID) {
+                    // Set the error message
+                    errorMessage = "The app's product id doesn't match the current one.";
+                }
+                // Else, deny if the version is less than the current
+                else if (pkgInfo.item.AppVersion != DataSource.DocSetItem.AppVersion) {
+                    // Compare the values
+                    let appVersion = DataSource.DocSetItem.AppVersion.split('.');
+                    let newAppVersion = pkgInfo.item.AppVersion.split('.');
+
+                    // See if the new version is greater
+                    for (let i = 0; i < appVersion.length; i++) {
+                        // See if this version is not greater than
+                        if (newAppVersion[0] < appVersion[0]) {
+                            // Set the error message
+                            errorMessage = "The app's version is less than the current one."
+                            break;
+                        }
+                    }
+
+                    // Set the flag
+                    appUpgraded = errorMessage ? false : true;
+                }
+
+                // See if an error message exists
+                if (errorMessage) {
+                    // Deny the file upload
+                    resolve(false);
+
+                    // Log the error
+                    ErrorDialog.show("Uploading Package", "<p>The app package being uploaded has been denied for the following reason:</p><br/>" + errorMessage);
+
+                    // Show the modal
+                    Modal.show();
+                } else {
+                    // Clears the client side assets folder
+                    let clearClientSideAssets = (): PromiseLike<Types.SP.Folder> => {
+                        // Update the loading dialog
+                        LoadingDialog.setBody("Clearing the Associated Client Side Assets");
+
+                        // Return a promise
+                        return new Promise(resolve => {
+                            // Ensure the folder exists
+                            AppActions.createClientSideAssetsFolder(Web(Strings.SourceUrl).Lists(Strings.Lists.Apps).Items(DataSource.DocSetItemId).Folder()).then(folder => {
+                                // Get the client side asset files
+                                folder.Files().execute(files => {
+                                    // Parse the files
+                                    Helper.Executor(files.results, file => {
+                                        // Return a promise
+                                        return new Promise(resolve => {
+                                            // Delete the file
+                                            file.delete().execute(resolve, resolve);
+                                        });
+                                    }).then(() => {
+                                        // Resolve the request
+                                        resolve(folder);
+                                    });
+                                });
+                            });
+                        });
+                    }
+
+                    // Uploads the client side assets
+                    let uploadClientSideAssets = (folder: Types.SP.Folder) => {
+                        // Update the loading dialog
+                        LoadingDialog.setBody("Uploading the Associated Client Side Assets");
+
+                        // Return a promise
+                        return new Promise(resolve => {
+                            // Parse the assets
+                            Helper.Executor(pkgInfo.assets, asset => {
+                                // Return a promise
+                                return new Promise((resolve) => {
+                                    // Get the file information
+                                    asset.async("arraybuffer").then(content => {
+                                        // Upload the file
+                                        folder.Files().add(asset.name.replace(/clientsideassets\//i, ''), true, content).execute(resolve, () => {
+                                            // Error uploading the asset
+                                            ErrorDialog.logError("Error uploading the client side asset file: " + asset.name);
+
+                                            // Upload the next file
+                                            resolve(null);
+                                        });
+                                    });
+                                });
+                            }).then(resolve);
+                        });
+                    }
+
+                    // Updates the status
+                    let updateStatus = (): PromiseLike<void> => {
+                        // Update the loading dialog
+                        LoadingDialog.setBody("Updating the Status");
+
+                        // Return a promise
+                        return new Promise((resolve, reject) => {
+                            let itemInfo = pkgInfo.item;
+
+                            // See if the status is after the test case status
+                            let status = AppConfig.Status[DataSource.DocSetItem.AppStatus];
+                            if (status.stepNumber > AppConfig.Status[AppConfig.TestCasesStatus].stepNumber) {
+                                // Revert the status back to the testing status
+                                itemInfo.AppStatus = AppConfig.TestCasesStatus;
+                            } else {
+                                // Default to the current status
+                                itemInfo.AppStatus = DataSource.DocSetItem.AppStatus;
+                            }
+
+                            // Update the app information
+                            DataSource.DocSetItem.update(itemInfo).execute(
+                                () => {
+                                    // Resolve the request
+                                    resolve();
+                                },
+                                ex => {
+                                    // Log the error
+                                    ErrorDialog.show("Updating Package", "There was an error updating the package.", ex);
+
+                                    // Reject the request
+                                    reject();
+                                }
+                            );
+                        });
+                    }
+
+                    // Archive the file
+                    AppActions.archivePackage(DataSource.DocSetItem, () => {
+                        // Update the status
+                        updateStatus().then(() => {
+                            // Clear the client side assets
+                            clearClientSideAssets().then(folder => {
+                                // Upload the client side assets
+                                uploadClientSideAssets(folder).then(() => {
+                                    // See if the app was upgraded
+                                    if (appUpgraded) {
+                                        // See if there is a flow
+                                        if (AppConfig.Configuration.appFlows && AppConfig.Configuration.appFlows.upgradeApp) {
+                                            // Execute the flow
+                                            AppActions.runFlow(DataSource.DocSetItem, AppConfig.Configuration.appFlows.upgradeApp);
+                                        }
+
+                                        // Send the notifications
+                                        AppNotifications.sendAppUpgradedEmail(DataSource.DocSetItem).then(() => {
+                                            // Resolve the request
+                                            resolve(true);
+                                        });
+                                    } else {
+                                        // Resolve the request
+                                        resolve(true);
+                                    }
+                                });
+                            });
+                        });
+                    });
+                }
+            });
+        });
+    }
 }
