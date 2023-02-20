@@ -433,8 +433,7 @@ export class DataSource {
     }
 
     // Loads the app test site
-    // TODO - Need to figure out if we are duplicating a request to the app catalog
-    static loadTestSite(item: IAppItem): PromiseLike<{ app: Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata, web: Types.SP.Web }> {
+    static loadTestSite(item: IAppItem): PromiseLike<Types.SP.Web> {
         // Return a promise
         return new Promise((resolve, reject) => {
             // Get the url to the test site
@@ -444,19 +443,8 @@ export class DataSource {
             Web(url).execute(
                 // Success
                 web => {
-                    // Get the app
-                    web.SiteCollectionAppCatalog().AvailableApps(item.AppProductID).execute(
-                        // App exists
-                        app => {
-                            // Resolve the request
-                            resolve({ app, web });
-                        },
-                        // App isn't installed on the site
-                        () => {
-                            // Resolve the request
-                            resolve({ app: null, web });
-                        }
-                    );
+                    // Resolve the request
+                    resolve(web);
                 },
 
                 // Error

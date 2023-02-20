@@ -521,7 +521,7 @@ ${ContextInfo.userDisplayName}`.trim()
                     // See if a test site exists
                     DataSource.loadTestSite(this._item).then(
                         // Test site exists
-                        webInfo => {
+                        web => {
                             // Render the view button
                             tooltips.add({
                                 content: "Opens the test site in a new tab.",
@@ -534,14 +534,14 @@ ${ContextInfo.userDisplayName}`.trim()
                                     type: Components.ButtonTypes.OutlinePrimary,
                                     onClick: () => {
                                         // Open the test site in a new tab
-                                        window.open(webInfo.web.Url, "_blank");
+                                        window.open(web.Url, "_blank");
                                     }
                                 }
                             });
 
                             // See if the current version is not deployed
-                            if (webInfo.app && this._item.AppVersion != webInfo.app.InstalledVersion &&
-                                this._item.AppVersion != webInfo.app.AppCatalogVersion) {
+                            if (DataSource.AppCatalogSiteItem && this._item.AppVersion != DataSource.AppCatalogSiteItem.InstalledVersion &&
+                                this._item.AppVersion != DataSource.AppCatalogSiteItem.AppCatalogVersion) {
                                 // Render the update button
                                 tooltips.add({
                                     content: "Versions do not match. Click to update the test site.",
@@ -555,7 +555,7 @@ ${ContextInfo.userDisplayName}`.trim()
                                         type: Components.ButtonTypes.OutlinePrimary,
                                         onClick: () => {
                                             // Show the update form
-                                            this._forms.updateApp(this._item, AppConfig.Configuration.appCatalogUrl, webInfo.web.Url, () => {
+                                            this._forms.updateApp(this._item, AppConfig.Configuration.appCatalogUrl, web.Url, () => {
                                                 // Call the update event
                                                 this._onUpdate();
                                             });
@@ -564,7 +564,7 @@ ${ContextInfo.userDisplayName}`.trim()
                                 });
                             }
                             // Else, see if the app doesn't exist
-                            else if (webInfo.app == null) {
+                            else if (DataSource.AppCatalogSiteItem == null) {
                                 // Render the update button
                                 tooltips.add({
                                     content: "App is not installed on the test site. Click to update the test site.",
@@ -578,7 +578,7 @@ ${ContextInfo.userDisplayName}`.trim()
                                         type: Components.ButtonTypes.OutlinePrimary,
                                         onClick: () => {
                                             // Show the update form
-                                            this._forms.updateApp(this._item, AppConfig.Configuration.appCatalogUrl, webInfo.web.Url, () => {
+                                            this._forms.updateApp(this._item, AppConfig.Configuration.appCatalogUrl, web.Url, () => {
                                                 // Call the update event
                                                 this._onUpdate();
                                             });
