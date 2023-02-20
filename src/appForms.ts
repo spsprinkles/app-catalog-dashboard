@@ -492,7 +492,7 @@ export class AppForms {
                                 LoadingDialog.show();
 
                                 // Ensure the user is an owner of the site
-                                DataSource.isOwner(url).then(
+                                AppSecurity.isOwner(url).then(
                                     // Successfully loaded site
                                     info => {
                                         // Set the flag and url
