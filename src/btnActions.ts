@@ -297,7 +297,7 @@ export class ButtonActions {
                     // Ensure this is a tenant app catalog owner
                     if (AppSecurity.IsTenantAppCatalogOwner) {
                         // See if the app is deployed
-                        if (DataSource.DocSetTenantApp && DataSource.DocSetTenantApp.Deployed) {
+                        if (DataSource.AppCatalogTenantItem && DataSource.AppCatalogTenantItem.Deployed) {
                             // Render the retract button
                             tooltips.add({
                                 content: "Retracts the solution from the tenant app catalog.",
@@ -323,7 +323,7 @@ export class ButtonActions {
                                 let web = Web(AppConfig.Configuration.tenantAppCatalogUrl, { requestDigest });
 
                                 // Ensure this app can be deployed to the tenant
-                                web.TenantAppCatalog().solutionContainsTeamsComponent(DataSource.DocSetTenantApp.ID).execute((resp: any) => {
+                                web.TenantAppCatalog().solutionContainsTeamsComponent(DataSource.AppCatalogTenantItem.ID).execute((resp: any) => {
                                     // See if we can deploy this app to teams
                                     if (resp.SolutionContainsTeamsComponent) {
                                         // Render the deploy to teams button
@@ -591,7 +591,7 @@ ${ContextInfo.userDisplayName}`.trim()
                         // Test site doesn't exist
                         () => {
                             // Ensure the app item exists
-                            if (DataSource.DocSetSCAppCatalogItem) {
+                            if (DataSource.AppCatalogSiteItem) {
                                 // Render the create button
                                 tooltips.add({
                                     content: "Creates the test site for the app.",
@@ -600,7 +600,7 @@ ${ContextInfo.userDisplayName}`.trim()
                                         iconClassName: "me-1",
                                         iconSize: 20,
                                         iconType: chatSquareDots,
-                                        isDisabled: !AppSecurity.IsSiteAppCatalogOwner || !DataSource.DocSetSCAppCatalogItem.IsValidAppPackage,
+                                        isDisabled: !AppSecurity.IsSiteAppCatalogOwner || !DataSource.AppCatalogSiteItem.IsValidAppPackage,
                                         isSmall: true,
                                         type: Components.ButtonTypes.OutlinePrimary,
                                         onClick: () => {

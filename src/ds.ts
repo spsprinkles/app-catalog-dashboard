@@ -1,8 +1,7 @@
-import { InstallationRequired, LoadingDialog } from "dattatable";
-import { Components, ContextInfo, Helper, Site, Types, Web } from "gd-sprest-bs";
+import { List } from "dattatable";
+import { Components, ContextInfo, Types, Web } from "gd-sprest-bs";
 import { AppConfig } from "./appCfg";
 import { AppSecurity } from "./appSecurity";
-import { Configuration, createSecurityGroups } from "./cfg";
 import { ErrorDialog } from "./errorDialog";
 import Strings from "./strings";
 
@@ -98,52 +97,43 @@ export interface IAssessmentItem extends Types.SP.ListItem {
  * Data Source
  */
 export class DataSource {
-    // Loads the document set item
-    private static _docSetInfo: Helper.IListFormResult = null;
-    static get DocSetFolder(): Types.SP.FolderOData { return this.DocSetItem ? this.DocSetItem.Folder as any : null; }
-    static get DocSetInfo(): Helper.IListFormResult { return this._docSetInfo; }
-    static get DocSetItem(): IAppItem { return this.DocSetInfo ? this.DocSetInfo.item as any : null; }
-    static get DocSetItemId(): number { return this.DocSetItem ? this.DocSetItem.Id : 0; }
-    private static _docSetSCApp: Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata = null;
-    static get DocSetSCApp(): Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata { return this._docSetSCApp; }
-    private static _docSetSCAppItem: IAppItem = null;
-    static get DocSetSCAppItem(): IAppItem { return this._docSetSCAppItem; }
-    private static _docSetSCAppCatalogItem: IAppCatalogItem = null;
-    static get DocSetSCAppCatalogItem(): IAppCatalogItem { return this._docSetSCAppCatalogItem; }
-    private static _docSetTenantApp: Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata = null;
-    static get DocSetTenantApp(): Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata { return this._docSetTenantApp; }
-    static loadDocSetFromQS(): number {
-        let itemId = null;
+    /**
+     * App Catalog Requests
+     */
 
-        // Parse the query string values
-        let qs = document.location.search.split('?');
-        qs = qs.length > 1 ? qs[1].split('&') : [];
-        for (let i = 0; i < qs.length; i++) {
-            let qsItem = qs[i].split('=');
-            let key = qsItem[0].toLowerCase();
-            let value = qsItem[1];
-
-            // See if this is the "id" key
-            if (key == "id" || key == "app-id") {
-                // Return the item
-                itemId = parseInt(value);
-                break;
-            }
-        }
-
-        // Return the doc set item id
-        return itemId;
-    }
-    static loadDocSet(id?: number): PromiseLike<void> {
+    // App Catalog Requests
+    private static _appCatalogRequests: List<IAppCatalogRequestItem> = null;
+    static get AppCatalogRequests(): List<IAppCatalogRequestItem> { return this._appCatalogRequests; }
+    static initAppCatalogRequests(): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve, reject) => {
-            // Load the list information
-            Components.ListForm.create({
+            // Set the requests list
+            this._appCatalogRequests = new List<IAppCatalogRequestItem>({
+                listName: Strings.Lists.AppCatalogRequests,
+                itemQuery: {
+                    Filter: "Requesters/Id eq " + ContextInfo.userId
+                }
+            })
+        });
+    }
+
+    /**
+     * App Dashboard Information
+     */
+
+    // Doc Set List
+    private static _docSetList: List<IAppItem> = null;
+    static get DocSetList(): List<IAppItem> { return this._docSetList; }
+    static initDocSetList(): PromiseLike<void> {
+        // Return a promise
+        return new Promise((resolve, reject) => {
+            // Set the app dashboard list
+            this._docSetList = new List<IAppItem>({
                 listName: Strings.Lists.Apps,
-                itemId: id || this.DocSetItemId,
-                contentType: "App",
-                webUrl: Strings.SourceUrl,
-                query: {
+                itemQuery: {
+                    Filter: "ContentType eq 'App'",
+                    GetAllItems: true,
+                    Top: 5000,
                     Expand: [
                         "AppDevelopers", "AppSponsor", "CheckoutUser",
                         "Folder/Files", "Folder/Folders"
@@ -154,46 +144,79 @@ export class DataSource {
                         "AppSponsor/Id", "AppSponsor/EMail", "AppSponsor/Title",
                         "CheckoutUser/Id", "CheckoutUser/EMail", "CheckoutUser/Title"
                     ]
+                },
+                onItemsLoaded: resolve,
+                onLoadItemsError: reject
+            });
+        });
+    }
+
+    /**
+     * App Information
+     * Set when viewing the details of an app
+     */
+
+    // App Catalog List Item
+    private static _appCatalogItem: IAppCatalogItem = null;
+    static get AppCatalogItem(): IAppCatalogItem { return this._appCatalogItem; }
+
+    // Site Collection App Catalog Item
+    private static _appCatalogSiteItem: Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata = null;
+    static get AppCatalogSiteItem(): Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata { return this._appCatalogSiteItem; }
+
+    // Tenant App Catalog Item
+    private static _appCatalogTenantItem: Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata = null;
+    static get AppCatalogTenantItem(): Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata { return this._appCatalogTenantItem; }
+
+    // App Document Set Item
+    private static _appItem: IAppItem = null;
+    static get AppFolder(): Types.SP.FolderOData { return this._appItem ? this._appItem.Folder as any : null; }
+    static get AppItem(): IAppItem { return this._appItem; }
+    static set AppItem(newItem: IAppItem) {
+        // Parse the items
+        for (let i = 0; i < this.DocSetList.Items.length; i++) {
+            let item = this.DocSetList.Items[i];
+
+            // See if the id match
+            if (item.Id == newItem.Id) {
+                // Update the item
+                this.DocSetList.Items[i] = newItem;
+                return;
+            }
+        }
+
+        // Append the item
+        this.DocSetList.Items.push(newItem);
+    }
+
+    // Status Filters
+    private static _statusFilters: Components.ICheckboxGroupItem[] = null;
+    static get StatusFilters(): Components.ICheckboxGroupItem[] { return this._statusFilters; }
+    static initStatusFilters(): PromiseLike<void> {
+        // Return a promise
+        return new Promise((resolve, reject) => {
+            // Get the status field
+            Web(Strings.SourceUrl).Lists(Strings.Lists.Apps).Fields("AppStatus").execute((fld: Types.SP.FieldChoice) => {
+                let items: Components.ICheckboxGroupItem[] = [];
+
+                // Parse the choices
+                for (let i = 0; i < fld.Choices.results.length; i++) {
+                    // Add an item
+                    items.push({
+                        label: fld.Choices.results[i],
+                        type: Components.CheckboxGroupTypes.Switch
+                    });
                 }
-            }).then(info => {
-                // Save the info
-                this._docSetInfo = info;
 
-                // Find the package file
-                for (let i = 0; i < this.DocSetFolder.Files.results.length; i++) {
-                    let file = this.DocSetFolder.Files.results[i];
+                // Set the filters and resolve the promise
+                this._statusFilters = items.sort((a, b) => {
+                    if (a.label < b.label) { return -1; }
+                    if (a.label > b.label) { return 1; }
+                    return 0;
+                });
 
-                    // See if this is the package
-                    if (file.Name.toLowerCase().endsWith(".sppkg")) {
-                        // Set the app catalog item
-                        this._docSetSCAppCatalogItem = this.getSiteCollectionAppItem(file.Name);
-                        break;
-                    }
-                }
-
-                // Ensure items exist
-                if (this._items) {
-                    // Parse the items
-                    for (let i = 0; i < this._items.length; i++) {
-                        let item = this._items[i];
-
-                        // See if the id match
-                        if (item.Id == info.item.Id) {
-                            // Update the item
-                            this._items[i] = info.item as any;
-                            break;
-                        }
-                    }
-                }
-
-                // Load the site collection apps
-                this.loadSiteCollectionApp(this.DocSetItem.AppProductID).then(() => {
-                    // Load the tenant apps
-                    this.loadTenantApp(this.DocSetItem.AppProductID).then(() => {
-                        // Resolve the request
-                        resolve();
-                    }, reject);
-                }, reject);
+                // Resolve the request
+                resolve();
             }, reject);
         });
     }
@@ -237,28 +260,180 @@ export class DataSource {
         });
     }
 
-    // Determines if the document set feature is enabled on this site
-    private static docSetEnabled(): PromiseLike<boolean> {
+    // Returns the app id from the query string
+    static getAppIdFromQS(): number {
+        let itemId = null;
+
+        // Parse the query string values
+        let qs = document.location.search.split('?');
+        qs = qs.length > 1 ? qs[1].split('&') : [];
+        for (let i = 0; i < qs.length; i++) {
+            let qsItem = qs[i].split('=');
+            let key = qsItem[0].toLowerCase();
+            let value = qsItem[1];
+
+            // See if this is the "id" key
+            if (key == "id" || key == "app-id") {
+                // Return the item
+                itemId = parseInt(value);
+                break;
+            }
+        }
+
+        // Return the doc set item id
+        return itemId;
+    }
+
+    // Initializes the application
+    static init(appConfiguration?: string): PromiseLike<void> {
+        // Return a promise
+        return new Promise((resolve, reject) => {
+            // Load the configuration
+            AppConfig.loadConfiguration(appConfiguration).then(() => {
+                // Load the security information
+                AppSecurity.init(AppConfig.Configuration.appCatalogUrl, AppConfig.Configuration.tenantAppCatalogUrl).then(() => {
+                    // Initialize the document set list
+                    this.initDocSetList().then(() => {
+                        // Load the status filters
+                        this.initStatusFilters().then(resolve, reject);
+                    }, reject);
+                    //this.getAppIdFromQS() -> TODO - Move to main index
+                }, reject);
+            }, reject);
+        });
+    }
+
+    // Loads an app selected from the dashboard
+    static loadAppDashboard(itemId: number): PromiseLike<any> {
+        // Return a promise
+        return new Promise((resolve, reject) => {
+            // Parse the items
+            for (let i = 0; i < this.DocSetList.Items.length; i++) {
+                let item = this.DocSetList.Items[i];
+
+                // See if the id match
+                if (item.Id == itemId) {
+                    // Set the item
+                    this._appItem = item;
+                    return;
+                }
+            }
+
+            // Reject the request if we don't have the item
+            if (this._appItem == null) { reject(); return; }
+
+            // Wait for the requests to complete
+            Promise.all([
+                // Load the site collection app catalog item
+                this.loadSiteCollectionApp(),
+                // Load the tenant app catalog item
+                this.loadTenantApp()
+            ]).then(resolve, reject);
+        });
+    }
+
+    // Loads the app item information from the app catalog
+    private static loadSiteCollectionApp(): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve) => {
-            // See if the site collection has the feature enabled
-            Site(Strings.SourceUrl).Features("3bae86a2-776d-499d-9db8-fa4cdc7884f8").execute(
-                // Request was successful
-                feature => {
-                    // Ensure the feature exists and resolve the request
-                    resolve(feature.DefinitionId ? true : false);
-                },
+            let web = Web(AppConfig.Configuration.appCatalogUrl);
 
-                // Not enabled
-                () => {
-                    // Resolve the request
-                    resolve(false);
+            // Load the available apps
+            web.SiteCollectionAppCatalog().AvailableApps(this.AppItem.AppProductID).execute(app => {
+                // Set the app catalog item
+                this._appCatalogSiteItem = app;
+            });
+
+            // Query the app catalog and try to find it by file name
+            web.Lists("Apps for SharePoint").Items().query({
+                Expand: ["File"]
+            }).execute(items => {
+                // Parse the docset items
+                for (let i = 0; i < this.AppFolder.Files.results.length; i++) {
+                    let file = this.AppFolder.Files.results[i];
+
+                    // Ensure this is the package file
+                    if (!file.Name.endsWith(".sppkg")) { continue; }
+
+                    // Parse the items
+                    for (let j = 0; j < items.results.length; j++) {
+                        let item = items.results[j];
+
+                        // See if the item matches
+                        if (item.File.Name == file.Name) {
+                            // Item found
+                            this._appCatalogItem = item as any;
+                            break;
+                        }
+                    }
+
+                    // Break from the loop
+                    break;
                 }
-            )
+            });
+
+            // Wait for the requests to complete
+            web.done(resolve);
+        });
+    }
+
+    // Loads a site collection app by file name
+    static loadSiteAppByName(name: string): PromiseLike<IAppCatalogItem> {
+        // Return a promise
+        return new Promise((resolve, reject) => {
+            // Load the available apps
+            Web(AppConfig.Configuration.appCatalogUrl).Lists("Apps for SharePoint").Items().query({
+                Expand: ["File"],
+                GetAllItems: true,
+                Top: 5000
+            }).execute(items => {
+                // Parse the items
+                for (let i = 0; i < items.results.length; i++) {
+                    let item = items.results[i];
+
+                    // See if this is the target app
+                    if (item.File.Name == name) {
+                        // Resolve the request
+                        resolve(item as any);
+                        return;
+                    }
+                }
+
+                // Resolve the request
+                resolve(null);
+            }, () => {
+                // Resolve the request
+                resolve(null);
+            });
+        });
+    }
+
+    // Loads the app information from the tenant app catalog
+    private static loadTenantApp(): PromiseLike<void> {
+        // Return a promise
+        return new Promise((resolve) => {
+            // See if the app catalog is defined and the user is an tenant admin
+            if (AppConfig.Configuration.tenantAppCatalogUrl && AppSecurity.IsTenantAppCatalogOwner) {
+                // Load the available apps
+                Web(AppConfig.Configuration.tenantAppCatalogUrl).TenantAppCatalog().AvailableApps(this.AppItem.AppProductID).execute(app => {
+                    // Set the app
+                    this._appCatalogTenantItem = app;
+
+                    // Resolve the request
+                    resolve();
+                }, () => {
+                    // App not found, resolve the request
+                    resolve();
+                });
+            } else {
+                // User doesn't have access
+                resolve();
+            }
         });
     }
 
     // Loads the app test site
+    // TODO - Need to figure out if we are duplicating a request to the app catalog
     static loadTestSite(item: IAppItem): PromiseLike<{ app: Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata, web: Types.SP.Web }> {
         // Return a promise
         return new Promise((resolve, reject) => {
@@ -293,183 +468,31 @@ export class DataSource {
         });
     }
 
-    // Initializes the application
-    static init(appConfiguration?: string): PromiseLike<void> {
+    // Method to refresh the data source
+    static refresh(itemId?: number): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve, reject) => {
-            // Load the configuration
-            AppConfig.loadConfiguration(appConfiguration).then(() => {
-                // Load the security information
-                AppSecurity.init(AppConfig.Configuration.appCatalogUrl, AppConfig.Configuration.tenantAppCatalogUrl).then(() => {
-                    // Call the refresh method to load the data
-                    this.refresh(this.loadDocSetFromQS()).then(resolve, reject);
+            // See if this is a item id is set
+            if (itemId > 0) {
+                // Load the app dashboard
+                this.loadAppDashboard(itemId).then(() => {
+                    // Resolve the request
+                    resolve();
                 }, reject);
-            }, reject);
+            } else {
+                // Load all the items
+                this.DocSetList.refresh().then(() => {
+                    // Resolve the request
+                    resolve();
+                }, reject);
+            }
         });
     }
 
-    // Sees if an install is required and displays a dialog
-    static InstallRequired(el: HTMLElement, showFl: boolean = false) {
-        // See if an install is required
-        InstallationRequired.requiresInstall(Configuration).then(installFl => {
-            let errors: Components.IListGroupItem[] = [];
-
-            // Ensure the document set feature is enabled
-            this.docSetEnabled().then(featureEnabledFl => {
-                // See if the feature is enabled
-                if (!featureEnabledFl) {
-                    // Add an error
-                    errors.push({
-                        content: "Document Set site feature is not enabled.",
-                        type: Components.ListGroupItemTypes.Danger
-                    });
-                }
-
-                // See if the configuration is correct
-                let cfgIsValid = true;
-                if (AppConfig.Configuration == null) {
-                    // Update the flag
-                    cfgIsValid = false;
-
-                    // Add an error
-                    errors.push({
-                        content: "App configuration doesn't exist or is not in the correct JSON format. Please edit the webpart and set the configuration property.",
-                        type: featureEnabledFl ? null : Components.ListGroupItemTypes.Danger
-                    });
-                }
-                // Else, ensure it's valid
-                else if (!AppConfig.IsValid) {
-                    // Update the flag
-                    cfgIsValid = false;
-
-                    // Add an error
-                    errors.push({
-                        content: "App configuration exists, but is invalid. Please contact your administrator.",
-                        type: featureEnabledFl ? null : Components.ListGroupItemTypes.Danger
-                    });
-                }
-
-                // See if the security groups exist
-                let securityGroupsExist = true;
-                if (AppSecurity.ApproverGroup == null || AppSecurity.DevGroup == null || AppSecurity.FinalApproverGroup == null || AppSecurity.SponsorGroup == null) {
-                    // Set the flag
-                    securityGroupsExist = false;
-
-                    // Add an error
-                    errors.push({
-                        content: "Security groups are not installed.",
-                        type: featureEnabledFl && cfgIsValid ? null : Components.ListGroupItemTypes.Danger
-                    });
-                }
-
-                // See if an installation is required
-                if ((installFl || errors.length > 0) || showFl) {
-                    // Show the installation dialog
-                    InstallationRequired.showDialog({
-                        errors,
-                        onFooterRendered: el => {
-                            // See if the configuration isn't defined
-                            if (!cfgIsValid) {
-                                // Disable the install button
-                                (el.firstChild as HTMLButtonElement).disabled = true;
-                            }
-
-                            // See if the feature isn't enabled
-                            if (!featureEnabledFl) {
-                                // Add the custom install button
-                                Components.Tooltip({
-                                    el,
-                                    content: "Enables the document set site collection feature.",
-                                    type: Components.ButtonTypes.OutlinePrimary,
-                                    btnProps: {
-                                        text: "Enable Feature",
-                                        onClick: () => {
-                                            // Show a loading dialog
-                                            LoadingDialog.setHeader("Enable Feature");
-                                            LoadingDialog.setBody("Enabling the document set feature. This dialog will close after this requests completes.");
-                                            LoadingDialog.show();
-
-                                            // Enable the feature
-                                            Site(Strings.SourceUrl).Features().add("3bae86a2-776d-499d-9db8-fa4cdc7884f8").execute(
-                                                // Enabled
-                                                () => {
-                                                    // Close the dialog
-                                                    LoadingDialog.hide();
-
-                                                    // Refresh the page
-                                                    window.location.reload();
-                                                },
-                                                ex => {
-                                                    // Show the error
-                                                    ErrorDialog.show("Enable Feature", "There was an error enabling the document set site collection feature.", ex);
-                                                }
-                                            );
-                                        }
-                                    }
-                                });
-                            }
-
-                            // See if the security group doesn't exist
-                            if (!securityGroupsExist || showFl) {
-                                // Add the custom install button
-                                Components.Tooltip({
-                                    el,
-                                    content: "Creates the security groups.",
-                                    type: Components.ButtonTypes.OutlinePrimary,
-                                    btnProps: {
-                                        text: "Security",
-                                        isDisabled: !featureEnabledFl || !cfgIsValid || !InstallationRequired.ListsExist,
-                                        onClick: () => {
-                                            // Show a loading dialog
-                                            LoadingDialog.setHeader("Security Groups");
-                                            LoadingDialog.setBody("Creating the security groups. This dialog will close after it completes.");
-                                            LoadingDialog.show();
-
-                                            // Create the security groups
-                                            createSecurityGroups().then(() => {
-                                                // Close the dialog
-                                                LoadingDialog.hide();
-
-                                                // Refresh the page
-                                                window.location.reload();
-                                            });
-                                        }
-                                    }
-                                });
-                            }
-                        }
-                    });
-
-                    // Clear the element
-                    while (el.firstChild) { el.removeChild(el.firstChild); }
-
-                    // Render the errors
-                    Components.ListGroup({
-                        el,
-                        items: errors
-                    });
-
-                    // Show a button to display the modal
-                    Components.Tooltip({
-                        el,
-                        content: "Displays the installation status modal.",
-                        btnProps: {
-                            text: "Status",
-                            onClick: () => {
-                                // Dispaly this modal
-                                this.InstallRequired(el, true);
-                            }
-                        }
-                    });
-                } else {
-                    // Log
-                    console.error("[" + Strings.ProjectName + "] Error initializing the solution.");
-                }
-            });
-        });
-    }
+    /** Old Code */
 
     // Determines if the user is an admin of a site collection
+    // TODO - Is this being done in AppSecurity?
     static isOwner(url: string): PromiseLike<{ url: string; isOwner: boolean; isRoot: boolean; }> {
         // Return a promise
         return new Promise((resolve, reject) => {
@@ -516,323 +539,6 @@ export class DataSource {
                 // Otherwise, the url entered is not valid
                 webUrl ? resolve({ url: webUrl, isOwner, isRoot }) : null;
             });
-        });
-    }
-
-    // Loads the list data
-    private static _items: IAppItem[] = null;
-    static get Items(): IAppItem[] { return this._items; }
-    static load(): PromiseLike<void> {
-        // Return a promise
-        return new Promise((resolve, reject) => {
-            // Load the list items
-            Web(Strings.SourceUrl).Lists(Strings.Lists.Apps).Items().query({
-                Expand: ["AppDevelopers", "AppSponsor", "CheckoutUser", "Folder"],
-                Filter: "ContentType eq 'App'",
-                Select: [
-                    "*", "Id", "FileLeafRef", "ContentTypeId",
-                    "AppDevelopers/Id", "AppDevelopers/EMail", "AppDevelopers/Title",
-                    "AppSponsor/Id", "AppSponsor/EMail", "AppSponsor/Title",
-                    "CheckoutUser/Id", "CheckoutUser/EMail", "CheckoutUser/Title"
-                ]
-            }).execute(items => {
-                // Set the items
-                this._items = items.results as any;
-
-                // Resolve the promise
-                resolve();
-            }, reject);
-        });
-    }
-
-    // App Catalog Requests
-    private static _appCatalogRequestitems: IAppCatalogRequestItem[] = null;
-    static get AppCatalogRequestItems(): IAppCatalogRequestItem[] { return this._appCatalogRequestitems; }
-    static get HasAppCatalogRequests(): boolean { return this.AppCatalogRequestItems && this.AppCatalogRequestItems.length > 0; }
-    static loadAppCatalogRequests(): PromiseLike<void> {
-        // Return a promise
-        return new Promise((resolve, reject) => {
-            // Load the list items
-            Web(Strings.SourceUrl).Lists(Strings.Lists.AppCatalogRequests).Items().query({
-                Filter: "Requesters/Id eq " + ContextInfo.userId
-            }).execute(items => {
-                // Save the items
-                this._appCatalogRequestitems = items.results as any;
-
-                // Resolve the request
-                resolve();
-            }, reject)
-        });
-    }
-
-    // Status Filters
-    private static _statusFilters: Components.ICheckboxGroupItem[] = null;
-    static get StatusFilters(): Components.ICheckboxGroupItem[] { return this._statusFilters; }
-    static loadStatusFilters(): PromiseLike<Components.ICheckboxGroupItem[]> {
-        // Return a promise
-        return new Promise((resolve, reject) => {
-            // Get the status field
-            Web(Strings.SourceUrl).Lists(Strings.Lists.Apps).Fields("AppStatus").execute((fld: Types.SP.FieldChoice) => {
-                let items: Components.ICheckboxGroupItem[] = [];
-
-                // Parse the choices
-                for (let i = 0; i < fld.Choices.results.length; i++) {
-                    // Add an item
-                    items.push({
-                        label: fld.Choices.results[i],
-                        type: Components.CheckboxGroupTypes.Switch
-                    });
-                }
-
-                // Set the filters and resolve the promise
-                this._statusFilters = items.sort((a, b) => {
-                    if (a.label < b.label) { return -1; }
-                    if (a.label > b.label) { return 1; }
-                    return 0;
-                });
-
-                // Resolve the request
-                resolve(this._statusFilters);
-            }, reject);
-        });
-    }
-
-    // Site Collection Apps
-    private static _siteCollectionApps: Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata[] = null;
-    private static _siteCollectionItems: IAppCatalogItem[] = null;
-    static get SiteCollectionAppCatalogExists(): boolean { return this._siteCollectionApps != null; }
-    static get SiteCollectionApps(): Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata[] { return this._siteCollectionApps; }
-    static get SiteCollectionItems(): IAppCatalogItem[] { return this._siteCollectionItems; }
-    static getSiteCollectionAppById(appId: string): Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata {
-        // Parse the apps
-        for (let i = 0; i < this._siteCollectionApps.length; i++) {
-            let app = this._siteCollectionApps[i];
-
-            // See if this is the target app
-            if (app.ProductId == appId) { return app; }
-        }
-
-        // App not found
-        return null;
-    }
-    static getSiteCollectionAppItem(value: string): IAppCatalogItem {
-        // Parse the apps
-        for (let i = 0; i < this._siteCollectionItems.length; i++) {
-            let item = this._siteCollectionItems[i];
-
-            // See if this is the target app
-            if (item.AppProductID == value || item.File.Name == value) { return item; }
-        }
-
-        // App item not found
-        return null;
-    }
-    static loadSiteCollectionApp(id: string): PromiseLike<void> {
-        // Return a promise
-        return new Promise((resolve) => {
-            // See if the app catalog is defined
-            if (AppConfig.Configuration.appCatalogUrl) {
-                let web = Web(AppConfig.Configuration.appCatalogUrl);
-
-                // Load the available apps
-                web.SiteCollectionAppCatalog().AvailableApps(id).execute(app => {
-                    // Set the app
-                    this._docSetSCApp = app;
-                });
-
-                // Query the app catalog and try to find it by file name
-                web.Lists("Apps for SharePoint").Items().query({
-                    Expand: ["File"]
-                }).execute(items => {
-                    // Parse the docset items
-                    for (let i = 0; i < this.DocSetFolder.Files.results.length; i++) {
-                        let file = this.DocSetFolder.Files.results[i];
-
-                        // Ensure this is the package file
-                        if (!file.Name.endsWith(".sppkg")) { continue; }
-
-                        // Parse the items
-                        for (let j = 0; j < items.results.length; j++) {
-                            let item = items.results[j];
-
-                            // See if the item matches
-                            if (item.File.Name == file.Name) {
-                                // Item found
-                                this._docSetSCAppItem = item as any;
-                                break;
-                            }
-                        }
-
-                        // Break from the loop
-                        break;
-                    }
-                });
-
-                // Wait for the requests to complete
-                web.done(resolve);
-            } else {
-                // App catalog url not being used
-                resolve();
-            }
-        });
-    }
-    static loadSiteCollectionApps(): PromiseLike<void> {
-        // Return a promise
-        return new Promise((resolve) => {
-            // See if the app catalog is defined
-            if (AppConfig.Configuration.appCatalogUrl) {
-                // Load the available apps
-                Web(AppConfig.Configuration.appCatalogUrl).SiteCollectionAppCatalog().AvailableApps().execute(apps => {
-                    // Set the apps
-                    this._siteCollectionApps = apps.results;
-
-                    // Resolve the request
-                    resolve();
-                }, () => {
-                    // No access to the site collection app catalog
-                    this._siteCollectionApps = [];
-
-                    // Resolve the request
-                    resolve();
-                });
-            } else {
-                // Default the site collection apps
-                this._siteCollectionApps = [];
-
-                // Resolve the request
-                resolve();
-            }
-        });
-    }
-    static loadSiteCollectionItems(): PromiseLike<void> {
-        // Return a promise
-        return new Promise((resolve) => {
-            // See if the app catalog is defined
-            if (AppConfig.Configuration.appCatalogUrl) {
-                // Load the available apps
-                Web(AppConfig.Configuration.appCatalogUrl).Lists("Apps for SharePoint").Items().query({
-                    Expand: ["File"],
-                    GetAllItems: true,
-                    Top: 5000
-                }).execute(items => {
-                    // Set the apps
-                    this._siteCollectionItems = items.results as any;
-
-                    // Resolve the request
-                    resolve();
-                }, () => {
-                    // No access to the site collection app catalog
-                    this._siteCollectionItems = [];
-
-                    // Resolve the request
-                    resolve();
-                });
-            } else {
-                // Default the site collection apps
-                this._siteCollectionItems = [];
-
-                // Resolve the request
-                resolve();
-            }
-        });
-    }
-
-    // Tenant Apps
-    private static _tenantApps: Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata[] = null;
-    static get TenantApps(): Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata[] { return this._tenantApps; }
-    static getTenantAppById(appId: string): Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata {
-        // Parse the apps
-        for (let i = 0; i < this._tenantApps.length; i++) {
-            let app = this._tenantApps[i];
-
-            // See if this is the target app
-            if (app.ProductId == appId) { return app; }
-        }
-
-        // App not found
-        return null;
-    }
-    static loadTenantApp(id: string): PromiseLike<void> {
-        // Return a promise
-        return new Promise((resolve) => {
-            // See if the app catalog is defined
-            if (AppConfig.Configuration.tenantAppCatalogUrl) {
-                // Load the available apps
-                Web(AppConfig.Configuration.tenantAppCatalogUrl).TenantAppCatalog().AvailableApps(id).execute(app => {
-                    // Set the app
-                    this._docSetTenantApp = app;
-
-                    // Resolve the request
-                    resolve();
-                }, () => {
-                    // App not found, resolve the request
-                    resolve();
-                });
-            }
-        });
-    }
-    static loadTenantApps(): PromiseLike<void> {
-        // Return a promise
-        return new Promise((resolve, reject) => {
-            // See if the tenant app catalog is defined
-            if (AppConfig.Configuration.tenantAppCatalogUrl) {
-                // Load the available apps
-                Web(AppConfig.Configuration.tenantAppCatalogUrl).TenantAppCatalog().AvailableApps().execute(apps => {
-                    // Set the apps
-                    this._tenantApps = apps.results;
-
-                    // Resolve the request
-                    resolve();
-                }, () => {
-                    // No access to the tenant app catalog
-                    this._tenantApps = [];
-
-                    // Resolve the request
-                    resolve();
-                });
-            } else {
-                // Default the tenant apps
-                this._tenantApps = [];
-
-                // Resolve the request
-                resolve();
-            }
-        });
-    }
-
-    // Method to refresh the data source
-    static refresh(docSetId?: number): PromiseLike<void> {
-        // Return a promise
-        return new Promise((resolve, reject) => {
-            // Load the site collection apps
-            this.loadSiteCollectionApps().then(() => {
-                // Load the site collection items
-                this.loadSiteCollectionItems().then(() => {
-                    // Load the tenant apps
-                    this.loadTenantApps().then(() => {
-                        // Load the app catalog requests
-                        this.loadAppCatalogRequests().then(() => {
-                            // See if this is a document set id is set
-                            if (docSetId > 0) {
-                                // Load the document set item
-                                this.loadDocSet(docSetId).then(() => {
-                                    // Resolve the request
-                                    resolve();
-                                }, reject);
-                            } else {
-                                // Load all the items
-                                this.load().then(() => {
-                                    // Load the status filters
-                                    this.loadStatusFilters().then(() => {
-                                        // Resolve the request
-                                        resolve();
-                                    }, reject);
-                                }, reject);
-                            }
-                        });
-                    }, reject);
-                }, reject);
-            }, reject);
         });
     }
 }

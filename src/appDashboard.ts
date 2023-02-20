@@ -19,12 +19,14 @@ import Strings from "./strings";
  * Gives a more detailed overview of the application.
  */
 export class AppDashboard {
+    private _docSetId: number = null;
     private _el: HTMLElement = null;
     private _elDashboard: HTMLElement = null;
 
     // Constructor
     constructor(el: HTMLElement, elDashboard?: HTMLElement, docSetId?: number) {
         // Initialize the component
+        this._docSetId = docSetId;
         this._el = el;
         this._elDashboard = elDashboard;
 
@@ -54,7 +56,7 @@ export class AppDashboard {
         this.renderActions();
 
         // Render the documents
-        this.renderDocuments(docSetId);
+        this.renderDocuments();
     }
 
     // Redirects to the dashboard
@@ -110,8 +112,8 @@ export class AppDashboard {
         LoadingDialog.setBody("This will close after the data is loaded.");
         LoadingDialog.show();
 
-        // Load the the document set information
-        DataSource.loadDocSet().then(() => {
+        // Load the the app information
+        DataSource.loadAppDashboard(this._docSetId).then(() => {
             // Render the alerts
             this.renderAlertStatus();
             this.renderAlertError();
@@ -144,7 +146,7 @@ export class AppDashboard {
                 title: "Actions",
                 onRender: el => {
                     // Render the actions
-                    new ButtonActions(el, DataSource.DocSetItem, () => {
+                    new ButtonActions(el, DataSource.AppItem, () => {
                         // Refresh the dashboard
                         this.refresh();
                     });
@@ -160,7 +162,7 @@ export class AppDashboard {
         while (elAlert.firstChild) { elAlert.removeChild(elAlert.firstChild); }
 
         // See if an alert exists
-        let cfg = AppConfig.Status[DataSource.DocSetItem.AppStatus];
+        let cfg = AppConfig.Status[DataSource.AppItem.AppStatus];
         if (cfg && cfg.alert) {
             // Show the element
             elAlert.classList.remove("d-none");
@@ -188,7 +190,7 @@ export class AppDashboard {
         while (elAlert.firstChild) { elAlert.removeChild(elAlert.firstChild); }
 
         // See if an alert exists
-        if (DataSource.DocSetItem.AppIsRejected && DataSource.DocSetItem.AppComments) {
+        if (DataSource.AppItem.AppIsRejected && DataSource.AppItem.AppComments) {
             // Show the element
             elAlert.classList.remove("d-none");
 
@@ -197,7 +199,7 @@ export class AppDashboard {
                 el: elAlert,
                 className: "m-0 rounded-0",
                 header: "Request Rejected",
-                content: DataSource.DocSetItem.AppComments,
+                content: DataSource.AppItem.AppComments,
                 type: Components.AlertTypes.Danger
             });
         }
@@ -207,9 +209,9 @@ export class AppDashboard {
         }
 
         // See if the app is deployed and has an error message
-        let errorMessage = DataSource.DocSetSCApp ? DataSource.DocSetSCApp.ErrorMessage : null;
-        errorMessage = DataSource.DocSetSCAppCatalogItem ? DataSource.DocSetSCAppCatalogItem.AppPackageErrorMessage : errorMessage;
-        errorMessage = DataSource.DocSetSCAppItem ? DataSource.DocSetSCAppItem.AppPackageErrorMessage : errorMessage;
+        let errorMessage = DataSource.AppCatalogSiteItem ? DataSource.AppCatalogSiteItem.ErrorMessage : null;
+        errorMessage = DataSource.AppCatalogItem ? DataSource.AppCatalogItem.AppPackageErrorMessage : errorMessage;
+        errorMessage = DataSource.AppItem ? DataSource.AppItem.AppPackageErrorMessage : errorMessage;
         if (errorMessage && errorMessage != "No errors.") {
             // Show the element
             elAlert.classList.remove("d-none");
@@ -226,12 +228,12 @@ export class AppDashboard {
     }
 
     // Renders the documents
-    private renderDocuments(docSetId: number = DataSource.DocSetItemId) {
+    private renderDocuments() {
         // Render the documents
         new Documents({
             el: this._el.querySelector("#app-docs"),
             listName: Strings.Lists.Apps,
-            docSetId,
+            docSetId: DataSource.AppItem.Id,
             templatesUrl: AppConfig.Configuration.templatesLibraryUrl,
             webUrl: Strings.SourceUrl,
             onActionsRendered: (el, col, file) => {
@@ -251,7 +253,7 @@ export class AppDashboard {
                     // See if this is an spfx package
                     if (fileInfo.name.toLowerCase().endsWith(".sppkg")) {
                         // See if the app isn't approved or requires an assessment
-                        if ([AppConfig.ApprovedStatus, AppConfig.TechReviewStatus, AppConfig.TestCasesStatus].indexOf(DataSource.DocSetItem.AppStatus) < 0) {
+                        if ([AppConfig.ApprovedStatus, AppConfig.TechReviewStatus, AppConfig.TestCasesStatus].indexOf(DataSource.AppItem.AppStatus) < 0) {
                             // Add the file
                             resolve(true);
                             return;
@@ -263,14 +265,14 @@ export class AppDashboard {
                             let appUpgraded = false;
 
                             // Deny if the product id doesn't match
-                            if (pkgInfo.item.AppProductID != DataSource.DocSetItem.AppProductID) {
+                            if (pkgInfo.item.AppProductID != DataSource.AppItem.AppProductID) {
                                 // Set the error message
                                 errorMessage = "The app's product id doesn't match the current one.";
                             }
                             // Else, deny if the version is less than the current
-                            else if (pkgInfo.item.AppVersion != DataSource.DocSetItem.AppVersion) {
+                            else if (pkgInfo.item.AppVersion != DataSource.AppItem.AppVersion) {
                                 // Compare the values
-                                let appVersion = DataSource.DocSetItem.AppVersion.split('.');
+                                let appVersion = DataSource.AppItem.AppVersion.split('.');
                                 let newAppVersion = pkgInfo.item.AppVersion.split('.');
 
                                 // See if the new version is greater
@@ -301,14 +303,14 @@ export class AppDashboard {
                                 // Update the status and set it back to the testing status
                                 let itemInfo = pkgInfo.item;
                                 itemInfo.AppStatus = AppConfig.TestCasesStatus;
-                                DataSource.DocSetItem.update(itemInfo).execute(
+                                DataSource.AppItem.update(itemInfo).execute(
                                     () => {
                                         // Archives the current app
                                         let archiveApp = () => {
                                             // See if the item is currently approved
-                                            if (DataSource.DocSetItem.AppStatus == AppConfig.ApprovedStatus) {
+                                            if (DataSource.AppItem.AppStatus == AppConfig.ApprovedStatus) {
                                                 // Archive the file
-                                                AppActions.archivePackage(DataSource.DocSetItem, () => {
+                                                AppActions.archivePackage(DataSource.AppItem, () => {
                                                     // Add the file
                                                     resolve(true);
                                                 });
@@ -323,7 +325,7 @@ export class AppDashboard {
                                             // Return a promise
                                             return new Promise(resolve => {
                                                 // Ensure the folder exists
-                                                AppActions.createClientSideAssetsFolder(Web(Strings.SourceUrl).Lists(Strings.Lists.Apps).Items(DataSource.DocSetItemId).Folder()).then(folder => {
+                                                AppActions.createClientSideAssetsFolder(Web(Strings.SourceUrl).Lists(Strings.Lists.Apps).Items(DataSource.AppItem.Id).Folder()).then(folder => {
                                                     // Get the client side asset files
                                                     folder.Files().execute(files => {
                                                         // Parse the files
@@ -375,11 +377,11 @@ export class AppDashboard {
                                                     // See if there is a flow
                                                     if (AppConfig.Configuration.appFlows && AppConfig.Configuration.appFlows.upgradeApp) {
                                                         // Execute the flow
-                                                        AppActions.runFlow(DataSource.DocSetItem, AppConfig.Configuration.appFlows.upgradeApp);
+                                                        AppActions.runFlow(DataSource.AppItem, AppConfig.Configuration.appFlows.upgradeApp);
                                                     }
 
                                                     // Send the notifications
-                                                    AppNotifications.sendAppUpgradedEmail(DataSource.DocSetItem).then(() => {
+                                                    AppNotifications.sendAppUpgradedEmail(DataSource.AppItem).then(() => {
                                                         // Archive the app
                                                         archiveApp();
                                                     });
@@ -446,21 +448,29 @@ export class AppDashboard {
                 {
                     body: [{
                         onRender: el => {
-                            // Render the properties
-                            Components.ListForm.renderDisplayForm({
-                                info: DataSource.DocSetInfo,
-                                el,
-                                includeFields: AppConfig.Configuration.appDetails && AppConfig.Configuration.appDetails.left ? AppConfig.Configuration.appDetails.left : [
-                                    "AppIsTenant",
-                                    "AppStatus",
-                                    "AppDevelopers",
-                                    "AppSponsor",
-                                    "AppProductID",
-                                    "AppIsClientSideSolution"
-                                ],
-                                onControlRendered: (ctrl, field) => {
-                                    // Update the fields
-                                    postUpdateFields(ctrl, field);
+                            // TODO: Add a renderForm event that gives the component
+                            // TODO: Set el to renderForm event
+                            // Render the display form
+                            DataSource.DocSetList.viewItem({
+                                itemId: DataSource.AppItem.Id,
+                                onCreateViewForm: props => {
+                                    props.includeFields = AppConfig.Configuration.appDetails && AppConfig.Configuration.appDetails.left ? AppConfig.Configuration.appDetails.left : [
+                                        "AppIsTenant",
+                                        "AppStatus",
+                                        "AppDevelopers",
+                                        "AppSponsor",
+                                        "AppProductID",
+                                        "AppIsClientSideSolution"
+                                    ];
+
+                                    // Set the control rendered event
+                                    props.onControlRendered = (ctrl, field) => {
+                                        // Update the fields
+                                        postUpdateFields(ctrl, field);
+                                    };
+
+                                    // Return the properties
+                                    return props;
                                 }
                             });
                         }
@@ -469,20 +479,29 @@ export class AppDashboard {
                 {
                     body: [{
                         onRender: el => {
+                            // TODO: Add a renderForm event that gives the component
+                            // TODO: Set el to renderForm event
                             // Render the properties
-                            Components.ListForm.renderDisplayForm({
-                                info: DataSource.DocSetInfo,
-                                el,
-                                includeFields: AppConfig.Configuration.appDetails && AppConfig.Configuration.appDetails.right ? AppConfig.Configuration.appDetails.right : [
-                                    "AppVersion",
-                                    "AppSharePointMinVersion",
-                                    "AppIsDomainIsolated",
-                                    "AppSkipFeatureDeployment",
-                                    "AppAPIPermissions"
-                                ],
-                                onControlRendered: (ctrl, field) => {
-                                    // Update the fields
-                                    postUpdateFields(ctrl, field);
+                            DataSource.DocSetList.viewItem({
+                                itemId: DataSource.AppItem.Id,
+                                onCreateViewForm: props => {
+                                    // Set the default items to view
+                                    props.includeFields = AppConfig.Configuration.appDetails && AppConfig.Configuration.appDetails.right ? AppConfig.Configuration.appDetails.right : [
+                                        "AppVersion",
+                                        "AppSharePointMinVersion",
+                                        "AppIsDomainIsolated",
+                                        "AppSkipFeatureDeployment",
+                                        "AppAPIPermissions"
+                                    ];
+
+                                    // Set the control rendered event
+                                    props.onControlRendered = (ctrl, field) => {
+                                        // Update the fields
+                                        postUpdateFields(ctrl, field);
+                                    };
+
+                                    // Return the properties
+                                    return props;
                                 }
                             });
                         }
@@ -518,7 +537,7 @@ export class AppDashboard {
                     crumb.remove();
                     crumb.remove();
                     crumb.add({
-                        text: DataSource.DocSetItem.Title,
+                        text: DataSource.AppItem.Title,
                         href: "#",
                         isActive: true
                     });
@@ -553,7 +572,7 @@ export class AppDashboard {
                             }
                         },
                         {
-                            text: DataSource.DocSetItem.Title, className: "pe-auto", href: "#", onClick: () => {
+                            text: DataSource.AppItem.Title, className: "pe-auto", href: "#", onClick: () => {
                                 // Show the info
                                 this._el.querySelector("#app-info").classList.remove("d-none");
                                 elNavInfo.classList.add("d-none");
@@ -565,7 +584,7 @@ export class AppDashboard {
                                 crumb.remove();
                                 crumb.remove();
                                 crumb.add({
-                                    text: DataSource.DocSetItem.Title,
+                                    text: DataSource.AppItem.Title,
                                     href: "#",
                                     isActive: true
                                 });
@@ -607,7 +626,7 @@ export class AppDashboard {
                     }
                 },
                 //{ text: "App Dashboard", href: AppConfig.Configuration.dashboardUrl, className: "pe-auto" },
-                { text: DataSource.DocSetItem.Title, href: "#", isActive: true }
+                { text: DataSource.AppItem.Title, href: "#", isActive: true }
             ]
         });
 

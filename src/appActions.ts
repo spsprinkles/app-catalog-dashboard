@@ -1,4 +1,4 @@
-import { ItemForm, LoadingDialog, Modal } from "dattatable";
+import { LoadingDialog, Modal } from "dattatable";
 import { ContextInfo, Graph, Helper, SPTypes, Types, Utility, Web } from "gd-sprest-bs";
 import * as JSZip from "jszip";
 import { AppConfig, IStatus } from "./appCfg";
@@ -26,8 +26,8 @@ export class AppActions {
         ErrorDialog.logInfo("Archiving the package....");
 
         // Find the package file
-        for (let i = 0; i < DataSource.DocSetFolder.Files.results.length; i++) {
-            let file = DataSource.DocSetFolder.Files.results[i];
+        for (let i = 0; i < DataSource.AppFolder.Files.results.length; i++) {
+            let file = DataSource.AppFolder.Files.results[i];
 
             // See if this is the package
             if (file.Name.toLowerCase().endsWith(".sppkg")) {
@@ -48,7 +48,7 @@ export class AppActions {
         }
 
         // Create the archive folder
-        this.createArchiveFolder(DataSource.DocSetFolder).then(archiveFolder => {
+        this.createArchiveFolder(DataSource.AppFolder).then(archiveFolder => {
             // Log
             ErrorDialog.logInfo(`Getting the SPFx package's file content from ${appFile.ServerRelativeUrl}...`);
 
@@ -451,8 +451,8 @@ export class AppActions {
         ErrorDialog.logInfo(`Getting the SPFx package...`);
 
         // Find the package file
-        for (let i = 0; i < DataSource.DocSetFolder.Files.results.length; i++) {
-            let file = DataSource.DocSetFolder.Files.results[i];
+        for (let i = 0; i < DataSource.AppFolder.Files.results.length; i++) {
+            let file = DataSource.AppFolder.Files.results[i];
 
             // See if this is the package
             if (file.Name.toLowerCase().endsWith(".sppkg")) {
@@ -560,10 +560,9 @@ export class AppActions {
                                                 }, () => {
                                                     // See if this isn't the tenant
                                                     if (!tenantFl) {
-                                                        // Refresh the apps
-                                                        DataSource.loadSiteCollectionItems().then(() => {
-                                                            // See if the app item exists
-                                                            let appItem = DataSource.getSiteCollectionAppItem(appFile.Name);
+                                                        // Load the site collection app item
+                                                        DataSource.loadSiteAppByName(appFile.Name).then(appItem => {
+                                                            // See if the item exists
                                                             if (appItem) {
                                                                 // Log the error
                                                                 ErrorDialog.show("Deploy Error", "The app was added to the catalog successfully, but there was an error with it.");
@@ -636,8 +635,8 @@ export class AppActions {
         LoadingDialog.show();
 
         // Find the package file
-        for (let i = 0; i < DataSource.DocSetFolder.Files.results.length; i++) {
-            let file = DataSource.DocSetFolder.Files.results[i];
+        for (let i = 0; i < DataSource.AppFolder.Files.results.length; i++) {
+            let file = DataSource.AppFolder.Files.results[i];
 
             // See if this is the package
             if (file.Name.toLowerCase().endsWith(".sppkg")) {
@@ -1329,8 +1328,8 @@ export class AppActions {
                 this.readPackage(file.data).then(pkgInfo => {
                     // Ensure the package doesn't exist
                     let existsFl = false;
-                    for (let i = 0; i < DataSource.Items.length; i++) {
-                        let item = DataSource.Items[i];
+                    for (let i = 0; i < DataSource.DocSetList.Items.length; i++) {
+                        let item = DataSource.DocSetList.Items[i];
 
                         // See if it exists
                         if (item.AppProductID == pkgInfo.item.AppProductID) {
