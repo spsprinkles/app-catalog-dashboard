@@ -16,7 +16,7 @@ export class AppCatalogRequests {
         // Display the dashboard
         new DataTable({
             el: Modal.BodyElement,
-            rows: DataSource.AppCatalogRequestItems,
+            rows: DataSource.AppCatalogRequests.Items,
             dtProps: {
                 dom: 'rt<"row"<"col-sm-4"l><"col-sm-4"i><"col-sm-4"p>>',
                 columnDefs: [
