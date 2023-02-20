@@ -104,6 +104,7 @@ export class DataSource {
     // App Catalog Requests
     private static _appCatalogRequests: List<IAppCatalogRequestItem> = null;
     static get AppCatalogRequests(): List<IAppCatalogRequestItem> { return this._appCatalogRequests; }
+    static get HasAppCatalogRequests(): boolean { return this.AppCatalogRequests ? this.AppCatalogRequests.Items.length > 0 : false; }
     static initAppCatalogRequests(): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve, reject) => {
@@ -292,12 +293,25 @@ export class DataSource {
             AppConfig.loadConfiguration(appConfiguration).then(() => {
                 // Load the security information
                 AppSecurity.init(AppConfig.Configuration.appCatalogUrl, AppConfig.Configuration.tenantAppCatalogUrl).then(() => {
-                    // Initialize the document set list
-                    this.initDocSetList().then(() => {
+                    // Wait for the components to initialize
+                    Promise.all([
+                        // Initialize the app catalog requests
+                        this.initAppCatalogRequests(),
+                        // Initialize the document set list
+                        this.initDocSetList(),
                         // Load the status filters
-                        this.initStatusFilters().then(resolve, reject);
+                        this.initStatusFilters(),
+                    ]).then(() => {
+                        // See if an app id was defined in the query string
+                        let itemId = this.getAppIdFromQS();
+                        if (itemId > 0) {
+                            // Load the app information
+                            this.loadAppDashboard(itemId).then(resolve, resolve);
+                        } else {
+                            // Resolve the request
+                            resolve();
+                        }
                     }, reject);
-                    //this.getAppIdFromQS() -> TODO - Move to main index
                 }, reject);
             }, reject);
         });

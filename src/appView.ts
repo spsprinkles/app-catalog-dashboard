@@ -14,6 +14,7 @@ import { AppCatalogRequests } from "./appCatalogRequests";
 import { AppConfig } from "./appCfg";
 import { AppDashboard } from "./appDashboard";
 import { AppForms } from "./appForms";
+import { AppInstall } from "./appInstall";
 import { AppSecurity } from "./appSecurity";
 import { UserAgreement } from "./userAgreement";
 import * as Common from "./common";
@@ -95,7 +96,7 @@ export class AppView {
                         text: "Manage App Configuration",
                         onClick: () => {
                             // Show the install modal
-                            DataSource.InstallRequired(null, true);
+                            AppInstall.InstallRequired(null, true);
                         }
                     },
                     {
@@ -372,7 +373,7 @@ export class AppView {
                 ],
             },
             table: {
-                rows: DataSource.Items,
+                rows: DataSource.DocSetList.Items,
                 dtProps: {
                     dom: 'rt<"row"<"col-sm-4"l><"col-sm-4"i><"col-sm-4"p>>',
                     pageLength: AppConfig.Configuration.paging,
@@ -534,16 +535,13 @@ export class AppView {
                                     isSmall: true,
                                     type: Components.ButtonTypes.OutlinePrimary,
                                     onClick: () => {
-                                        // Redirect to the docset item
-                                        //window.open(Common.generateDocSetUrl(item), "_self");
-
                                         // Show a loading dialog
                                         LoadingDialog.setHeader("Loading Application Information");
                                         LoadingDialog.setBody("This will close after the data is loaded...");
                                         LoadingDialog.show();
 
-                                        // Load the doc set item
-                                        DataSource.loadDocSet(item.Id).then(() => {
+                                        // Load the app dashboard
+                                        DataSource.loadAppDashboard(item.Id).then(() => {
                                             // Clear the details
                                             while (this._elAppDetails.firstChild) { this._elAppDetails.removeChild(this._elAppDetails.firstChild); }
 
