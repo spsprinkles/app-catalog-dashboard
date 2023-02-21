@@ -105,52 +105,49 @@ export class AppForms {
                                 // Update the item
                                 item.update({
                                     AppStatus: status.nextStep
-                                }).execute(
-                                    () => {
-                                        // Close the dialog
-                                        LoadingDialog.hide();
+                                }).execute(() => {
+                                    // Close the dialog
+                                    LoadingDialog.hide();
 
-                                        // Run the flow associated for this status
-                                        AppActions.runFlow(item, status.flowId);
+                                    // Run the flow associated for this status
+                                    AppActions.runFlow(item, status.flowId);
 
-                                        // Send the notifications
-                                        AppNotifications.sendEmail(status.notification, item).then(() => {
-                                            // See if the test app catalog exists and we are creating the test site
-                                            if (DataSource.SiteCollectionAppCatalogExists && status.createTestSite) {
-                                                // Load the test site
-                                                DataSource.loadTestSite(item).then(
-                                                    // Exists
-                                                    webInfo => {
-                                                        // See if the current version is deployed
-                                                        if (item.AppVersion == webInfo.app.InstalledVersion && !webInfo.app.SkipDeploymentFeature) {
+                                    // Send the notifications
+                                    AppNotifications.sendEmail(status.notification, item).then(() => {
+                                        // See if the test app catalog exists and we are creating the test site
+                                        if (AppSecurity.IsSiteAppCatalogOwner && status.createTestSite) {
+                                            // Load the test site
+                                            DataSource.loadTestSite(item).then(
+                                                // Exists
+                                                web => {
+                                                    // See if the current version is deployed
+                                                    if (item.AppVersion == DataSource.AppCatalogSiteItem.InstalledVersion && !DataSource.AppCatalogSiteItem.SkipDeploymentFeature) {
+                                                        // Call the update event
+                                                        onUpdate();
+                                                    } else {
+                                                        // Update the app
+                                                        AppActions.updateApp(item, web.ServerRelativeUrl, true, onUpdate).then(() => {
                                                             // Call the update event
                                                             onUpdate();
-                                                        } else {
-                                                            // Update the app
-                                                            AppActions.updateApp(item, webInfo.web.ServerRelativeUrl, true, onUpdate).then(() => {
-                                                                // Call the update event
-                                                                onUpdate();
-                                                            });
-                                                        }
-                                                    },
-
-                                                    // Doesn't exist
-                                                    () => {
-                                                        // Create the test site
-                                                        AppActions.createTestSite(item, onUpdate);
+                                                        });
                                                     }
-                                                );
-                                            } else {
-                                                // Call the update event
-                                                onUpdate();
-                                            }
-                                        },
-                                            ex => {
-                                                // Log the error
-                                                ErrorDialog.show("Updating Status", "There was an error updating the status.", ex);
-                                            }
-                                        );
+                                                },
+
+                                                // Doesn't exist
+                                                () => {
+                                                    // Create the test site
+                                                    AppActions.createTestSite(item, onUpdate);
+                                                }
+                                            );
+                                        } else {
+                                            // Call the update event
+                                            onUpdate();
+                                        }
+                                    }, ex => {
+                                        // Log the error
+                                        ErrorDialog.show("Updating Status", "There was an error updating the status.", ex);
                                     });
+                                });
                             });
                         });
                     });
@@ -188,9 +185,9 @@ export class AppForms {
                 }
 
                 // See if the app was deployed, but errored out
-                if (DataSource.DocSetSCAppItem && DataSource.DocSetSCAppItem.AppPackageErrorMessage && DataSource.DocSetSCAppItem.AppPackageErrorMessage != "No errors.") {
+                if (DataSource.AppCatalogItem && DataSource.AppCatalogItem.AppPackageErrorMessage && DataSource.AppCatalogItem.AppPackageErrorMessage != "No errors.") {
                     // Delete the item
-                    DataSource.DocSetItem.delete().execute(() => {
+                    DataSource.AppCatalogItem.delete().execute(() => {
                         // Create the test site
                         onComplete();
                     });
@@ -845,6 +842,7 @@ export class AppForms {
                     }
 
                     // See if this is a url field
+                    // TODO: This shouldn't be happening anymore
                     if (field.InternalName.indexOf("URL") > 0) {
                         /* TODO - Dade to customize the image url and video url fields */
                         // Hide the description field
@@ -880,7 +878,7 @@ export class AppForms {
                                     LoadingDialog.show();
 
                                     // Upload the file
-                                    Web(Strings.SourceUrl).Lists(Strings.Lists.Apps).Items(DataSource.DocSetItemId).Folder().Files().add(fileName, true, file.data).execute(
+                                    Web(Strings.SourceUrl).Lists(Strings.Lists.Apps).Items(DataSource.AppItem.Id).Folder().Files().add(fileName, true, file.data).execute(
                                         // Success
                                         file => {
                                             // Close the dialog
@@ -915,7 +913,7 @@ export class AppForms {
                                         // Upload the file
                                         let fileInfo = fileName.split('.');
                                         let dstFileName = "AppImage" + field.InternalName.replace("AppImageURL", '') + "." + fileInfo[fileInfo.length - 1];
-                                        let fileUrl = [DataSource.DocSetFolder.ServerRelativeUrl, dstFileName].join('/');
+                                        let fileUrl = [DataSource.AppFolder.ServerRelativeUrl, dstFileName].join('/');
                                         uploadFile(dstFileName, file).then(
                                             () => {
                                                 // Set the value
@@ -948,7 +946,7 @@ export class AppForms {
                                         // Upload the file
                                         let fileInfo = fileName.split('.');
                                         let dstFileName = "AppVideo" + "." + fileInfo[fileInfo.length - 1];
-                                        let fileUrl = [DataSource.DocSetFolder.ServerRelativeUrl, dstFileName].join('/');
+                                        let fileUrl = [DataSource.AppFolder.ServerRelativeUrl, dstFileName].join('/');
                                         uploadFile(dstFileName, file).then(
                                             () => {
                                                 // Set the value
@@ -1312,8 +1310,8 @@ export class AppForms {
             LoadingDialog.show();
 
             // Parse the fields
-            for (let fieldName in DataSource.DocSetInfo.fields) {
-                let field = DataSource.DocSetInfo.fields[fieldName];
+            for (let fieldName in DataSource.DocSetList.FormInfo.fields) {
+                let field = DataSource.DocSetList.FormInfo.fields[fieldName];
 
                 // See if this is a required field
                 if (field.Required) {
@@ -1549,7 +1547,7 @@ export class AppForms {
                 // Show 'assessment not found' modal
                 Modal.clear();
                 Modal.setHeader("Assessment not found")
-                Modal.setBody("Unable to find an assessment for app '" + DataSource.DocSetItem.Title + "'.")
+                Modal.setBody("Unable to find an assessment for app '" + DataSource.AppItem.Title + "'.")
                 let close = Components.Button({
                     el: document.createElement("div"),
                     text: "Close",
@@ -1685,7 +1683,7 @@ export class AppForms {
             },
             onUpdate: () => {
                 // Reload the app catalog items
-                DataSource.loadAppCatalogRequests();
+                DataSource.AppCatalogRequests.refresh();
             }
         });
     }
@@ -1979,7 +1977,7 @@ export class AppForms {
                 // Update the app
                 AppActions.updateApp(item, siteUrl, true, onUpdate).then(() => {
                     // Send the notifications
-                    AppNotifications.sendAppTestSiteUpgradedEmail(DataSource.DocSetItem).then(() => {
+                    AppNotifications.sendAppTestSiteUpgradedEmail(DataSource.AppItem).then(() => {
                         // Call the update event
                         onUpdate();
                     });
