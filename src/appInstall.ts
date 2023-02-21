@@ -39,7 +39,7 @@ export class AppInstall {
             let errors: Components.IListGroupItem[] = [];
 
             // See if the audit log exists
-            if (!installAuditLogFl) {
+            if (installAuditLogFl) {
                 errors.push({
                     content: "App audit log doesn't exist...",
                     type: Components.ListGroupItemTypes.Danger
@@ -109,7 +109,7 @@ export class AppInstall {
                                 }
 
                                 // See if the audit log doesn't exist
-                                if (!installAuditLogFl) {
+                                if (installAuditLogFl) {
                                     // Add the custom install button
                                     Components.Tooltip({
                                         el,

@@ -451,7 +451,7 @@ export class AppDashboard {
                             // TODO: Add a renderForm event that gives the component
                             // TODO: Set el to renderForm event
                             // Render the display form
-                            DataSource.DocSetList.viewItem({
+                            DataSource.DocSetList.viewForm({
                                 itemId: DataSource.AppItem.Id,
                                 onCreateViewForm: props => {
                                     props.includeFields = AppConfig.Configuration.appDetails && AppConfig.Configuration.appDetails.left ? AppConfig.Configuration.appDetails.left : [
@@ -482,7 +482,7 @@ export class AppDashboard {
                             // TODO: Add a renderForm event that gives the component
                             // TODO: Set el to renderForm event
                             // Render the properties
-                            DataSource.DocSetList.viewItem({
+                            DataSource.DocSetList.viewForm({
                                 itemId: DataSource.AppItem.Id,
                                 onCreateViewForm: props => {
                                     // Set the default items to view

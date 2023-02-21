@@ -111,8 +111,8 @@ export class DataSource {
             this._appAssessments = new List<IAssessmentItem>({
                 listName: Strings.Lists.Assessments,
                 itemQuery: { Filter: "RelatedAppId eq 0" },
-                onItemsLoaded: resolve,
-                onLoadItemsError: reject
+                onInitError: reject,
+                onInitialized: resolve
             });
         });
     }
@@ -141,8 +141,8 @@ export class DataSource {
                 itemQuery: {
                     Filter: "Requesters/Id eq " + ContextInfo.userId
                 },
-                onItemsLoaded: resolve,
-                onLoadItemsError: reject
+                onInitError: reject,
+                onInitialized: resolve
             })
         });
     }
@@ -175,8 +175,8 @@ export class DataSource {
                         "CheckoutUser/Id", "CheckoutUser/EMail", "CheckoutUser/Title"
                     ]
                 },
-                onItemsLoaded: resolve,
-                onLoadItemsError: reject
+                onInitError: reject,
+                onInitialized: resolve
             });
         });
     }
@@ -324,8 +324,12 @@ export class DataSource {
                 AppSecurity.init(AppConfig.Configuration.appCatalogUrl, AppConfig.Configuration.tenantAppCatalogUrl).then(() => {
                     // Wait for the components to initialize
                     Promise.all([
+                        // Initialize the app assessments
+                        this.initAppAssessments(),
                         // Initialize the app catalog requests
                         this.initAppCatalogRequests(),
+                        // Initialize the audit log
+                        this.initAuditLog(),
                         // Initialize the document set list
                         this.initDocSetList(),
                         // Load the status filters
@@ -527,8 +531,15 @@ export class DataSource {
     // Audit Log
     private static _auditLog: AuditLog = null;
     static get AuditLog(): AuditLog { return this._auditLog; }
-    private static initAuditLog() {
-        // Intialize the audit log
-        this._auditLog = new AuditLog(Strings.Lists.AuditLog);
+    private static initAuditLog(): PromiseLike<void> {
+        // Return a promise
+        return new Promise((resolve, reject) => {
+            // Intialize the audit log
+            this._auditLog = new AuditLog({
+                listName: Strings.Lists.AuditLog,
+                onInitError: reject,
+                onInitialized: resolve
+            });
+        });
     }
 }

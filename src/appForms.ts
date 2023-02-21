@@ -635,7 +635,7 @@ export class AppForms {
     // Display form
     display(itemId: number) {
         // Show the display form
-        DataSource.DocSetList.viewItem({
+        DataSource.DocSetList.viewForm({
             itemId,
             webUrl: Strings.SourceUrl,
             onSetHeader: el => {
@@ -693,7 +693,7 @@ export class AppForms {
             // See if an item exists
             if (assessment) {
                 // Display the the view form
-                DataSource.AppAssessments.viewItem({
+                DataSource.AppAssessments.viewForm({
                     itemId: assessment.Id,
                     webUrl: Strings.SourceUrl,
                     onGetListInfo: (props) => {
@@ -719,7 +719,7 @@ export class AppForms {
             // See if an item exists
             if (assessment) {
                 // Display the the view form
-                DataSource.AppAssessments.viewItem({
+                DataSource.AppAssessments.viewForm({
                     itemId: assessment.Id,
                     webUrl: Strings.SourceUrl,
                     onGetListInfo: props => {
@@ -746,7 +746,7 @@ export class AppForms {
     // Edit form
     edit(itemId: number, onUpdate: () => void) {
         // Display the edit form
-        DataSource.DocSetList.editItem({
+        DataSource.DocSetList.editForm({
             itemId,
             webUrl: Strings.SourceUrl,
             onSetFooter: el => {
@@ -1009,7 +1009,7 @@ export class AppForms {
             let validateFl = false;
 
             // Display the edit form
-            DataSource.AppAssessments.editItem({
+            DataSource.AppAssessments.editForm({
                 itemId: assessment.Id,
                 webUrl: Strings.SourceUrl,
                 onSetFooter: el => {
@@ -1106,13 +1106,13 @@ export class AppForms {
                 LoadingDialog.setBody("This dialog will close after the form is created.");
 
                 // Create the item
-                Web(Strings.SourceUrl).Lists(Strings.Lists.Assessments).Items().add({
+                DataSource.AppAssessments.createItem({
                     RelatedAppId: item.Id,
                     Title: item.Title + " Review " + (new Date(Date.now()).toDateString())
-                }).execute(
+                }).then(
                     item => {
                         // Show the assessment form
-                        displayEditForm(item as any);
+                        displayEditForm(item);
                     },
                     ex => {
                         // Log the error
@@ -1130,7 +1130,7 @@ export class AppForms {
             let validateFl = false;
 
             // Show the edit form
-            DataSource.AppAssessments.editItem({
+            DataSource.AppAssessments.editForm({
                 itemId: assessment.Id,
                 webUrl: Strings.SourceUrl,
                 onGetListInfo: props => {
@@ -1238,14 +1238,14 @@ export class AppForms {
                     let ct = cts.results[0];
 
                     // Create the item
-                    Web(Strings.SourceUrl).Lists(Strings.Lists.Assessments).Items().add({
+                    DataSource.AppAssessments.createItem({
                         ContentTypeId: ct ? ct.StringId : null,
                         RelatedAppId: item.Id,
                         Title: item.Title + " Tests " + (new Date(Date.now()).toDateString())
-                    }).execute(
+                    }).then(
                         item => {
                             // Show the assessment form
-                            displayEditForm(item as any);
+                            displayEditForm(item);
                         },
                         ex => {
                             // Log the error
@@ -1516,7 +1516,7 @@ export class AppForms {
             // See if an item exists
             if (assessment) {
                 // Display the view form
-                DataSource.AppAssessments.viewItem({
+                DataSource.AppAssessments.viewForm({
                     itemId: assessment.Id,
                     webUrl: Strings.SourceUrl
                 });
@@ -1625,7 +1625,7 @@ export class AppForms {
     // Displays the list form for requesting an app catalog
     requestAppCatalog(url: string) {
         // Display the new form
-        DataSource.AppCatalogRequests.createItem({
+        DataSource.AppCatalogRequests.newForm({
             webUrl: Strings.SourceUrl,
             onSetHeader(el) {
                 el.innerHTML = el.innerHTML;
