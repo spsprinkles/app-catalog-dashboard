@@ -1,4 +1,4 @@
-import { List } from "dattatable";
+import { AuditLog, List } from "dattatable";
 import { Components, ContextInfo, Types, Web } from "gd-sprest-bs";
 import { AppConfig } from "./appCfg";
 import { AppSecurity } from "./appSecurity";
@@ -489,5 +489,17 @@ export class DataSource {
                 }, reject);
             }
         });
+    }
+
+    /**
+     * Audit Log
+     */
+
+    // Audit Log
+    private static _auditLog: AuditLog = null;
+    static get AuditLog(): AuditLog { return this._auditLog; }
+    private static initAuditLog() {
+        // Intialize the audit log
+        this._auditLog = new AuditLog(Strings.Lists.AuditLog);
     }
 }

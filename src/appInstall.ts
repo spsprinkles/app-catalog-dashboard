@@ -3,6 +3,7 @@ import { Components, Site } from "gd-sprest-bs";
 import { AppConfig } from "./appCfg";
 import { AppSecurity, createSecurityGroups } from "./appSecurity";
 import { Configuration } from "./cfg";
+import { DataSource } from "./ds";
 import { ErrorDialog } from "./errorDialog";
 import Strings from "./strings";
 
@@ -34,160 +35,207 @@ export class AppInstall {
     // Sees if an install is required and displays a dialog
     static InstallRequired(el: HTMLElement, showFl: boolean = false) {
         // See if an install is required
-        InstallationRequired.requiresInstall(Configuration).then(installFl => {
+        InstallationRequired.requiresInstall(DataSource.AuditLog.Configuration).then(installAuditLogFl => {
             let errors: Components.IListGroupItem[] = [];
 
-            // Ensure the document set feature is enabled
-            this.docSetEnabled().then(featureEnabledFl => {
-                // See if the feature is enabled
-                if (!featureEnabledFl) {
-                    // Add an error
-                    errors.push({
-                        content: "Document Set site feature is not enabled.",
-                        type: Components.ListGroupItemTypes.Danger
-                    });
-                }
+            // See if the audit log exists
+            if (!installAuditLogFl) {
+                errors.push({
+                    content: "App audit log doesn't exist...",
+                    type: Components.ListGroupItemTypes.Danger
+                });
+            }
 
-                // See if the configuration is correct
-                let cfgIsValid = true;
-                if (AppConfig.Configuration == null) {
-                    // Update the flag
-                    cfgIsValid = false;
+            // See if the audit log exists
+            InstallationRequired.requiresInstall(Configuration).then(installFl => {
+                // Ensure the document set feature is enabled
+                this.docSetEnabled().then(featureEnabledFl => {
+                    // See if the feature is enabled
+                    if (!featureEnabledFl) {
+                        // Add an error
+                        errors.push({
+                            content: "Document Set site feature is not enabled.",
+                            type: Components.ListGroupItemTypes.Danger
+                        });
+                    }
 
-                    // Add an error
-                    errors.push({
-                        content: "App configuration doesn't exist or is not in the correct JSON format. Please edit the webpart and set the configuration property.",
-                        type: featureEnabledFl ? null : Components.ListGroupItemTypes.Danger
-                    });
-                }
-                // Else, ensure it's valid
-                else if (!AppConfig.IsValid) {
-                    // Update the flag
-                    cfgIsValid = false;
+                    // See if the configuration is correct
+                    let cfgIsValid = true;
+                    if (AppConfig.Configuration == null) {
+                        // Update the flag
+                        cfgIsValid = false;
 
-                    // Add an error
-                    errors.push({
-                        content: "App configuration exists, but is invalid. Please contact your administrator.",
-                        type: featureEnabledFl ? null : Components.ListGroupItemTypes.Danger
-                    });
-                }
+                        // Add an error
+                        errors.push({
+                            content: "App configuration doesn't exist or is not in the correct JSON format. Please edit the webpart and set the configuration property.",
+                            type: featureEnabledFl ? null : Components.ListGroupItemTypes.Danger
+                        });
+                    }
+                    // Else, ensure it's valid
+                    else if (!AppConfig.IsValid) {
+                        // Update the flag
+                        cfgIsValid = false;
 
-                // See if the security groups exist
-                let securityGroupsExist = true;
-                if (AppSecurity.ApproverGroup == null || AppSecurity.DevGroup == null || AppSecurity.FinalApproverGroup == null || AppSecurity.SponsorGroup == null) {
-                    // Set the flag
-                    securityGroupsExist = false;
+                        // Add an error
+                        errors.push({
+                            content: "App configuration exists, but is invalid. Please contact your administrator.",
+                            type: featureEnabledFl ? null : Components.ListGroupItemTypes.Danger
+                        });
+                    }
 
-                    // Add an error
-                    errors.push({
-                        content: "Security groups are not installed.",
-                        type: featureEnabledFl && cfgIsValid ? null : Components.ListGroupItemTypes.Danger
-                    });
-                }
+                    // See if the security groups exist
+                    let securityGroupsExist = true;
+                    if (AppSecurity.ApproverGroup == null || AppSecurity.DevGroup == null || AppSecurity.FinalApproverGroup == null || AppSecurity.SponsorGroup == null) {
+                        // Set the flag
+                        securityGroupsExist = false;
 
-                // See if an installation is required
-                if ((installFl || errors.length > 0) || showFl) {
-                    // Show the installation dialog
-                    InstallationRequired.showDialog({
-                        errors,
-                        onFooterRendered: el => {
-                            // See if the configuration isn't defined
-                            if (!cfgIsValid) {
-                                // Disable the install button
-                                (el.firstChild as HTMLButtonElement).disabled = true;
-                            }
+                        // Add an error
+                        errors.push({
+                            content: "Security groups are not installed.",
+                            type: featureEnabledFl && cfgIsValid ? null : Components.ListGroupItemTypes.Danger
+                        });
+                    }
 
-                            // See if the feature isn't enabled
-                            if (!featureEnabledFl) {
-                                // Add the custom install button
-                                Components.Tooltip({
-                                    el,
-                                    content: "Enables the document set site collection feature.",
-                                    type: Components.ButtonTypes.OutlinePrimary,
-                                    btnProps: {
-                                        text: "Enable Feature",
-                                        onClick: () => {
-                                            // Show a loading dialog
-                                            LoadingDialog.setHeader("Enable Feature");
-                                            LoadingDialog.setBody("Enabling the document set feature. This dialog will close after this requests completes.");
-                                            LoadingDialog.show();
+                    // See if an installation is required
+                    if ((installFl || errors.length > 0) || showFl) {
+                        // Show the installation dialog
+                        InstallationRequired.showDialog({
+                            errors,
+                            onFooterRendered: el => {
+                                // See if the configuration isn't defined
+                                if (!cfgIsValid) {
+                                    // Disable the install button
+                                    (el.firstChild as HTMLButtonElement).disabled = true;
+                                }
 
-                                            // Enable the feature
-                                            Site(Strings.SourceUrl).Features().add("3bae86a2-776d-499d-9db8-fa4cdc7884f8").execute(
-                                                // Enabled
-                                                () => {
+                                // See if the audit log doesn't exist
+                                if (!installAuditLogFl) {
+                                    // Add the custom install button
+                                    Components.Tooltip({
+                                        el,
+                                        content: "Installs the audit log list.",
+                                        type: Components.ButtonTypes.OutlinePrimary,
+                                        btnProps: {
+                                            text: "Install Audit Log",
+                                            onClick: () => {
+                                                // Show a loading dialog
+                                                LoadingDialog.setHeader("Creating List");
+                                                LoadingDialog.setBody("This dialog will close after list is created...");
+                                                LoadingDialog.show();
+
+                                                // Create the list
+                                                DataSource.AuditLog.install().then(
+                                                    // Success
+                                                    () => {
+                                                        // Close the dialog
+                                                        LoadingDialog.hide();
+
+                                                        // Refresh the page
+                                                        window.location.reload();
+                                                    },
+                                                    // Error
+                                                    ex => {
+                                                        // Show the error
+                                                        ErrorDialog.show("Error Creating List", "There was an error creating the audit log list.", ex);
+                                                    }
+                                                );
+                                            }
+                                        }
+                                    });
+                                }
+
+                                // See if the feature isn't enabled
+                                if (!featureEnabledFl) {
+                                    // Add the custom install button
+                                    Components.Tooltip({
+                                        el,
+                                        content: "Enables the document set site collection feature.",
+                                        type: Components.ButtonTypes.OutlinePrimary,
+                                        btnProps: {
+                                            text: "Enable Feature",
+                                            onClick: () => {
+                                                // Show a loading dialog
+                                                LoadingDialog.setHeader("Enable Feature");
+                                                LoadingDialog.setBody("Enabling the document set feature. This dialog will close after this requests completes.");
+                                                LoadingDialog.show();
+
+                                                // Enable the feature
+                                                Site(Strings.SourceUrl).Features().add("3bae86a2-776d-499d-9db8-fa4cdc7884f8").execute(
+                                                    // Enabled
+                                                    () => {
+                                                        // Close the dialog
+                                                        LoadingDialog.hide();
+
+                                                        // Refresh the page
+                                                        window.location.reload();
+                                                    },
+                                                    ex => {
+                                                        // Show the error
+                                                        ErrorDialog.show("Enable Feature", "There was an error enabling the document set site collection feature.", ex);
+                                                    }
+                                                );
+                                            }
+                                        }
+                                    });
+                                }
+
+                                // See if the security group doesn't exist
+                                if (!securityGroupsExist || showFl) {
+                                    // Add the custom install button
+                                    Components.Tooltip({
+                                        el,
+                                        content: "Creates the security groups.",
+                                        type: Components.ButtonTypes.OutlinePrimary,
+                                        btnProps: {
+                                            text: "Security",
+                                            isDisabled: !featureEnabledFl || !cfgIsValid || !InstallationRequired.ListsExist,
+                                            onClick: () => {
+                                                // Show a loading dialog
+                                                LoadingDialog.setHeader("Security Groups");
+                                                LoadingDialog.setBody("Creating the security groups. This dialog will close after it completes.");
+                                                LoadingDialog.show();
+
+                                                // Create the security groups
+                                                createSecurityGroups().then(() => {
                                                     // Close the dialog
                                                     LoadingDialog.hide();
 
                                                     // Refresh the page
                                                     window.location.reload();
-                                                },
-                                                ex => {
-                                                    // Show the error
-                                                    ErrorDialog.show("Enable Feature", "There was an error enabling the document set site collection feature.", ex);
-                                                }
-                                            );
+                                                });
+                                            }
                                         }
-                                    }
-                                });
+                                    });
+                                }
                             }
+                        });
 
-                            // See if the security group doesn't exist
-                            if (!securityGroupsExist || showFl) {
-                                // Add the custom install button
-                                Components.Tooltip({
-                                    el,
-                                    content: "Creates the security groups.",
-                                    type: Components.ButtonTypes.OutlinePrimary,
-                                    btnProps: {
-                                        text: "Security",
-                                        isDisabled: !featureEnabledFl || !cfgIsValid || !InstallationRequired.ListsExist,
-                                        onClick: () => {
-                                            // Show a loading dialog
-                                            LoadingDialog.setHeader("Security Groups");
-                                            LoadingDialog.setBody("Creating the security groups. This dialog will close after it completes.");
-                                            LoadingDialog.show();
+                        // Clear the element
+                        while (el.firstChild) { el.removeChild(el.firstChild); }
 
-                                            // Create the security groups
-                                            createSecurityGroups().then(() => {
-                                                // Close the dialog
-                                                LoadingDialog.hide();
+                        // Render the errors
+                        Components.ListGroup({
+                            el,
+                            items: errors
+                        });
 
-                                                // Refresh the page
-                                                window.location.reload();
-                                            });
-                                        }
-                                    }
-                                });
+                        // Show a button to display the modal
+                        Components.Tooltip({
+                            el,
+                            content: "Displays the installation status modal.",
+                            btnProps: {
+                                text: "Status",
+                                onClick: () => {
+                                    // Dispaly this modal
+                                    this.InstallRequired(el, true);
+                                }
                             }
-                        }
-                    });
-
-                    // Clear the element
-                    while (el.firstChild) { el.removeChild(el.firstChild); }
-
-                    // Render the errors
-                    Components.ListGroup({
-                        el,
-                        items: errors
-                    });
-
-                    // Show a button to display the modal
-                    Components.Tooltip({
-                        el,
-                        content: "Displays the installation status modal.",
-                        btnProps: {
-                            text: "Status",
-                            onClick: () => {
-                                // Dispaly this modal
-                                this.InstallRequired(el, true);
-                            }
-                        }
-                    });
-                } else {
-                    // Log
-                    console.error("[" + Strings.ProjectName + "] Error initializing the solution.");
-                }
+                        });
+                    } else {
+                        // Log
+                        console.error("[" + Strings.ProjectName + "] Error initializing the solution.");
+                    }
+                });
             });
         });
     }

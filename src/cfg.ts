@@ -1,6 +1,4 @@
-import { Helper, List, SPTypes, Types, Web } from "gd-sprest-bs";
-import { AppConfig } from "./appCfg";
-import { ErrorDialog } from "./errorDialog";
+import { Helper, List, SPTypes } from "gd-sprest-bs";
 import Strings from "./strings";
 
 /**
