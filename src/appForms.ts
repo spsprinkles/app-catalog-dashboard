@@ -1,4 +1,4 @@
-import { ItemForm, LoadingDialog, Modal } from "dattatable";
+import { LoadingDialog, Modal } from "dattatable";
 import { Components, ContextInfo, Helper, List, SPTypes, Web } from "gd-sprest-bs";
 import { AppActions } from "./appActions";
 import { AppConfig, IStatus } from "./appCfg";
@@ -634,12 +634,8 @@ export class AppForms {
 
     // Display form
     display(itemId: number) {
-        // Set the form properties
-        ItemForm.AutoClose = false;
-        ItemForm.ListName = Strings.Lists.Apps;
-
-        // Show the item form
-        ItemForm.view({
+        // Show the display form
+        DataSource.DocSetList.viewItem({
             itemId,
             webUrl: Strings.SourceUrl,
             onSetHeader: el => {
@@ -692,16 +688,12 @@ export class AppForms {
 
     // Technical review form
     displayTechReview(item: IAppItem) {
-        // Set the form properties
-        ItemForm.AutoClose = false;
-        ItemForm.ListName = Strings.Lists.Assessments;
-
         // Get the assessment item
         this.getAssessmentItem(item, false).then(assessment => {
             // See if an item exists
             if (assessment) {
-                // Show the view form
-                ItemForm.view({
+                // Display the the view form
+                DataSource.AppAssessments.viewItem({
                     itemId: assessment.Id,
                     webUrl: Strings.SourceUrl,
                     onGetListInfo: (props) => {
@@ -722,16 +714,12 @@ export class AppForms {
 
     // Views the tests for the application
     displayTestCases(item: IAppItem) {
-        // Set the form properties
-        ItemForm.AutoClose = false;
-        ItemForm.ListName = Strings.Lists.Assessments;
-
         // Get the assessment item
         this.getAssessmentItem(item).then(assessment => {
             // See if an item exists
             if (assessment) {
-                // Show the view form
-                ItemForm.view({
+                // Display the the view form
+                DataSource.AppAssessments.viewItem({
                     itemId: assessment.Id,
                     webUrl: Strings.SourceUrl,
                     onGetListInfo: props => {
@@ -757,26 +745,20 @@ export class AppForms {
 
     // Edit form
     edit(itemId: number, onUpdate: () => void) {
-        // Set the form properties
-        ItemForm.AutoClose = false;
-        ItemForm.ListName = Strings.Lists.Apps;
-
-        // Show the item form
-        ItemForm.edit({
+        // Display the edit form
+        DataSource.DocSetList.editItem({
             itemId,
             webUrl: Strings.SourceUrl,
             onSetFooter: el => {
-                // Add a cancel button if form is in a modal
-                if (ItemForm.UseModal) {
-                    Components.Button({
-                        el,
-                        text: "Cancel",
-                        type: Components.ButtonTypes.OutlineSecondary,
-                        onClick: () => {
-                            Modal.hide();
-                        }
-                    });
-                }
+                // Add a cancel button
+                Components.Button({
+                    el,
+                    text: "Cancel",
+                    type: Components.ButtonTypes.OutlineSecondary,
+                    onClick: () => {
+                        Modal.hide();
+                    }
+                });
             },
             onSetHeader: el => {
                 // Update the header
@@ -824,7 +806,7 @@ export class AppForms {
                         // Add validation
                         ctrl.onValidate = (ctrl, results) => {
                             // See if permissions exist
-                            let apiPermissions = ItemForm.EditForm.getItem()["AppAPIPermissions"];
+                            let apiPermissions = DataSource.DocSetList.EditForm.getItem()["AppAPIPermissions"];
                             if (apiPermissions) {
                                 // Set the flag
                                 results.isValid = (results.value || "").trim().length > 0;
@@ -1022,16 +1004,12 @@ export class AppForms {
 
     // Technical review form
     editTechReview(item: IAppItem, onUpdate: () => void) {
-        // Set the form properties
-        ItemForm.AutoClose = false;
-        ItemForm.ListName = Strings.Lists.Assessments;
-
         // Displays the assessment form
-        let displayForm = (assessment: IAssessmentItem) => {
+        let displayEditForm = (assessment: IAssessmentItem) => {
             let validateFl = false;
 
-            // Show the edit form
-            ItemForm.edit({
+            // Display the edit form
+            DataSource.AppAssessments.editItem({
                 itemId: assessment.Id,
                 webUrl: Strings.SourceUrl,
                 onSetFooter: el => {
@@ -1047,7 +1025,7 @@ export class AppForms {
                                 validateFl = true;
 
                                 // Validate the form
-                                ItemForm.EditForm.isValid();
+                                DataSource.AppAssessments.EditForm.isValid();
                             }
                         }
                     });
@@ -1121,7 +1099,7 @@ export class AppForms {
             // See if an item exists
             if (assessment) {
                 // Show the assessment form
-                displayForm(assessment);
+                displayEditForm(assessment);
             } else {
                 // Show a loading dialog
                 LoadingDialog.setHeader("Creating the Form");
@@ -1134,7 +1112,7 @@ export class AppForms {
                 }).execute(
                     item => {
                         // Show the assessment form
-                        displayForm(item as any);
+                        displayEditForm(item as any);
                     },
                     ex => {
                         // Log the error
@@ -1147,16 +1125,12 @@ export class AppForms {
 
     // Views the tests for the application
     editTestCases(item: IAppItem, onUpdate: () => void) {
-        // Set the form properties
-        ItemForm.AutoClose = false;
-        ItemForm.ListName = Strings.Lists.Assessments;
-
         // Displays the form
-        let displayForm = (assessment: IAssessmentItem) => {
+        let displayEditForm = (assessment: IAssessmentItem) => {
             let validateFl = false;
 
             // Show the edit form
-            ItemForm.edit({
+            DataSource.AppAssessments.editItem({
                 itemId: assessment.Id,
                 webUrl: Strings.SourceUrl,
                 onGetListInfo: props => {
@@ -1179,7 +1153,7 @@ export class AppForms {
                                 validateFl = true;
 
                                 // Validate the form
-                                ItemForm.EditForm.isValid();
+                                DataSource.AppAssessments.EditForm.isValid();
                             }
                         }
                     });
@@ -1250,7 +1224,7 @@ export class AppForms {
             // See if an item exists
             if (assessment) {
                 // Show the assessment form
-                displayForm(assessment);
+                displayEditForm(assessment);
             } else {
                 // Show a loading dialog
                 LoadingDialog.setHeader("Creating the Form");
@@ -1271,7 +1245,7 @@ export class AppForms {
                     }).execute(
                         item => {
                             // Show the assessment form
-                            displayForm(item as any);
+                            displayEditForm(item as any);
                         },
                         ex => {
                             // Log the error
@@ -1287,13 +1261,10 @@ export class AppForms {
     private getAssessmentItem(item: IAppItem, testFl: boolean = true): PromiseLike<IAssessmentItem> {
         // Return a promise
         return new Promise((resolve, reject) => {
-            // Get the assoicated item
-            List(Strings.Lists.Assessments).Items().query({
-                Filter: "RelatedAppId eq " + item.Id + " and ContentType eq '" + (testFl ? "TestCases" : "Item") + "'",
-                OrderBy: ["Completed desc"]
-            }).execute(items => {
+            // Get the associated items
+            DataSource.loadAssessments(item.Id, testFl).then(items => {
                 // Return the last item
-                resolve(items.results[0] as any);
+                resolve(items[0]);
             }, reject);
         });
     }
@@ -1309,17 +1280,28 @@ export class AppForms {
             LoadingDialog.setBody("This dialog will close after the validation completes.");
             LoadingDialog.show();
 
-            // Parse the fields
-            for (let fieldName in DataSource.DocSetList.FormInfo.fields) {
-                let field = DataSource.DocSetList.FormInfo.fields[fieldName];
+            // Get the content type
+            for (let i = 0; i < DataSource.DocSetList.ListContentTypes.length; i++) {
+                let ct = DataSource.DocSetList.ListContentTypes[i];
 
-                // See if this is a required field
-                if (field.Required) {
-                    // Ensure a value exists
-                    if (item[fieldName]) { continue; }
+                // See if this is the target content type
+                if (ct.Name == "App") {
+                    // Parse the fields
+                    for (let fieldName in DataSource.DocSetList.ListFields) {
+                        let field = DataSource.DocSetList.ListFields[fieldName];
 
-                    // Set the flag and break from the loop
-                    isValid = false;
+                        // See if this is a required field
+                        if (field.Required) {
+                            // Ensure a value exists
+                            if (item[fieldName]) { continue; }
+
+                            // Set the flag and break from the loop
+                            isValid = false;
+                            break;
+                        }
+                    }
+
+                    // Break from the loop
                     break;
                 }
             }
@@ -1529,34 +1511,35 @@ export class AppForms {
 
     // Last Assessment form
     lastAssessment(item: IAppItem) {
-        // Set the list name
-        ItemForm.AutoClose = false;
-        ItemForm.ListName = Strings.Lists.Assessments;
-
         // Get the assessment item
         this.getAssessmentItem(item, false).then(assessment => {
             // See if an item exists
             if (assessment) {
-                // Show the edit form
-                ItemForm.view({
+                // Display the view form
+                DataSource.AppAssessments.viewItem({
                     itemId: assessment.Id,
                     webUrl: Strings.SourceUrl
                 });
             }
             else {
-                // Show 'assessment not found' modal
+                // Clear the modal
                 Modal.clear();
+
+                // Set the header & body
                 Modal.setHeader("Assessment not found")
                 Modal.setBody("Unable to find an assessment for app '" + DataSource.AppItem.Title + "'.")
-                let close = Components.Button({
-                    el: document.createElement("div"),
+
+                // Add the footer button
+                Components.Button({
+                    el: Modal.FooterElement,
                     text: "Close",
                     type: Components.ButtonTypes.OutlineSecondary,
                     onClick: () => {
                         Modal.hide();
                     }
                 });
-                Modal.setFooter(close.el);
+
+                // Show the modal
                 Modal.show();
             }
         });
@@ -1641,12 +1624,8 @@ export class AppForms {
 
     // Displays the list form for requesting an app catalog
     requestAppCatalog(url: string) {
-        // Set the list name
-        ItemForm.AutoClose = false;
-        ItemForm.ListName = Strings.Lists.AppCatalogRequests;
-
-        // Show the edit form
-        ItemForm.create({
+        // Display the new form
+        DataSource.AppCatalogRequests.createItem({
             webUrl: Strings.SourceUrl,
             onSetHeader(el) {
                 el.innerHTML = el.innerHTML;

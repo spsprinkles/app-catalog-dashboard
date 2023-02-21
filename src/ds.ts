@@ -98,6 +98,33 @@ export interface IAssessmentItem extends Types.SP.ListItem {
  */
 export class DataSource {
     /**
+     * App Assessments
+     */
+
+    // App Assessements
+    private static _appAssessments: List<IAssessmentItem> = null;
+    static get AppAssessments(): List<IAssessmentItem> { return this._appAssessments; }
+    static initAppAssessments(): PromiseLike<void> {
+        // Return a promise
+        return new Promise((resolve, reject) => {
+            // Set the requests list
+            this._appAssessments = new List<IAssessmentItem>({
+                listName: Strings.Lists.Assessments,
+                itemQuery: { Filter: "RelatedAppId eq 0" },
+                onItemsLoaded: resolve,
+                onLoadItemsError: reject
+            });
+        });
+    }
+    static loadAssessments(itemId: number, testFl: boolean) {
+        // Query the assessments
+        return this._appAssessments.refresh({
+            Filter: "RelatedAppId eq " + itemId + " and ContentType eq '" + (testFl ? "TestCases" : "Item") + "'",
+            OrderBy: ["Completed desc"]
+        });
+    }
+
+    /**
      * App Catalog Requests
      */
 
