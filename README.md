@@ -88,6 +88,7 @@ The available values for the `actions` status property.
 | Name | Description |
 | --- | --- |
 | ApproveReject | Displays the approve and reject button if the user is listed in the `approval` property. |
+| AuditLog | Displays the audit log history for an app. |
 | DeploySiteCatalog | Displays the deploy to site collection button, allowing the user to deploy the application to a site of their choice. |
 | Delete | Displays the delete button to remove the app and test site. |
 | DeleteTestSite | Displays the delete test site button if the site exists. |

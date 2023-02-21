@@ -448,29 +448,21 @@ export class AppDashboard {
                 {
                     body: [{
                         onRender: el => {
-                            // TODO: Add a renderForm event that gives the component
-                            // TODO: Set el to renderForm event
                             // Render the display form
-                            DataSource.DocSetList.viewForm({
-                                itemId: DataSource.AppItem.Id,
-                                onCreateViewForm: props => {
-                                    props.includeFields = AppConfig.Configuration.appDetails && AppConfig.Configuration.appDetails.left ? AppConfig.Configuration.appDetails.left : [
-                                        "AppIsTenant",
-                                        "AppStatus",
-                                        "AppDevelopers",
-                                        "AppSponsor",
-                                        "AppProductID",
-                                        "AppIsClientSideSolution"
-                                    ];
-
-                                    // Set the control rendered event
-                                    props.onControlRendered = (ctrl, field) => {
-                                        // Update the fields
-                                        postUpdateFields(ctrl, field);
-                                    };
-
-                                    // Return the properties
-                                    return props;
+                            Components.ListForm.renderDisplayForm({
+                                info: DataSource.AppFormInfo,
+                                el,
+                                includeFields: AppConfig.Configuration.appDetails && AppConfig.Configuration.appDetails.left ? AppConfig.Configuration.appDetails.left : [
+                                    "AppIsTenant",
+                                    "AppStatus",
+                                    "AppDevelopers",
+                                    "AppSponsor",
+                                    "AppProductID",
+                                    "AppIsClientSideSolution"
+                                ],
+                                onControlRendered: (ctrl, field) => {
+                                    // Update the fields
+                                    postUpdateFields(ctrl, field);
                                 }
                             });
                         }
@@ -479,29 +471,20 @@ export class AppDashboard {
                 {
                     body: [{
                         onRender: el => {
-                            // TODO: Add a renderForm event that gives the component
-                            // TODO: Set el to renderForm event
-                            // Render the properties
-                            DataSource.DocSetList.viewForm({
-                                itemId: DataSource.AppItem.Id,
-                                onCreateViewForm: props => {
-                                    // Set the default items to view
-                                    props.includeFields = AppConfig.Configuration.appDetails && AppConfig.Configuration.appDetails.right ? AppConfig.Configuration.appDetails.right : [
-                                        "AppVersion",
-                                        "AppSharePointMinVersion",
-                                        "AppIsDomainIsolated",
-                                        "AppSkipFeatureDeployment",
-                                        "AppAPIPermissions"
-                                    ];
-
-                                    // Set the control rendered event
-                                    props.onControlRendered = (ctrl, field) => {
-                                        // Update the fields
-                                        postUpdateFields(ctrl, field);
-                                    };
-
-                                    // Return the properties
-                                    return props;
+                            // Render the display form
+                            Components.ListForm.renderDisplayForm({
+                                info: DataSource.AppFormInfo,
+                                el,
+                                includeFields: AppConfig.Configuration.appDetails && AppConfig.Configuration.appDetails.right ? AppConfig.Configuration.appDetails.right : [
+                                    "AppVersion",
+                                    "AppSharePointMinVersion",
+                                    "AppIsDomainIsolated",
+                                    "AppSkipFeatureDeployment",
+                                    "AppAPIPermissions"
+                                ],
+                                onControlRendered: (ctrl, field) => {
+                                    // Update the fields
+                                    postUpdateFields(ctrl, field);
                                 }
                             });
                         }

@@ -1,4 +1,4 @@
-import { LoadingDialog, Modal } from "dattatable";
+import { Dashboard, LoadingDialog, Modal } from "dattatable";
 import { Components, ContextInfo, Helper, List, SPTypes, Web } from "gd-sprest-bs";
 import { AppActions } from "./appActions";
 import { AppConfig, IStatus } from "./appCfg";
