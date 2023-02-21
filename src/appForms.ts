@@ -1262,7 +1262,7 @@ export class AppForms {
         // Return a promise
         return new Promise((resolve, reject) => {
             // Get the associated items
-            DataSource.loadAssessments(item.Id, testFl).then(items => {
+            DataSource.loadAppAssessments(item.Id, testFl).then(items => {
                 // Return the last item
                 resolve(items[0]);
             }, reject);

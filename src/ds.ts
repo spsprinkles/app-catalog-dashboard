@@ -116,7 +116,7 @@ export class DataSource {
             });
         });
     }
-    static loadAssessments(itemId: number, testFl: boolean) {
+    static loadAppAssessments(itemId: number, testFl: boolean) {
         // Query the assessments
         return this._appAssessments.refresh({
             Filter: "RelatedAppId eq " + itemId + " and ContentType eq '" + (testFl ? "TestCases" : "Item") + "'",
@@ -140,7 +140,9 @@ export class DataSource {
                 listName: Strings.Lists.AppCatalogRequests,
                 itemQuery: {
                     Filter: "Requesters/Id eq " + ContextInfo.userId
-                }
+                },
+                onItemsLoaded: resolve,
+                onLoadItemsError: reject
             })
         });
     }
