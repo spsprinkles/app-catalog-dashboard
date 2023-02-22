@@ -1146,6 +1146,10 @@ export class AppForms {
                     // Return the properties
                     return props;
                 },
+                onValidation: (values) => {
+                    // Save the form by default
+                    return true;
+                },
                 onUpdate: () => {
                     // Call the update event
                     onUpdate();
@@ -1270,6 +1274,10 @@ export class AppForms {
 
                     // Return the properties
                     return props;
+                },
+                onValidation: (values) => {
+                    // Save the form by default
+                    return true;
                 },
                 onUpdate: () => {
                     // Call the update event
