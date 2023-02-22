@@ -1346,13 +1346,13 @@ export class AppForms {
                 // See if this is the target content type
                 if (ct.Name == "App") {
                     // Parse the fields
-                    for (let fieldName in DataSource.DocSetList.ListFields) {
-                        let field = DataSource.DocSetList.ListFields[fieldName];
+                    for (let i = 0; i < ct.FieldLinks.results.length; i++) {
+                        let field = ct.FieldLinks.results[i];
 
                         // See if this is a required field
                         if (field.Required) {
                             // Ensure a value exists
-                            if (item[fieldName]) { continue; }
+                            if (item[field.Name]) { continue; }
 
                             // Set the flag and break from the loop
                             isValid = false;

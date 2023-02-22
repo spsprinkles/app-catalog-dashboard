@@ -632,20 +632,20 @@ export class DataSource {
   static refresh(itemId?: number): PromiseLike<void> {
     // Return a promise
     return new Promise((resolve, reject) => {
-      // See if this is a item id is set
-      if (itemId > 0) {
-        // Load the app dashboard
-        this.loadAppDashboard(itemId).then(() => {
+      // Load all the items
+      this.DocSetList.refresh().then(() => {
+        // See if we need to refresh a specific app
+        if (itemId > 0) {
+          // Load the app dashboard
+          this.loadAppDashboard(itemId).then(() => {
+            // Resolve the request
+            resolve();
+          }, reject);
+        } else {
           // Resolve the request
           resolve();
-        }, reject);
-      } else {
-        // Load all the items
-        this.DocSetList.refresh().then(() => {
-          // Resolve the request
-          resolve();
-        }, reject);
-      }
+        }
+      }, reject);
     });
   }
 

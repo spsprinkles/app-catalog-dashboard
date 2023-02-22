@@ -112,8 +112,8 @@ export class AppDashboard {
         LoadingDialog.setBody("This will close after the data is loaded.");
         LoadingDialog.show();
 
-        // Load the the app information
-        DataSource.loadAppDashboard(this._docSetId).then(() => {
+        // Refresh the data
+        DataSource.refresh(this._docSetId).then(() => {
             // Render the alerts
             this.renderAlertStatus();
             this.renderAlertError();
