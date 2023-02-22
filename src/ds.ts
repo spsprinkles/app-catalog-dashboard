@@ -1,4 +1,4 @@
-import { AuditLog, List } from "dattatable";
+import { AuditLog, IAuditLogItemCreation, List } from "dattatable";
 import { Components, ContextInfo, Helper, Types, Web } from "gd-sprest-bs";
 import { AppConfig } from "./appCfg";
 import { AppSecurity } from "./appSecurity";
@@ -668,5 +668,12 @@ export class DataSource {
         onInitialized: resolve,
       });
     });
+  }
+  static logItem(values: IAuditLogItemCreation, item:IAppItem) {
+    // Set the data
+    values.LogData = item.stringify();
+
+    // Log the item
+    this.AuditLog.logItem(values);
   }
 }
