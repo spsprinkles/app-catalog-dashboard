@@ -1676,7 +1676,7 @@ export class AppForms {
                                 ParentId: item.AppProductID,
                                 ParentListName: Strings.Lists.Apps,
                                 Title: "App Rejected",
-                                LogComment: `The app ${item.Title} was rejected.`
+                                LogComment: `The app ${item.Title} was rejected. Justification: ${values.AppComments}`
                             }, { ...item, ...values });
                         },
                         ex => {
