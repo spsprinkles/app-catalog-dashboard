@@ -1,5 +1,5 @@
 import { Documents, LoadingDialog, Modal } from "dattatable";
-import { Components, Helper, Types, Web } from "gd-sprest-bs";
+import { Components, ContextInfo, Helper, Types, Web } from "gd-sprest-bs";
 import { caretRightFill } from "gd-sprest-bs/build/icons/svgs/caretRightFill";
 import { folderSymlink } from "gd-sprest-bs/build/icons/svgs/folderSymlink";
 import { layoutTextWindow } from "gd-sprest-bs/build/icons/svgs/layoutTextWindow";
@@ -385,6 +385,15 @@ export class AppDashboard {
                                                         // Archive the app
                                                         archiveApp();
                                                     });
+
+                                                    // Log
+                                                    DataSource.logItem({
+                                                        LogUserId: ContextInfo.userId,
+                                                        ParentItemId: DataSource.AppItem.Id,
+                                                        ParentListName: Strings.Lists.Apps,
+                                                        Title: "App Updated",
+                                                        LogComment: `A new version (${pkgInfo.item.AppVersion}) of the app ${pkgInfo.item.Title} was added.`
+                                                    }, Object.assign({ ...DataSource.AppItem, ...itemInfo }));
                                                 } else {
                                                     // Archive the app
                                                     archiveApp();

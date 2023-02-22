@@ -882,7 +882,7 @@ export class AppActions {
                         ParentListName: Strings.Lists.Apps,
                         Title: "Deploy Teams App",
                         LogComment: `The app ${item.Title} was synced with the Teams app store.`
-                    }, DataSource.AppItem);
+                    }, item);
 
                     // Hide the dialog
                     LoadingDialog.hide();
