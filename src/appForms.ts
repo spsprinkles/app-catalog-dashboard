@@ -1,4 +1,4 @@
-import { Dashboard, LoadingDialog, Modal } from "dattatable";
+import { LoadingDialog, Modal } from "dattatable";
 import { Components, ContextInfo, Helper, List, SPTypes, Web } from "gd-sprest-bs";
 import { AppActions } from "./appActions";
 import { AppConfig, IStatus } from "./appCfg";
@@ -950,7 +950,7 @@ export class AppForms {
                                         // Upload the file
                                         let fileInfo = fileName.split('.');
                                         let dstFileName = "AppImage" + field.InternalName.replace("AppImageURL", '') + "." + fileInfo[fileInfo.length - 1];
-                                        let fileUrl = [DataSource.AppFolder.ServerRelativeUrl, dstFileName].join('/');
+                                        let fileUrl = [document.location.origin, DataSource.AppFolder.ServerRelativeUrl.replace(/^\//, ''), dstFileName].join('/');
                                         uploadFile(dstFileName, file).then(
                                             () => {
                                                 // Set the value
@@ -983,7 +983,7 @@ export class AppForms {
                                         // Upload the file
                                         let fileInfo = fileName.split('.');
                                         let dstFileName = "AppVideo" + "." + fileInfo[fileInfo.length - 1];
-                                        let fileUrl = [DataSource.AppFolder.ServerRelativeUrl, dstFileName].join('/');
+                                        let fileUrl = [document.location.origin, DataSource.AppFolder.ServerRelativeUrl.replace(/^\//, ''), dstFileName].join('/');
                                         uploadFile(dstFileName, file).then(
                                             () => {
                                                 // Set the value
