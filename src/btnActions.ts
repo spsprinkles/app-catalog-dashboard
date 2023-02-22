@@ -618,7 +618,6 @@ ${ContextInfo.userDisplayName}`.trim()
                       // Show the update form
                       this._forms.updateApp(
                         this._item,
-                        AppConfig.Configuration.appCatalogUrl,
                         web.Url,
                         () => {
                           // Call the update event
@@ -647,7 +646,6 @@ ${ContextInfo.userDisplayName}`.trim()
                       // Show the update form
                       this._forms.updateApp(
                         this._item,
-                        AppConfig.Configuration.appCatalogUrl,
                         web.Url,
                         () => {
                           // Call the update event

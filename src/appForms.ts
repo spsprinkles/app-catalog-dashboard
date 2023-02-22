@@ -4,7 +4,7 @@ import { AppActions } from "./appActions";
 import { AppConfig, IStatus } from "./appCfg";
 import { AppNotifications } from "./appNotifications";
 import { AppSecurity } from "./appSecurity";
-import { DataSource, IAppItem, IAssessmentItem } from "./ds";
+import { DataSource, IAppCatalogRequestItem, IAppItem, IAssessmentItem } from "./ds";
 import { ErrorDialog } from "./errorDialog";
 import Strings from "./strings";
 
@@ -102,6 +102,15 @@ export class AppForms {
                                 LoadingDialog.setBody("This dialog will close after the status is updated.");
                                 LoadingDialog.show();
 
+                                // Log
+                                DataSource.logItem({
+                                    LogUserId: ContextInfo.userId,
+                                    ParentItemId: item.Id,
+                                    ParentListName: Strings.Lists.Apps,
+                                    Title: "App Approved",
+                                    LogComment: `The app ${item.Title} was approved, from ${item.AppStatus} to ${status.nextStep}.`
+                                }, DataSource.AppItem);
+
                                 // Update the item
                                 item.update({
                                     AppStatus: status.nextStep
@@ -178,7 +187,16 @@ export class AppForms {
                 // Code to run after the logic below completes
                 let onComplete = () => {
                     // Create the test site
-                    AppActions.createTestSite(item, () => {
+                    AppActions.createTestSite(item, (web) => {
+                        // Log
+                        DataSource.logItem({
+                            LogUserId: ContextInfo.userId,
+                            ParentItemId: item.Id,
+                            ParentListName: Strings.Lists.Apps,
+                            Title: "Create Test Site",
+                            LogComment: `The app ${item.Title} test site was created successfully at: ${web.ServerRelativeUrl}`
+                        }, item);
+
                         // Call the update event
                         onUpdate();
                     });
@@ -244,6 +262,15 @@ export class AppForms {
                                     // Close the dialog
                                     LoadingDialog.hide();
 
+                                    // Log
+                                    DataSource.logItem({
+                                        LogUserId: ContextInfo.userId,
+                                        ParentItemId: item.Id,
+                                        ParentListName: Strings.Lists.Apps,
+                                        Title: "Delete App",
+                                        LogComment: `The app ${item.Title} was deleted.`
+                                    }, item);
+
                                     // Execute the update event
                                     onUpdate();
                                 });
@@ -305,6 +332,15 @@ export class AppForms {
 
                 // Delete the test site
                 AppActions.deleteTestSite(item).then(() => {
+                    // Log
+                    DataSource.logItem({
+                        LogUserId: ContextInfo.userId,
+                        ParentItemId: item.Id,
+                        ParentListName: Strings.Lists.Apps,
+                        Title: "Delete Test Site",
+                        LogComment: `The app ${item.Title} test site was deleted.`
+                    }, item);
+
                     // Execute the update event
                     onUpdate();
                 });
@@ -367,6 +403,15 @@ export class AppForms {
                         // Execute the flow
                         AppActions.runFlow(item, AppConfig.Configuration.appFlows.deployToTenant);
                     }
+
+                    // Log
+                    DataSource.logItem({
+                        LogUserId: ContextInfo.userId,
+                        ParentItemId: item.Id,
+                        ParentListName: Strings.Lists.Apps,
+                        Title: `App${tenantFl ? " Tenant" : ""} Deployed`,
+                        LogComment: `The app ${item.Title} was deployed to: ${tenantFl ? AppConfig.Configuration.tenantAppCatalogUrl : AppConfig.Configuration.appCatalogUrl}`
+                    }, item);
 
                     // Call the update event
                     onUpdate();
@@ -565,12 +610,22 @@ export class AppForms {
                             Modal.hide();
 
                             // Deploy the app
-                            AppActions.deployToSite(item, form.getValues()["Url"], () => {
+                            let siteUrl = form.getValues()["Url"];
+                            AppActions.deployToSite(item, siteUrl, () => {
                                 // See if there is a flow
                                 if (AppConfig.Configuration.appFlows && AppConfig.Configuration.appFlows.deployToSiteCollection) {
                                     // Execute the flow
                                     AppActions.runFlow(item, AppConfig.Configuration.appFlows.deployToSiteCollection);
                                 }
+
+                                // Log
+                                DataSource.logItem({
+                                    LogUserId: ContextInfo.userId,
+                                    ParentItemId: item.Id,
+                                    ParentListName: Strings.Lists.Apps,
+                                    Title: "App Deployed",
+                                    LogComment: `The app ${item.Title} was deployed to: ${siteUrl}`
+                                }, item);
 
                                 // Call the update event
                                 onUpdate();
@@ -1594,11 +1649,12 @@ export class AppForms {
                     let newStatus = status && status.prevStep ? status.prevStep : item.AppStatus;
 
                     // Update the status
-                    item.update({
+                    let values = {
                         AppComments: comments,
                         AppIsRejected: true,
                         AppStatus: newStatus
-                    }).execute(
+                    };
+                    item.update(values).execute(
                         () => {
                             // Send the notification
                             AppNotifications.rejectEmail(newStatus, item, comments).then(() => {
@@ -1608,6 +1664,15 @@ export class AppForms {
                                 // Hide the dialog
                                 LoadingDialog.hide();
                             });
+
+                            // Log
+                            DataSource.logItem({
+                                LogUserId: ContextInfo.userId,
+                                ParentItemId: item.Id,
+                                ParentListName: Strings.Lists.Apps,
+                                Title: "App Rejected",
+                                LogComment: `The app ${item.Title} was rejected.`
+                            }, { ...item, ...values });
                         },
                         ex => {
                             // Log the error
@@ -1660,9 +1725,18 @@ export class AppForms {
                 // Return the values
                 return values;
             },
-            onUpdate: () => {
+            onUpdate: (item: IAppCatalogRequestItem) => {
                 // Reload the app catalog items
                 DataSource.AppCatalogRequests.refresh();
+
+                // Log
+                DataSource.logItem({
+                    LogUserId: ContextInfo.userId,
+                    ParentItemId: DataSource.AppItem.Id,
+                    ParentListName: Strings.Lists.Apps,
+                    Title: "App Catalog Request",
+                    LogComment: `An app catalog was requested for site: ${item.SiteCollectionUrl.Url}`
+                }, item as any);
             }
         });
     }
@@ -1685,6 +1759,15 @@ export class AppForms {
 
                 // Retract the app
                 AppActions.retract(item, true, false, () => {
+                    // Log
+                    DataSource.logItem({
+                        LogUserId: ContextInfo.userId,
+                        ParentItemId: DataSource.AppItem.Id,
+                        ParentListName: Strings.Lists.Apps,
+                        Title: "App Retracted From Tenant",
+                        LogComment: `The app ${item.Title} was retracted from the tenant app catalog.`
+                    }, item);
+
                     // Call the update event
                     onUpdate();
                 });
@@ -1889,12 +1972,22 @@ export class AppForms {
                             // Update the status
                             let status = AppConfig.Status[item.AppStatus];
                             let newStatus = status ? status.nextStep : AppConfig.Status[0].name;
-                            item.update({
+                            let values = {
                                 AppIsRejected: false,
                                 AppStatus: item.AppIsRejected ? item.AppStatus : newStatus
-                            }).execute(() => {
+                            };
+                            item.update(values).execute(() => {
                                 // Code to run after the sponsor is added to the security group
                                 let onComplete = () => {
+                                    // Log
+                                    DataSource.logItem({
+                                        LogUserId: ContextInfo.userId,
+                                        ParentItemId: item.Id,
+                                        ParentListName: Strings.Lists.Apps,
+                                        Title: item.AppIsRejected ? "App Resubmitted" : "App Submitted",
+                                        LogComment: `The app ${item.Title} was ${item.AppIsRejected ? "resubmitted" : "submitted"} for approval.`
+                                    }, { ...item, ...values });
+
                                     // Run the flow associated for this status
                                     AppActions.runFlow(item, status.flowId);
 
@@ -1938,7 +2031,7 @@ export class AppForms {
     }
 
     // Updates the app
-    updateApp(item: IAppItem, appCatalogUrl: string, siteUrl: string, onUpdate: () => void) {
+    updateApp(item: IAppItem, siteUrl: string, onUpdate: () => void) {
         // Set the header
         Modal.setHeader("Update App");
 
@@ -1960,6 +2053,15 @@ export class AppForms {
                         // Call the update event
                         onUpdate();
                     });
+
+                    // Log
+                    DataSource.logItem({
+                        LogUserId: ContextInfo.userId,
+                        ParentItemId: DataSource.AppItem.Id,
+                        ParentListName: Strings.Lists.Apps,
+                        Title: "App Updated",
+                        LogComment: `The app ${item.Title} was updated for site: ${siteUrl}`
+                    }, item);
                 });
             }
         }).el);
@@ -2071,6 +2173,15 @@ export class AppForms {
                                     // Update the loading dialog
                                     LoadingDialog.setHeader("Upgrading Apps");
                                     LoadingDialog.setBody("Upgrading " + (++counter) + " of " + items.length);
+
+                                    // Log
+                                    DataSource.logItem({
+                                        LogUserId: ContextInfo.userId,
+                                        ParentItemId: DataSource.AppItem.Id,
+                                        ParentListName: Strings.Lists.Apps,
+                                        Title: "App Upgraded",
+                                        LogComment: `The app ${appItem.Title} was upgraded on site: ${item.data}`
+                                    }, appItem);
 
                                     // Upgrade the next site
                                     resolve(null);

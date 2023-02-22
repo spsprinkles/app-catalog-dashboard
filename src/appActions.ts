@@ -68,13 +68,6 @@ export class AppActions {
                     file => {
                         // Log
                         ErrorDialog.logInfo("The app file was archived successfully...");
-                        DataSource.logItem({
-                            LogUserId: ContextInfo.userId,
-                            ParentItemId: DataSource.AppItem.Id,
-                            ParentListName: Strings.Lists.Apps,
-                            Title: "Archive Package",
-                            LogComment: `The app file ${fileName} was successfully archived.`
-                        }, DataSource.AppItem);
 
                         // Hide the dialog
                         LoadingDialog.hide();
@@ -272,7 +265,7 @@ export class AppActions {
     }
 
     // Creates the test site for the application
-    static createTestSite(item: IAppItem, onComplete: () => void) {
+    static createTestSite(item: IAppItem, onComplete: (web?: Types.SP.WebInformation) => void) {
         // Log
         ErrorDialog.logInfo(`Creating the test site...`);
 
@@ -311,13 +304,6 @@ export class AppActions {
                         web => {
                             // Log
                             ErrorDialog.logInfo(`Creating the test web '${web.ServerRelativeUrl}' successfully...`);
-                            DataSource.logItem({
-                                LogUserId: ContextInfo.userId,
-                                ParentItemId: DataSource.AppItem.Id,
-                                ParentListName: Strings.Lists.Apps,
-                                Title: "Create Test Web",
-                                LogComment: `The test web for app ${item.Title} was successfully created: ${web.ServerRelativeUrl}`
-                            }, DataSource.AppItem);
 
                             // Method to send an email
                             let sendEmail = () => {
@@ -349,7 +335,7 @@ export class AppActions {
                                             LoadingDialog.hide();
 
                                             // Notify the parent this process is complete
-                                            onComplete();
+                                            onComplete(web);
                                         },
                                         ex => {
                                             // Log the error
@@ -361,7 +347,7 @@ export class AppActions {
                                     LoadingDialog.hide();
 
                                     // Notify the parent this process is complete
-                                    onComplete();
+                                    onComplete(web);
                                 }
                             }
 
@@ -440,15 +426,6 @@ export class AppActions {
 
             // Delete the test site
             DataSource.deleteTestSite(item).then(() => {
-                // Log
-                DataSource.logItem({
-                    LogUserId: ContextInfo.userId,
-                    ParentItemId: DataSource.AppItem.Id,
-                    ParentListName: Strings.Lists.Apps,
-                    Title: "Delete Test Web",
-                    LogComment: `The test web for app ${item.Title} was successfully deleted.`
-                }, DataSource.AppItem);
-
                 // Close the dialog
                 LoadingDialog.hide();
 
@@ -516,13 +493,6 @@ export class AppActions {
                         this.retract(item, tenantFl, true, () => {
                             // Log
                             ErrorDialog.logInfo(`Uploading the app '${item.Title}' with id ${item.AppProductID} to the catalog...`);
-                            DataSource.logItem({
-                                LogUserId: ContextInfo.userId,
-                                ParentItemId: DataSource.AppItem.Id,
-                                ParentListName: Strings.Lists.Apps,
-                                Title: "Retract App",
-                                LogComment: `The app ${item.Title} was retracted from: ${catalogUrl}`
-                            }, DataSource.AppItem);
 
                             // Update the dialog
                             LoadingDialog.setHeader("Uploading the Package");
@@ -534,13 +504,6 @@ export class AppActions {
                                 file => {
                                     // Log
                                     ErrorDialog.logInfo(`The app '${item.Title}' with id ${item.AppProductID} was added to the catalog successfully...`);
-                                    DataSource.logItem({
-                                        LogUserId: ContextInfo.userId,
-                                        ParentItemId: DataSource.AppItem.Id,
-                                        ParentListName: Strings.Lists.Apps,
-                                        Title: "Install App",
-                                        LogComment: `The app ${item.Title} was installed to: ${catalogUrl}`
-                                    }, DataSource.AppItem);
 
                                     // Update the dialog
                                     LoadingDialog.setHeader("Deploying the Package");
@@ -562,13 +525,6 @@ export class AppActions {
                                                 appCatalog.AvailableApps(item.AppProductID).deploy(skipFeatureDeployment).execute(app => {
                                                     // Log
                                                     ErrorDialog.logInfo(`The app '${item.Title}' with id ${item.AppProductID} was deployed successfully...`);
-                                                    DataSource.logItem({
-                                                        LogUserId: ContextInfo.userId,
-                                                        ParentItemId: DataSource.AppItem.Id,
-                                                        ParentListName: Strings.Lists.Apps,
-                                                        Title: "Deploy App",
-                                                        LogComment: `The app ${item.Title} was deployed to: ${catalogUrl}`
-                                                    }, item);
 
                                                     // See if this is the tenant app
                                                     if (tenantFl) {
@@ -718,13 +674,6 @@ export class AppActions {
                         this.retract(item, false, true, () => {
                             // Log
                             ErrorDialog.logInfo(`Uploading the SPFx app package '${appFile.Name}' to the app catalog...`);
-                            DataSource.logItem({
-                                LogUserId: ContextInfo.userId,
-                                ParentItemId: DataSource.AppItem.Id,
-                                ParentListName: Strings.Lists.Apps,
-                                Title: "Retract App",
-                                LogComment: `The app ${item.Title} was retracted from: ${siteUrl}`
-                            }, DataSource.AppItem);
 
                             // Update the dialog
                             LoadingDialog.setHeader("Uploading the Package");
@@ -751,15 +700,6 @@ export class AppActions {
 
                                                 // Deploy the app
                                                 Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(item.AppProductID).deploy(item.AppSkipFeatureDeployment).execute(app => {
-                                                    // Log
-                                                    DataSource.logItem({
-                                                        LogUserId: ContextInfo.userId,
-                                                        ParentItemId: DataSource.AppItem.Id,
-                                                        ParentListName: Strings.Lists.Apps,
-                                                        Title: "Deploy App",
-                                                        LogComment: `The app ${item.Title} was deployed to: ${siteUrl}`
-                                                    }, item);
-
                                                     // Send the notification
                                                     AppNotifications.sendAppDeployedEmail(item, context.GetContextWebInformation.WebFullUrl).then(() => {
                                                         // See if we are updating the metadata
@@ -876,13 +816,6 @@ export class AppActions {
                 () => {
                     // Log
                     ErrorDialog.logInfo(`App '${item.Title}' with id ${item.AppProductID} was successfully synced to Teams...`);
-                    DataSource.logItem({
-                        LogUserId: ContextInfo.userId,
-                        ParentItemId: DataSource.AppItem.Id,
-                        ParentListName: Strings.Lists.Apps,
-                        Title: "Deploy Teams App",
-                        LogComment: `The app ${item.Title} was synced with the Teams app store.`
-                    }, item);
 
                     // Hide the dialog
                     LoadingDialog.hide();
@@ -1435,13 +1368,6 @@ export class AppActions {
                             (item: IAppItem) => {
                                 // Log
                                 ErrorDialog.logInfo(`Document set folder for ${pkgInfo.item.Title} was created succesfully...`);
-                                DataSource.logItem({
-                                    LogUserId: ContextInfo.userId,
-                                    ParentItemId: DataSource.AppItem.Id,
-                                    ParentListName: Strings.Lists.Apps,
-                                    Title: "Create App",
-                                    LogComment: `The app ${pkgInfo.item.Title} document set folder was created.`
-                                }, item);
 
                                 // Create the client side assets folder
                                 this.createClientSideAssetsFolder(item.Folder()).then(clientSideAssetFolder => {
