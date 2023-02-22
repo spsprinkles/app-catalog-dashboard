@@ -1386,6 +1386,9 @@ export class AppActions {
                                         // Log
                                         ErrorDialog.logInfo(`App's metadata was updated successfully...`);
 
+                                        // Set the id
+                                        pkgInfo.item.Id = item.Id;
+
                                         // Update the loading dialog
                                         LoadingDialog.setHeader("Uploading the Package");
                                         LoadingDialog.setBody("Uploading the app package...");
@@ -1460,7 +1463,7 @@ export class AppActions {
                                                                         LoadingDialog.hide();
 
                                                                         // Execute the completed event
-                                                                        onComplete(item as any);
+                                                                        onComplete(pkgInfo.item);
                                                                     });
                                                                 },
                                                                 ex => {
@@ -1474,7 +1477,7 @@ export class AppActions {
                                                         LoadingDialog.hide();
 
                                                         // Execute the completed event
-                                                        onComplete(item as any);
+                                                        onComplete(pkgInfo.item);
                                                     }
                                                 });
                                             },

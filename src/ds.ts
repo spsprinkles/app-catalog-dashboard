@@ -669,9 +669,18 @@ export class DataSource {
       });
     });
   }
-  static logItem(values: IAuditLogItemCreation, item:IAppItem) {
+  static logItem(values: IAuditLogItemCreation, item: IAppItem) {
     // Set the data
-    values.LogData = item.stringify();
+    let data = null;
+    try { data = item.stringify(); }
+    catch {
+      // Try to stringify the object
+      try { data = JSON.stringify(item); }
+      catch { }
+    }
+
+    // Set the log data
+    values.LogData = data;
 
     // Log the item
     this.AuditLog.logItem(values);

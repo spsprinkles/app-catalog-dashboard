@@ -8,6 +8,7 @@ import { AppForms } from "./appForms";
 import { AppSecurity } from "./appSecurity";
 import * as Common from "./common";
 import { DataSource, IAppItem } from "./ds";
+import Strings from "./strings";
 
 /**
  * Actions
@@ -236,7 +237,10 @@ export class ButtonActions {
                 type: Components.ButtonTypes.OutlineSuccess,
                 onClick: () => {
                   // Display the audit log information
-                  DataSource.AuditLog.viewLog(this._item.Id);
+                  DataSource.AuditLog.viewLog({
+                    id: this._item.AppProductID,
+                    listName: Strings.Lists.Apps
+                  });
                 },
               },
             });

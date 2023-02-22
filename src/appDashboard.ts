@@ -389,10 +389,10 @@ export class AppDashboard {
                                                     // Log
                                                     DataSource.logItem({
                                                         LogUserId: ContextInfo.userId,
-                                                        ParentItemId: DataSource.AppItem.Id,
+                                                        ParentId: itemInfo.AppProductID || DataSource.AppItem.AppProductID,
                                                         ParentListName: Strings.Lists.Apps,
                                                         Title: "App Updated",
-                                                        LogComment: `A new version (${pkgInfo.item.AppVersion}) of the app ${pkgInfo.item.Title} was added.`
+                                                        LogComment: `A new version (${itemInfo.AppVersion}) of the app ${itemInfo.Title} was added.`
                                                     }, Object.assign({ ...DataSource.AppItem, ...itemInfo }));
                                                 } else {
                                                     // Archive the app

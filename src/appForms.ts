@@ -105,7 +105,7 @@ export class AppForms {
                                 // Log
                                 DataSource.logItem({
                                     LogUserId: ContextInfo.userId,
-                                    ParentItemId: item.Id,
+                                    ParentId: item.AppProductID,
                                     ParentListName: Strings.Lists.Apps,
                                     Title: "App Approved",
                                     LogComment: `The app ${item.Title} was approved, from ${item.AppStatus} to ${status.nextStep}.`
@@ -191,7 +191,7 @@ export class AppForms {
                         // Log
                         DataSource.logItem({
                             LogUserId: ContextInfo.userId,
-                            ParentItemId: item.Id,
+                            ParentId: item.AppProductID,
                             ParentListName: Strings.Lists.Apps,
                             Title: "Create Test Site",
                             LogComment: `The app ${item.Title} test site was created successfully at: ${web.ServerRelativeUrl}`
@@ -265,7 +265,7 @@ export class AppForms {
                                     // Log
                                     DataSource.logItem({
                                         LogUserId: ContextInfo.userId,
-                                        ParentItemId: item.Id,
+                                        ParentId: item.AppProductID,
                                         ParentListName: Strings.Lists.Apps,
                                         Title: "Delete App",
                                         LogComment: `The app ${item.Title} was deleted.`
@@ -335,7 +335,7 @@ export class AppForms {
                     // Log
                     DataSource.logItem({
                         LogUserId: ContextInfo.userId,
-                        ParentItemId: item.Id,
+                        ParentId: item.AppProductID,
                         ParentListName: Strings.Lists.Apps,
                         Title: "Delete Test Site",
                         LogComment: `The app ${item.Title} test site was deleted.`
@@ -407,7 +407,7 @@ export class AppForms {
                     // Log
                     DataSource.logItem({
                         LogUserId: ContextInfo.userId,
-                        ParentItemId: item.Id,
+                        ParentId: item.AppProductID,
                         ParentListName: Strings.Lists.Apps,
                         Title: `App${tenantFl ? " Tenant" : ""} Deployed`,
                         LogComment: `The app ${item.Title} was deployed to: ${tenantFl ? AppConfig.Configuration.tenantAppCatalogUrl : AppConfig.Configuration.appCatalogUrl}`
@@ -621,7 +621,7 @@ export class AppForms {
                                 // Log
                                 DataSource.logItem({
                                     LogUserId: ContextInfo.userId,
-                                    ParentItemId: item.Id,
+                                    ParentId: item.AppProductID,
                                     ParentListName: Strings.Lists.Apps,
                                     Title: "App Deployed",
                                     LogComment: `The app ${item.Title} was deployed to: ${siteUrl}`
@@ -1018,6 +1018,10 @@ export class AppForms {
 
                 // Return the properties
                 return props;
+            },
+            onValidation: (values) => {
+                // Save the form by default
+                return true;
             },
             onUpdate: (item: IAppItem) => {
                 // See if this is a new item
@@ -1668,7 +1672,7 @@ export class AppForms {
                             // Log
                             DataSource.logItem({
                                 LogUserId: ContextInfo.userId,
-                                ParentItemId: item.Id,
+                                ParentId: item.AppProductID,
                                 ParentListName: Strings.Lists.Apps,
                                 Title: "App Rejected",
                                 LogComment: `The app ${item.Title} was rejected.`
@@ -1732,7 +1736,7 @@ export class AppForms {
                 // Log
                 DataSource.logItem({
                     LogUserId: ContextInfo.userId,
-                    ParentItemId: DataSource.AppItem.Id,
+                    ParentId: DataSource.AppItem.AppProductID,
                     ParentListName: Strings.Lists.Apps,
                     Title: "App Catalog Request",
                     LogComment: `An app catalog was requested for site: ${item.SiteCollectionUrl.Url}`
@@ -1762,7 +1766,7 @@ export class AppForms {
                     // Log
                     DataSource.logItem({
                         LogUserId: ContextInfo.userId,
-                        ParentItemId: DataSource.AppItem.Id,
+                        ParentId: item.AppProductID,
                         ParentListName: Strings.Lists.Apps,
                         Title: "App Retracted From Tenant",
                         LogComment: `The app ${item.Title} was retracted from the tenant app catalog.`
@@ -1982,7 +1986,7 @@ export class AppForms {
                                     // Log
                                     DataSource.logItem({
                                         LogUserId: ContextInfo.userId,
-                                        ParentItemId: item.Id,
+                                        ParentId: item.AppProductID,
                                         ParentListName: Strings.Lists.Apps,
                                         Title: item.AppIsRejected ? "App Resubmitted" : "App Submitted",
                                         LogComment: `The app ${item.Title} was ${item.AppIsRejected ? "resubmitted" : "submitted"} for approval.`
@@ -2057,7 +2061,7 @@ export class AppForms {
                     // Log
                     DataSource.logItem({
                         LogUserId: ContextInfo.userId,
-                        ParentItemId: DataSource.AppItem.Id,
+                        ParentId: item.AppProductID,
                         ParentListName: Strings.Lists.Apps,
                         Title: "App Updated",
                         LogComment: `The app ${item.Title} was updated for site: ${siteUrl}`
@@ -2177,7 +2181,7 @@ export class AppForms {
                                     // Log
                                     DataSource.logItem({
                                         LogUserId: ContextInfo.userId,
-                                        ParentItemId: DataSource.AppItem.Id,
+                                        ParentId: appItem.AppProductID,
                                         ParentListName: Strings.Lists.Apps,
                                         Title: "App Upgraded",
                                         LogComment: `The app ${appItem.Title} was upgraded on site: ${item.data}`
