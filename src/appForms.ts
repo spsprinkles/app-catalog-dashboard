@@ -1654,22 +1654,15 @@ export class AppForms {
                     LoadingDialog.setBody("This dialog will close after the app is sent back to the developer.");
                     LoadingDialog.show();
 
-                    // Get the current status configuration
-                    let status = AppConfig.Status[item.AppStatus];
-
-                    // Set the new status
-                    let newStatus = status && status.prevStep ? status.prevStep : item.AppStatus;
-
                     // Update the status
                     let values = {
                         AppComments: comments,
-                        AppIsRejected: true,
-                        AppStatus: newStatus
+                        AppIsRejected: true
                     };
                     item.update(values).execute(
                         () => {
                             // Send the notification
-                            AppNotifications.rejectEmail(newStatus, item, comments).then(() => {
+                            AppNotifications.rejectEmail(item, comments).then(() => {
                                 // Call the update event
                                 onUpdate();
 
