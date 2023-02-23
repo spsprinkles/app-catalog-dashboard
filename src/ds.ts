@@ -653,6 +653,24 @@ export class DataSource {
    * Audit Log
    */
 
+  // Audit Log States
+  static AuditLogStates = {
+    AppAdded: "App Added",
+    AppApproved: "App Approved",
+    AppCatalogRequest: "App Catalog Request",
+    AppDeployed: "App Deployed",
+    AppRejected: "App Rejected",
+    AppRetracted: "App Retracted",
+    AppResubmitted: "App Resubmitted",
+    AppSubmitted: "App Submitted",
+    AppTenantDeployed: "App Tenant Deployed",
+    AppUpdated: "App Updated",
+    AppUpgraded: "App Upgraded",
+    CreateTestSite: "Create Test Site",
+    DeleteApp: "Delete App",
+    DeleteTestSite: "Delete Test Site"
+  }
+
   // Audit Log
   private static _auditLog: AuditLog = null;
   static get AuditLog(): AuditLog {

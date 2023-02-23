@@ -391,7 +391,7 @@ export class AppDashboard {
                                                         LogUserId: ContextInfo.userId,
                                                         ParentId: itemInfo.AppProductID || DataSource.AppItem.AppProductID,
                                                         ParentListName: Strings.Lists.Apps,
-                                                        Title: "App Updated",
+                                                        Title: DataSource.AuditLogStates.AppUpdated,
                                                         LogComment: `A new version (${itemInfo.AppVersion}) of the app ${itemInfo.Title} was added.`
                                                     }, Object.assign({ ...DataSource.AppItem, ...itemInfo }));
                                                 } else {

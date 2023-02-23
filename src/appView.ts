@@ -327,7 +327,7 @@ export class AppView {
                                                     LogUserId: ContextInfo.userId,
                                                     ParentId: item.AppProductID,
                                                     ParentListName: Strings.Lists.Apps,
-                                                    Title: "App Added",
+                                                    Title: DataSource.AuditLogStates.AppAdded,
                                                     LogComment: `A new app ${item.Title} was added.`
                                                 }, item);
 
