@@ -1,7 +1,7 @@
-import { ItemForm, LoadingDialog, Modal } from "dattatable";
+import { LoadingDialog, Modal } from "dattatable";
 import { ContextInfo, Graph, Helper, SPTypes, Types, Utility, Web } from "gd-sprest-bs";
 import * as JSZip from "jszip";
-import { AppConfig, IStatus } from "./appCfg";
+import { AppConfig } from "./appCfg";
 import { AppNotifications } from "./appNotifications";
 import { DataSource, IAppItem } from "./ds";
 import { ErrorDialog } from "./errorDialog";
@@ -26,8 +26,8 @@ export class AppActions {
         ErrorDialog.logInfo("Archiving the package....");
 
         // Find the package file
-        for (let i = 0; i < DataSource.DocSetFolder.Files.results.length; i++) {
-            let file = DataSource.DocSetFolder.Files.results[i];
+        for (let i = 0; i < DataSource.AppFolder.Files.results.length; i++) {
+            let file = DataSource.AppFolder.Files.results[i];
 
             // See if this is the package
             if (file.Name.toLowerCase().endsWith(".sppkg")) {
@@ -48,7 +48,7 @@ export class AppActions {
         }
 
         // Create the archive folder
-        this.createArchiveFolder(DataSource.DocSetFolder).then(archiveFolder => {
+        this.createArchiveFolder(DataSource.AppFolder).then(archiveFolder => {
             // Log
             ErrorDialog.logInfo(`Getting the SPFx package's file content from ${appFile.ServerRelativeUrl}...`);
 
@@ -265,7 +265,7 @@ export class AppActions {
     }
 
     // Creates the test site for the application
-    static createTestSite(item: IAppItem, onComplete: () => void) {
+    static createTestSite(item: IAppItem, onComplete: (web?: Types.SP.WebInformation) => void) {
         // Log
         ErrorDialog.logInfo(`Creating the test site...`);
 
@@ -335,7 +335,7 @@ export class AppActions {
                                             LoadingDialog.hide();
 
                                             // Notify the parent this process is complete
-                                            onComplete();
+                                            onComplete(web);
                                         },
                                         ex => {
                                             // Log the error
@@ -347,7 +347,7 @@ export class AppActions {
                                     LoadingDialog.hide();
 
                                     // Notify the parent this process is complete
-                                    onComplete();
+                                    onComplete(web);
                                 }
                             }
 
@@ -451,8 +451,8 @@ export class AppActions {
         ErrorDialog.logInfo(`Getting the SPFx package...`);
 
         // Find the package file
-        for (let i = 0; i < DataSource.DocSetFolder.Files.results.length; i++) {
-            let file = DataSource.DocSetFolder.Files.results[i];
+        for (let i = 0; i < DataSource.AppFolder.Files.results.length; i++) {
+            let file = DataSource.AppFolder.Files.results[i];
 
             // See if this is the package
             if (file.Name.toLowerCase().endsWith(".sppkg")) {
@@ -560,10 +560,9 @@ export class AppActions {
                                                 }, () => {
                                                     // See if this isn't the tenant
                                                     if (!tenantFl) {
-                                                        // Refresh the apps
-                                                        DataSource.loadSiteCollectionItems().then(() => {
-                                                            // See if the app item exists
-                                                            let appItem = DataSource.getSiteCollectionAppItem(appFile.Name);
+                                                        // Load the site collection app item
+                                                        DataSource.loadSiteAppByName(appFile.Name).then(appItem => {
+                                                            // See if the item exists
                                                             if (appItem) {
                                                                 // Log the error
                                                                 ErrorDialog.show("Deploy Error", "The app was added to the catalog successfully, but there was an error with it.");
@@ -636,8 +635,8 @@ export class AppActions {
         LoadingDialog.show();
 
         // Find the package file
-        for (let i = 0; i < DataSource.DocSetFolder.Files.results.length; i++) {
-            let file = DataSource.DocSetFolder.Files.results[i];
+        for (let i = 0; i < DataSource.AppFolder.Files.results.length; i++) {
+            let file = DataSource.AppFolder.Files.results[i];
 
             // See if this is the package
             if (file.Name.toLowerCase().endsWith(".sppkg")) {
@@ -701,7 +700,7 @@ export class AppActions {
 
                                                 // Deploy the app
                                                 Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(item.AppProductID).deploy(item.AppSkipFeatureDeployment).execute(app => {
-                                                    // Send the notifications
+                                                    // Send the notification
                                                     AppNotifications.sendAppDeployedEmail(item, context.GetContextWebInformation.WebFullUrl).then(() => {
                                                         // See if we are updating the metadata
                                                         if (updateSitesFl) {
@@ -1271,14 +1270,14 @@ export class AppActions {
                         // Update the metadata
                         list.Items(appItemId).update({
                             AppDescription: item.AppDescription,
-                            AppImageURL1: item.AppImageURL1,
-                            AppImageURL2: item.AppImageURL2,
-                            AppImageURL3: item.AppImageURL3,
-                            AppImageURL4: item.AppImageURL4,
-                            AppImageURL5: item.AppImageURL5,
+                            AppImageURL1: item.AppImageURL1 ? { Description: item.AppImageURL1.Description, Url: item.AppImageURL1.Url } : null,
+                            AppImageURL2: item.AppImageURL2 ? { Description: item.AppImageURL2.Description, Url: item.AppImageURL2.Url } : null,
+                            AppImageURL3: item.AppImageURL3 ? { Description: item.AppImageURL3.Description, Url: item.AppImageURL3.Url } : null,
+                            AppImageURL4: item.AppImageURL4 ? { Description: item.AppImageURL4.Description, Url: item.AppImageURL4.Url } : null,
+                            AppImageURL5: item.AppImageURL5 ? { Description: item.AppImageURL5.Description, Url: item.AppImageURL5.Url } : null,
                             AppShortDescription: item.AppShortDescription,
-                            AppSupportURL: item.AppSupportURL,
-                            AppVideoURL: item.AppVideoURL
+                            AppSupportURL: item.AppSupportURL ? { Description: item.AppSupportURL.Description, Url: item.AppSupportURL.Url } : null,
+                            AppVideoURL: item.AppVideoURL ? { Description: item.AppVideoURL.Description, Url: item.AppVideoURL.Url } : null,
                         }).execute(
                             () => {
                                 // Log
@@ -1329,8 +1328,8 @@ export class AppActions {
                 this.readPackage(file.data).then(pkgInfo => {
                     // Ensure the package doesn't exist
                     let existsFl = false;
-                    for (let i = 0; i < DataSource.Items.length; i++) {
-                        let item = DataSource.Items[i];
+                    for (let i = 0; i < DataSource.DocSetList.Items.length; i++) {
+                        let item = DataSource.DocSetList.Items[i];
 
                         // See if it exists
                         if (item.AppProductID == pkgInfo.item.AppProductID) {
@@ -1366,7 +1365,7 @@ export class AppActions {
                         // Create the document set folder
                         Helper.createDocSet(pkgInfo.item.Title, Strings.Lists.Apps).then(
                             // Success
-                            item => {
+                            (item: IAppItem) => {
                                 // Log
                                 ErrorDialog.logInfo(`Document set folder for ${pkgInfo.item.Title} was created succesfully...`);
 
@@ -1386,6 +1385,9 @@ export class AppActions {
                                     item.update(pkgInfo.item).execute(() => {
                                         // Log
                                         ErrorDialog.logInfo(`App's metadata was updated successfully...`);
+
+                                        // Set the id
+                                        pkgInfo.item.Id = item.Id;
 
                                         // Update the loading dialog
                                         LoadingDialog.setHeader("Uploading the Package");
@@ -1461,7 +1463,7 @@ export class AppActions {
                                                                         LoadingDialog.hide();
 
                                                                         // Execute the completed event
-                                                                        onComplete(item as any);
+                                                                        onComplete(pkgInfo.item);
                                                                     });
                                                                 },
                                                                 ex => {
@@ -1475,7 +1477,7 @@ export class AppActions {
                                                         LoadingDialog.hide();
 
                                                         // Execute the completed event
-                                                        onComplete(item as any);
+                                                        onComplete(pkgInfo.item);
                                                     }
                                                 });
                                             },

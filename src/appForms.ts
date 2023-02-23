@@ -1,10 +1,10 @@
-import { ItemForm, LoadingDialog, Modal } from "dattatable";
+import { LoadingDialog, Modal } from "dattatable";
 import { Components, ContextInfo, Helper, List, SPTypes, Web } from "gd-sprest-bs";
 import { AppActions } from "./appActions";
 import { AppConfig, IStatus } from "./appCfg";
 import { AppNotifications } from "./appNotifications";
 import { AppSecurity } from "./appSecurity";
-import { DataSource, IAppItem, IAssessmentItem } from "./ds";
+import { DataSource, IAppCatalogRequestItem, IAppItem, IAssessmentItem } from "./ds";
 import { ErrorDialog } from "./errorDialog";
 import Strings from "./strings";
 
@@ -102,55 +102,61 @@ export class AppForms {
                                 LoadingDialog.setBody("This dialog will close after the status is updated.");
                                 LoadingDialog.show();
 
+                                // Log
+                                DataSource.logItem({
+                                    LogUserId: ContextInfo.userId,
+                                    ParentId: item.AppProductID,
+                                    ParentListName: Strings.Lists.Apps,
+                                    Title: DataSource.AuditLogStates.AppApproved,
+                                    LogComment: `The app ${item.Title} was approved, from ${item.AppStatus} to ${status.nextStep}.`
+                                }, DataSource.AppItem);
+
                                 // Update the item
                                 item.update({
                                     AppStatus: status.nextStep
-                                }).execute(
-                                    () => {
-                                        // Close the dialog
-                                        LoadingDialog.hide();
+                                }).execute(() => {
+                                    // Close the dialog
+                                    LoadingDialog.hide();
 
-                                        // Run the flow associated for this status
-                                        AppActions.runFlow(item, status.flowId);
+                                    // Run the flow associated for this status
+                                    AppActions.runFlow(item, status.flowId);
 
-                                        // Send the notifications
-                                        AppNotifications.sendEmail(status.notification, item).then(() => {
-                                            // See if the test app catalog exists and we are creating the test site
-                                            if (DataSource.SiteCollectionAppCatalogExists && status.createTestSite) {
-                                                // Load the test site
-                                                DataSource.loadTestSite(item).then(
-                                                    // Exists
-                                                    webInfo => {
-                                                        // See if the current version is deployed
-                                                        if (item.AppVersion == webInfo.app.InstalledVersion && !webInfo.app.SkipDeploymentFeature) {
+                                    // Send the notifications
+                                    AppNotifications.sendEmail(status.notification, item).then(() => {
+                                        // See if the test app catalog exists and we are creating the test site
+                                        if (AppSecurity.IsSiteAppCatalogOwner && status.createTestSite) {
+                                            // Load the test site
+                                            DataSource.loadTestSite(item).then(
+                                                // Exists
+                                                web => {
+                                                    // See if the current version is deployed
+                                                    if (item.AppVersion == DataSource.AppCatalogSiteItem.InstalledVersion && !DataSource.AppCatalogSiteItem.SkipDeploymentFeature) {
+                                                        // Call the update event
+                                                        onUpdate();
+                                                    } else {
+                                                        // Update the app
+                                                        AppActions.updateApp(item, web.ServerRelativeUrl, true, onUpdate).then(() => {
                                                             // Call the update event
                                                             onUpdate();
-                                                        } else {
-                                                            // Update the app
-                                                            AppActions.updateApp(item, webInfo.web.ServerRelativeUrl, true, onUpdate).then(() => {
-                                                                // Call the update event
-                                                                onUpdate();
-                                                            });
-                                                        }
-                                                    },
-
-                                                    // Doesn't exist
-                                                    () => {
-                                                        // Create the test site
-                                                        AppActions.createTestSite(item, onUpdate);
+                                                        });
                                                     }
-                                                );
-                                            } else {
-                                                // Call the update event
-                                                onUpdate();
-                                            }
-                                        },
-                                            ex => {
-                                                // Log the error
-                                                ErrorDialog.show("Updating Status", "There was an error updating the status.", ex);
-                                            }
-                                        );
+                                                },
+
+                                                // Doesn't exist
+                                                () => {
+                                                    // Create the test site
+                                                    AppActions.createTestSite(item, onUpdate);
+                                                }
+                                            );
+                                        } else {
+                                            // Call the update event
+                                            onUpdate();
+                                        }
+                                    }, ex => {
+                                        // Log the error
+                                        ErrorDialog.show("Updating Status", "There was an error updating the status.", ex);
                                     });
+                                });
                             });
                         });
                     });
@@ -181,16 +187,25 @@ export class AppForms {
                 // Code to run after the logic below completes
                 let onComplete = () => {
                     // Create the test site
-                    AppActions.createTestSite(item, () => {
+                    AppActions.createTestSite(item, (web) => {
+                        // Log
+                        DataSource.logItem({
+                            LogUserId: ContextInfo.userId,
+                            ParentId: item.AppProductID,
+                            ParentListName: Strings.Lists.Apps,
+                            Title: DataSource.AuditLogStates.CreateTestSite,
+                            LogComment: `The app ${item.Title} test site was created successfully at: ${web.ServerRelativeUrl}`
+                        }, item);
+
                         // Call the update event
                         onUpdate();
                     });
                 }
 
                 // See if the app was deployed, but errored out
-                if (DataSource.DocSetSCAppItem && DataSource.DocSetSCAppItem.AppPackageErrorMessage && DataSource.DocSetSCAppItem.AppPackageErrorMessage != "No errors.") {
+                if (DataSource.AppCatalogItem && DataSource.AppCatalogItem.AppPackageErrorMessage && DataSource.AppCatalogItem.AppPackageErrorMessage != "No errors.") {
                     // Delete the item
-                    DataSource.DocSetItem.delete().execute(() => {
+                    DataSource.AppCatalogItem.delete().execute(() => {
                         // Create the test site
                         onComplete();
                     });
@@ -246,6 +261,15 @@ export class AppForms {
                                 item.delete().execute(() => {
                                     // Close the dialog
                                     LoadingDialog.hide();
+
+                                    // Log
+                                    DataSource.logItem({
+                                        LogUserId: ContextInfo.userId,
+                                        ParentId: item.AppProductID,
+                                        ParentListName: Strings.Lists.Apps,
+                                        Title: DataSource.AuditLogStates.DeleteApp,
+                                        LogComment: `The app ${item.Title} was deleted.`
+                                    }, item);
 
                                     // Execute the update event
                                     onUpdate();
@@ -308,6 +332,15 @@ export class AppForms {
 
                 // Delete the test site
                 AppActions.deleteTestSite(item).then(() => {
+                    // Log
+                    DataSource.logItem({
+                        LogUserId: ContextInfo.userId,
+                        ParentId: item.AppProductID,
+                        ParentListName: Strings.Lists.Apps,
+                        Title: DataSource.AuditLogStates.DeleteTestSite,
+                        LogComment: `The app ${item.Title} test site was deleted.`
+                    }, item);
+
                     // Execute the update event
                     onUpdate();
                 });
@@ -370,6 +403,15 @@ export class AppForms {
                         // Execute the flow
                         AppActions.runFlow(item, AppConfig.Configuration.appFlows.deployToTenant);
                     }
+
+                    // Log
+                    DataSource.logItem({
+                        LogUserId: ContextInfo.userId,
+                        ParentId: item.AppProductID,
+                        ParentListName: Strings.Lists.Apps,
+                        Title: tenantFl ? DataSource.AuditLogStates.AppTenantDeployed : DataSource.AuditLogStates.AppDeployed,
+                        LogComment: `The app ${item.Title} was deployed to: ${tenantFl ? AppConfig.Configuration.tenantAppCatalogUrl : AppConfig.Configuration.appCatalogUrl}`
+                    }, item);
 
                     // Call the update event
                     onUpdate();
@@ -492,7 +534,7 @@ export class AppForms {
                                 LoadingDialog.show();
 
                                 // Ensure the user is an owner of the site
-                                DataSource.isOwner(url).then(
+                                AppSecurity.isOwner(url).then(
                                     // Successfully loaded site
                                     info => {
                                         // Set the flag and url
@@ -568,12 +610,22 @@ export class AppForms {
                             Modal.hide();
 
                             // Deploy the app
-                            AppActions.deployToSite(item, form.getValues()["Url"], () => {
+                            let siteUrl = form.getValues()["Url"];
+                            AppActions.deployToSite(item, siteUrl, () => {
                                 // See if there is a flow
                                 if (AppConfig.Configuration.appFlows && AppConfig.Configuration.appFlows.deployToSiteCollection) {
                                     // Execute the flow
                                     AppActions.runFlow(item, AppConfig.Configuration.appFlows.deployToSiteCollection);
                                 }
+
+                                // Log
+                                DataSource.logItem({
+                                    LogUserId: ContextInfo.userId,
+                                    ParentId: item.AppProductID,
+                                    ParentListName: Strings.Lists.Apps,
+                                    Title: DataSource.AuditLogStates.AppDeployed,
+                                    LogComment: `The app ${item.Title} was deployed to: ${siteUrl}`
+                                }, item);
 
                                 // Call the update event
                                 onUpdate();
@@ -637,12 +689,8 @@ export class AppForms {
 
     // Display form
     display(itemId: number) {
-        // Set the form properties
-        ItemForm.AutoClose = false;
-        ItemForm.ListName = Strings.Lists.Apps;
-
-        // Show the item form
-        ItemForm.view({
+        // Show the display form
+        DataSource.DocSetList.viewForm({
             itemId,
             webUrl: Strings.SourceUrl,
             onSetHeader: el => {
@@ -695,16 +743,12 @@ export class AppForms {
 
     // Technical review form
     displayTechReview(item: IAppItem) {
-        // Set the form properties
-        ItemForm.AutoClose = false;
-        ItemForm.ListName = Strings.Lists.Assessments;
-
         // Get the assessment item
         this.getAssessmentItem(item, false).then(assessment => {
             // See if an item exists
             if (assessment) {
-                // Show the view form
-                ItemForm.view({
+                // Display the the view form
+                DataSource.AppAssessments.viewForm({
                     itemId: assessment.Id,
                     webUrl: Strings.SourceUrl,
                     onGetListInfo: (props) => {
@@ -725,16 +769,12 @@ export class AppForms {
 
     // Views the tests for the application
     displayTestCases(item: IAppItem) {
-        // Set the form properties
-        ItemForm.AutoClose = false;
-        ItemForm.ListName = Strings.Lists.Assessments;
-
         // Get the assessment item
         this.getAssessmentItem(item).then(assessment => {
             // See if an item exists
             if (assessment) {
-                // Show the view form
-                ItemForm.view({
+                // Display the the view form
+                DataSource.AppAssessments.viewForm({
                     itemId: assessment.Id,
                     webUrl: Strings.SourceUrl,
                     onGetListInfo: props => {
@@ -760,26 +800,20 @@ export class AppForms {
 
     // Edit form
     edit(itemId: number, onUpdate: () => void) {
-        // Set the form properties
-        ItemForm.AutoClose = false;
-        ItemForm.ListName = Strings.Lists.Apps;
-
-        // Show the item form
-        ItemForm.edit({
+        // Display the edit form
+        DataSource.DocSetList.editForm({
             itemId,
             webUrl: Strings.SourceUrl,
             onSetFooter: el => {
-                // Add a cancel button if form is in a modal
-                if (ItemForm.UseModal) {
-                    Components.Button({
-                        el,
-                        text: "Cancel",
-                        type: Components.ButtonTypes.OutlineSecondary,
-                        onClick: () => {
-                            Modal.hide();
-                        }
-                    });
-                }
+                // Add a cancel button
+                Components.Button({
+                    el,
+                    text: "Cancel",
+                    type: Components.ButtonTypes.OutlineSecondary,
+                    onClick: () => {
+                        Modal.hide();
+                    }
+                });
             },
             onSetHeader: el => {
                 // Update the header
@@ -827,7 +861,7 @@ export class AppForms {
                         // Add validation
                         ctrl.onValidate = (ctrl, results) => {
                             // See if permissions exist
-                            let apiPermissions = ItemForm.EditForm.getItem()["AppAPIPermissions"];
+                            let apiPermissions = DataSource.DocSetList.EditForm.getItem()["AppAPIPermissions"];
                             if (apiPermissions) {
                                 // Set the flag
                                 results.isValid = (results.value || "").trim().length > 0;
@@ -845,6 +879,7 @@ export class AppForms {
                     }
 
                     // See if this is a url field
+                    // TODO: This shouldn't be happening anymore
                     if (field.InternalName.indexOf("URL") > 0) {
                         /* TODO - Dade to customize the image url and video url fields */
                         // Hide the description field
@@ -880,7 +915,7 @@ export class AppForms {
                                     LoadingDialog.show();
 
                                     // Upload the file
-                                    Web(Strings.SourceUrl).Lists(Strings.Lists.Apps).Items(DataSource.DocSetItemId).Folder().Files().add(fileName, true, file.data).execute(
+                                    Web(Strings.SourceUrl).Lists(Strings.Lists.Apps).Items(DataSource.AppItem.Id).Folder().Files().add(fileName, true, file.data).execute(
                                         // Success
                                         file => {
                                             // Close the dialog
@@ -915,7 +950,7 @@ export class AppForms {
                                         // Upload the file
                                         let fileInfo = fileName.split('.');
                                         let dstFileName = "AppImage" + field.InternalName.replace("AppImageURL", '') + "." + fileInfo[fileInfo.length - 1];
-                                        let fileUrl = [DataSource.DocSetFolder.ServerRelativeUrl, dstFileName].join('/');
+                                        let fileUrl = [document.location.origin, DataSource.AppFolder.ServerRelativeUrl.replace(/^\//, ''), dstFileName].join('/');
                                         uploadFile(dstFileName, file).then(
                                             () => {
                                                 // Set the value
@@ -948,7 +983,7 @@ export class AppForms {
                                         // Upload the file
                                         let fileInfo = fileName.split('.');
                                         let dstFileName = "AppVideo" + "." + fileInfo[fileInfo.length - 1];
-                                        let fileUrl = [DataSource.DocSetFolder.ServerRelativeUrl, dstFileName].join('/');
+                                        let fileUrl = [document.location.origin, DataSource.AppFolder.ServerRelativeUrl.replace(/^\//, ''), dstFileName].join('/');
                                         uploadFile(dstFileName, file).then(
                                             () => {
                                                 // Set the value
@@ -983,6 +1018,10 @@ export class AppForms {
 
                 // Return the properties
                 return props;
+            },
+            onValidation: (values) => {
+                // Save the form by default
+                return true;
             },
             onUpdate: (item: IAppItem) => {
                 // See if this is a new item
@@ -1024,16 +1063,12 @@ export class AppForms {
 
     // Technical review form
     editTechReview(item: IAppItem, onUpdate: () => void) {
-        // Set the form properties
-        ItemForm.AutoClose = false;
-        ItemForm.ListName = Strings.Lists.Assessments;
-
         // Displays the assessment form
-        let displayForm = (assessment: IAssessmentItem) => {
+        let displayEditForm = (assessment: IAssessmentItem) => {
             let validateFl = false;
 
-            // Show the edit form
-            ItemForm.edit({
+            // Display the edit form
+            DataSource.AppAssessments.editForm({
                 itemId: assessment.Id,
                 webUrl: Strings.SourceUrl,
                 onSetFooter: el => {
@@ -1049,7 +1084,7 @@ export class AppForms {
                                 validateFl = true;
 
                                 // Validate the form
-                                ItemForm.EditForm.isValid();
+                                DataSource.AppAssessments.EditForm.isValid();
                             }
                         }
                     });
@@ -1111,6 +1146,10 @@ export class AppForms {
                     // Return the properties
                     return props;
                 },
+                onValidation: (values) => {
+                    // Save the form by default
+                    return true;
+                },
                 onUpdate: () => {
                     // Call the update event
                     onUpdate();
@@ -1123,20 +1162,20 @@ export class AppForms {
             // See if an item exists
             if (assessment) {
                 // Show the assessment form
-                displayForm(assessment);
+                displayEditForm(assessment);
             } else {
                 // Show a loading dialog
                 LoadingDialog.setHeader("Creating the Form");
                 LoadingDialog.setBody("This dialog will close after the form is created.");
 
                 // Create the item
-                Web(Strings.SourceUrl).Lists(Strings.Lists.Assessments).Items().add({
+                DataSource.AppAssessments.createItem({
                     RelatedAppId: item.Id,
                     Title: item.Title + " Review " + (new Date(Date.now()).toDateString())
-                }).execute(
+                }).then(
                     item => {
                         // Show the assessment form
-                        displayForm(item as any);
+                        displayEditForm(item);
                     },
                     ex => {
                         // Log the error
@@ -1149,16 +1188,12 @@ export class AppForms {
 
     // Views the tests for the application
     editTestCases(item: IAppItem, onUpdate: () => void) {
-        // Set the form properties
-        ItemForm.AutoClose = false;
-        ItemForm.ListName = Strings.Lists.Assessments;
-
         // Displays the form
-        let displayForm = (assessment: IAssessmentItem) => {
+        let displayEditForm = (assessment: IAssessmentItem) => {
             let validateFl = false;
 
             // Show the edit form
-            ItemForm.edit({
+            DataSource.AppAssessments.editForm({
                 itemId: assessment.Id,
                 webUrl: Strings.SourceUrl,
                 onGetListInfo: props => {
@@ -1181,7 +1216,7 @@ export class AppForms {
                                 validateFl = true;
 
                                 // Validate the form
-                                ItemForm.EditForm.isValid();
+                                DataSource.AppAssessments.EditForm.isValid();
                             }
                         }
                     });
@@ -1240,6 +1275,10 @@ export class AppForms {
                     // Return the properties
                     return props;
                 },
+                onValidation: (values) => {
+                    // Save the form by default
+                    return true;
+                },
                 onUpdate: () => {
                     // Call the update event
                     onUpdate();
@@ -1252,7 +1291,7 @@ export class AppForms {
             // See if an item exists
             if (assessment) {
                 // Show the assessment form
-                displayForm(assessment);
+                displayEditForm(assessment);
             } else {
                 // Show a loading dialog
                 LoadingDialog.setHeader("Creating the Form");
@@ -1266,14 +1305,14 @@ export class AppForms {
                     let ct = cts.results[0];
 
                     // Create the item
-                    Web(Strings.SourceUrl).Lists(Strings.Lists.Assessments).Items().add({
+                    DataSource.AppAssessments.createItem({
                         ContentTypeId: ct ? ct.StringId : null,
                         RelatedAppId: item.Id,
                         Title: item.Title + " Tests " + (new Date(Date.now()).toDateString())
-                    }).execute(
+                    }).then(
                         item => {
                             // Show the assessment form
-                            displayForm(item as any);
+                            displayEditForm(item);
                         },
                         ex => {
                             // Log the error
@@ -1289,13 +1328,10 @@ export class AppForms {
     private getAssessmentItem(item: IAppItem, testFl: boolean = true): PromiseLike<IAssessmentItem> {
         // Return a promise
         return new Promise((resolve, reject) => {
-            // Get the assoicated item
-            List(Strings.Lists.Assessments).Items().query({
-                Filter: "RelatedAppId eq " + item.Id + " and ContentType eq '" + (testFl ? "TestCases" : "Item") + "'",
-                OrderBy: ["Completed desc"]
-            }).execute(items => {
+            // Get the associated items
+            DataSource.loadAppAssessments(item.Id, testFl).then(items => {
                 // Return the last item
-                resolve(items.results[0] as any);
+                resolve(items[0]);
             }, reject);
         });
     }
@@ -1311,17 +1347,28 @@ export class AppForms {
             LoadingDialog.setBody("This dialog will close after the validation completes.");
             LoadingDialog.show();
 
-            // Parse the fields
-            for (let fieldName in DataSource.DocSetInfo.fields) {
-                let field = DataSource.DocSetInfo.fields[fieldName];
+            // Get the content type
+            for (let i = 0; i < DataSource.DocSetList.ListContentTypes.length; i++) {
+                let ct = DataSource.DocSetList.ListContentTypes[i];
 
-                // See if this is a required field
-                if (field.Required) {
-                    // Ensure a value exists
-                    if (item[fieldName]) { continue; }
+                // See if this is the target content type
+                if (ct.Name == "App") {
+                    // Parse the fields
+                    for (let i = 0; i < ct.FieldLinks.results.length; i++) {
+                        let field = ct.FieldLinks.results[i];
 
-                    // Set the flag and break from the loop
-                    isValid = false;
+                        // See if this is a required field
+                        if (field.Required) {
+                            // Ensure a value exists
+                            if (item[field.Name]) { continue; }
+
+                            // Set the flag and break from the loop
+                            isValid = false;
+                            break;
+                        }
+                    }
+
+                    // Break from the loop
                     break;
                 }
             }
@@ -1531,34 +1578,35 @@ export class AppForms {
 
     // Last Assessment form
     lastAssessment(item: IAppItem) {
-        // Set the list name
-        ItemForm.AutoClose = false;
-        ItemForm.ListName = Strings.Lists.Assessments;
-
         // Get the assessment item
         this.getAssessmentItem(item, false).then(assessment => {
             // See if an item exists
             if (assessment) {
-                // Show the edit form
-                ItemForm.view({
+                // Display the view form
+                DataSource.AppAssessments.viewForm({
                     itemId: assessment.Id,
                     webUrl: Strings.SourceUrl
                 });
             }
             else {
-                // Show 'assessment not found' modal
+                // Clear the modal
                 Modal.clear();
+
+                // Set the header & body
                 Modal.setHeader("Assessment not found")
-                Modal.setBody("Unable to find an assessment for app '" + DataSource.DocSetItem.Title + "'.")
-                let close = Components.Button({
-                    el: document.createElement("div"),
+                Modal.setBody("Unable to find an assessment for app '" + DataSource.AppItem.Title + "'.")
+
+                // Add the footer button
+                Components.Button({
+                    el: Modal.FooterElement,
                     text: "Close",
                     type: Components.ButtonTypes.OutlineSecondary,
                     onClick: () => {
                         Modal.hide();
                     }
                 });
-                Modal.setFooter(close.el);
+
+                // Show the modal
                 Modal.show();
             }
         });
@@ -1606,27 +1654,30 @@ export class AppForms {
                     LoadingDialog.setBody("This dialog will close after the app is sent back to the developer.");
                     LoadingDialog.show();
 
-                    // Get the current status configuration
-                    let status = AppConfig.Status[item.AppStatus];
-
-                    // Set the new status
-                    let newStatus = status && status.prevStep ? status.prevStep : item.AppStatus;
-
                     // Update the status
-                    item.update({
+                    let values = {
                         AppComments: comments,
-                        AppIsRejected: true,
-                        AppStatus: newStatus
-                    }).execute(
+                        AppIsRejected: true
+                    };
+                    item.update(values).execute(
                         () => {
                             // Send the notification
-                            AppNotifications.rejectEmail(newStatus, item, comments).then(() => {
+                            AppNotifications.rejectEmail(item, comments).then(() => {
                                 // Call the update event
                                 onUpdate();
 
                                 // Hide the dialog
                                 LoadingDialog.hide();
                             });
+
+                            // Log
+                            DataSource.logItem({
+                                LogUserId: ContextInfo.userId,
+                                ParentId: item.AppProductID,
+                                ParentListName: Strings.Lists.Apps,
+                                Title: DataSource.AuditLogStates.AppRejected,
+                                LogComment: `The app ${item.Title} was rejected. Justification: ${values.AppComments}`
+                            }, { ...item, ...values });
                         },
                         ex => {
                             // Log the error
@@ -1643,12 +1694,8 @@ export class AppForms {
 
     // Displays the list form for requesting an app catalog
     requestAppCatalog(url: string) {
-        // Set the list name
-        ItemForm.AutoClose = false;
-        ItemForm.ListName = Strings.Lists.AppCatalogRequests;
-
-        // Show the edit form
-        ItemForm.create({
+        // Display the new form
+        DataSource.AppCatalogRequests.newForm({
             webUrl: Strings.SourceUrl,
             onSetHeader(el) {
                 el.innerHTML = el.innerHTML;
@@ -1683,9 +1730,18 @@ export class AppForms {
                 // Return the values
                 return values;
             },
-            onUpdate: () => {
+            onUpdate: (item: IAppCatalogRequestItem) => {
                 // Reload the app catalog items
-                DataSource.loadAppCatalogRequests();
+                DataSource.AppCatalogRequests.refresh();
+
+                // Log
+                DataSource.logItem({
+                    LogUserId: ContextInfo.userId,
+                    ParentId: DataSource.AppItem.AppProductID,
+                    ParentListName: Strings.Lists.Apps,
+                    Title: DataSource.AuditLogStates.AppCatalogRequest,
+                    LogComment: `An app catalog was requested for site: ${item.SiteCollectionUrl.Url}`
+                }, item as any);
             }
         });
     }
@@ -1708,6 +1764,15 @@ export class AppForms {
 
                 // Retract the app
                 AppActions.retract(item, true, false, () => {
+                    // Log
+                    DataSource.logItem({
+                        LogUserId: ContextInfo.userId,
+                        ParentId: item.AppProductID,
+                        ParentListName: Strings.Lists.Apps,
+                        Title: DataSource.AuditLogStates.AppRetracted,
+                        LogComment: `The app ${item.Title} was retracted from the tenant app catalog.`
+                    }, item);
+
                     // Call the update event
                     onUpdate();
                 });
@@ -1912,12 +1977,22 @@ export class AppForms {
                             // Update the status
                             let status = AppConfig.Status[item.AppStatus];
                             let newStatus = status ? status.nextStep : AppConfig.Status[0].name;
-                            item.update({
+                            let values = {
                                 AppIsRejected: false,
                                 AppStatus: item.AppIsRejected ? item.AppStatus : newStatus
-                            }).execute(() => {
+                            };
+                            item.update(values).execute(() => {
                                 // Code to run after the sponsor is added to the security group
                                 let onComplete = () => {
+                                    // Log
+                                    DataSource.logItem({
+                                        LogUserId: ContextInfo.userId,
+                                        ParentId: item.AppProductID,
+                                        ParentListName: Strings.Lists.Apps,
+                                        Title: item.AppIsRejected ? DataSource.AuditLogStates.AppResubmitted : DataSource.AuditLogStates.AppSubmitted,
+                                        LogComment: `The app ${item.Title} was ${item.AppIsRejected ? "resubmitted" : "submitted"} for approval.`
+                                    }, { ...item, ...values });
+
                                     // Run the flow associated for this status
                                     AppActions.runFlow(item, status.flowId);
 
@@ -1961,7 +2036,7 @@ export class AppForms {
     }
 
     // Updates the app
-    updateApp(item: IAppItem, appCatalogUrl: string, siteUrl: string, onUpdate: () => void) {
+    updateApp(item: IAppItem, siteUrl: string, onUpdate: () => void) {
         // Set the header
         Modal.setHeader("Update App");
 
@@ -1979,10 +2054,19 @@ export class AppForms {
                 // Update the app
                 AppActions.updateApp(item, siteUrl, true, onUpdate).then(() => {
                     // Send the notifications
-                    AppNotifications.sendAppTestSiteUpgradedEmail(DataSource.DocSetItem).then(() => {
+                    AppNotifications.sendAppTestSiteUpgradedEmail(DataSource.AppItem).then(() => {
                         // Call the update event
                         onUpdate();
                     });
+
+                    // Log
+                    DataSource.logItem({
+                        LogUserId: ContextInfo.userId,
+                        ParentId: item.AppProductID,
+                        ParentListName: Strings.Lists.Apps,
+                        Title: DataSource.AuditLogStates.AppUpdated,
+                        LogComment: `The app ${item.Title} was updated for site: ${siteUrl}`
+                    }, item);
                 });
             }
         }).el);
@@ -2094,6 +2178,15 @@ export class AppForms {
                                     // Update the loading dialog
                                     LoadingDialog.setHeader("Upgrading Apps");
                                     LoadingDialog.setBody("Upgrading " + (++counter) + " of " + items.length);
+
+                                    // Log
+                                    DataSource.logItem({
+                                        LogUserId: ContextInfo.userId,
+                                        ParentId: appItem.AppProductID,
+                                        ParentListName: Strings.Lists.Apps,
+                                        Title: DataSource.AuditLogStates.AppUpgraded,
+                                        LogComment: `The app ${appItem.Title} was upgraded on site: ${item.data}`
+                                    }, appItem);
 
                                     // Upgrade the next site
                                     resolve(null);

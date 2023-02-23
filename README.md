@@ -6,6 +6,27 @@ Helps manage solutions that are deployed to site collection and/or tenant app ca
 
 ![Demo](https://github.com/spsprinkles/app-catalog-dashboard/raw/main/solution.png)
 
+## Audit Log
+
+The tool will track a history of actions taken on an app. This audit log is visible to admins and owners. Below is a list of states that are tracked.
+
+| Name | Description |
+| --- | --- |
+| App Added | Logged when an app is added to the tool. |
+| App Approved | Logged when an app is approved. |
+| App Catalog Request | Logged when an app catalog is being requested for a site collection. |
+| App Deployed | Logged when an app is deployed to a site collection app catalog. |
+| App Rejected | Logged when an app is rejected. |
+| App Retracted | Logged when an app is retracted. |
+| App Resubmitted | Logged when an app is resubmitted from a rejected state. |
+| App Submitted | Logged when an app is submitted for approval. |
+| App Tenant Deployed | Logged when an app is deployed to the tenant app catalog. |
+| App Updated | Logged when an app is updated in the tool. |
+| App Upgraded | Logged when an app is upgraded in the tool. |
+| Create Test Site | Logged when the test site is created for the app. |
+| Delete App | Logged when an app is deleted from the tool |
+| Delete Test Site | Logged when the test site is deleted for the app. |
+
 ## Configuration
 
 The [configuration file](https://github.com/spsprinkles/app-catalog-dashboard/raw/main/assets/config.json) contains the settings for the application.
@@ -88,6 +109,7 @@ The available values for the `actions` status property.
 | Name | Description |
 | --- | --- |
 | ApproveReject | Displays the approve and reject button if the user is listed in the `approval` property. |
+| AuditLog | Displays the audit log history for an app. |
 | DeploySiteCatalog | Displays the deploy to site collection button, allowing the user to deploy the application to a site of their choice. |
 | Delete | Displays the delete button to remove the app and test site. |
 | DeleteTestSite | Displays the delete test site button if the site exists. |

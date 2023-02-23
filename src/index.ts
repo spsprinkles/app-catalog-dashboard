@@ -1,5 +1,6 @@
 import { ContextInfo } from "gd-sprest-bs";
 import { AppDashboard } from "./appDashboard";
+import { AppInstall } from "./appInstall";
 import { AppSecurity } from "./appSecurity";
 import { AppView } from "./appView";
 import { Configuration } from "./cfg";
@@ -48,7 +49,7 @@ const GlobalVariable = {
                 // Ensure the security groups exist
                 if (AppSecurity.ApproverGroup == null || AppSecurity.DevGroup == null || AppSecurity.FinalApproverGroup == null || AppSecurity.SponsorGroup == null) {
                     // See if an install is required
-                    DataSource.InstallRequired(el);
+                    AppInstall.InstallRequired(el);
                 } else {
                     // Create the app elements
                     el.innerHTML = "<div id='apps'></div><div id='app-details' class='d-none'></div>";
@@ -56,7 +57,7 @@ const GlobalVariable = {
                     let elAppDetails = el.querySelector("#app-details") as HTMLElement;
 
                     // See if this is a document set and we are not in teams
-                    if (!Strings.IsTeams && DataSource.DocSetItem) {
+                    if (!Strings.IsTeams && DataSource.AppItem) {
                         // View the application dashboard
                         new AppDashboard(elAppDetails, elApps);
 
@@ -71,7 +72,7 @@ const GlobalVariable = {
             // Error
             () => {
                 // See if an install is required
-                DataSource.InstallRequired(el);
+                AppInstall.InstallRequired(el);
             }
         );
     }

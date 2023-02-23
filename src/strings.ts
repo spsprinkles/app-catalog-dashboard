@@ -45,6 +45,7 @@ const Strings = {
     Lists: {
         Apps: "Developer Apps",
         AppCatalogRequests: "App Catalog Requests",
+        AuditLog: "App Logs",
         Assessments: "Dev App Assessments"
     },
     ProjectName: "App Dashboard",

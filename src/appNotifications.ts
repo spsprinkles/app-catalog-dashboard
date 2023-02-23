@@ -186,7 +186,7 @@ export class AppNotifications {
     }
 
     // Sends a rejection notification
-    static rejectEmail(status: string, item: IAppItem, comments: string): PromiseLike<void> {
+    static rejectEmail(item: IAppItem, comments: string): PromiseLike<void> {
         // Return a promise
         return new Promise(resolve => {
             // Get the app developers
