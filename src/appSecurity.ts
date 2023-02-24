@@ -549,32 +549,28 @@ export class AppSecurity {
         return new Promise(resolve => {
             // See if the tenant app catalog is defined
             if (tenantAppCatalogUrl) {
+                let web = Web(tenantAppCatalogUrl);
+
                 // Ensure the user is an owner of the site
-                Web(tenantAppCatalogUrl).AssociatedOwnerGroup().Users().getByEmail(ContextInfo.userEmail).execute(user => {
+                web.AssociatedOwnerGroup().Users().getByEmail(ContextInfo.userEmail).execute(user => {
                     // Ensure the user is an owner
                     if (user && user.Id > 0) {
                         // Set the flag
                         this._isTenantAppCatalogOwner = true;
                     }
-
-                    // Resolve the request
-                    resolve();
-                }, () => {
-                    // Get the user
-                    Web(tenantAppCatalogUrl).SiteUsers().getByEmail(ContextInfo.userEmail).execute(user => {
-                        // See if they are an admin
-                        if (user.IsSiteAdmin) {
-                            // Set the flag
-                            this._isSiteAppCatalogOwner = true;
-                        }
-
-                        // Resolve the request
-                        resolve();
-                    }, () => {
-                        // Resolve the request
-                        resolve();
-                    });
                 });
+
+                // Get the user
+                web.SiteUsers().getByEmail(ContextInfo.userEmail || ContextInfo.userPrincipalName).execute(user => {
+                    // See if they are an admin
+                    if (user.IsSiteAdmin) {
+                        // Set the flag
+                        this._isSiteAppCatalogOwner = true;
+                    }
+                });
+
+                // Wait for the requests to complete and resolve the request
+                web.done(resolve);
             } else {
                 // Resolve the request
                 resolve();
