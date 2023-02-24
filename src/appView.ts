@@ -88,7 +88,7 @@ export class AppView {
     private render() {
         // See if this is an owner
         let navLinks: Components.INavbarItem[] = [];
-        if (AppSecurity.IsOwner) {
+        if (AppSecurity.IsAdmin || AppSecurity.IsOwner) {
             // Set the admin buttons
             navLinks.push({
                 className: "btn-outline-light ms-2 ps-2 pt-1",
@@ -131,6 +131,13 @@ export class AppView {
                         onClick: () => {
                             // Show the group in a new tab
                             window.open(AppSecurity.SponsorUrl, "_blank");
+                        }
+                    },
+                    {
+                        text: "Manage Audit Log",
+                        onClick: () => {
+                            // Show the audit log list
+                            window.open(DataSource.AuditLog.List.ListUrl);
                         }
                     }
                 ]
