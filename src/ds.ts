@@ -391,29 +391,30 @@ export class DataSource {
                     AppConfig.Configuration.appCatalogUrl,
                     AppConfig.Configuration.tenantAppCatalogUrl
                 ).then(() => {
-                    // Wait for the components to initialize
-                    Promise.all([
-                        // Initialize the app assessments
-                        this.initAppAssessments(),
-                        // Initialize the app catalog requests
-                        this.initAppCatalogRequests(),
-                        // Initialize the audit log
-                        this.initAuditLog(),
-                        // Initialize the document set list
-                        this.initDocSetList(),
-                        // Load the status filters
-                        this.initStatusFilters(),
-                    ]).then(() => {
-                        // See if an app id was defined in the query string
-                        let itemId = this.getAppIdFromQS();
-                        if (itemId > 0) {
-                            // Load the app information
-                            this.loadAppDashboard(itemId).then(resolve, resolve);
-                        } else {
-                            // Resolve the request
-                            resolve();
-                        }
-                    }, reject);
+                    // Initialize the audit log
+                    this.initAuditLog().then(() => {
+                        // Wait for the components to initialize
+                        Promise.all([
+                            // Initialize the app assessments
+                            this.initAppAssessments(),
+                            // Initialize the app catalog requests
+                            this.initAppCatalogRequests(),
+                            // Initialize the document set list
+                            this.initDocSetList(),
+                            // Load the status filters
+                            this.initStatusFilters(),
+                        ]).then(() => {
+                            // See if an app id was defined in the query string
+                            let itemId = this.getAppIdFromQS();
+                            if (itemId > 0) {
+                                // Load the app information
+                                this.loadAppDashboard(itemId).then(resolve, resolve);
+                            } else {
+                                // Resolve the request
+                                resolve();
+                            }
+                        }, reject);
+                    });
                 }, reject);
             }, reject);
         });
