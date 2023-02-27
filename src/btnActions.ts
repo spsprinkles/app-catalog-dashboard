@@ -3,6 +3,7 @@ import { appIndicator } from "gd-sprest-bs/build/icons/svgs/appIndicator";
 import { chatSquareDots } from "gd-sprest-bs/build/icons/svgs/chatSquareDots";
 import { pencilSquare } from "gd-sprest-bs/build/icons/svgs/pencilSquare";
 import { trash } from "gd-sprest-bs/build/icons/svgs/trash";
+import * as moment from "moment";
 import { AppConfig, IStatus, UserTypes } from "./appCfg";
 import { AppForms } from "./appForms";
 import { AppSecurity } from "./appSecurity";
@@ -239,7 +240,14 @@ export class ButtonActions {
                   // Display the audit log information
                   DataSource.AuditLog.viewLog({
                     id: this._item.AppProductID,
-                    listName: Strings.Lists.Apps
+                    listName: Strings.Lists.Apps,
+                    onTableCellRendering: (el, col, item) => {
+                      // See if this is the date/time column
+                      if (col.name == "Created") {
+                        // Format the value
+                        el.innerHTML = moment(item.Created).format(AppConfig.Configuration.dateFormat);
+                      }
+                    }
                   });
                 },
               },
