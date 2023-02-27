@@ -122,6 +122,7 @@ export const Configuration = Helper.SPConfig({
                         "AppImageURL3",
                         "AppImageURL4",
                         "AppImageURL5",
+                        "AppSourceControl",
                         "AppSupportURL",
                         "AppVideoURL",
                         { Name: "AppAPIPermissions", ReadOnly: true },
@@ -238,6 +239,14 @@ export const Configuration = Helper.SPConfig({
                     showInEditForm: false,
                     showInNewForm: false
                 } as Helper.IFieldInfoNote,
+                {
+                    name: "AppSourceControl",
+                    title: "App Source Control",
+                    type: Helper.SPCfgFieldType.Url,
+                    allowDeletion: false,
+                    description: "The site containing the repository of the app source code.",
+                    format: SPTypes.UrlFormatType.Hyperlink
+                } as Helper.IFieldInfoUrl,
                 {
                     name: "AppSponsor",
                     title: "Sponsor",

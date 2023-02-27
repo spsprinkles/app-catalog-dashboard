@@ -746,6 +746,29 @@ ${ContextInfo.userDisplayName}`.trim()
           });
           break;
 
+        // View Source Control
+        case "ViewSourceControl":
+          // Ensure the source control url exists for this app
+          if (this._item.AppSourceControl) {
+            // Render the button
+            tooltips.add({
+              content: "Views the source code for the app.",
+              btnProps: {
+                text: "View Source Control",
+                iconClassName: "me-1",
+                iconSize: 20,
+                iconType: chatSquareDots,
+                isSmall: true,
+                type: Components.ButtonTypes.OutlinePrimary,
+                onClick: () => {
+                  // Display the url in a new tab
+                  window.open(this._item.AppSourceControl.Url, "_blank");
+                },
+              },
+            });
+          }
+          break;
+
         // View Tech Review
         case "ViewTechReview":
           // Render the button
