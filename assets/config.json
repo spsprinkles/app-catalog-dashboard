@@ -38,6 +38,7 @@
         "Approved": {
             "actions": [
                 "View",
+                "ViewSourceControl",
                 "ViewTestCases",
                 "ViewTechReview",
                 "TestSite",
@@ -71,6 +72,7 @@
             "actions": [
                 "GetHelp",
                 "View",
+                "ViewSourceControl",
                 "ViewTestCases",
                 "ViewTechReview",
                 "TestSite",
@@ -82,6 +84,7 @@
             "requiresTestCases": true,
             "actions": [
                 "View",
+                "ViewSourceControl",
                 "TestSite",
                 "EditTestCases",
                 "Submit"
@@ -140,6 +143,7 @@
         "Pending Approval": {
             "actions": [
                 "View",
+                "ViewSourceControl",
                 "ViewTestCases",
                 "ViewTechReview",
                 "TestSite",
@@ -171,6 +175,7 @@
         "Pending Final Approval": {
             "actions": [
                 "View",
+                "ViewSourceControl",
                 "ViewTestCases",
                 "ViewTechReview",
                 "TestSite",
@@ -204,6 +209,7 @@
             "requiresTechReview": true,
             "actions": [
                 "View",
+                "ViewSourceControl",
                 "TestSite",
                 "ViewTestCases",
                 "EditTechReview",
