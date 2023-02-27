@@ -1,9 +1,24 @@
 import { Components, ContextInfo, Web } from "gd-sprest-bs";
 import { appIndicator } from "gd-sprest-bs/build/icons/svgs/appIndicator";
-import { chatSquareDots } from "gd-sprest-bs/build/icons/svgs/chatSquareDots";
+import { arrowClockwise } from "gd-sprest-bs/build/icons/svgs/arrowClockwise";
+import { boxArrowDownRight } from "gd-sprest-bs/build/icons/svgs/boxArrowDownRight";
+import { boxArrowInLeft } from "gd-sprest-bs/build/icons/svgs/boxArrowInLeft";
+import { boxArrowRight } from "gd-sprest-bs/build/icons/svgs/boxArrowRight";
+import { cardChecklist } from "gd-sprest-bs/build/icons/svgs/cardChecklist";
+import { cardText } from "gd-sprest-bs/build/icons/svgs/cardText";
+import { clockHistory } from "gd-sprest-bs/build/icons/svgs/clockHistory";
+import { envelope } from "gd-sprest-bs/build/icons/svgs/envelope";
 import { git } from "gd-sprest-bs/build/icons/svgs/git";
-import { pencilSquare } from "gd-sprest-bs/build/icons/svgs/pencilSquare";
-import { trash } from "gd-sprest-bs/build/icons/svgs/trash";
+import { handThumbsDown } from "gd-sprest-bs/build/icons/svgs/handThumbsDown";
+import { handThumbsUp } from "gd-sprest-bs/build/icons/svgs/handThumbsUp";
+import { inputCursorText } from "gd-sprest-bs/build/icons/svgs/inputCursorText";
+import { microsoftTeams } from "gd-sprest-bs/build/icons/svgs/microsoftTeams";
+import { nodePlus } from "gd-sprest-bs/build/icons/svgs/nodePlus";
+import { questionSquare } from "gd-sprest-bs/build/icons/svgs/questionSquare";
+import { send } from "gd-sprest-bs/build/icons/svgs/send";
+import { trash3 } from "gd-sprest-bs/build/icons/svgs/trash3";
+import { window_ } from "gd-sprest-bs/build/icons/svgs/window_";
+import { windowStack } from "gd-sprest-bs/build/icons/svgs/windowStack";
 import * as moment from "moment";
 import { AppConfig, IStatus, UserTypes } from "./appCfg";
 import { AppForms } from "./appForms";
@@ -165,9 +180,9 @@ export class ButtonActions {
                   text: "Resubmit",
                   iconClassName: "me-1",
                   iconSize: 20,
-                  iconType: chatSquareDots,
+                  iconType: arrowClockwise,
                   isSmall: true,
-                  type: Components.ButtonTypes.OutlineSuccess,
+                  type: Components.ButtonTypes.OutlinePrimary,
                   onClick: () => {
                     // Display the approval form
                     this._forms.submit(this._item, () => {
@@ -188,7 +203,7 @@ export class ButtonActions {
                 text: "Approve",
                 iconClassName: "me-1",
                 iconSize: 20,
-                iconType: chatSquareDots,
+                iconType: handThumbsUp,
                 isSmall: true,
                 type: Components.ButtonTypes.OutlineSuccess,
                 onClick: () => {
@@ -208,7 +223,7 @@ export class ButtonActions {
                 text: "Reject",
                 iconClassName: "me-1",
                 iconSize: 20,
-                iconType: chatSquareDots,
+                iconType: handThumbsDown,
                 isSmall: true,
                 type: Components.ButtonTypes.OutlineDanger,
                 onClick: () => {
@@ -234,9 +249,9 @@ export class ButtonActions {
                 text: "Audit History",
                 iconClassName: "me-1",
                 iconSize: 20,
-                iconType: chatSquareDots,
+                iconType: clockHistory,
                 isSmall: true,
-                type: Components.ButtonTypes.OutlineSuccess,
+                type: Components.ButtonTypes.OutlineSecondary,
                 onClick: () => {
                   // Display the audit log information
                   DataSource.AuditLog.viewLog({
@@ -267,7 +282,7 @@ export class ButtonActions {
                 text: "Delete App/Solution",
                 iconClassName: "me-1",
                 iconSize: 20,
-                iconType: trash,
+                iconType: trash3,
                 isSmall: true,
                 type: Components.ButtonTypes.OutlineDanger,
                 onClick: () => {
@@ -297,7 +312,7 @@ export class ButtonActions {
                     text: "Delete Test Site",
                     iconClassName: "me-1",
                     iconSize: 20,
-                    iconType: trash,
+                    iconType: trash3,
                     isSmall: true,
                     type: Components.ButtonTypes.OutlineDanger,
                     onClick: () => {
@@ -330,9 +345,9 @@ export class ButtonActions {
               text: "Deploy to Site Collection",
               iconClassName: "me-1",
               iconSize: 20,
-              //iconType: trash,
+              iconType: boxArrowDownRight,
               isSmall: true,
-              type: Components.ButtonTypes.OutlineDanger,
+              type: Components.ButtonTypes.OutlineSuccess,
               onClick: () => {
                 // Display the delete site form
                 this._forms.deployToSite(this._item, () => {
@@ -360,6 +375,7 @@ export class ButtonActions {
                   text: "Retract from Tenant",
                   iconClassName: "me-1",
                   iconSize: 20,
+                  iconType: boxArrowInLeft,
                   isSmall: true,
                   type: Components.ButtonTypes.OutlineDanger,
                   onClick: () => {
@@ -398,10 +414,10 @@ export class ButtonActions {
                           text: "Deploy to Teams",
                           iconClassName: "me-1",
                           iconSize: 20,
-                          //iconType: trash,
+                          iconType: microsoftTeams,
                           isDisabled: AppSecurity.IsTenantAppCatalogOwner,
                           isSmall: true,
-                          type: Components.ButtonTypes.OutlineWarning,
+                          type: Components.ButtonTypes.OutlineSuccess,
                           onClick: () => {
                             // Deploy the app
                             this._forms.deployToTeams(this._item, () => {
@@ -422,7 +438,7 @@ export class ButtonActions {
                   text: "Deploy to Tenant",
                   iconClassName: "me-1",
                   iconSize: 20,
-                  //iconType: trash,
+                  iconType: boxArrowRight,
                   isSmall: true,
                   type: Components.ButtonTypes.OutlineSuccess,
                   onClick: () => {
@@ -447,10 +463,10 @@ export class ButtonActions {
               text: "Edit Properties",
               iconClassName: "me-1",
               iconSize: 20,
-              iconType: pencilSquare,
+              iconType: inputCursorText,
               isDisabled: !canEdit,
               isSmall: true,
-              type: Components.ButtonTypes.OutlineSecondary,
+              type: Components.ButtonTypes.OutlinePrimary,
               onClick: () => {
                 // Display the edit form
                 this._forms.edit(this._item.Id, () => {
@@ -471,7 +487,7 @@ export class ButtonActions {
               text: "Edit Technical Review",
               iconClassName: "me-1",
               iconSize: 20,
-              iconType: chatSquareDots,
+              iconType: cardChecklist,
               isSmall: true,
               type: Components.ButtonTypes.OutlinePrimary,
               onClick: () => {
@@ -494,7 +510,7 @@ export class ButtonActions {
               text: "Edit Test Cases",
               iconClassName: "me-1",
               iconSize: 20,
-              iconType: chatSquareDots,
+              iconType: cardChecklist,
               isDisabled: !canEdit,
               isSmall: true,
               type: Components.ButtonTypes.OutlinePrimary,
@@ -518,7 +534,7 @@ export class ButtonActions {
               text: "Get Help",
               iconClassName: "me-1",
               iconSize: 20,
-              iconType: appIndicator,
+              iconType: questionSquare,
               isSmall: true,
               type: Components.ButtonTypes.OutlinePrimary,
               onClick: () => {
@@ -549,7 +565,7 @@ ${ContextInfo.userDisplayName}`.trim()
               text: "Notification",
               iconClassName: "me-1",
               iconSize: 20,
-              iconType: appIndicator,
+              iconType: envelope,
               isSmall: true,
               type: Components.ButtonTypes.OutlinePrimary,
               onClick: () => {
@@ -569,7 +585,7 @@ ${ContextInfo.userDisplayName}`.trim()
               text: "Submit",
               iconClassName: "me-1",
               iconSize: 20,
-              iconType: appIndicator,
+              iconType: send,
               isDisabled: !canEdit || this.Status.lastStep,
               isSmall: true,
               type: Components.ButtonTypes.OutlinePrimary,
@@ -597,9 +613,9 @@ ${ContextInfo.userDisplayName}`.trim()
                   text: "View Test Site",
                   iconClassName: "me-1",
                   iconSize: 20,
-                  iconType: chatSquareDots,
+                  iconType: windowStack,
                   isSmall: true,
-                  type: Components.ButtonTypes.OutlinePrimary,
+                  type: Components.ButtonTypes.OutlineSecondary,
                   onClick: () => {
                     // Open the test site in a new tab
                     window.open(web.Url, "_blank");
@@ -623,7 +639,7 @@ ${ContextInfo.userDisplayName}`.trim()
                     text: "Update Test Site",
                     iconClassName: "me-1",
                     iconSize: 20,
-                    iconType: chatSquareDots,
+                    iconType: appIndicator,
                     isDisabled: !AppSecurity.IsSiteAppCatalogOwner,
                     isSmall: true,
                     type: Components.ButtonTypes.OutlinePrimary,
@@ -651,7 +667,7 @@ ${ContextInfo.userDisplayName}`.trim()
                     text: "Update Test Site",
                     iconClassName: "me-1",
                     iconSize: 20,
-                    iconType: chatSquareDots,
+                    iconType: appIndicator,
                     isDisabled: !AppSecurity.IsSiteAppCatalogOwner,
                     isSmall: true,
                     type: Components.ButtonTypes.OutlinePrimary,
@@ -682,7 +698,7 @@ ${ContextInfo.userDisplayName}`.trim()
                     text: "Create Test Site",
                     iconClassName: "me-1",
                     iconSize: 20,
-                    iconType: chatSquareDots,
+                    iconType: nodePlus,
                     isDisabled:
                       !AppSecurity.IsSiteAppCatalogOwner ||
                       !DataSource.AppCatalogSiteItem.IsValidAppPackage,
@@ -715,9 +731,9 @@ ${ContextInfo.userDisplayName}`.trim()
                 text: "Upgrade",
                 iconClassName: "me-1",
                 iconSize: 20,
-                iconType: pencilSquare,
+                iconType: appIndicator,
                 isSmall: true,
-                type: Components.ButtonTypes.OutlineSecondary,
+                type: Components.ButtonTypes.OutlinePrimary,
                 onClick: () => {
                   // Display the upgrade form
                   this._forms.upgrade(this._item);
@@ -736,7 +752,7 @@ ${ContextInfo.userDisplayName}`.trim()
               text: "View Properties",
               iconClassName: "me-1",
               iconSize: 20,
-              iconType: pencilSquare,
+              iconType: window_,
               isSmall: true,
               type: Components.ButtonTypes.OutlineSecondary,
               onClick: () => {
@@ -760,7 +776,7 @@ ${ContextInfo.userDisplayName}`.trim()
                 iconSize: 20,
                 iconType: git,
                 isSmall: true,
-                type: Components.ButtonTypes.OutlinePrimary,
+                type: Components.ButtonTypes.OutlineSecondary,
                 onClick: () => {
                   // Display the url in a new tab
                   window.open(this._item.AppSourceControl.Url, "_blank");
@@ -779,9 +795,9 @@ ${ContextInfo.userDisplayName}`.trim()
               text: "View Technical Review",
               iconClassName: "me-1",
               iconSize: 20,
-              iconType: chatSquareDots,
+              iconType: cardText,
               isSmall: true,
-              type: Components.ButtonTypes.OutlinePrimary,
+              type: Components.ButtonTypes.OutlineSecondary,
               onClick: () => {
                 // Display the test cases
                 this._forms.displayTechReview(this._item);
@@ -799,9 +815,9 @@ ${ContextInfo.userDisplayName}`.trim()
               text: "View Test Cases",
               iconClassName: "me-1",
               iconSize: 20,
-              iconType: chatSquareDots,
+              iconType: cardText,
               isSmall: true,
-              type: Components.ButtonTypes.OutlinePrimary,
+              type: Components.ButtonTypes.OutlineSecondary,
               onClick: () => {
                 // Display the review form
                 this._forms.displayTestCases(this._item);
