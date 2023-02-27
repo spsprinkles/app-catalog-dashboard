@@ -486,47 +486,38 @@ export class DataSource {
             let web = Web(AppConfig.Configuration.appCatalogUrl);
 
             // Load the available apps
-            web
-                .SiteCollectionAppCatalog()
-                .AvailableApps(this.AppItem.AppProductID)
-                .execute((app) => {
-                    // Set the app catalog item
-                    this._appCatalogSiteItem = app;
-                });
+            web.SiteCollectionAppCatalog().AvailableApps(this.AppItem.AppProductID).execute((app) => {
+                // Set the app catalog item
+                this._appCatalogSiteItem = app;
+            });
 
             // Query the app catalog and try to find it by file name
-            web
-                .Lists(Strings.Lists.AppCatalog)
-                .Items()
-                .query({
-                    Expand: ["File"],
-                })
-                .execute((items) => {
-                    // Parse the docset items
-                    for (let i = 0; i < this.AppFolder.Files.results.length; i++) {
-                        let file = this.AppFolder.Files.results[i];
+            web.Lists(Strings.Lists.AppCatalog).Items().query({ Expand: ["File"] }).execute((items) => {
+                // Parse the docset items
+                for (let i = 0; i < this.AppFolder.Files.results.length; i++) {
+                    let file = this.AppFolder.Files.results[i];
 
-                        // Ensure this is the package file
-                        if (!file.Name.endsWith(".sppkg")) {
-                            continue;
-                        }
-
-                        // Parse the items
-                        for (let j = 0; j < items.results.length; j++) {
-                            let item = items.results[j];
-
-                            // See if the item matches
-                            if (item.File.Name == file.Name) {
-                                // Item found
-                                this._appCatalogItem = item as any;
-                                break;
-                            }
-                        }
-
-                        // Break from the loop
-                        break;
+                    // Ensure this is the package file
+                    if (!file.Name.endsWith(".sppkg")) {
+                        continue;
                     }
-                });
+
+                    // Parse the items
+                    for (let j = 0; j < items.results.length; j++) {
+                        let item = items.results[j];
+
+                        // See if the item matches
+                        if (item.File.Name == file.Name) {
+                            // Item found
+                            this._appCatalogItem = item as any;
+                            break;
+                        }
+                    }
+
+                    // Break from the loop
+                    break;
+                }
+            });
 
             // Wait for the requests to complete
             web.done(resolve);
