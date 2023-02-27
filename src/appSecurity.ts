@@ -414,31 +414,18 @@ export class AppSecurity {
         return new Promise(resolve => {
             // See if the app catalog is defined
             if (appCatalogUrl) {
-                // Ensure the user is an owner of the site
-                Web(appCatalogUrl).AssociatedOwnerGroup().Users().getByEmail(ContextInfo.userEmail).execute(user => {
-                    // Ensure the user is an owner
-                    if (user && user.Id > 0) {
-                        // Set the flag
-                        this._isSiteAppCatalogOwner = true;
-                    }
+                // Get the user's permissions to the app catalog list
+                Web(appCatalogUrl).Lists(Strings.Lists.AppCatalog).getUserEffectivePermissions().execute(permissions => {
+                    // See if the user has right access
+                    this._isSiteAppCatalogOwner = Helper.hasPermissions(permissions.GetUserEffectivePermissions, [
+                        SPTypes.BasePermissionTypes.AddListItems, SPTypes.BasePermissionTypes.EditListItems
+                    ]);
 
-                    // resolve the request
+                    // Resolve the request
                     resolve();
                 }, () => {
-                    // Get the user
-                    Web(appCatalogUrl).SiteUsers().getByEmail(ContextInfo.userEmail).execute(user => {
-                        // See if they are an admin
-                        if (user.IsSiteAdmin) {
-                            // Set the flag
-                            this._isSiteAppCatalogOwner = true;
-                        }
-
-                        // Resolve the request
-                        resolve();
-                    }, () => {
-                        // Resolve the request
-                        resolve();
-                    });
+                    // Resolve the request
+                    resolve();
                 });
             } else {
                 // Resolve the request
@@ -549,28 +536,19 @@ export class AppSecurity {
         return new Promise(resolve => {
             // See if the tenant app catalog is defined
             if (tenantAppCatalogUrl) {
-                let web = Web(tenantAppCatalogUrl);
+                // Get the user's permissions to the app catalog list
+                Web(tenantAppCatalogUrl).Lists(Strings.Lists.AppCatalog).getUserEffectivePermissions().execute(permissions => {
+                    // See if the user has right access
+                    this._isTenantAppCatalogOwner = Helper.hasPermissions(permissions.GetUserEffectivePermissions, [
+                        SPTypes.BasePermissionTypes.AddListItems, SPTypes.BasePermissionTypes.EditListItems
+                    ]);
 
-                // Ensure the user is an owner of the site
-                web.AssociatedOwnerGroup().Users().getByEmail(ContextInfo.userEmail).execute(user => {
-                    // Ensure the user is an owner
-                    if (user && user.Id > 0) {
-                        // Set the flag
-                        this._isTenantAppCatalogOwner = true;
-                    }
+                    // Resolve the request
+                    resolve();
+                }, () => {
+                    // Resolve the request
+                    resolve();
                 });
-
-                // Get the user
-                web.SiteUsers().getByEmail(ContextInfo.userEmail || ContextInfo.userPrincipalName).execute(user => {
-                    // See if they are an admin
-                    if (user.IsSiteAdmin) {
-                        // Set the flag
-                        this._isSiteAppCatalogOwner = true;
-                    }
-                });
-
-                // Wait for the requests to complete and resolve the request
-                web.done(resolve);
             } else {
                 // Resolve the request
                 resolve();
