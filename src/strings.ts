@@ -43,6 +43,7 @@ const Strings = {
     },
     IsTeams: false,
     Lists: {
+        AppCatalog: "Apps for SharePoint",
         Apps: "Developer Apps",
         AppCatalogRequests: "App Catalog Requests",
         AuditLog: "App Logs",

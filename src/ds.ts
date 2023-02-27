@@ -496,7 +496,7 @@ export class DataSource {
 
             // Query the app catalog and try to find it by file name
             web
-                .Lists("Apps for SharePoint")
+                .Lists(Strings.Lists.AppCatalog)
                 .Items()
                 .query({
                     Expand: ["File"],
@@ -539,7 +539,7 @@ export class DataSource {
         return new Promise((resolve, reject) => {
             // Load the available apps
             Web(AppConfig.Configuration.appCatalogUrl)
-                .Lists("Apps for SharePoint")
+                .Lists(Strings.Lists.AppCatalog)
                 .Items()
                 .query({
                     Expand: ["File"],
