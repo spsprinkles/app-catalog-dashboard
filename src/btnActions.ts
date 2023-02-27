@@ -1,6 +1,7 @@
 import { Components, ContextInfo, Web } from "gd-sprest-bs";
 import { appIndicator } from "gd-sprest-bs/build/icons/svgs/appIndicator";
 import { chatSquareDots } from "gd-sprest-bs/build/icons/svgs/chatSquareDots";
+import { git } from "gd-sprest-bs/build/icons/svgs/git";
 import { pencilSquare } from "gd-sprest-bs/build/icons/svgs/pencilSquare";
 import { trash } from "gd-sprest-bs/build/icons/svgs/trash";
 import * as moment from "moment";
@@ -744,6 +745,29 @@ ${ContextInfo.userDisplayName}`.trim()
               },
             },
           });
+          break;
+
+        // View Source Control
+        case "ViewSourceControl":
+          // Ensure the source control url exists for this app
+          if (this._item.AppSourceControl) {
+            // Render the button
+            tooltips.add({
+              content: "Views the source code for the app.",
+              btnProps: {
+                text: "View Source Control",
+                iconClassName: "me-1",
+                iconSize: 20,
+                iconType: git,
+                isSmall: true,
+                type: Components.ButtonTypes.OutlinePrimary,
+                onClick: () => {
+                  // Display the url in a new tab
+                  window.open(this._item.AppSourceControl.Url, "_blank");
+                },
+              },
+            });
+          }
           break;
 
         // View Tech Review
