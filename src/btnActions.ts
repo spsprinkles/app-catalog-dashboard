@@ -1,6 +1,7 @@
 import { Components, ContextInfo, Web } from "gd-sprest-bs";
 import { appIndicator } from "gd-sprest-bs/build/icons/svgs/appIndicator";
 import { chatSquareDots } from "gd-sprest-bs/build/icons/svgs/chatSquareDots";
+import { git } from "gd-sprest-bs/build/icons/svgs/git";
 import { pencilSquare } from "gd-sprest-bs/build/icons/svgs/pencilSquare";
 import { trash } from "gd-sprest-bs/build/icons/svgs/trash";
 import * as moment from "moment";
@@ -757,7 +758,7 @@ ${ContextInfo.userDisplayName}`.trim()
                 text: "View Source Control",
                 iconClassName: "me-1",
                 iconSize: 20,
-                iconType: chatSquareDots,
+                iconType: git,
                 isSmall: true,
                 type: Components.ButtonTypes.OutlinePrimary,
                 onClick: () => {
