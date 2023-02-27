@@ -226,6 +226,13 @@ export class AppActions {
 
         // Return a promise
         return new Promise(resolve => {
+            // See if we are disabling the client side assets extraction
+            if (AppConfig.Configuration.disableClientSideAssetsExtraction) {
+                // Resolve the request and do nothing
+                resolve(null);
+                return;
+            }
+
             // Load the folders
             rootFolder.Folders().execute(folders => {
                 // Find the archive folder
@@ -1414,6 +1421,13 @@ export class AppActions {
                                                 Helper.Executor(pkgInfo.assets, asset => {
                                                     // Return a promise
                                                     return new Promise((resolve) => {
+                                                        // See if we are disabling the client side assets extraction
+                                                        if (AppConfig.Configuration.disableClientSideAssetsExtraction) {
+                                                            // Resolve the request and do nothing
+                                                            resolve(null);
+                                                            return;
+                                                        }
+
                                                         // Get the file information
                                                         asset.async("arraybuffer").then(content => {
                                                             // Upload the file
@@ -1600,6 +1614,13 @@ export class AppActions {
 
                                 // Return a promise
                                 return new Promise(resolve => {
+                                    // See if we are disabling the client side assets extraction
+                                    if (AppConfig.Configuration.disableClientSideAssetsExtraction) {
+                                        // Resolve the request and do nothing
+                                        resolve(null);
+                                        return;
+                                    }
+
                                     // Ensure the folder exists
                                     AppActions.createClientSideAssetsFolder(Web(Strings.SourceUrl).Lists(Strings.Lists.Apps).Items(DataSource.AppItem.Id).Folder()).then(folder => {
                                         // Get the client side asset files
@@ -1627,6 +1648,13 @@ export class AppActions {
 
                                 // Return a promise
                                 return new Promise(resolve => {
+                                    // See if we are disabling the client side assets extraction
+                                    if (AppConfig.Configuration.disableClientSideAssetsExtraction) {
+                                        // Resolve the request and do nothing
+                                        resolve(null);
+                                        return;
+                                    }
+
                                     // Parse the assets
                                     Helper.Executor(pkgInfo.assets, asset => {
                                         // Return a promise

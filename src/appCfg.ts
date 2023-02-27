@@ -12,6 +12,7 @@ export interface IConfiguration {
     appNotifications?: IAppNotifications;
     dashboardUrl?: string;
     dateFormat?: string;
+    disableClientSideAssetsExtraction?: boolean;
     errorEmails?: string[];
     flowEndpoint?: string;
     helpdeskGroupName?: string;
