@@ -384,15 +384,15 @@ export class DataSource {
     static init(appConfiguration?: string): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve, reject) => {
-            // Load the configuration
-            AppConfig.loadConfiguration(appConfiguration).then(() => {
-                // Load the security information
-                AppSecurity.init(
-                    AppConfig.Configuration.appCatalogUrl,
-                    AppConfig.Configuration.tenantAppCatalogUrl
-                ).then(() => {
-                    // Initialize the audit log
-                    this.initAuditLog().then(() => {
+            // Initialize the audit log
+            this.initAuditLog().then(() => {
+                // Load the configuration
+                AppConfig.loadConfiguration(appConfiguration).then(() => {
+                    // Load the security information
+                    AppSecurity.init(
+                        AppConfig.Configuration.appCatalogUrl,
+                        AppConfig.Configuration.tenantAppCatalogUrl
+                    ).then(() => {
                         // Wait for the components to initialize
                         Promise.all([
                             // Initialize the app assessments
