@@ -1655,9 +1655,11 @@ export class AppForms {
                     LoadingDialog.show();
 
                     // Update the status
+                    let status = AppConfig.Status[item.AppStatus];
                     let values = {
                         AppComments: comments,
-                        AppIsRejected: true
+                        AppIsRejected: true,
+                        AppStatus: status && status.prevStep ? status.prevStep : item.AppStatus
                     };
                     item.update(values).execute(
                         () => {
@@ -1976,10 +1978,10 @@ export class AppForms {
 
                             // Update the status
                             let status = AppConfig.Status[item.AppStatus];
-                            let newStatus = status ? status.nextStep : AppConfig.Status[0].name;
+                            let newStatus = status && status.nextStep ? status.nextStep : item.AppStatus;
                             let values = {
                                 AppIsRejected: false,
-                                AppStatus: item.AppIsRejected ? item.AppStatus : newStatus
+                                AppStatus: newStatus
                             };
                             item.update(values).execute(() => {
                                 // Code to run after the sponsor is added to the security group
