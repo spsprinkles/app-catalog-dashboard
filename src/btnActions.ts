@@ -245,7 +245,7 @@ export class ButtonActions {
                       // See if this is the date/time column
                       if (col.name == "Created") {
                         // Format the value
-                        el.innerHTML = moment(item.Created).format("YYYY-MM-DD HH:mm:ss");
+                        el.innerHTML = moment(item.Created).format(AppConfig.Configuration.dateFormat);
                       }
                     }
                   });

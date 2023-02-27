@@ -49,6 +49,7 @@ The [configuration file](https://github.com/spsprinkles/app-catalog-dashboard/ra
 | appDetails | The app details information to display. |
 | appFlows | The flow ids to trigger based on actions of the app. |
 | appNotifications | The ability to send notifications based on app actions. |
+| dateFormat | The date format to use. _(Examples: YYYY-MM-DD or YYYY-MM-DD HH:mm:ss)_ |
 | flowEndpoint | The flow authorization endpoint to use when triggering a flow. This is will default to commercial unless specified. Possible values: Flow, FlowChina, FlowDoD, FlowGov, FlowHigh, FlowUSNat, FlowUSSec or the url to the flow authorization endpoint. |
 | errorEmails | An array of email addresses to send to when a user has an error when using the application. This will help with troubleshooting issues in production. |
 | helpdeskGroupName | The site group name to use to send notifications to the `HelpdeskGroup` users. |

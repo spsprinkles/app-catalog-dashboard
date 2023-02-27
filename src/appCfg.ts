@@ -11,6 +11,7 @@ export interface IConfiguration {
     appFlows?: IAppFlows;
     appNotifications?: IAppNotifications;
     dashboardUrl?: string;
+    dateFormat?: string;
     errorEmails?: string[];
     flowEndpoint?: string;
     helpdeskGroupName?: string;
@@ -142,6 +143,9 @@ export class AppConfig {
                     this._cfg.helpPageUrl = this._cfg.helpPageUrl ? Common.updateUrl(this._cfg.helpPageUrl) : this._cfg.helpPageUrl;
                     this._cfg.templatesLibraryUrl = this._cfg.templatesLibraryUrl ? Common.updateUrl(this._cfg.templatesLibraryUrl) : this._cfg.templatesLibraryUrl;
                     this._cfg.tenantAppCatalogUrl = this.Configuration.tenantAppCatalogUrl ? Common.updateUrl(this._cfg.tenantAppCatalogUrl) : this._cfg.tenantAppCatalogUrl;
+
+                    // Default the values
+                    this._cfg.dateFormat = this._cfg.dateFormat || "YYYY-MM-DD HH:mm:ss";
 
                     // Ensure the configuration is valid
                     if (this.IsValid) {
