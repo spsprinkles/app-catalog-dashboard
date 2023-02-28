@@ -40,7 +40,7 @@ const AppPackageFields = [
 
 // Define the app store properties
 const AppStoreFields = [
-    "AppDescription",
+    "AppShortDescription",
     "AppThumbnailURL",
     "AppImageURL1",
     "AppImageURL2",
