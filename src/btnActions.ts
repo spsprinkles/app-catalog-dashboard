@@ -723,31 +723,43 @@ ${ContextInfo.userDisplayName}`.trim()
 
             // Test site doesn't exist
             () => {
-              // Ensure the app item exists
-              if (DataSource.AppCatalogSiteItem) {
-                // Render the create button
-                tooltips.add({
-                  content: "Creates the test site for the app.",
-                  btnProps: {
-                    text: "Create Test Site",
-                    iconClassName: "me-1",
-                    iconSize: 20,
-                    iconType: nodePlus,
-                    isDisabled:
-                      !AppSecurity.IsSiteAppCatalogOwner ||
-                      !DataSource.AppCatalogSiteItem.IsValidAppPackage,
-                    isSmall: true,
-                    type: Components.ButtonTypes.OutlinePrimary,
-                    onClick: () => {
-                      // Display the create test site form
-                      this._forms.createTestSite(this._item, () => {
-                        // Call the update event
-                        this._onUpdate();
-                      });
-                    },
-                  },
-                });
+              // Set the tooltip
+              let tooltip = "Creates the test site for the app.";
+
+              // See if the app catalog item is not valid
+              if (DataSource.AppCatalogItem && DataSource.AppCatalogItem.IsValidAppPackage == false) {
+                // Set the tooltip
+                tooltip = "App package is invalid. Unable to deploy app.";
               }
+
+              // See if the user is an owner
+              if (!AppSecurity.IsSiteAppCatalogOwner) {
+                // Set the tooltip
+                tooltip = "User does not have permissions to deploy the app.";
+              }
+
+              // Render the create button
+              tooltips.add({
+                content: tooltip,
+                btnProps: {
+                  text: "Create Test Site",
+                  iconClassName: "me-1",
+                  iconSize: 20,
+                  iconType: nodePlus,
+                  isDisabled:
+                    !AppSecurity.IsSiteAppCatalogOwner ||
+                    !(DataSource.AppCatalogSiteItem ? DataSource.AppCatalogSiteItem.IsValidAppPackage : true),
+                  isSmall: true,
+                  type: Components.ButtonTypes.OutlinePrimary,
+                  onClick: () => {
+                    // Display the create test site form
+                    this._forms.createTestSite(this._item, () => {
+                      // Call the update event
+                      this._onUpdate();
+                    });
+                  }
+                }
+              });
             }
           );
           break;
