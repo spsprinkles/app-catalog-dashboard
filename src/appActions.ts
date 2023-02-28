@@ -1298,6 +1298,7 @@ export class AppActions {
                             AppImageURL5: item.AppImageURL5 ? { Description: item.AppImageURL5.Description, Url: item.AppImageURL5.Url } : null,
                             AppShortDescription: item.AppShortDescription,
                             AppSupportURL: item.AppSupportURL ? { Description: item.AppSupportURL.Description, Url: item.AppSupportURL.Url } : null,
+                            AppThumbnailURL: item.AppThumbnailURL ? { Description: item.AppThumbnailURL.Description, Url: item.AppThumbnailURL.Url } : null,
                             AppVideoURL: item.AppVideoURL ? { Description: item.AppVideoURL.Description, Url: item.AppVideoURL.Url } : null,
                         }).execute(
                             () => {
