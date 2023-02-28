@@ -9,7 +9,6 @@ import Strings from "./strings";
 export interface IAppItem extends Types.SP.ListItem {
     AppAPIPermissions?: string;
     AppComments?: string;
-    AppDescription: string;
     AppDevelopers: { results: { Id: number; EMail: string; Title: string }[] };
     AppDevelopersId: { results: number[] };
     AppIsClientSideSolution?: boolean;
@@ -33,6 +32,7 @@ export interface IAppItem extends Types.SP.ListItem {
     AppPackageErrorMessage?: string;
     FileLeafRef: string;
 
+    AppDescription: string;
     AppImageURL1: Types.SP.FieldUrlValue;
     AppImageURL2: Types.SP.FieldUrlValue;
     AppImageURL3: Types.SP.FieldUrlValue;
