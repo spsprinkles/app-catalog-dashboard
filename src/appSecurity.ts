@@ -284,9 +284,9 @@ export class AppSecurity {
                 // Load the current user
                 this.loadCurrentUser(),
                 // Initialize the SC Owner
-                this.initSCOwner(appCatalogUrl),
+                this.initSCAppCatalogOwner(appCatalogUrl),
                 // Initialize the tenant owner
-                this.initTenantOwner(tenantAppCatalogUrl),
+                this.initTenantAppCatalogOwner(tenantAppCatalogUrl),
                 // Load the approver's group
                 this.loadApproverGroup(),
                 // Load the final approver's group
@@ -409,16 +409,18 @@ export class AppSecurity {
     // Site Collection App Catalog Owner
     private static _isSiteAppCatalogOwner = false;
     static get IsSiteAppCatalogOwner(): boolean { return this._isSiteAppCatalogOwner; }
-    private static initSCOwner(appCatalogUrl: string): PromiseLike<void> {
+    private static initSCAppCatalogOwner(appCatalogUrl: string): PromiseLike<void> {
         // Return a promise
         return new Promise(resolve => {
             // See if the app catalog is defined
             if (appCatalogUrl) {
                 // Get the user's permissions to the app catalog list
-                Web(appCatalogUrl).Lists(Strings.Lists.AppCatalog).getUserEffectivePermissions().execute(permissions => {
+                Web(appCatalogUrl).Lists(Strings.Lists.AppCatalog).query({
+                    Expand: ["EffectiveBasePermissions"]
+                }).execute(list => {
                     // See if the user has right access
-                    this._isSiteAppCatalogOwner = Helper.hasPermissions(permissions.GetUserEffectivePermissions, [
-                        SPTypes.BasePermissionTypes.AddListItems, SPTypes.BasePermissionTypes.EditListItems
+                    this._isSiteAppCatalogOwner = Helper.hasPermissions(list.EffectiveBasePermissions, [
+                        SPTypes.BasePermissionTypes.FullMask
                     ]);
 
                     // Resolve the request
@@ -531,16 +533,18 @@ export class AppSecurity {
     // Tenant App Catalog Owner
     private static _isTenantAppCatalogOwner = false;
     static get IsTenantAppCatalogOwner(): boolean { return this._isTenantAppCatalogOwner; }
-    private static initTenantOwner(tenantAppCatalogUrl: string): PromiseLike<void> {
+    private static initTenantAppCatalogOwner(tenantAppCatalogUrl: string): PromiseLike<void> {
         // Return a promise
         return new Promise(resolve => {
             // See if the tenant app catalog is defined
             if (tenantAppCatalogUrl) {
                 // Get the user's permissions to the app catalog list
-                Web(tenantAppCatalogUrl).Lists(Strings.Lists.AppCatalog).getUserEffectivePermissions().execute(permissions => {
+                Web(tenantAppCatalogUrl).Lists(Strings.Lists.AppCatalog).query({
+                    Expand: ["EffectiveBasePermissions"]
+                }).execute(list => {
                     // See if the user has right access
-                    this._isTenantAppCatalogOwner = Helper.hasPermissions(permissions.GetUserEffectivePermissions, [
-                        SPTypes.BasePermissionTypes.AddListItems, SPTypes.BasePermissionTypes.EditListItems
+                    this._isTenantAppCatalogOwner = Helper.hasPermissions(list.EffectiveBasePermissions, [
+                        SPTypes.BasePermissionTypes.FullMask
                     ]);
 
                     // Resolve the request
