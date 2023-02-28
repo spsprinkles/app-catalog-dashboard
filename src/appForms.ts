@@ -1355,12 +1355,19 @@ export class AppForms {
                 if (ct.Name == "App") {
                     // Parse the fields
                     for (let i = 0; i < ct.FieldLinks.results.length; i++) {
-                        let field = ct.FieldLinks.results[i];
+                        let fieldLink = ct.FieldLinks.results[i];
+                        let field = ct.Fields.results[i];
+
+                        // Set the field name based on the type
+                        let fieldName = field.InternalName;
+                        if (field.FieldTypeKind == SPTypes.FieldType.Lookup || field.FieldTypeKind == SPTypes.FieldType.User) {
+                            fieldName += "Id";
+                        }
 
                         // See if this is a required field
-                        if (field.Required) {
+                        if (fieldLink.Required) {
                             // Ensure a value exists
-                            if (item[field.Name]) { continue; }
+                            if (item[fieldName]) { continue; }
 
                             // Set the flag and break from the loop
                             isValid = false;
