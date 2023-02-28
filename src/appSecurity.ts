@@ -284,9 +284,9 @@ export class AppSecurity {
                 // Load the current user
                 this.loadCurrentUser(),
                 // Initialize the SC Owner
-                this.initSCOwner(appCatalogUrl),
+                this.initSCAppCatalogOwner(appCatalogUrl),
                 // Initialize the tenant owner
-                this.initTenantOwner(tenantAppCatalogUrl),
+                this.initTenantAppCatalogOwner(tenantAppCatalogUrl),
                 // Load the approver's group
                 this.loadApproverGroup(),
                 // Load the final approver's group
@@ -409,36 +409,25 @@ export class AppSecurity {
     // Site Collection App Catalog Owner
     private static _isSiteAppCatalogOwner = false;
     static get IsSiteAppCatalogOwner(): boolean { return this._isSiteAppCatalogOwner; }
-    private static initSCOwner(appCatalogUrl: string): PromiseLike<void> {
+    private static initSCAppCatalogOwner(appCatalogUrl: string): PromiseLike<void> {
         // Return a promise
         return new Promise(resolve => {
             // See if the app catalog is defined
             if (appCatalogUrl) {
-                // Ensure the user is an owner of the site
-                Web(appCatalogUrl).AssociatedOwnerGroup().Users().getByEmail(ContextInfo.userEmail).execute(user => {
-                    // Ensure the user is an owner
-                    if (user && user.Id > 0) {
-                        // Set the flag
-                        this._isSiteAppCatalogOwner = true;
-                    }
+                // Get the user's permissions to the app catalog list
+                Web(appCatalogUrl).Lists(Strings.Lists.AppCatalog).query({
+                    Expand: ["EffectiveBasePermissions"]
+                }).execute(list => {
+                    // See if the user has right access
+                    this._isSiteAppCatalogOwner = Helper.hasPermissions(list.EffectiveBasePermissions, [
+                        SPTypes.BasePermissionTypes.FullMask
+                    ]);
 
-                    // resolve the request
+                    // Resolve the request
                     resolve();
                 }, () => {
-                    // Get the user
-                    Web(appCatalogUrl).SiteUsers().getByEmail(ContextInfo.userEmail).execute(user => {
-                        // See if they are an admin
-                        if (user.IsSiteAdmin) {
-                            // Set the flag
-                            this._isSiteAppCatalogOwner = true;
-                        }
-
-                        // Resolve the request
-                        resolve();
-                    }, () => {
-                        // Resolve the request
-                        resolve();
-                    });
+                    // Resolve the request
+                    resolve();
                 });
             } else {
                 // Resolve the request
@@ -544,33 +533,26 @@ export class AppSecurity {
     // Tenant App Catalog Owner
     private static _isTenantAppCatalogOwner = false;
     static get IsTenantAppCatalogOwner(): boolean { return this._isTenantAppCatalogOwner; }
-    private static initTenantOwner(tenantAppCatalogUrl: string): PromiseLike<void> {
+    private static initTenantAppCatalogOwner(tenantAppCatalogUrl: string): PromiseLike<void> {
         // Return a promise
         return new Promise(resolve => {
             // See if the tenant app catalog is defined
             if (tenantAppCatalogUrl) {
-                let web = Web(tenantAppCatalogUrl);
+                // Get the user's permissions to the app catalog list
+                Web(tenantAppCatalogUrl).Lists(Strings.Lists.AppCatalog).query({
+                    Expand: ["EffectiveBasePermissions"]
+                }).execute(list => {
+                    // See if the user has right access
+                    this._isTenantAppCatalogOwner = Helper.hasPermissions(list.EffectiveBasePermissions, [
+                        SPTypes.BasePermissionTypes.FullMask
+                    ]);
 
-                // Ensure the user is an owner of the site
-                web.AssociatedOwnerGroup().Users().getByEmail(ContextInfo.userEmail).execute(user => {
-                    // Ensure the user is an owner
-                    if (user && user.Id > 0) {
-                        // Set the flag
-                        this._isTenantAppCatalogOwner = true;
-                    }
+                    // Resolve the request
+                    resolve();
+                }, () => {
+                    // Resolve the request
+                    resolve();
                 });
-
-                // Get the user
-                web.SiteUsers().getByEmail(ContextInfo.userEmail || ContextInfo.userPrincipalName).execute(user => {
-                    // See if they are an admin
-                    if (user.IsSiteAdmin) {
-                        // Set the flag
-                        this._isSiteAppCatalogOwner = true;
-                    }
-                });
-
-                // Wait for the requests to complete and resolve the request
-                web.done(resolve);
             } else {
                 // Resolve the request
                 resolve();

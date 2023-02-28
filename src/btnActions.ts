@@ -363,48 +363,25 @@ export class ButtonActions {
         case "DeployTenantCatalog":
           // Ensure this is a tenant app catalog owner
           if (AppSecurity.IsTenantAppCatalogOwner) {
+            let showDeploy = false;
+            let showRemove = false;
+            let showRetract = false;
+
             // See if the app is deployed
-            if (
-              DataSource.AppCatalogTenantItem &&
-              DataSource.AppCatalogTenantItem.Deployed
-            ) {
-              // Render the retract button
-              tooltips.add({
-                content: "Retracts the solution from the tenant app catalog.",
-                btnProps: {
-                  text: "Retract from Tenant",
-                  iconClassName: "me-1",
-                  iconSize: 20,
-                  iconType: boxArrowInLeft,
-                  isSmall: true,
-                  type: Components.ButtonTypes.OutlineDanger,
-                  onClick: () => {
-                    // Retract the app
-                    this._forms.retractFromTenant(this._item, () => {
-                      // Call the update event
-                      this._onUpdate();
-                    });
-                  },
-                },
-              });
+            if (DataSource.AppCatalogTenantItem) {
+              // See if it's deployed
+              if (DataSource.AppCatalogTenantItem.Deployed) {
+                // Set the flags
+                showRemove = true;
+                showRetract = true;
 
-              // Load the context of the app catalog
-              ContextInfo.getWeb(
-                AppConfig.Configuration.tenantAppCatalogUrl
-              ).execute((context) => {
-                let requestDigest =
-                  context.GetContextWebInformation.FormDigestValue;
-                let web = Web(AppConfig.Configuration.tenantAppCatalogUrl, {
-                  requestDigest,
-                });
+                // Load the context of the app catalog
+                ContextInfo.getWeb(AppConfig.Configuration.tenantAppCatalogUrl).execute((context) => {
+                  let requestDigest = context.GetContextWebInformation.FormDigestValue;
+                  let web = Web(AppConfig.Configuration.tenantAppCatalogUrl, { requestDigest });
 
-                // Ensure this app can be deployed to the tenant
-                web
-                  .TenantAppCatalog()
-                  .solutionContainsTeamsComponent(
-                    DataSource.AppCatalogTenantItem.ID
-                  )
-                  .execute((resp: any) => {
+                  // Ensure this app can be deployed to the tenant
+                  web.TenantAppCatalog().solutionContainsTeamsComponent(DataSource.AppCatalogTenantItem.ID).execute((resp: any) => {
                     // See if we can deploy this app to teams
                     if (resp.SolutionContainsTeamsComponent) {
                       // Render the deploy to teams button
@@ -429,11 +406,22 @@ export class ButtonActions {
                       });
                     }
                   });
-              });
+                });
+              } else {
+                // Set the flags
+                showDeploy = true;
+                showRemove = true;
+              }
             } else {
+              // Set the flag
+              showDeploy = true;
+            }
+
+            // See if we are showing the deploy button
+            if (showDeploy) {
               // Render the deploy button
               tooltips.add({
-                content: "Deploys the application to the tenant app catalog.",
+                content: "Deploys the app to the tenant app catalog.",
                 btnProps: {
                   text: "Deploy to Tenant",
                   iconClassName: "me-1",
@@ -444,6 +432,52 @@ export class ButtonActions {
                   onClick: () => {
                     // Deploy the app
                     this._forms.deploy(this._item, true, () => {
+                      // Call the update event
+                      this._onUpdate();
+                    });
+                  },
+                },
+              });
+            }
+
+            // See if we are showing the remove button
+            if (showRemove) {
+              // Render the retract button
+              tooltips.add({
+                content: "Removes the app from the tenant app catalog.",
+                btnProps: {
+                  text: "Remove from Tenant",
+                  iconClassName: "me-1",
+                  iconSize: 20,
+                  iconType: boxArrowInLeft,
+                  isSmall: true,
+                  type: Components.ButtonTypes.OutlineDanger,
+                  onClick: () => {
+                    // Remove the app
+                    this._forms.removeFromTenant(this._item, () => {
+                      // Call the update event
+                      this._onUpdate();
+                    });
+                  },
+                },
+              });
+            }
+
+            // See if we are showing the retract button
+            if (showRetract) {
+              // Render the retract button
+              tooltips.add({
+                content: "Retracts the app from the tenant app catalog.",
+                btnProps: {
+                  text: "Retract from Tenant",
+                  iconClassName: "me-1",
+                  iconSize: 20,
+                  iconType: boxArrowInLeft,
+                  isSmall: true,
+                  type: Components.ButtonTypes.OutlineDanger,
+                  onClick: () => {
+                    // Retract the app
+                    this._forms.retractFromTenant(this._item, () => {
                       // Call the update event
                       this._onUpdate();
                     });

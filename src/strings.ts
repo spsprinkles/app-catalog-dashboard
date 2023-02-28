@@ -43,6 +43,7 @@ const Strings = {
     },
     IsTeams: false,
     Lists: {
+        AppCatalog: "Apps for SharePoint",
         Apps: "Developer Apps",
         AppCatalogRequests: "App Catalog Requests",
         AuditLog: "App Logs",
@@ -52,6 +53,6 @@ const Strings = {
     ProjectDescription: "App Dashboard for Developers",
     SolutionUrl: AssetsUrl + "index.html",
     SourceUrl: ContextInfo.webServerRelativeUrl,
-    Version: "0.0.5.6",
+    Version: "0.0.5.7",
 };
 export default Strings;

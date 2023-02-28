@@ -485,48 +485,43 @@ export class DataSource {
         return new Promise((resolve) => {
             let web = Web(AppConfig.Configuration.appCatalogUrl);
 
+            // Clear the references
+            this._appCatalogItem = null;
+            this._appCatalogSiteItem = null;
+
             // Load the available apps
-            web
-                .SiteCollectionAppCatalog()
-                .AvailableApps(this.AppItem.AppProductID)
-                .execute((app) => {
-                    // Set the app catalog item
-                    this._appCatalogSiteItem = app;
-                });
+            web.SiteCollectionAppCatalog().AvailableApps(this.AppItem.AppProductID).execute((app) => {
+                // Set the app catalog item
+                this._appCatalogSiteItem = app;
+            });
 
             // Query the app catalog and try to find it by file name
-            web
-                .Lists("Apps for SharePoint")
-                .Items()
-                .query({
-                    Expand: ["File"],
-                })
-                .execute((items) => {
-                    // Parse the docset items
-                    for (let i = 0; i < this.AppFolder.Files.results.length; i++) {
-                        let file = this.AppFolder.Files.results[i];
+            web.Lists(Strings.Lists.AppCatalog).Items().query({ Expand: ["File"] }).execute((items) => {
+                // Parse the docset items
+                for (let i = 0; i < this.AppFolder.Files.results.length; i++) {
+                    let file = this.AppFolder.Files.results[i];
 
-                        // Ensure this is the package file
-                        if (!file.Name.endsWith(".sppkg")) {
-                            continue;
-                        }
-
-                        // Parse the items
-                        for (let j = 0; j < items.results.length; j++) {
-                            let item = items.results[j];
-
-                            // See if the item matches
-                            if (item.File.Name == file.Name) {
-                                // Item found
-                                this._appCatalogItem = item as any;
-                                break;
-                            }
-                        }
-
-                        // Break from the loop
-                        break;
+                    // Ensure this is the package file
+                    if (!file.Name.endsWith(".sppkg")) {
+                        continue;
                     }
-                });
+
+                    // Parse the items
+                    for (let j = 0; j < items.results.length; j++) {
+                        let item = items.results[j];
+
+                        // See if the item matches
+                        if (item.File.Name == file.Name) {
+                            // Item found
+                            this._appCatalogItem = item as any;
+                            break;
+                        }
+                    }
+
+                    // Break from the loop
+                    break;
+                }
+            });
 
             // Wait for the requests to complete
             web.done(resolve);
@@ -539,7 +534,7 @@ export class DataSource {
         return new Promise((resolve, reject) => {
             // Load the available apps
             Web(AppConfig.Configuration.appCatalogUrl)
-                .Lists("Apps for SharePoint")
+                .Lists(Strings.Lists.AppCatalog)
                 .Items()
                 .query({
                     Expand: ["File"],
@@ -575,6 +570,9 @@ export class DataSource {
     private static loadTenantApp(): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve) => {
+            // Clear the references
+            this._appCatalogTenantItem = null;
+
             // See if the app catalog is defined and the user is an tenant admin
             if (AppConfig.Configuration.tenantAppCatalogUrl && AppSecurity.IsTenantAppCatalogOwner) {
                 // Load the available apps
