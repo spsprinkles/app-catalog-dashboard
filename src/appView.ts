@@ -341,7 +341,7 @@ export class AppView {
                                                 // Refresh the dashboard data
                                                 this.refresh().then(() => {
                                                     // View the app details
-                                                    this.viewAppDetails(item);
+                                                    this.viewAppDetails(item, true);
                                                 });
                                             });
                                         }
@@ -591,7 +591,7 @@ export class AppView {
     }
 
     // Method to view the app details
-    private viewAppDetails(item: IAppItem) {
+    private viewAppDetails(item: IAppItem, showEditForm: boolean = false) {
         // Show a loading dialog
         LoadingDialog.setHeader("Loading Application Information");
         LoadingDialog.setBody("This will close after the data is loaded...");
@@ -613,6 +613,16 @@ export class AppView {
 
             // Hide the loading dialog
             LoadingDialog.hide();
+
+            // See if we are showing the edit form
+            if (showEditForm) {
+                // Display the edit form
+                this._forms.edit(item.Id, () => {
+                    // Refresh the dashboard
+                    this.viewAppDetails(item);
+                });
+
+            }
         });
     }
 }
