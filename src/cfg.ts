@@ -458,6 +458,35 @@ export const Configuration = Helper.SPConfig({
                 }
             ],
             CustomFields: [
+                /** Common Fields */
+
+                {
+                    name: "Completed",
+                    title: "Date Completed",
+                    type: Helper.SPCfgFieldType.Date,
+                    allowDeletion: false,
+                    description: "The assessment completion date.",
+                    indexed: true,
+                    displayFormat: SPTypes.DateFormat.DateTime,
+                    showInEditForm: false,
+                    showInNewForm: false,
+                    showInViewForms: false
+                } as Helper.IFieldInfoDate,
+                {
+                    name: "RelatedApp",
+                    title: "Related App",
+                    type: Helper.SPCfgFieldType.Lookup,
+                    allowDeletion: false,
+                    indexed: true,
+                    listName: Strings.Lists.Apps,
+                    relationshipBehavior: SPTypes.RelationshipDeleteBehaviorType.Cascade,
+                    required: true,
+                    showField: "Title",
+                    showInEditForm: false,
+                    showInNewForm: false,
+                    showInViewForms: false
+                } as Helper.IFieldInfoLookup,
+
                 /**
                  * Test Case Fields
                  */
@@ -964,36 +993,7 @@ export const Configuration = Helper.SPConfig({
                     noteType: SPTypes.FieldNoteType.TextOnly,
                     numberOfLines: 4,
                     sortable: false
-                } as Helper.IFieldInfoNote,
-
-                /** Common Fields */
-
-                {
-                    name: "Completed",
-                    title: "Date Completed",
-                    type: Helper.SPCfgFieldType.Date,
-                    allowDeletion: false,
-                    description: "The assessment completion date.",
-                    indexed: true,
-                    displayFormat: SPTypes.DateFormat.DateTime,
-                    showInEditForm: false,
-                    showInNewForm: false,
-                    showInViewForms: false
-                } as Helper.IFieldInfoDate,
-                {
-                    name: "RelatedApp",
-                    title: "Related App",
-                    type: Helper.SPCfgFieldType.Lookup,
-                    allowDeletion: false,
-                    indexed: true,
-                    listName: Strings.Lists.Apps,
-                    relationshipBehavior: SPTypes.RelationshipDeleteBehaviorType.Cascade,
-                    required: true,
-                    showField: "Title",
-                    showInEditForm: false,
-                    showInNewForm: false,
-                    showInViewForms: false
-                } as Helper.IFieldInfoLookup
+                } as Helper.IFieldInfoNote
             ],
             ViewInformation: [{
                 ViewName: "All Items",

@@ -1443,10 +1443,18 @@ export class AppForms {
 
                             // Show the dialog
                             Modal.show();
-                        }
 
-                        // Resolve the request
-                        resolve(isValid);
+                            // Resolve the request
+                            resolve(isValid);
+                        } else {
+                            // Update the item
+                            item.update({
+                                Completed: new Date(Date.now())
+                            }).execute(() => {
+                                // Resolve the request
+                                resolve(isValid);
+                            });
+                        }
                     } else {
                         // Hide the dialog
                         LoadingDialog.hide();
@@ -1533,10 +1541,18 @@ export class AppForms {
 
                             // Show the dialog
                             Modal.show();
-                        }
 
-                        // Resolve the request
-                        resolve(isValid);
+                            // Resolve the request
+                            resolve(isValid);
+                        } else {
+                            // Update the item
+                            item.update({
+                                Completed: new Date(Date.now())
+                            }).execute(() => {
+                                // Resolve the request
+                                resolve(isValid);
+                            });
+                        }
                     } else {
                         // Hide the dialog
                         LoadingDialog.hide();
