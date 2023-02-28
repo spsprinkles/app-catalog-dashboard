@@ -1007,6 +1007,20 @@ export class AppActions {
                     // Log
                     ErrorDialog.logInfo(`The app '${item.Title}' with id ${item.AppProductID} was retracted from the app catalog successfully...`);
 
+                    // See if this is a tenant app
+                    if (tenantFl) {
+                        // Update the item
+                        item.update({
+                            AppIsTenantDeployed: false
+                        }).execute(() => {
+                            // Log
+                            ErrorDialog.logInfo(`The app metadata flag for tenant deployment was cleared.`);
+                        }, () => {
+                            // Log
+                            ErrorDialog.logError(`Failed to clear the app metadata flag for tenant deployment.`);
+                        });
+                    }
+
                     // See if we are removing the app
                     if (removeFl) {
                         // Log

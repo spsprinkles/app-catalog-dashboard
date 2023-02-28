@@ -485,6 +485,10 @@ export class DataSource {
         return new Promise((resolve) => {
             let web = Web(AppConfig.Configuration.appCatalogUrl);
 
+            // Clear the references
+            this._appCatalogItem = null;
+            this._appCatalogSiteItem = null;
+
             // Load the available apps
             web.SiteCollectionAppCatalog().AvailableApps(this.AppItem.AppProductID).execute((app) => {
                 // Set the app catalog item
@@ -566,6 +570,9 @@ export class DataSource {
     private static loadTenantApp(): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve) => {
+            // Clear the references
+            this._appCatalogTenantItem = null;
+
             // See if the app catalog is defined and the user is an tenant admin
             if (AppConfig.Configuration.tenantAppCatalogUrl && AppSecurity.IsTenantAppCatalogOwner) {
                 // Load the available apps

@@ -1730,12 +1730,49 @@ export class AppForms {
     }
 
     // Retracts the solution from the tenant app catalog
-    retractFromTenant(item: IAppItem, onUpdate: () => void) {
+    removeFromTenant(item: IAppItem, onUpdate: () => void) {
         // Set the header
-        Modal.setHeader("Deploy to Teams");
+        Modal.setHeader("Remove App");
 
         // Set the body
-        Modal.setBody("Are you sure you want to retract the solution?");
+        Modal.setBody("Are you sure you want to remove the app from the tenant app catalog?");
+
+        // Render the footer
+        Modal.setFooter(Components.Button({
+            text: "Remove",
+            type: Components.ButtonTypes.OutlineDanger,
+            onClick: () => {
+                // Close the modal
+                Modal.hide();
+
+                // Retract the app
+                AppActions.retract(item, true, true, () => {
+                    // Log
+                    DataSource.logItem({
+                        LogUserId: ContextInfo.userId,
+                        ParentId: item.AppProductID,
+                        ParentListName: Strings.Lists.Apps,
+                        Title: DataSource.AuditLogStates.AppRetracted,
+                        LogComment: `The app ${item.Title} was removed from the tenant app catalog.`
+                    }, item);
+
+                    // Call the update event
+                    onUpdate();
+                });
+            }
+        }).el);
+
+        // Show the modal
+        Modal.show();
+    }
+
+    // Retracts the solution from the tenant app catalog
+    retractFromTenant(item: IAppItem, onUpdate: () => void) {
+        // Set the header
+        Modal.setHeader("Retract App");
+
+        // Set the body
+        Modal.setBody("Are you sure you want to retract the app from the tenant app catalog? The app will still be in the app catalog, but not available for use.");
 
         // Render the footer
         Modal.setFooter(Components.Button({
