@@ -1296,6 +1296,7 @@ export class AppActions {
                             AppImageURL3: item.AppImageURL3 ? { Description: item.AppImageURL3.Description, Url: item.AppImageURL3.Url } : null,
                             AppImageURL4: item.AppImageURL4 ? { Description: item.AppImageURL4.Description, Url: item.AppImageURL4.Url } : null,
                             AppImageURL5: item.AppImageURL5 ? { Description: item.AppImageURL5.Description, Url: item.AppImageURL5.Url } : null,
+                            AppPublisher: item.AppPublisher,
                             AppShortDescription: item.AppShortDescription,
                             AppSupportURL: item.AppSupportURL ? { Description: item.AppSupportURL.Description, Url: item.AppSupportURL.Url } : null,
                             AppThumbnailURL: item.AppThumbnailURL ? { Description: item.AppThumbnailURL.Description, Url: item.AppThumbnailURL.Url } : null,
