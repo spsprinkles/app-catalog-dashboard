@@ -1365,7 +1365,7 @@ export class AppForms {
                         }
 
                         // See if this is a required field
-                        if (field.Required) {
+                        if (fieldLink.Required) {
                             // Ensure a value exists
                             if (item[fieldName]) { continue; }
 
