@@ -920,6 +920,55 @@ export class AppActions {
             });
         }
 
+        // Determines if the xml configuration supports teams
+        let getAppManifest = (files: JSZip.JSZipObject[]): PromiseLike<string> => {
+            // Return a promise
+            return new Promise(resolve => {
+                let appManifest = null;
+
+                // Parse the files
+                Helper.Executor(files, file => {
+                    // Return a promise
+                    return new Promise((resolve) => {
+                        // Log
+                        ErrorDialog.logInfo(`${file.name}: Reading XML Configuration File. Processing the information...`);
+
+                        // Read the file
+                        file.async("string").then(content => {
+                            var i = content.indexOf("<ClientSideComponent");
+                            if (i < 0) { resolve(false); return; }
+
+                            // Read the configuration
+                            var oParser = new DOMParser();
+                            var oDOM = oParser.parseFromString(content.substring(i), "text/xml");
+
+                            // Get the manifest information
+                            let xmlAppManifest = oDOM.documentElement.attributes["ComponentManifest"];
+                            if (xmlAppManifest) {
+                                // Try to convert it
+                                try {
+                                    // Get the manifest information
+                                    let manifest = JSON.parse(xmlAppManifest.value.replace(/&quot;/g, '"'));
+
+                                    // Set the app manifest value
+                                    appManifest = JSON.stringify(manifest, null, 2);
+
+                                    // Log
+                                    ErrorDialog.logInfo(`App Manifest: \r\n${manifest.value}`);
+                                } catch { }
+                            }
+
+                            // Check the next file
+                            resolve(null);
+                        });
+                    });
+                }).then(() => {
+                    // Resolve the request
+                    resolve(appManifest);
+                })
+            });
+        }
+
         // Return a promise
         return new Promise(resolve => {
             // Log
@@ -930,6 +979,7 @@ export class AppActions {
                 let appManifest: JSZip.JSZipObject = null;
                 let assets: JSZip.JSZipObject[] = [];
                 let image = null;
+                let xmlFiles: JSZip.JSZipObject[] = [];
 
                 // Log
                 ErrorDialog.logInfo(`Parsing the SPFx package files...`);
@@ -966,12 +1016,23 @@ export class AppActions {
                         // Set the manifest file
                         appManifest = fileInfo;
                     }
+                    // Else, see if this is an xml file
+                    else if (fileName.endsWith(".xml")) {
+                        // Append the configuration file
+                        xmlFiles.push(fileInfo);
+                    }
                 });
 
                 // Read the app manifest
                 readMetadata(appManifest).then(item => {
-                    // Resolve the request
-                    resolve({ assets, item, image });
+                    // Determine if this app supports teams
+                    getAppManifest(xmlFiles).then(appManifest => {
+                        // Set the app manifest value
+                        item.AppManifest = appManifest;
+
+                        // Resolve the request
+                        resolve({ assets, item, image });
+                    });
                 });
             });
         });

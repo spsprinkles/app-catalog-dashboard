@@ -110,6 +110,7 @@ export const Configuration = Helper.SPConfig({
                         { Name: "AppVersion", ReadOnly: true },
                         { Name: "AppIsTenantDeployed", ReadOnly: true },
                         { Name: "AppSiteDeployments", ReadOnly: true },
+                        { Name: "AppManifest", ReadOnly: true },
                         "AppPublisher",
                         "AppSponsor",
                         "AppDevelopers",
@@ -293,6 +294,14 @@ export const Configuration = Helper.SPConfig({
                     name: "AppIsDomainIsolated",
                     title: "Is Domain Isolated",
                     type: Helper.SPCfgFieldType.Boolean,
+                    allowDeletion: false,
+                    showInNewForm: false
+                },
+                {
+                    name: "AppManifest",
+                    title: "App Manifest",
+                    type: Helper.SPCfgFieldType.Note,
+                    description: "The app manifest for the solution.",
                     allowDeletion: false,
                     showInNewForm: false
                 },

@@ -35,7 +35,8 @@ const AppPackageFields = [
     "AppProductID",
     "AppSharePointMinVersion",
     "AppSkipFeatureDeployment",
-    "AppVersion"
+    "AppVersion",
+    "AppManifest"
 ];
 
 // Define the app store properties
@@ -858,6 +859,11 @@ export class AppForms {
                             // Return the results
                             return results;
                         }
+                    }
+
+                    // See if this is the teams field
+                    if (field.InternalName == "AppIsTeams") {
+                        // Ensure this is 
                     }
 
                     // See if this is a url field

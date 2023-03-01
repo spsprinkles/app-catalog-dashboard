@@ -17,6 +17,7 @@ export interface IAppItem extends Types.SP.ListItem {
     AppIsTenant: boolean;
     AppIsTenantDeployed: boolean;
     AppJustification: string;
+    AppManifest: string;
     AppPermissionsJustification: string;
     AppProductID: string;
     AppPublisher: string;
