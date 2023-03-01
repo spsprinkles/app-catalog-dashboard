@@ -1429,8 +1429,14 @@ export class AppForms {
                         // Hide the dialog
                         LoadingDialog.hide();
 
-                        // See if it's not valid
-                        if (!isValid) {
+                        // See if it's valid
+                        if (isValid) {
+                            // Update the date completed field
+                            item.update({ Completed: (new Date(Date.now())).toISOString() }).execute(() => {
+                                // Resolve the request
+                                resolve(isValid);
+                            });
+                        } else {
                             // Clear the modal
                             Modal.clear();
 
@@ -1445,14 +1451,6 @@ export class AppForms {
 
                             // Resolve the request
                             resolve(isValid);
-                        } else {
-                            // Update the item
-                            item.update({
-                                Completed: new Date(Date.now())
-                            }).execute(() => {
-                                // Resolve the request
-                                resolve(isValid);
-                            });
                         }
                     } else {
                         // Hide the dialog
@@ -1527,8 +1525,14 @@ export class AppForms {
                         // Hide the dialog
                         LoadingDialog.hide();
 
-                        // See if it's not valid
-                        if (!isValid) {
+                        // See if it's valid
+                        if (isValid) {
+                            // Update the date completed field
+                            item.update({ Completed: (new Date(Date.now())).toISOString() }).execute(() => {
+                                // Resolve the request
+                                resolve(isValid);
+                            });
+                        } else {
                             // Clear the modal
                             Modal.clear();
 
@@ -1543,14 +1547,6 @@ export class AppForms {
 
                             // Resolve the request
                             resolve(isValid);
-                        } else {
-                            // Update the item
-                            item.update({
-                                Completed: new Date(Date.now())
-                            }).execute(() => {
-                                // Resolve the request
-                                resolve(isValid);
-                            });
                         }
                     } else {
                         // Hide the dialog
