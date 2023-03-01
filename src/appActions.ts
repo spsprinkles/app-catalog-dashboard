@@ -3,6 +3,7 @@ import { ContextInfo, Graph, Helper, SPTypes, Types, Utility, Web } from "gd-spr
 import * as JSZip from "jszip";
 import { AppConfig } from "./appCfg";
 import { AppNotifications } from "./appNotifications";
+import { AppSecurity } from "./appSecurity";
 import { DataSource, IAppItem } from "./ds";
 import { ErrorDialog } from "./errorDialog";
 import Strings from "./strings";
@@ -980,6 +981,23 @@ export class AppActions {
     static retract(item: IAppItem, tenantFl: boolean, removeFl: boolean, onUpdate: () => void) {
         // Log
         ErrorDialog.logInfo(`Retracting the SPFx package...`);
+
+        // See if this is for the tenant
+        if (tenantFl) {
+            // Ensure the app exists
+            if (!AppSecurity.IsTenantAppCatalogOwner || DataSource.AppCatalogTenantItem == null) {
+                // Call the update method and return
+                onUpdate();
+                return;
+            }
+        } else {
+            // Ensure the app exists
+            if (!AppSecurity.IsSiteAppCatalogOwner || DataSource.AppCatalogSiteItem == null) {
+                // Call the update method and return
+                onUpdate();
+                return;
+            }
+        }
 
         // Show a loading dialog
         LoadingDialog.setHeader("Retracting the Package");
