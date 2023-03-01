@@ -861,9 +861,7 @@ export class AppForms {
                     }
 
                     // See if this is a url field
-                    // TODO: This shouldn't be happening anymore
-                    if (field.InternalName.indexOf("URL") > 0) {
-                        /* TODO - Dade to customize the image url and video url fields */
+                    if (field.InternalName.indexOf("URL") > 0 || field.InternalName == "AppSourceControl") {
                         // Hide the description field
                         (ctrl as Components.IFormControlUrlProps).showDescription = false;
                     }
