@@ -1,7 +1,7 @@
 import { InstallationRequired, LoadingDialog } from "dattatable";
 import { Components, Site } from "gd-sprest-bs";
 import { AppConfig } from "./appCfg";
-import { AppSecurity, createSecurityGroups } from "./appSecurity";
+import { AppSecurity, CreateSecurityGroups } from "./appSecurity";
 import { Configuration } from "./cfg";
 import { DataSource } from "./ds";
 import { ErrorDialog } from "./errorDialog";
@@ -196,7 +196,7 @@ export class AppInstall {
                                                 LoadingDialog.show();
 
                                                 // Create the security groups
-                                                createSecurityGroups().then(() => {
+                                                CreateSecurityGroups.run().then(() => {
                                                     // Close the dialog
                                                     LoadingDialog.hide();
 
