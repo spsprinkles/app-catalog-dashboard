@@ -1,7 +1,7 @@
 import { InstallationRequired, LoadingDialog } from "dattatable";
 import { Components, Site } from "gd-sprest-bs";
 import { AppConfig } from "./appCfg";
-import { AppSecurity, CreateSecurityGroups } from "./appSecurity";
+import { AppSecurity } from "./appSecurity";
 import { Configuration } from "./cfg";
 import { DataSource } from "./ds";
 import { ErrorDialog } from "./errorDialog";
@@ -83,15 +83,15 @@ export class AppInstall {
                         });
                     }
 
-                    // See if the security groups exist
+                    // See if the security groups are configured
                     let securityGroupsExist = true;
-                    if (AppSecurity.ApproverGroup == null || AppSecurity.DevGroup == null || AppSecurity.FinalApproverGroup == null || AppSecurity.SponsorGroup == null) {
+                    if (AppSecurity.hasErrors()) {
                         // Set the flag
                         securityGroupsExist = false;
 
                         // Add an error
                         errors.push({
-                            content: "Security groups are not installed.",
+                            content: "Security groups are not configured for the app.",
                             type: featureEnabledFl && cfgIsValid ? null : Components.ListGroupItemTypes.Danger
                         });
                     }
@@ -196,7 +196,7 @@ export class AppInstall {
                                                 LoadingDialog.show();
 
                                                 // Create the security groups
-                                                CreateSecurityGroups.run().then(() => {
+                                                AppSecurity.install().then(() => {
                                                     // Close the dialog
                                                     LoadingDialog.hide();
 

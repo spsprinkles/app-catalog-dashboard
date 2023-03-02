@@ -86,13 +86,16 @@ export class AppView {
 
     // Renders the dashboard
     private render() {
+        // See if the app catalog is on the same site as the app
+        let isSameWeb = AppConfig.Configuration.appCatalogUrl == Strings.SolutionUrl;
+
         // See if this is an owner
         let navLinks: Components.INavbarItem[] = [];
-        if (AppSecurity.IsAdmin || AppSecurity.IsOwner) {
+        if (AppSecurity.AppWeb.IsAdmin || AppSecurity.AppWeb.IsOwner) {
             // Set the admin buttons
             navLinks.push({
                 className: "btn-outline-light ms-2 ps-2 pt-1",
-                text: "Settings",
+                text: "Manage App",
                 iconClassName: "me-1",
                 iconSize: 24,
                 iconType: gearWideConnected,
@@ -109,28 +112,28 @@ export class AppView {
                         text: "Manage Approver Group",
                         onClick: () => {
                             // Show the group in a new tab
-                            window.open(AppSecurity.ApproverUrl, "_blank");
+                            window.open(AppSecurity.AppWeb.getUrlForGroup(Strings.Groups.Approvers), "_blank");
                         }
                     },
                     {
                         text: "Manage Developer Group",
                         onClick: () => {
                             // Show the group in a new tab
-                            window.open(AppSecurity.DevUrl, "_blank");
+                            window.open(AppSecurity.AppWeb.getUrlForGroup(Strings.Groups.Developers), "_blank");
                         }
                     },
                     {
                         text: "Manage Final Approver Group",
                         onClick: () => {
                             // Show the group in a new tab
-                            window.open(AppSecurity.FinalApproverUrl, "_blank");
+                            window.open(AppSecurity.AppWeb.getUrlForGroup(Strings.Groups.FinalApprovers), "_blank");
                         }
                     },
                     {
                         text: "Manage Sponsor Group",
                         onClick: () => {
                             // Show the group in a new tab
-                            window.open(AppSecurity.SponsorUrl, "_blank");
+                            window.open(AppSecurity.AppWeb.getUrlForGroup(Strings.Groups.Sponsors), "_blank");
                         }
                     },
                     {
@@ -138,6 +141,49 @@ export class AppView {
                         onClick: () => {
                             // Show the audit log list
                             window.open(DataSource.AuditLog.List.ListUrl);
+                        }
+                    }
+                ]
+            });
+        }
+
+        // See if this is the app catalog owner
+        if (!isSameWeb && (AppSecurity.AppCatalogWeb.IsAdmin || AppSecurity.AppCatalogWeb.IsOwner)) {
+            // Set the app catalog buttons
+            navLinks.push({
+                className: "btn-outline-light ms-2 ps-2 pt-1",
+                text: "Manage App Catalog",
+                iconClassName: "me-1",
+                iconSize: 24,
+                iconType: gearWideConnected,
+                isButton: true,
+                items: [
+                    {
+                        text: "Manage Approver Group",
+                        onClick: () => {
+                            // Show the group in a new tab
+                            window.open(AppSecurity.AppCatalogWeb.getUrlForGroup(Strings.Groups.Approvers), "_blank");
+                        }
+                    },
+                    {
+                        text: "Manage Developer Group",
+                        onClick: () => {
+                            // Show the group in a new tab
+                            window.open(AppSecurity.AppCatalogWeb.getUrlForGroup(Strings.Groups.Developers), "_blank");
+                        }
+                    },
+                    {
+                        text: "Manage Final Approver Group",
+                        onClick: () => {
+                            // Show the group in a new tab
+                            window.open(AppSecurity.AppCatalogWeb.getUrlForGroup(Strings.Groups.FinalApprovers), "_blank");
+                        }
+                    },
+                    {
+                        text: "Manage Sponsor Group",
+                        onClick: () => {
+                            // Show the group in a new tab
+                            window.open(AppSecurity.AppCatalogWeb.getUrlForGroup(Strings.Groups.Sponsors), "_blank");
                         }
                     }
                 ]
@@ -316,11 +362,8 @@ export class AppView {
                                     text: "Upload App",
                                     type: Components.ButtonTypes.OutlineSecondary,
                                     onClick: () => {
-                                        // Ensure the user is not an approver or developer
-                                        if (!AppSecurity.IsApprover && !AppSecurity.IsDeveloper) {
-                                            // Show the user agreement
-                                            new UserAgreement();
-                                        } else {
+                                        // Show the user agreement
+                                        new UserAgreement(() => {
                                             // Upload the package file
                                             AppActions.upload(item => {
                                                 // See if there is a flow
@@ -344,7 +387,7 @@ export class AppView {
                                                     this.viewAppDetails(item, true);
                                                 });
                                             });
-                                        }
+                                        });
                                     }
                                 },
                             });

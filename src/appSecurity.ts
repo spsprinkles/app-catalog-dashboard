@@ -1,433 +1,435 @@
 import { ContextInfo, Helper, SPTypes, Types, Web } from "gd-sprest-bs";
 import { AppConfig } from "./appCfg";
 import { ErrorDialog } from "./errorDialog";
-import Strings from "./strings";
+import Strings, { setContext } from "./strings";
+
+// App Groups
+interface IAppGroups {
+    Approvers: Types.SP.GroupOData;
+    Developers: Types.SP.GroupOData;
+    FinalApprovers: Types.SP.GroupOData;
+    HelpDesk?: Types.SP.GroupOData;
+    Sponsors: Types.SP.GroupOData;
+}
+
+// Web Groups
+interface IWebGroups {
+    members: Types.SP.GroupOData;
+    owners: Types.SP.GroupOData;
+    visitors: Types.SP.GroupOData;
+}
 
 /**
- * Application Security
- * The security group/user references for the application.
+ * Application Security Web
+ * The site groups for a web.
  */
-export class AppSecurity {
-    // Administrator
-    static get IsAdmin(): boolean { return ContextInfo.isSiteAdmin; }
+class AppSecurityWeb {
+    // Constructor
+    constructor(webUrl: string, useCustomPermission: boolean = false) {
+        // Set the properties
+        this._customPermissionInUse = useCustomPermission;
+        this._url = webUrl;
 
-    // Approver Security Group
-    private static _approverGroup: Types.SP.GroupOData = null;
-    static get ApproverGroup(): Types.SP.GroupOData { return this._approverGroup; }
-    static get ApproverUrl(): string { return ContextInfo.webServerRelativeUrl + "/_layouts/15/people.aspx?MembershipGroupId=" + this._approverGroup.Id; }
-    static get ApproverEmails(): string[] {
-        let emails = [];
-
-        // Parse the approvers
-        for (let i = 0; i < this.ApproverGroup.Users.results.length; i++) {
-            let email = this.ApproverGroup.Users.results[i].Email;
-
-            // Append the email
-            email ? emails.push(email) : null;
-        }
-
-        // Return the emails
-        return emails;
-    }
-    static get IsApprover(): boolean {
-        // See if the user is a site admin
-        if (this.IsAdmin) { return true; }
-
-        // See if the group doesn't exist
-        if (this.ApproverGroup == null) { return false; }
-
-        // Parse the group
-        for (let i = 0; i < this.ApproverGroup.Users.results.length; i++) {
-            // See if this is the current user
-            if (this.ApproverGroup.Users.results[i].Id == ContextInfo.userId) {
-                // Found
-                return true;
-            }
-        }
-
-        // Return false by default
-        return false;
-    }
-    private static loadApproverGroup(): PromiseLike<void> {
-        // Return a promise
-        return new Promise((resolve, reject) => {
-            // Load the security group
-            Web(Strings.SourceUrl).SiteGroups().getByName(Strings.Groups.Approvers).query({
-                Expand: ["Users"]
-            }).execute(group => {
-                // Set the group
-                this._approverGroup = group;
-
-                // Resolve the request
-                resolve();
-            }, () => {
-                // Log
-                ErrorDialog.logError("[App Security] Error loading the approver group.");
-
-                // Reject the request
-                reject();
-            });
-        });
+        // Initialize the class
+        this.init();
     }
 
-    // Current User
-    private static _currentUser: Types.SP.User = null;
-    static get CurrentUser(): Types.SP.User { return this._currentUser; }
-    static loadCurrentUser(): PromiseLike<void> {
-        // Return a promise
-        return new Promise((resolve, reject) => {
-            // Get the current user
-            Web(Strings.SourceUrl).CurrentUser().execute(user => {
-                // Set the user
-                this._currentUser = user;
+    /** Public Methods */
 
-                // Resolve the request
-                resolve();
-            }, () => {
-                // Log
-                ErrorDialog.logError("[App Security] Error loading the current user.");
-
-                // Reject the request
-                reject();
-            });
-        });
-    }
-
-    // Developer Security Group
-    private static _devGroup: Types.SP.GroupOData = null;
-    static get DevGroup(): Types.SP.GroupOData { return this._devGroup; }
-    static get DevUrl(): string { return ContextInfo.webServerRelativeUrl + "/_layouts/15/people.aspx?MembershipGroupId=" + this._devGroup.Id; }
-    static get DeveloperEmails(): string[] {
-        let emails = [];
-
-        // Parse the users
-        for (let i = 0; i < this.DevGroup.Users.results.length; i++) {
-            let email = this.DevGroup.Users.results[i].Email;
-
-            // Append the email
-            email ? emails.push(email) : null;
-        }
-
-        // Return the emails
-        return emails;
-    }
-    static get IsDeveloper(): boolean {
-        // See if the group doesn't exist
-        if (this.DevGroup == null) { return false; }
-
-        // Parse the users
-        for (let i = 0; i < this.DevGroup.Users.results.length; i++) {
-            // See if this is the current user
-            if (this.DevGroup.Users.results[i].Id == ContextInfo.userId) {
-                // Found
-                return true;
-            }
-        }
-
-        // Return false by default
-        return false;
-    }
     // Add the user to the developer group
-    static addDeveloper(userId: number): PromiseLike<void> {
+    addUserToGroup(groupName: string, userId: number): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve, reject) => {
-            // Add the user
-            this.DevGroup.Users.addUserById(userId).execute(
-                user => {
-                    // Append the user
-                    this.DevGroup.Users.results.push(user);
+            // Get the group
+            let group = this.getGroup(groupName);
+            if (group) {
+                // Add the user
+                group.Users.addUserById(userId).execute(
+                    user => {
+                        // Append the user
+                        group.Users.results.push(user);
+
+                        // Resolve the request
+                        resolve();
+                    },
+                    ex => {
+                        // Log the error
+                        ErrorDialog.logError(`There was an error adding the user with id ${userId} to the ${groupName} security group.`);
+
+                        // Reject the request
+                        reject(ex);
+                    }
+                );
+            }
+        });
+    }
+
+    // Creates the app groups
+    create(): PromiseLike<void> {
+        // Return a promise
+        return new Promise((resolve, reject) => {
+            let web = Web(this._url, { requestDigest: this._context.FormDigestValue });
+
+            // Parse the group names
+            let groupNames = this.getAppGroupNames();
+            for (let i = 0; i < groupNames.length; i++) {
+                let groupName = groupNames[i];
+
+                // See if this group exists
+                let group = this.getGroup(groupName);
+                if (group) { continue; }
+
+                // Create the group
+                this.createAppGroup(web, groupName);
+            }
+
+            // Wait for the requests to complete
+            web.done(() => {
+                // Get the role types
+                this.createCustomPermissionLevel().then(resolve, reject);
+            });
+        });
+    }
+
+    // Current user
+    get CurrentUser(): Types.SP.User { return this._user; }
+
+    // Returns the emails for a group
+    getEmailsForGroup(groupName: string): string[] {
+        let emails = [];
+
+        // Get the group
+        let group = this.getGroup(groupName);
+        if (group) {
+            // Parse the approvers
+            for (let i = 0; i < group.Users.results.length; i++) {
+                let email = group.Users.results[i].Email;
+
+                // Append the email
+                email ? emails.push(email) : null;
+            }
+        }
+
+        // Return the emails
+        return emails;
+    }
+
+    // Returns the group
+    getGroup(groupName: string): Types.SP.GroupOData { return this._appGroups[groupName]; }
+
+    // Returns a user from a group
+    getUserForGroup(groupName: string, userId: number): Types.SP.User {
+        // Get the group
+        let group = this.getGroup(groupName);
+        if (group) {
+            // Parse the approvers
+            for (let i = 0; i < group.Users.results.length; i++) {
+                let user = group.Users.results[i];
+
+                // Return the user, if it matches
+                if (user.Id == userId) { return user; }
+            }
+        }
+    }
+
+    // Returns the url of the security group
+    getUrlForGroup(groupName: string) {
+        let group = this.getGroup(groupName);
+        if (group) {
+            // Return the url
+            return this._url + "/_layouts/15/people.aspx?MembershipGroupId=" + group.Id;
+        }
+    }
+
+    // Gets the role definitions for the permission types
+    getPermissionTypes(): PromiseLike<{ [key: number]: number }> {
+        // Return a promise
+        return new Promise(resolve => {
+            // Get the definitions
+            Web(this._url, { requestDigest: this._context.FormDigestValue }).RoleDefinitions().execute(roleDefs => {
+                let roles = {};
+
+                // Parse the role definitions
+                for (let i = 0; i < roleDefs.results.length; i++) {
+                    let roleDef = roleDefs.results[i];
+
+                    // Add the role by type
+                    roles[roleDef.RoleTypeKind > 0 ? roleDef.RoleTypeKind : roleDef.Name] = roleDef.Id;
+                }
+
+                // Resolve the request
+                resolve(roles);
+            });
+        });
+    }
+
+    // Returns true if the user is a SCA
+    get IsAdmin(): boolean {
+        // See if the user is an admin
+        return this._user.IsSiteAdmin;
+    }
+
+    // Returns true if the user is in the group
+    isInGroup(groupName: string): boolean {
+        let userInGroup = false;
+
+        // Get the group
+        let group = this.getGroup(groupName);
+        if (group) {
+            // Parse the users
+            for (let i = 0; i < group.Users.results.length; i++) {
+                let user = group.Users.results[i];
+
+                // See if this is the user
+                if (user.Id == this._user.Id) {
+                    // Set the flag and break from the loop
+                    userInGroup = true;
+                    break;
+                }
+            }
+        }
+
+        // Return the flag
+        return userInGroup;
+    }
+
+    // Returns true if the user has full rights to the site
+    get IsOwner(): boolean {
+        // See if the user is an owner
+        return Helper.hasPermissions(this._userPermissions, [SPTypes.BasePermissionTypes.FullMask]);
+    }
+
+    // Waits for the class to be initialized
+    isInitialized(): PromiseLike<void> {
+        // Return a promise
+        return new Promise((resolve, reject) => {
+            let counter = 0;
+            let maxTries = 100;
+
+            // Wait 50 ms
+            let loopId = setInterval(() => {
+                // See if the class is inititalized
+                if (this._initFl) {
+                    // Stop the loop
+                    clearInterval(loopId);
+
+                    // Resolve the request
+                    resolve();
+                }
+
+                // See if there was an error or we have maxed out attempts
+                if (this._errorFl || ++counter > maxTries) {
+                    // Stop the loop
+                    clearInterval(loopId);
+
+                    // Reject the request
+                    reject();
+                }
+            }, 50);
+        });
+    }
+
+    // Returns the web member's group
+    get webMembers(): Types.SP.GroupOData { return this._webGroups.members; }
+
+    // Returns the web owner's group
+    get webOwners(): Types.SP.GroupOData { return this._webGroups.owners; }
+
+    // Returns the web visitor's group
+    get webVisitors(): Types.SP.GroupOData { return this._webGroups.visitors; }
+
+    /** Global Variables */
+
+    private _appGroups: IAppGroups = null;
+    private _context: Types.SP.ContextWebInformation = null;
+    private _customPermissionInUse: boolean = null;
+    private _customPermissionLevel: string = "Contribute and Manage Subwebs";
+    private _errorFl: boolean = null;
+    private _initFl: boolean = null;
+    private _url: string = null;
+    private _user: Types.SP.User = null;
+    private _userPermissions: Types.SP.BasePermissions = null;
+    private _webGroups: IWebGroups = null;
+
+    /** Private Methods */
+
+    // Gets an app group
+    private createAppGroup(web: Types.SP.IWeb, groupName: string): PromiseLike<void> {
+        // Return a promise
+        return new Promise((resolve, reject) => {
+            // Get the site group
+            web.SiteGroups().getByName(groupName).query({ Expand: ["Users"] }).execute(
+                // Exists
+                group => {
+                    // Set the group
+                    this._appGroups[groupName] = group;
 
                     // Resolve the request
                     resolve();
                 },
-                ex => {
-                    // Log the error
-                    ErrorDialog.show("Adding Developer", "There was an error adding the developer.", ex);
+
+                // Doesn't exist
+                () => {
+                    let isDevGroup = groupName == Strings.Groups.Developers;
+                    let isSponsorGroup = groupName == Strings.Groups.Sponsors;
+
+                    // Create the group
+                    Web().SiteGroups().add({
+                        AllowMembersEditMembership: true,
+                        AllowRequestToJoinLeave: isDevGroup || isSponsorGroup,
+                        AutoAcceptRequestToJoinLeave: isDevGroup || isSponsorGroup,
+                        Title: groupName,
+                        Description: "Group contains the '" + groupName + "' users.",
+                        OnlyAllowMembersViewMembership: false
+                    }).execute(
+                        // Successful
+                        group => {
+                            // Get the group
+                            web.SiteGroups(group.Id).query({ Expand: ["Users"] }).execute(group => {
+                                // Set the group
+                                this._appGroups[groupName] = group;
+
+                                // Check the next group
+                                resolve(null);
+                            });
+                        },
+
+                        // Error
+                        ex => {
+                            // Log the error
+                            ErrorDialog.show("Security Group", "There was an error creating the security group.", ex);
+
+                            // Reject the request
+                            reject();
+                        }
+                    );
                 }
             );
         });
     }
-    private static loadDevGroup(): PromiseLike<void> {
-        // Return a promise
-        return new Promise((resolve, reject) => {
-            // Load the security group
-            Web(Strings.SourceUrl).SiteGroups().getByName(Strings.Groups.Developers).query({
-                Expand: ["Users"]
-            }).execute(group => {
-                // Set the group
-                this._devGroup = group;
 
-                // Resolve the request
-                resolve();
-            }, () => {
-                // Log
-                ErrorDialog.logError("[App Security] Error loading the developer group.");
+    // Returns the app's site group names
+    private getAppGroupNames(): string[] {
+        let groupNames: string[] = [];
 
-                // Reject the request
-                reject();
-            });
-        });
-    }
+        // See if the help desk group is being used
+        if (AppConfig.Configuration.helpdeskGroupName) {
+            // Add the name
+            groupNames.push(Strings.Groups[AppConfig.Configuration.helpdeskGroupName]);
 
-    // Approver Security Group
-    private static _finalApproverGroup: Types.SP.GroupOData = null;
-    static get FinalApproverGroup(): Types.SP.GroupOData { return this._finalApproverGroup; }
-    static get FinalApproverUrl(): string { return ContextInfo.webServerRelativeUrl + "/_layouts/15/people.aspx?MembershipGroupId=" + this._finalApproverGroup.Id; }
-    static get FinalApproverEmails(): string[] {
-        let emails = [];
-
-        // Parse the approvers
-        for (let i = 0; i < this.FinalApproverGroup.Users.results.length; i++) {
-            let email = this.FinalApproverGroup.Users.results[i].Email;
-
-            // Append the email
-            email ? emails.push(email) : null;
+            // Clear the group
+            this._appGroups[AppConfig.Configuration.helpdeskGroupName] = null;
         }
 
-        // Return the emails
-        return emails;
-    }
-    static get IsFinalApprover(): boolean {
-        // See if the user is a site admin
-        if (this.IsAdmin) { return true; }
+        // Parse the configuration's group names
+        for (let groupName in Strings.Groups) {
+            // Add the name
+            groupNames.push(Strings.Groups[groupName]);
 
-        // See if the group doesn't exist
-        if (this.FinalApproverGroup == null) { return false; }
-
-        // Parse the group
-        for (let i = 0; i < this.FinalApproverGroup.Users.results.length; i++) {
-            // See if this is the current user
-            if (this.FinalApproverGroup.Users.results[i].Id == ContextInfo.userId) {
-                // Found
-                return true;
-            }
+            // Clear the group
+            this._appGroups[groupName] = null;
         }
 
-        // Return false by default
-        return false;
+        // Return the group names
+        return groupNames;
     }
-    private static loadFinalApproverGroup(): PromiseLike<void> {
-        // Return a promise
-        return new Promise((resolve, reject) => {
-            // Load the security group
-            Web(Strings.SourceUrl).SiteGroups().getByName(Strings.Groups.FinalApprovers).query({
-                Expand: ["Users"]
-            }).execute(group => {
-                // Set the group
-                this._finalApproverGroup = group;
 
-                // Resolve the request
-                resolve();
-            }, () => {
-                // Log
-                ErrorDialog.logError("[App Security] Error loading the final approver group.");
+    // Initialize the class
+    private init() {
+        // Defaults the flags
+        this._errorFl = false;
+        this._initFl = false;
 
-                // Reject the request
-                reject();
+        // Get the context
+        ContextInfo.getWeb(this._url).execute(context => {
+            // Set the context
+            this._context = context.GetContextWebInformation;
+
+            // Load the web information
+            let web = Web(this._url, { requestDigest: this._context.FormDigestValue });
+
+            // Query the base permissions
+            web.query({ Expand: ["EffectiveBasePermissions"] }).execute(web => {
+                // Set the base permissions
+                this._userPermissions = web.EffectiveBasePermissions;
+            })
+
+            // Get the current user
+            web.CurrentUser().execute(user => {
+                // Set the user
+                this._user = user;
             });
-        });
-    }
 
-    // Approver Security Group
-    private static _helpdeskGroup: Types.SP.GroupOData = null;
-    static get HelpdeskGroup(): Types.SP.GroupOData { return this._helpdeskGroup; }
-    static get HelpdeskUrl(): string { return ContextInfo.webServerRelativeUrl + "/_layouts/15/people.aspx?MembershipGroupId=" + this._helpdeskGroup.Id; }
-    static get HelpdeskEmails(): string[] {
-        let emails = [];
-
-        // Parse the approvers
-        for (let i = 0; i < this.HelpdeskGroup.Users.results.length; i++) {
-            let email = this.HelpdeskGroup.Users.results[i].Email;
-
-            // Append the email
-            email ? emails.push(email) : null;
-        }
-
-        // Return the emails
-        return emails;
-    }
-    private static loadHelpdeskGroup(): PromiseLike<void> {
-        // Return a promise
-        return new Promise((resolve, reject) => {
-            // Ensure the group name exists
-            if (AppConfig.Configuration.helpdeskGroupName) {
-                // Load the security group
-                Web(Strings.SourceUrl).SiteGroups().getByName(AppConfig.Configuration.helpdeskGroupName).query({
-                    Expand: ["Users"]
-                }).execute(group => {
-                    // Set the group
-                    this._finalApproverGroup = group;
-
-                    // Resolve the request
-                    resolve();
-                }, () => {
-                    // Log
-                    ErrorDialog.logError("[App Security] Error loading the helpdesk group.");
-
-                    // Reject the request
-                    reject();
-                });
-            }
-            else {
-                // Resolve the request
-                resolve();
-            }
-        });
-    }
-
-    // Initialization
-    static init(appCatalogUrl: string, tenantAppCatalogUrl: string): PromiseLike<void> {
-        // Return a promise
-        return new Promise((resolve, reject) => {
-            // Execute the requests
-            Promise.all([
-                // Load the current user
-                this.loadCurrentUser(),
-                // Initialize the SC Owner
-                this.initSCAppCatalogOwner(appCatalogUrl),
-                // Initialize the tenant owner
-                this.initTenantAppCatalogOwner(tenantAppCatalogUrl),
-                // Load the approver's group
-                this.loadApproverGroup(),
-                // Load the final approver's group
-                this.loadFinalApproverGroup(),
-                // Load the helpdesk group
-                this.loadHelpdeskGroup(),
-                // Load the developer's group
-                this.loadDevGroup(),
-                // Load the owner's group
-                this.loadOwnerGroup(),
-                // Load the sponsor's group
-                this.loadSponsorGroup()
-            ]).then(() => {
-                // Resolve the request
-                resolve();
-            }, () => {
-                // Log
-                ErrorDialog.logError("[App Security] Error initializing the App Security component.");
-
-                // Reject the request
-                reject();
-            });
-        });
-    }
-
-    // Determines if the user is an admin of a site collection
-    static isOwner(url: string): PromiseLike<{ url: string; isOwner: boolean; isRoot: boolean; }> {
-        // Return a promise
-        return new Promise((resolve, reject) => {
-            let isOwner = false;
-            let isRoot = false;
-            let userId = null;
-            let web = Web(url);
-            let webUrl: string = null;
-
-            // Get the web
-            web.query({ Expand: ["CurrentUser", "ParentWeb"], Select: ["Id", "Url"] }).execute(web => {
-                // Set the web url
-                webUrl = web.Url;
-
-                // Set the user id
-                userId = web.CurrentUser.Id;
-
-                // Set the flag
-                isRoot = web.ParentWeb.Id == null || web.ParentWeb.Id == web.Id;
-
-                // See if the user is a SCA
-                if (web.CurrentUser.IsSiteAdmin) {
-                    // Set the flag
-                    isOwner = true;
-                }
-            }, reject);
-
-            // Get the owners group
-            web.AssociatedOwnerGroup().Users().execute(users => {
-                // Parse the users
-                for (let i = 0; i < users.results.length; i++) {
-                    // See if the user is in the group
-                    if (users.results[i].Id == userId) {
-                        // Set the flag and break from the loop
-                        isOwner = true;
-                        break;
-                    }
-                }
-            }, reject, true);
+            // Initialize the app and web groups
+            this.initAppGroups(web);
+            this.initWebGroups(web);
 
             // Wait for the requests to complete
             web.done(() => {
-                // Ensure the web url was set and resolve the request
-                // Otherwise, the url entered is not valid
-                webUrl ? resolve({ url: webUrl, isOwner, isRoot }) : null;
+                // Set the flag
+                this._initFl = true;
             });
+        }, () => {
+            // Set the flag
+            this._errorFl = true;
         });
     }
 
-    // Owner Security Group
-    private static _ownerGroup: Types.SP.GroupOData = null;
-    static get OwnerGroup(): Types.SP.GroupOData { return this._ownerGroup; }
-    static get IsOwner(): boolean {
-        // See if the user is a site admin
-        if (this.IsAdmin) { return true; }
+    // Initializes the app groups
+    private initAppGroups(web: Types.SP.IWeb) {
+        // Reset the groups
+        this._appGroups = {} as any;
 
-        // See if the group doesn't exist
-        if (this.OwnerGroup == null) { return false; }
+        // Parse the group names
+        let groupNames = this.getAppGroupNames();
+        for (let i = 0; i < groupNames.length; i++) {
+            let groupName = groupNames[i];
 
-        // Parse the group
-        for (let i = 0; i < this.OwnerGroup.Users.results.length; i++) {
-            // See if this is the current user
-            if (this.OwnerGroup.Users.results[i].Id == ContextInfo.userId) {
-                // Found
-                return true;
-            }
-        }
-
-        // Return false by default
-        return false;
-    }
-    private static loadOwnerGroup(): PromiseLike<void> {
-        // Return a promise
-        return new Promise((resolve) => {
-            // Load the security group
-            Web(Strings.SourceUrl).AssociatedOwnerGroup().query({
-                Expand: ["Users"]
-            }).execute(group => {
+            // Get the site group
+            web.SiteGroups().getByName(groupName).query({ Expand: ["Users"] }).execute(group => {
                 // Set the group
-                this._ownerGroup = group;
-
-                // Resolve the request
-                resolve();
+                this._appGroups[groupName] = group;
             }, () => {
-                // Log
-                ErrorDialog.logError("[App Security] Error loading the owner group.");
-
-                // Resolve the request
-                resolve();
+                // Set the flag
+                this._errorFl = true;
             });
-        });
+        }
     }
 
-    // Site Collection App Catalog Owner
-    private static _isSiteAppCatalogOwner = false;
-    static get IsSiteAppCatalogOwner(): boolean { return this._isSiteAppCatalogOwner; }
-    private static initSCAppCatalogOwner(appCatalogUrl: string): PromiseLike<void> {
+    // Gets the custom permission level
+    private createCustomPermissionLevel(): PromiseLike<void> {
         // Return a promise
-        return new Promise(resolve => {
-            // See if the app catalog is defined
-            if (appCatalogUrl) {
-                // Get the user's permissions to the app catalog list
-                Web(appCatalogUrl).Lists(Strings.Lists.AppCatalog).query({
-                    Expand: ["EffectiveBasePermissions"]
-                }).execute(list => {
-                    // See if the user has right access
-                    this._isSiteAppCatalogOwner = Helper.hasPermissions(list.EffectiveBasePermissions, [
-                        SPTypes.BasePermissionTypes.FullMask
-                    ]);
+        return new Promise((resolve, reject) => {
+            // See if we are using a custom permission
+            if (this._customPermissionInUse) {
+                // Get the permissions
+                this.getPermissionTypes().then(permissions => {
+                    // See if the permissions already contains
+                    if (permissions[this._customPermissionLevel]) {
+                        // Resolve the request
+                        resolve();
+                    } else {
+                        // Create the custom permission
+                        Helper.copyPermissionLevel({
+                            BasePermission: "Contribute",
+                            Name: this._customPermissionLevel,
+                            Description: "Extends the contribute permission level and adds the ability to create a subweb.",
+                            AddPermissions: [SPTypes.BasePermissionTypes.ManageSubwebs],
+                            WebUrl: this._url
+                        }).then(
+                            role => {
+                                // Resolve the request
+                                resolve();
+                            },
+                            ex => {
+                                // Log the error
+                                ErrorDialog.show("Permission Level", "There was an error creating the contribute and manage subwebs custom permission level.", ex);
 
-                    // Resolve the request
-                    resolve();
-                }, () => {
-                    // Resolve the request
-                    resolve();
+                                // Reject the request
+                                reject();
+                            }
+                        );
+                    }
                 });
             } else {
                 // Resolve the request
@@ -436,110 +438,226 @@ export class AppSecurity {
         });
     }
 
-    // Sponsor Security Group
-    private static _sponsorGroup: Types.SP.GroupOData = null;
-    static get SponsorGroup(): Types.SP.GroupOData { return this._sponsorGroup; }
-    static get SponsorUrl(): string { return ContextInfo.webServerRelativeUrl + "/_layouts/15/people.aspx?MembershipGroupId=" + this._sponsorGroup.Id; }
-    static get SponsorEmails(): string[] {
-        let emails = [];
+    // Initializes the web's default site groups
+    private initWebGroups(web: Types.SP.IWeb) {
+        // Clear the current value
+        this._webGroups = {
+            members: null,
+            owners: null,
+            visitors: null
+        };
 
-        // Parse the users
-        for (let i = 0; i < this.SponsorGroup.Users.results.length; i++) {
-            let email = this.SponsorGroup.Users.results[i].Email;
+        // Get the default members group
+        web.AssociatedMemberGroup().query({ Expand: ["Users"] }).execute(group => {
+            // Set the members group
+            this._webGroups.members = group;
+        });
 
-            // Append the email
-            email ? emails.push(email) : null;
-        }
+        // Get the default owners group
+        web.AssociatedOwnerGroup().query({ Expand: ["Users"] }).execute(group => {
+            // Set the owners group
+            this._webGroups.owners = group;
+        });
 
-        // Return the emails
-        return emails;
-    }
-    // Add the user to the sponsor group
-    static addSponsor(userId: number): PromiseLike<void> {
-        // Log
-        ErrorDialog.logInfo(`Adding the user with id '${userId}' to the App Sponsor site group...`);
-
-        // Return a promise
-        return new Promise((resolve, reject) => {
-            // Add the user
-            this.SponsorGroup.Users.addUserById(userId).execute(user => {
-                // Append the user
-                this.SponsorGroup.Users.results.push(user);
-
-                // Resolve the request
-                resolve();
-            },
-                // Error
-                ex => {
-                    // Log
-                    ErrorDialog.logError(`Error adding the app sponsor not added to the group.`);
-                    ErrorDialog.logError(`Error Message: ${ex.response}`)
-
-                    // Reject the request
-                    reject();
-                });
+        // Get the default visitors group
+        web.AssociatedVisitorGroup().query({ Expand: ["Users"] }).execute(group => {
+            // Set the visitors group
+            this._webGroups.visitors = group;
         });
     }
-    static getSponsor(userId: number): Types.SP.User {
-        // Parse the users
-        for (let i = 0; i < this.SponsorGroup.Users.results.length; i++) {
-            let user = this.SponsorGroup.Users.results[i];
+}
 
-            // Return the user if we found them
-            if (user.Id == userId) { return user; }
-        }
+/**
+ * Application Security
+ * The security group/user references for the application.
+ */
+export class AppSecurity {
+    /** Public Variables */
 
-        // User not found
-        return null;
-    }
-    static get IsSponsor(): boolean {
-        // See if the group doesn't exist
-        if (this.SponsorGroup == null) { return false; }
+    // App Web
+    private static _appWeb: AppSecurityWeb = null;
+    static get AppWeb(): AppSecurityWeb { return this._appWeb; }
 
-        // Parse the users
-        for (let i = 0; i < this.SponsorGroup.Users.results.length; i++) {
-            // See if this is the current user
-            if (this.SponsorGroup.Users.results[i].Id == ContextInfo.userId) {
-                // Found
-                return true;
-            }
-        }
+    // App Catalog Web
+    private static _appCatalogWeb: AppSecurityWeb = null;
+    static get AppCatalogWeb(): AppSecurityWeb { return this._appCatalogWeb; }
 
-        // Return false by default
-        return false;
-    }
-    private static loadSponsorGroup(): PromiseLike<void> {
-        // Return a promise
-        return new Promise((resolve, reject) => {
-            // Load the security group
-            Web(Strings.SourceUrl).SiteGroups().getByName(Strings.Groups.Sponsors).query({
-                Expand: ["Users"]
-            }).execute(group => {
-                // Set the group
-                this._sponsorGroup = group;
-
-                // Resolve the request
-                resolve();
-            }, () => {
-                // Log
-                ErrorDialog.logError("[App Security] Error loading the sponsor group.");
-
-                // Reject the request
-                reject();
-            });
-        });
-    }
+    // App Catalog Owner
+    static get IsSiteAppCatalogOwner(): boolean { return this.AppCatalogWeb.IsOwner; }
 
     // Tenant App Catalog Owner
     private static _isTenantAppCatalogOwner = false;
     static get IsTenantAppCatalogOwner(): boolean { return this._isTenantAppCatalogOwner; }
-    private static initTenantAppCatalogOwner(tenantAppCatalogUrl: string): PromiseLike<void> {
+
+    /** Private Interface */
+
+    // Creates the security groups for the app site
+    private static createAppSecurityGroups(webUrl: string = Strings.SourceUrl): PromiseLike<void> {
+        // Return a promise
+        return new Promise((resolve) => {
+            // Get the permission types
+            this.AppWeb.getPermissionTypes().then(permissions => {
+                // Reset group settings
+                Promise.all([
+                    // Set the dev group owner
+                    Helper.setGroupOwner(Strings.Groups.Developers, Strings.Groups.Approvers, webUrl),
+                    // Set the sponsor group owner
+                    Helper.setGroupOwner(Strings.Groups.Sponsors, Strings.Groups.Developers, webUrl),
+                    // Reset the list permissions
+                    this.resetListPermissions([Strings.Lists.Apps, Strings.Lists.Assessments, Strings.Lists.AppCatalogRequests])
+                ]).then(() => {
+                    // Get the lists to update
+                    let listApps = Web().Lists(Strings.Lists.Apps);
+                    let listAssessments = Web().Lists(Strings.Lists.Assessments);
+                    let listRequests = Web().Lists(Strings.Lists.AppCatalogRequests);
+
+                    // Ensure the approver group exists
+                    let group = this._appCatalogWeb.getGroup[Strings.Groups.Approvers];
+                    if (group) {
+                        // Set the list permissions
+                        listApps.RoleAssignments().addRoleAssignment(group.Id, permissions[SPTypes.RoleType.WebDesigner]).execute(() => {
+                            // Log
+                            console.log("[Apps List] The approver permission was added successfully.");
+                        });
+                        listAssessments.RoleAssignments().addRoleAssignment(group.Id, permissions[SPTypes.RoleType.WebDesigner]).execute(() => {
+                            // Log
+                            console.log("[Assessments List] The approver permission was added successfully.");
+                        });
+                        listRequests.RoleAssignments().addRoleAssignment(group.Id, permissions[SPTypes.RoleType.WebDesigner]).execute(() => {
+                            // Log
+                            console.log("[App Catalog Requests List] The approver permission was added successfully.");
+                        });
+                    }
+
+                    // Ensure the dev group exists
+                    group = this._appCatalogWeb.getGroup[Strings.Groups.Developers];
+                    if (group) {
+                        // Set the list permissions
+                        listApps.RoleAssignments().addRoleAssignment(group.Id, permissions[SPTypes.RoleType.Contributor]).execute(() => {
+                            // Log
+                            console.log("[Apps List] The dev permission was added successfully.");
+                        });
+                        listAssessments.RoleAssignments().addRoleAssignment(group.Id, permissions[SPTypes.RoleType.Contributor]).execute(() => {
+                            // Log
+                            console.log("[Assessments List] The dev permission was added successfully.");
+                        });
+                        listRequests.RoleAssignments().addRoleAssignment(group.Id, permissions[SPTypes.RoleType.Contributor]).execute(() => {
+                            // Log
+                            console.log("[App Catalog Requests List] The dev permission was added successfully.");
+                        });
+                    }
+
+                    // Ensure the final approver group exists
+                    group = this._appCatalogWeb.getGroup[Strings.Groups.FinalApprovers];
+                    if (group) {
+                        // Set the list permissions
+                        listApps.RoleAssignments().addRoleAssignment(group.Id, permissions[SPTypes.RoleType.WebDesigner]).execute(() => {
+                            // Log
+                            console.log("[Apps List] The approver permission was added successfully.");
+                        });
+                        listAssessments.RoleAssignments().addRoleAssignment(group.Id, permissions[SPTypes.RoleType.WebDesigner]).execute(() => {
+                            // Log
+                            console.log("[Assessments List] The approver permission was added successfully.");
+                        });
+                        listRequests.RoleAssignments().addRoleAssignment(group.Id, permissions[SPTypes.RoleType.WebDesigner]).execute(() => {
+                            // Log
+                            console.log("[App Catalog Requests List] The approver permission was added successfully.");
+                        });
+                    }
+
+                    // Ensure the dev group exists
+                    group = this._appCatalogWeb.getGroup[Strings.Groups.Sponsors];
+                    if (group) {
+                        // Set the list permissions
+                        listApps.RoleAssignments().addRoleAssignment(group.Id, permissions[SPTypes.RoleType.Contributor]).execute(() => {
+                            // Log
+                            console.log("[Apps List] The sponsor permission was added successfully.");
+                        });
+                        listAssessments.RoleAssignments().addRoleAssignment(group.Id, permissions[SPTypes.RoleType.Contributor]).execute(() => {
+                            // Log
+                            console.log("[Assessments List] The sponsor permission was added successfully.");
+                        });
+                        listRequests.RoleAssignments().addRoleAssignment(group.Id, permissions[SPTypes.RoleType.Contributor]).execute(() => {
+                            // Log
+                            console.log("[App Catalog Requests List] The sponsor permission was added successfully.");
+                        });
+                    }
+
+                    // Ensure the default members group exists
+                    if (this._appCatalogWeb.webMembers) {
+                        // Set the list permissions
+                        listApps.RoleAssignments().addRoleAssignment(this._appCatalogWeb.webMembers.Id, permissions[SPTypes.RoleType.Reader]).execute(() => {
+                            // Log
+                            console.log("[Apps List] The default members permission was added successfully.");
+                        });
+                        listAssessments.RoleAssignments().addRoleAssignment(this._appCatalogWeb.webMembers.Id, permissions[SPTypes.RoleType.Reader]).execute(() => {
+                            // Log
+                            console.log("[Assessments List] The default members permission was added successfully.");
+                        });
+                        listRequests.RoleAssignments().addRoleAssignment(this._appCatalogWeb.webMembers.Id, permissions[SPTypes.RoleType.Contributor]).execute(() => {
+                            // Log
+                            console.log("[App Catalog Requests List] The default members permission was added successfully.");
+                        });
+                    }
+
+                    // Ensure the default owners group exists
+                    if (this._appCatalogWeb.webOwners) {
+                        // Set the list permissions
+                        listApps.RoleAssignments().addRoleAssignment(this._appCatalogWeb.webOwners.Id, permissions[SPTypes.RoleType.Reader]).execute(() => {
+                            // Log
+                            console.log("[Apps List] The default owners permission was added successfully.");
+                        });
+                        listAssessments.RoleAssignments().addRoleAssignment(this._appCatalogWeb.webOwners.Id, permissions[SPTypes.RoleType.Reader]).execute(() => {
+                            // Log
+                            console.log("[Assessments List] The default owners permission was added successfully.");
+                        });
+                        listRequests.RoleAssignments().addRoleAssignment(this._appCatalogWeb.webOwners.Id, permissions[SPTypes.RoleType.Contributor]).execute(() => {
+                            // Log
+                            console.log("[App Catalog Requests List] The default owners permission was added successfully.");
+                        });
+                    }
+
+                    // Ensure the default members group exists
+                    if (this._appCatalogWeb.webVisitors) {
+                        // Set the list permissions
+                        listApps.RoleAssignments().addRoleAssignment(this._appCatalogWeb.webVisitors.Id, permissions[SPTypes.RoleType.Reader]).execute(() => {
+                            // Log
+                            console.log("[Apps List] The default visitors permission was added successfully.");
+                        });
+                        listAssessments.RoleAssignments().addRoleAssignment(this._appCatalogWeb.webVisitors.Id, permissions[SPTypes.RoleType.Reader]).execute(() => {
+                            // Log
+                            console.log("[Assessments List] The default visitors permission was added successfully.");
+                        });
+                        listRequests.RoleAssignments().addRoleAssignment(this._appCatalogWeb.webVisitors.Id, permissions[SPTypes.RoleType.Contributor]).execute(() => {
+                            // Log
+                            console.log("[App Catalog Requests List] The default visitors permission was added successfully.");
+                        });
+                    }
+
+                    // Wait for the app list updates to complete
+                    listApps.done(() => {
+                        // Wait for the assessment list updates to complete
+                        listAssessments.done(() => {
+                            // Wait for the requests list updates to complete
+                            listRequests.done(() => {
+                                // Resolve the request
+                                resolve();
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    }
+
+    // Determines if the user is able to deploy to the tenant
+    private static initTenantAppCatalogOwner(): PromiseLike<void> {
         // Return a promise
         return new Promise(resolve => {
             // See if the tenant app catalog is defined
-            if (tenantAppCatalogUrl) {
+            if (AppConfig.Configuration.tenantAppCatalogUrl) {
                 // Get the user's permissions to the app catalog list
-                Web(tenantAppCatalogUrl).Lists(Strings.Lists.AppCatalog).query({
+                Web(AppConfig.Configuration.tenantAppCatalogUrl).Lists(Strings.Lists.AppCatalog).query({
                     Expand: ["EffectiveBasePermissions"]
                 }).execute(list => {
                     // See if the user has right access
@@ -559,341 +677,12 @@ export class AppSecurity {
             }
         });
     }
-}
-
-/**
- * Create Security Groups
- */
-export class CreateSecurityGroups {
-    // Creates the security groups
-    static run(): PromiseLike<any> {
-        return Promise.all([
-            this.createAppCatalogSecurityGroups(),
-            this.createAppSecurityGroups()
-        ]);
-    }
-
-    // Creates the security groups for the app site
-    private static createAppSecurityGroups(webUrl: string = Strings.SourceUrl): PromiseLike<void> {
-        // Return a promise
-        return new Promise((resolve) => {
-            // Get the site groups
-            this.getWebSiteGroups(webUrl, ContextInfo.formDigestValue).then(webGroups => {
-                // Create the site groups
-                this.createSiteGroups(webUrl, ContextInfo.formDigestValue, Strings.Groups).then(groups => {
-                    // Get the definitions
-                    this.getPermissionTypes(webUrl, ContextInfo.formDigestValue).then(permissions => {
-                        // Reset group settings
-                        Promise.all([
-                            // Set the dev group owner
-                            Helper.setGroupOwner(webGroups[Strings.Groups.Developers], webGroups[Strings.Groups.Approvers], Strings.SourceUrl),
-                            // Set the sponsor group owner
-                            Helper.setGroupOwner(webGroups[Strings.Groups.Sponsors], webGroups[Strings.Groups.Developers], Strings.SourceUrl),
-                            // Reset the list permissions
-                            this.resetListPermissions([Strings.Lists.Apps, Strings.Lists.Assessments, Strings.Lists.AppCatalogRequests])
-                        ]).then(() => {
-                            // Get the lists to update
-                            let listApps = Web().Lists(Strings.Lists.Apps);
-                            let listAssessments = Web().Lists(Strings.Lists.Assessments);
-                            let listRequests = Web().Lists(Strings.Lists.AppCatalogRequests);
-
-                            // Ensure the approver group exists
-                            if (groups[Strings.Groups.Approvers]) {
-                                // Set the list permissions
-                                listApps.RoleAssignments().addRoleAssignment(groups[Strings.Groups.Approvers].Id, permissions[SPTypes.RoleType.WebDesigner]).execute(() => {
-                                    // Log
-                                    console.log("[Apps List] The approver permission was added successfully.");
-                                });
-                                listAssessments.RoleAssignments().addRoleAssignment(groups[Strings.Groups.Approvers].Id, permissions[SPTypes.RoleType.WebDesigner]).execute(() => {
-                                    // Log
-                                    console.log("[Assessments List] The approver permission was added successfully.");
-                                });
-                                listRequests.RoleAssignments().addRoleAssignment(groups[Strings.Groups.Approvers].Id, permissions[SPTypes.RoleType.WebDesigner]).execute(() => {
-                                    // Log
-                                    console.log("[App Catalog Requests List] The approver permission was added successfully.");
-                                });
-                            }
-
-                            // Ensure the dev group exists
-                            if (groups[Strings.Groups.Developers]) {
-                                // Set the list permissions
-                                listApps.RoleAssignments().addRoleAssignment(groups[Strings.Groups.Developers].Id, permissions[SPTypes.RoleType.Contributor]).execute(() => {
-                                    // Log
-                                    console.log("[Apps List] The dev permission was added successfully.");
-                                });
-                                listAssessments.RoleAssignments().addRoleAssignment(groups[Strings.Groups.Developers].Id, permissions[SPTypes.RoleType.Contributor]).execute(() => {
-                                    // Log
-                                    console.log("[Assessments List] The dev permission was added successfully.");
-                                });
-                                listRequests.RoleAssignments().addRoleAssignment(groups[Strings.Groups.Developers].Id, permissions[SPTypes.RoleType.Contributor]).execute(() => {
-                                    // Log
-                                    console.log("[App Catalog Requests List] The dev permission was added successfully.");
-                                });
-                            }
-
-                            // Ensure the final approver group exists
-                            if (groups[Strings.Groups.FinalApprovers]) {
-                                // Set the list permissions
-                                listApps.RoleAssignments().addRoleAssignment(groups[Strings.Groups.FinalApprovers].Id, permissions[SPTypes.RoleType.WebDesigner]).execute(() => {
-                                    // Log
-                                    console.log("[Apps List] The approver permission was added successfully.");
-                                });
-                                listAssessments.RoleAssignments().addRoleAssignment(groups[Strings.Groups.FinalApprovers].Id, permissions[SPTypes.RoleType.WebDesigner]).execute(() => {
-                                    // Log
-                                    console.log("[Assessments List] The approver permission was added successfully.");
-                                });
-                                listRequests.RoleAssignments().addRoleAssignment(groups[Strings.Groups.FinalApprovers].Id, permissions[SPTypes.RoleType.WebDesigner]).execute(() => {
-                                    // Log
-                                    console.log("[App Catalog Requests List] The approver permission was added successfully.");
-                                });
-                            }
-
-                            // Ensure the dev group exists
-                            if (groups[Strings.Groups.Sponsors]) {
-                                // Set the list permissions
-                                listApps.RoleAssignments().addRoleAssignment(groups[Strings.Groups.Sponsors].Id, permissions[SPTypes.RoleType.Contributor]).execute(() => {
-                                    // Log
-                                    console.log("[Apps List] The sponsor permission was added successfully.");
-                                });
-                                listAssessments.RoleAssignments().addRoleAssignment(groups[Strings.Groups.Sponsors].Id, permissions[SPTypes.RoleType.Contributor]).execute(() => {
-                                    // Log
-                                    console.log("[Assessments List] The sponsor permission was added successfully.");
-                                });
-                                listRequests.RoleAssignments().addRoleAssignment(groups[Strings.Groups.Sponsors].Id, permissions[SPTypes.RoleType.Contributor]).execute(() => {
-                                    // Log
-                                    console.log("[App Catalog Requests List] The sponsor permission was added successfully.");
-                                });
-                            }
-
-                            // Ensure the default members group exists
-                            if (webGroups.members) {
-                                // Set the list permissions
-                                listApps.RoleAssignments().addRoleAssignment(webGroups.members.Id, permissions[SPTypes.RoleType.Reader]).execute(() => {
-                                    // Log
-                                    console.log("[Apps List] The default members permission was added successfully.");
-                                });
-                                listAssessments.RoleAssignments().addRoleAssignment(webGroups.members.Id, permissions[SPTypes.RoleType.Reader]).execute(() => {
-                                    // Log
-                                    console.log("[Assessments List] The default members permission was added successfully.");
-                                });
-                                listRequests.RoleAssignments().addRoleAssignment(webGroups.members.Id, permissions[SPTypes.RoleType.Contributor]).execute(() => {
-                                    // Log
-                                    console.log("[App Catalog Requests List] The default members permission was added successfully.");
-                                });
-                            }
-
-                            // Ensure the default owners group exists
-                            if (webGroups.owners) {
-                                // Set the list permissions
-                                listApps.RoleAssignments().addRoleAssignment(webGroups.owners.Id, permissions[SPTypes.RoleType.Reader]).execute(() => {
-                                    // Log
-                                    console.log("[Apps List] The default owners permission was added successfully.");
-                                });
-                                listAssessments.RoleAssignments().addRoleAssignment(webGroups.owners.Id, permissions[SPTypes.RoleType.Reader]).execute(() => {
-                                    // Log
-                                    console.log("[Assessments List] The default owners permission was added successfully.");
-                                });
-                                listRequests.RoleAssignments().addRoleAssignment(webGroups.owners.Id, permissions[SPTypes.RoleType.Contributor]).execute(() => {
-                                    // Log
-                                    console.log("[App Catalog Requests List] The default owners permission was added successfully.");
-                                });
-                            }
-
-                            // Ensure the default members group exists
-                            if (webGroups.visitors) {
-                                // Set the list permissions
-                                listApps.RoleAssignments().addRoleAssignment(webGroups.visitors.Id, permissions[SPTypes.RoleType.Reader]).execute(() => {
-                                    // Log
-                                    console.log("[Apps List] The default visitors permission was added successfully.");
-                                });
-                                listAssessments.RoleAssignments().addRoleAssignment(webGroups.visitors.Id, permissions[SPTypes.RoleType.Reader]).execute(() => {
-                                    // Log
-                                    console.log("[Assessments List] The default visitors permission was added successfully.");
-                                });
-                                listRequests.RoleAssignments().addRoleAssignment(webGroups.visitors.Id, permissions[SPTypes.RoleType.Contributor]).execute(() => {
-                                    // Log
-                                    console.log("[App Catalog Requests List] The default visitors permission was added successfully.");
-                                });
-                            }
-
-                            // Wait for the app list updates to complete
-                            listApps.done(() => {
-                                // Wait for the assessment list updates to complete
-                                listAssessments.done(() => {
-                                    // Wait for the requests list updates to complete
-                                    listRequests.done(() => {
-                                        // Resolve the request
-                                        resolve();
-                                    });
-                                });
-                            });
-                        });
-                    });
-                });
-            });
-        });
-    }
-
-    // Creates the security groups for the app catalog site
-    private static createAppCatalogSecurityGroups(webUrl: string = AppConfig.Configuration.appCatalogUrl): PromiseLike<any> {
-        // Return a promise
-        return new Promise((resolve, reject) => {
-            // Get the context information
-            ContextInfo.getWeb(webUrl).execute(context => {
-                // Execute the requests
-                Promise.all([
-                    // Get the site groups
-                    this.getWebSiteGroups(webUrl, context.GetContextWebInformation.FormDigestValue),
-                    // Create the site groups
-                    this.createSiteGroups(webUrl, ContextInfo.formDigestValue, Strings.Groups),
-                    // Get the definitions
-                    this.getPermissionTypes(webUrl, ContextInfo.formDigestValue, true)
-                ]).then(resolve, reject);
-            }, reject);
-        });
-    }
-
-    // Creates the site groups
-    private static createSiteGroups(url: string, requestDigest: string, groups: { [key: string]: string }): PromiseLike<{ [key: string]: Types.SP.Group }> {
-        let siteGroups: { [key: string]: Types.SP.Group } = {};
-
-        // Return a promise
-        return new Promise((resolve) => {
-            // Get the group names
-            let groupNames: string[] = [];
-            for (let groupName in groups) {
-                // Add the name
-                groupNames.push(groupName);
-            }
-
-            // Parse the groups to create
-            Helper.Executor(groupNames, groupName => {
-                // Return a promise
-                return new Promise((resolve, reject) => {
-                    // Get the group
-                    Web(url, { requestDigest }).SiteGroups().getByName(groupName).execute(
-                        // Exists
-                        group => {
-                            // Save the group
-                            siteGroups[groupName] = group;
-
-                            // Check the next group
-                            resolve(null);
-                        },
-
-                        // Doesn't exist
-                        () => {
-                            let isDevGroup = groupName == Strings.Groups.Developers;
-                            let isSponsorGroup = groupName == Strings.Groups.Sponsors;
-
-                            // Create the group
-                            Web().SiteGroups().add({
-                                AllowMembersEditMembership: true,
-                                AllowRequestToJoinLeave: isDevGroup || isSponsorGroup,
-                                AutoAcceptRequestToJoinLeave: isDevGroup || isSponsorGroup,
-                                Title: groupName,
-                                Description: "Group contains the '" + groupName + "' users.",
-                                OnlyAllowMembersViewMembership: false
-                            }).execute(
-                                // Successful
-                                group => {
-                                    // Save the group
-                                    siteGroups[groupName] = group;
-
-                                    // Check the next group
-                                    resolve(null);
-                                },
-
-                                // Error
-                                ex => {
-                                    // Log the error
-                                    ErrorDialog.show("Security Group", "There was an error creating the security group.", ex);
-
-                                    // Reject the request
-                                    reject();
-                                }
-                            );
-                        }
-                    );
-                });
-            }).then(() => {
-                // Resolve the request
-                resolve(siteGroups);
-            });
-        });
-    }
-
-    // Gets the custom permission level
-    static CustomPermissionLevel: string = "Contribute and Manage Subwebs";
-    private static getCustomPermissionLevel(url: string, roles: { [key: number]: number }): PromiseLike<{ [key: number]: number }> {
-
-        // Return a promise
-        return new Promise(resolve => {
-            // See if the roles contain the custom permission
-            if (roles[this.CustomPermissionLevel]) {
-                // Resolve the request
-                resolve(roles);
-            } else {
-                // Create the custom permission
-                Helper.copyPermissionLevel({
-                    BasePermission: "Contribute",
-                    Name: this.CustomPermissionLevel,
-                    Description: "Extends the contribute permission level and adds the ability to create a subweb.",
-                    AddPermissions: [SPTypes.BasePermissionTypes.ManageSubwebs],
-                    WebUrl: url
-                }).then(
-                    role => {
-                        // Update the mapper
-                        roles[this.CustomPermissionLevel] = role.Id;
-
-                        // Resolve the request
-                        resolve(roles);
-                    },
-                    ex => {
-                        // Log the error
-                        ErrorDialog.show("Permission Level", "There was an error creating the contribute and manage subwebs custom permission level.", ex);
-                    }
-                );
-            }
-        });
-
-    }
-
-    // Gets the role definitions for the permission types
-    private static getPermissionTypes(url: string, requestDigest: string, customPermission: boolean = false): PromiseLike<{ [key: number]: number }> {
-        // Return a promise
-        return new Promise(resolve => {
-            // Get the definitions
-            Web(url, { requestDigest }).RoleDefinitions().execute(roleDefs => {
-                let roles = {};
-
-                // Parse the role definitions
-                for (let i = 0; i < roleDefs.results.length; i++) {
-                    let roleDef = roleDefs.results[i];
-
-                    // Add the role by type
-                    roles[roleDef.RoleTypeKind > 0 ? roleDef.RoleTypeKind : roleDef.Name] = roleDef.Id;
-                }
-
-                // See if we are including the custom permission
-                if (customPermission) {
-                    // Get the custom permission level
-                    this.getCustomPermissionLevel(url, roles).then(roles => {
-                        // Resolve the request
-                        resolve(roles);
-                    });
-                } else {
-                    // Resolve the request
-                    resolve(roles);
-                }
-            });
-        });
-    }
 
     // Resets the list permissions
     private static resetListPermissions(lists: string[]): PromiseLike<void> {
         // Return a promise
         return new Promise(resolve => {
+            // Parse the lists
             Helper.Executor(lists, listName => {
                 // Return a promise
                 return new Promise(resolve => {
@@ -913,40 +702,67 @@ export class CreateSecurityGroups {
         });
     }
 
+    /** Public Interface */
 
-    // Gets the web's default site groups
-    private static getWebSiteGroups(url: string, requestDigest: string): PromiseLike<{ members: Types.SP.Group, owners: Types.SP.Group, visitors: Types.SP.Group }> {
-        let members: Types.SP.Group = null;
-        let owners: Types.SP.Group = null;
-        let visitors: Types.SP.Group = null;
+    static hasErrors() {
+        // Check the app web
+        if (this.AppWeb.getGroup(Strings.Groups.Approvers) == null ||
+            this.AppWeb.getGroup(Strings.Groups.Developers) == null ||
+            this.AppWeb.getGroup(Strings.Groups.FinalApprovers) == null ||
+            this.AppWeb.getGroup(Strings.Groups.Sponsors) == null) {
+            // Groups are missing
+            return true;
+        }
 
+        // Check the app catalog web
+        if (this.AppCatalogWeb.getGroup(Strings.Groups.Approvers) == null ||
+            this.AppCatalogWeb.getGroup(Strings.Groups.Developers) == null ||
+            this.AppCatalogWeb.getGroup(Strings.Groups.FinalApprovers) == null ||
+            this.AppCatalogWeb.getGroup(Strings.Groups.Sponsors) == null) {
+            // Groups are missing
+            return true;
+        }
+
+        // Groups exist
+        return false;
+    }
+
+    static init() {
         // Return a promise
-        return new Promise((resolve) => {
-            let web = Web(url, { requestDigest });
+        return new Promise((resolve, reject) => {
+            // Initialize the app web
+            this._appWeb = new AppSecurityWeb(Strings.SourceUrl);
 
-            // Get the default members group
-            web.AssociatedMemberGroup().execute(group => {
-                // Set the members group
-                members = group;
-            });
+            // See if the app catalog is on a different web
+            if (AppConfig.Configuration.appCatalogUrl != Strings.SourceUrl) {
+                // Initialize the app catalog web
+                this._appCatalogWeb = new AppSecurityWeb(AppConfig.Configuration.appCatalogUrl);
+            } else {
+                // Set the app catalog web
+                this._appCatalogWeb = this._appWeb;
+            }
+            // Execute the requests, and resolve the request when it completes
+            Promise.all([
+                // Wait for the webs to complete
+                this._appWeb.isInitialized(),
+                this._appCatalogWeb.isInitialized(),
+                this.initTenantAppCatalogOwner(),
+            ]).then(resolve, () => {
+                // Log
+                ErrorDialog.logError("[App Security] Error initializing the App Security component.");
 
-            // Get the default owners group
-            web.AssociatedOwnerGroup().execute(group => {
-                // Set the owners group
-                owners = group;
-            });
-
-            // Get the default visitors group
-            web.AssociatedVisitorGroup().execute(group => {
-                // Set the visitors group
-                visitors = group;
-            });
-
-            // Wait for the requests to complete
-            web.done(() => {
-                // Resolve the request
-                resolve({ members, owners, visitors });
+                // Reject the request
+                reject();
             });
         });
+    }
+
+    // Creates the security groups
+    static install(): PromiseLike<any> {
+        // Create the security groups
+        return Promise.all([
+            this.AppCatalogWeb.create(),
+            this.createAppSecurityGroups()
+        ]);
     }
 }

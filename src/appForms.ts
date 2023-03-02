@@ -1010,13 +1010,13 @@ export class AppForms {
                     ErrorDialog.logInfo(`Validating the app sponsor id: '${item.AppSponsorId}'`);
 
                     // Get the sponsor
-                    let sponsor = AppSecurity.getSponsor(item.AppSponsorId);
+                    let sponsor = AppSecurity.AppWeb.getUserForGroup(Strings.Groups.Sponsors, item.AppSponsorId);
                     if (sponsor == null && item.AppSponsorId > 0) {
                         // Log
                         ErrorDialog.logInfo(`App sponsor not in group. Adding the user...`);
 
                         // Add the sponsor to the group
-                        AppSecurity.addSponsor(item.AppSponsorId).then(() => {
+                        AppSecurity.AppWeb.addUserToGroup(Strings.Groups.Sponsors, item.AppSponsorId).then(() => {
                             // Get the status
                             let status = AppConfig.Status[item.AppStatus];
 
@@ -2052,13 +2052,13 @@ export class AppForms {
                                 ErrorDialog.logInfo(`Validating the app sponsor id: '${item.AppSponsorId}'`);
 
                                 // Get the sponsor
-                                let sponsor = AppSecurity.getSponsor(item.AppSponsorId);
+                                let sponsor = AppSecurity.AppWeb.getUserForGroup(Strings.Groups.Sponsors, item.AppSponsorId);
                                 if (sponsor == null && item.AppSponsorId > 0) {
                                     // Log
                                     ErrorDialog.logInfo(`App sponsor not in group. Adding the user...`);
 
                                     // Add the sponsor to the group
-                                    AppSecurity.addSponsor(item.AppSponsorId).then(() => {
+                                    AppSecurity.AppWeb.addUserToGroup(Strings.Groups.Sponsors, item.AppSponsorId).then(() => {
                                         // Complete the request
                                         onComplete();
                                     });
