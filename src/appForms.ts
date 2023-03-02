@@ -35,7 +35,8 @@ const AppPackageFields = [
     "AppProductID",
     "AppSharePointMinVersion",
     "AppSkipFeatureDeployment",
-    "AppVersion"
+    "AppVersion",
+    "AppManifest"
 ];
 
 // Define the app store properties
@@ -858,6 +859,25 @@ export class AppForms {
                             // Return the results
                             return results;
                         }
+                    }
+
+                    // See if this is the teams field
+                    if (field.InternalName == "AppIsTeams") {
+                        // Disable it by default
+                        ctrl.isDisabled = true;
+
+                        try {
+                            // Get the manifest information
+                            let manifest = JSON.parse(DataSource.AppItem.AppManifest);
+                            if (manifest) {
+                                // See if the app supports teams
+                                if (manifest.supportedHosts.indexOf("TeamsTab") >= 0 ||
+                                    manifest.supportedHosts.indexOf("TeamsPersonalApp") >= 0) {
+                                    // Enable the control
+                                    ctrl.isDisabled = false;
+                                }
+                            }
+                        } catch { }
                     }
 
                     // See if this is a url field
