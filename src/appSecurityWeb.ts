@@ -1,5 +1,4 @@
 import { ContextInfo, Helper, SPTypes, Types, Web } from "gd-sprest-bs";
-import { AppConfig } from "./appCfg";
 import { ErrorDialog } from "./errorDialog";
 import Strings from "./strings";
 
@@ -8,7 +7,6 @@ interface IAppGroups {
     Approvers: Types.SP.GroupOData;
     Developers: Types.SP.GroupOData;
     FinalApprovers: Types.SP.GroupOData;
-    HelpDesk?: Types.SP.GroupOData;
     Sponsors: Types.SP.GroupOData;
 }
 
