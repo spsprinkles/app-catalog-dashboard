@@ -36,10 +36,10 @@ export class AppNotifications {
                 // Return the emails
                 return emails;
 
-            // Helpdesk Group
-            case "HelpdeskGroup":
+            // Helpdesk
+            case "Helpdesk":
                 // Return the email
-                return AppSecurity.AppWeb.getEmailsForGroup(AppConfig.Configuration.helpdeskGroupName);
+                return AppConfig.Configuration.helpdesk ? [AppConfig.Configuration.helpdesk] : [];
 
             // Sponsor
             case "Sponsor":
