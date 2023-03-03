@@ -15,7 +15,7 @@ export interface IConfiguration {
     disableClientSideAssetsExtraction?: boolean;
     errorEmails?: string[];
     flowEndpoint?: string;
-    helpdeskGroupName?: string;
+    helpdesk?: string;
     helpPageUrl?: string;
     paging?: number;
     templatesLibraryUrl?: string;
