@@ -391,10 +391,7 @@ export class DataSource {
                 // Load the configuration
                 AppConfig.loadConfiguration(appConfiguration).then(() => {
                     // Load the security information
-                    AppSecurity.init(
-                        AppConfig.Configuration.appCatalogUrl,
-                        AppConfig.Configuration.tenantAppCatalogUrl
-                    ).then(() => {
+                    AppSecurity.init().then(() => {
                         // Wait for the components to initialize
                         Promise.all([
                             // Initialize the app assessments

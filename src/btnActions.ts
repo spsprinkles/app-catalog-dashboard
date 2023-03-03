@@ -70,7 +70,7 @@ export class ButtonActions {
         // Approver's Group
         case UserTypes.ApproversGroup:
           // See if this user is an approver
-          isApprover = isApprover || AppSecurity.IsApprover;
+          isApprover = isApprover || AppSecurity.AppWeb.isInGroup(Strings.Groups.Approvers);
           break;
 
         // Developers of the application
@@ -92,13 +92,13 @@ export class ButtonActions {
         // Developer's Group
         case UserTypes.DevelopersGroup:
           // See if this user is a developer
-          isApprover = isApprover || AppSecurity.IsDeveloper;
+          isApprover = isApprover || AppSecurity.AppWeb.isInGroup(Strings.Groups.Developers);
           break;
 
         // Final Approver's Group
         case UserTypes.FinalApproversGroup:
           // See if this user is a final approver
-          isApprover = isApprover || AppSecurity.IsFinalApprover;
+          isApprover = isApprover || AppSecurity.AppWeb.isInGroup(Strings.Groups.FinalApprovers);
           break;
 
         // Sponsor
@@ -111,7 +111,7 @@ export class ButtonActions {
         // Sponsor's Group
         case UserTypes.SponsorsGroup:
           // See if this user is a sponsor
-          isApprover = isApprover || AppSecurity.IsSponsor;
+          isApprover = isApprover || AppSecurity.AppWeb.isInGroup(Strings.Groups.Sponsors);
           break;
       }
     }
@@ -241,7 +241,7 @@ export class ButtonActions {
         // Audit Log
         case "AuditLog":
           // Ensure the user is an admin or owner
-          if (AppSecurity.IsAdmin || AppSecurity.isOwner) {
+          if (AppSecurity.AppWeb.IsAdmin || AppSecurity.AppWeb.IsOwner) {
             // Render the resubmit button
             tooltips.add({
               content: "Displays the audit log information.",
@@ -274,7 +274,7 @@ export class ButtonActions {
         // Delete
         case "Delete":
           // Ensure this is an approver
-          if (AppSecurity.IsApprover) {
+          if (AppSecurity.AppWeb.isInGroup(Strings.Groups.Approvers)) {
             // Render the button
             tooltips.add({
               content: "Deletes the app.",

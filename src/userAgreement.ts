@@ -2,17 +2,18 @@ import { LoadingDialog, Modal } from "dattatable";
 import { Components, ContextInfo } from "gd-sprest-bs";
 import { AppConfig } from "./appCfg";
 import { AppSecurity } from "./appSecurity";
+import Strings from "./strings";
 
 /**
  * User Agreement
  */
 export class UserAgreement {
     // Constructor
-    constructor() {
+    constructor(onAgree: () => void) {
         // Ensure the user agreement exists
         if (AppConfig.Configuration.userAgreement) {
             // Render the modal
-            this.render();
+            this.render(onAgree);
         } else {
             // Clear the modal
             Modal.clear();
@@ -25,7 +26,7 @@ export class UserAgreement {
     }
 
     // Renders the user agreement modal
-    private render() {
+    private render(onAgree: () => void) {
         // Clear the modal
         Modal.clear();
 
@@ -45,19 +46,26 @@ export class UserAgreement {
                 text: "Agree",
                 type: Components.ButtonTypes.OutlinePrimary,
                 onClick: () => {
-                    // Show a loading dialog
-                    LoadingDialog.setHeader("Adding User");
-                    LoadingDialog.setBody("Adding the user to the developer's security group. This will close after the user is added.");
-                    LoadingDialog.show();
+                    // See if the user is already in the developer's group
+                    if (AppSecurity.AppWeb.isInGroup(Strings.Groups.Developers)) {
+                        // Call the event
+                        onAgree();
+                    } else {
+                        // See if the user is in the developer's group
+                        // Show a loading dialog
+                        LoadingDialog.setHeader("Adding User");
+                        LoadingDialog.setBody("Adding the user to the developer's security group. This will close after the user is added.");
+                        LoadingDialog.show();
 
-                    // Add the user to the group
-                    AppSecurity.addDeveloper(ContextInfo.userId).then(() => {
-                        // Close the dialog
-                        LoadingDialog.hide();
+                        // Add the user to the group
+                        AppSecurity.AppWeb.addUserToGroup(Strings.Groups.Developers, ContextInfo.userId).then(() => {
+                            // Close the dialog
+                            LoadingDialog.hide();
 
-                        // Refresh the page
-                        window.location.reload();
-                    });
+                            // Call the event
+                            onAgree();
+                        });
+                    }
                 }
             },
             placement: Components.TooltipPlacements.Left
