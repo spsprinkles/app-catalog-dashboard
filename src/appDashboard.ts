@@ -211,8 +211,8 @@ export class AppDashboard {
 
         // See if the app is deployed and has an error message
         let errorMessage = DataSource.AppCatalogSiteItem ? DataSource.AppCatalogSiteItem.ErrorMessage : null;
-        errorMessage = DataSource.AppCatalogItem ? DataSource.AppCatalogItem.AppPackageErrorMessage : errorMessage;
-        errorMessage = DataSource.AppItem ? DataSource.AppItem.AppPackageErrorMessage : errorMessage;
+        errorMessage = (DataSource.AppCatalogItem ? DataSource.AppCatalogItem.AppPackageErrorMessage : null) || errorMessage;
+        errorMessage = (DataSource.AppItem ? DataSource.AppItem.AppPackageErrorMessage : null) || errorMessage;
         if (errorMessage && errorMessage != "No errors.") {
             // Show the element
             elAlert.classList.remove("d-none");
