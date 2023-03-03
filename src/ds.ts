@@ -630,9 +630,12 @@ export class DataSource {
             // See if we need to refresh a specific app
             if (itemId > 0) {
                 // Load all the items
-                this.DocSetList.refreshItem(itemId).then(() => {
+                this.DocSetList.refreshItem(itemId).then(item => {
                     // Load the app dashboard
-                    this.loadAppDashboard(itemId).then(resolve, reject);
+                    this.loadAppDashboard(itemId).then(() => {
+                        // Resolve the promise
+                        resolve(item);
+                    }, reject);
                 }, reject);
             } else {
                 // Load all the items
