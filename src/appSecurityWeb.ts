@@ -312,15 +312,6 @@ export class AppSecurityWeb {
     private getAppGroupNames(): string[] {
         let groupNames: string[] = [];
 
-        // See if the help desk group is being used
-        if (AppConfig.Configuration.helpdeskGroupName) {
-            // Add the name
-            groupNames.push(Strings.Groups[AppConfig.Configuration.helpdeskGroupName]);
-
-            // Clear the group
-            this._appGroups[AppConfig.Configuration.helpdeskGroupName] = null;
-        }
-
         // Parse the configuration's group names
         for (let groupName in Strings.Groups) {
             // Add the name
