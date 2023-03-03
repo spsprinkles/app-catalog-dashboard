@@ -657,7 +657,6 @@ export class AppView {
                         // Refresh the app details
                         this.viewAppDetails(itemId);
                     });
-
                 }
             });
         });
