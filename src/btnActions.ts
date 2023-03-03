@@ -287,7 +287,7 @@ export class ButtonActions {
                 type: Components.ButtonTypes.OutlineDanger,
                 onClick: () => {
                   // Display the delete form
-                  this._forms.delete(this._item, () => {
+                  this._forms.delete(() => {
                     // Redirect to the dashboard
                     window.open(AppConfig.Configuration.dashboardUrl, "_self");
                   });
@@ -723,6 +723,8 @@ ${ContextInfo.userDisplayName}`.trim()
 
             // Test site doesn't exist
             () => {
+              let isError = false;
+
               // Set the tooltip
               let tooltip = "Creates the test site for the app.";
 
@@ -730,12 +732,14 @@ ${ContextInfo.userDisplayName}`.trim()
               if (DataSource.AppCatalogItem && DataSource.AppCatalogItem.IsValidAppPackage == false) {
                 // Set the tooltip
                 tooltip = "App package is invalid. Unable to deploy app.";
+                isError = true;
               }
 
               // See if the user is an owner
               if (!AppSecurity.IsSiteAppCatalogOwner) {
                 // Set the tooltip
                 tooltip = "User does not have permissions to deploy the app.";
+                isError = true;
               }
 
               // Render the create button
@@ -747,13 +751,13 @@ ${ContextInfo.userDisplayName}`.trim()
                   iconSize: 20,
                   iconType: nodePlus,
                   isDisabled:
-                    !AppSecurity.IsSiteAppCatalogOwner ||
+                    !AppSecurity.IsSiteAppCatalogOwner &&
                     !(DataSource.AppCatalogSiteItem ? DataSource.AppCatalogSiteItem.IsValidAppPackage : true),
                   isSmall: true,
                   type: Components.ButtonTypes.OutlinePrimary,
                   onClick: () => {
                     // Display the create test site form
-                    this._forms.createTestSite(this._item, () => {
+                    this._forms.createTestSite(isError ? tooltip : "", () => {
                       // Call the update event
                       this._onUpdate();
                     });

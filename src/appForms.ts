@@ -171,17 +171,18 @@ export class AppForms {
     }
 
     // Creates the test site for the application
-    createTestSite(item: IAppItem, onUpdate: () => void) {
+    createTestSite(errorMessage: string, onUpdate: () => void) {
         // Set the header
-        Modal.setHeader("Create Test Site");
+        Modal.setHeader(errorMessage ? "App Error" : "Create Test Site");
 
         // Set the body
-        Modal.setBody("Are you sure you want to create the test site for this application?");
+        Modal.setBody(errorMessage || "Are you sure you want to create the test site for this application?");
 
         // Render the footer
         Modal.setFooter(Components.Button({
             text: "Create Site",
             type: Components.ButtonTypes.OutlineSuccess,
+            isDisabled: errorMessage ? true : false,
             onClick: () => {
                 // Close the modal
                 Modal.hide();
@@ -193,11 +194,11 @@ export class AppForms {
                         // Log
                         DataSource.logItem({
                             LogUserId: ContextInfo.userId,
-                            ParentId: item.AppProductID,
+                            ParentId: DataSource.AppItem.AppProductID,
                             ParentListName: Strings.Lists.Apps,
                             Title: DataSource.AuditLogStates.CreateTestSite,
-                            LogComment: `The app ${item.Title} test site was created successfully at: ${web.ServerRelativeUrl}`
-                        }, item);
+                            LogComment: `The app ${DataSource.AppItem.Title} test site was created successfully at: ${web.ServerRelativeUrl}`
+                        }, DataSource.AppItem);
 
                         // Call the update event
                         onUpdate();
@@ -223,7 +224,7 @@ export class AppForms {
     }
 
     // Delete form
-    delete(item: IAppItem, onUpdate: () => void) {
+    delete(onUpdate: () => void) {
         // Set the header
         Modal.setHeader("Delete App/Solution Package");
 
@@ -254,24 +255,24 @@ export class AppForms {
                             LoadingDialog.setBody("Removing the assessments associated with this app.");
 
                             // Delete the assessments w/ this app
-                            this.deleteAssessments(item).then(() => {
+                            this.deleteAssessments(DataSource.AppItem.Id).then(() => {
                                 // Update the loading dialog
                                 LoadingDialog.setHeader("Deleting the App Request");
                                 LoadingDialog.setBody("This dialog will close after the app request is deleted.");
 
                                 // Delete this folder
-                                item.delete().execute(() => {
+                                DataSource.AppItem.delete().execute(() => {
                                     // Close the dialog
                                     LoadingDialog.hide();
 
                                     // Log
                                     DataSource.logItem({
                                         LogUserId: ContextInfo.userId,
-                                        ParentId: item.AppProductID,
+                                        ParentId: DataSource.AppItem.AppProductID,
                                         ParentListName: Strings.Lists.Apps,
                                         Title: DataSource.AuditLogStates.DeleteApp,
-                                        LogComment: `The app ${item.Title} was deleted.`
-                                    }, item);
+                                        LogComment: `The app ${DataSource.AppItem.Title} was deleted.`
+                                    }, DataSource.AppItem);
 
                                     // Execute the update event
                                     onUpdate();
@@ -288,12 +289,12 @@ export class AppForms {
     }
 
     // Method to delete the assessments associated with the app
-    private deleteAssessments(item: IAppItem): PromiseLike<void> {
+    private deleteAssessments(itemId: number): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve, reject) => {
             // Get the assoicated item
             List(Strings.Lists.Assessments).Items().query({
-                Filter: "RelatedAppId eq " + item.Id
+                Filter: "RelatedAppId eq " + itemId
             }).execute(
                 items => {
                     // Parse the items
