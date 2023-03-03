@@ -624,23 +624,20 @@ export class DataSource {
     }
 
     // Method to refresh the data source
-    static refresh(itemId?: number): PromiseLike<void> {
+    static refresh(itemId?: number): PromiseLike<any> {
         // Return a promise
         return new Promise((resolve, reject) => {
-            // Load all the items
-            this.DocSetList.refresh().then(() => {
-                // See if we need to refresh a specific app
-                if (itemId > 0) {
+            // See if we need to refresh a specific app
+            if (itemId > 0) {
+                // Load all the items
+                this.DocSetList.refreshItem(itemId).then(() => {
                     // Load the app dashboard
-                    this.loadAppDashboard(itemId).then(() => {
-                        // Resolve the request
-                        resolve();
-                    }, reject);
-                } else {
-                    // Resolve the request
-                    resolve();
-                }
-            }, reject);
+                    this.loadAppDashboard(itemId).then(resolve, reject);
+                }, reject);
+            } else {
+                // Load all the items
+                this.DocSetList.refresh().then(resolve, reject);
+            }
         });
     }
 

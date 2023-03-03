@@ -15,7 +15,7 @@ import Strings from "./strings";
  */
 export class AppActions {
     // Archives the current package file
-    static archivePackage(item: IAppItem, onComplete: () => void) {
+    static archivePackage(onComplete: () => void) {
         let appFile: Types.SP.File = null;
 
         // Show a loading dialog
@@ -59,7 +59,7 @@ export class AppActions {
                 LoadingDialog.setBody("Copying the file package.")
 
                 // Get the name of the file
-                let fileName = appFile.Name.toLowerCase().split(".sppkg")[0] + "_" + item.AppVersion + ".sppkg"
+                let fileName = appFile.Name.toLowerCase().split(".sppkg")[0] + "_" + DataSource.AppItem.AppVersion + ".sppkg"
 
                 // Log
                 ErrorDialog.logInfo(`Renaming the archived package ${fileName}...`);
@@ -86,7 +86,7 @@ export class AppActions {
     }
 
     // Configures the test site collection
-    static configureTestSite(webUrl: string, item: IAppItem): PromiseLike<void> {
+    static configureTestSite(webUrl: string): PromiseLike<void> {
         // Log
         ErrorDialog.logInfo("Configuring the Test Web...");
 
@@ -121,7 +121,7 @@ export class AppActions {
                     ErrorDialog.logInfo(`Adding the developers to the web as 'Owners'...`);
 
                     // Parse the developers
-                    let developers = item.AppDevelopers.results || [];
+                    let developers = DataSource.AppItem.AppDevelopers.results || [];
                     for (let i = 0; i < developers.length; i++) {
                         // Ensure the user exists in this site collection
                         web.ensureUser(developers[i].EMail).execute(user => {
@@ -149,7 +149,7 @@ export class AppActions {
                         ErrorDialog.logInfo(`Updating the web's permissions...`);
 
                         // Add the app sponsor
-                        item.AppSponsorId > 0 ? web.RoleAssignments().addRoleAssignment(item.AppSponsorId, role.Id).execute() : null;
+                        DataSource.AppItem.AppSponsorId > 0 ? web.RoleAssignments().addRoleAssignment(DataSource.AppItem.AppSponsorId, role.Id).execute() : null;
 
                         // Parse the developers
                         for (let i = 0; i < developers.length; i++) {
@@ -273,7 +273,7 @@ export class AppActions {
     }
 
     // Creates the test site for the application
-    static createTestSite(item: IAppItem, onComplete: (web?: Types.SP.WebInformation) => void) {
+    static createTestSite(onComplete: (web?: Types.SP.WebInformation) => void) {
         // Log
         ErrorDialog.logInfo(`Creating the test site...`);
 
@@ -284,7 +284,7 @@ export class AppActions {
 
         // Deploy the solution
         // Force the skip feature deployment to be false for a test site.
-        this.deploy(item, false, false, onComplete, () => {
+        this.deploy(false, false, onComplete, () => {
             // Update the loading dialog
             LoadingDialog.setHeader("Creating the Test Site");
             LoadingDialog.setBody("Creating the sub-web for testing the application.");
@@ -299,13 +299,13 @@ export class AppActions {
                     let requestDigest = context.GetContextWebInformation.FormDigestValue;
 
                     // Log
-                    ErrorDialog.logInfo(`Creating the test web for app: ${item.AppProductID}...`);
+                    ErrorDialog.logInfo(`Creating the test web for app: ${DataSource.AppItem.AppProductID}...`);
 
                     // Create the test site
                     Web(AppConfig.Configuration.appCatalogUrl, { requestDigest }).WebInfos().add({
-                        Description: "The test site for the " + item.Title + " application.",
-                        Title: item.Title,
-                        Url: item.AppProductID,
+                        Description: "The test site for the " + DataSource.AppItem.Title + " application.",
+                        Title: DataSource.AppItem.Title,
+                        Url: DataSource.AppItem.AppProductID,
                         WebTemplate: SPTypes.WebTemplateType.Site
                     }).execute(
                         // Success
@@ -321,7 +321,7 @@ export class AppActions {
 
                                 // Get the app developers
                                 let to = [];
-                                let pocs = item.AppDevelopers && item.AppDevelopers.results ? item.AppDevelopers.results : [];
+                                let pocs = DataSource.AppItem.AppDevelopers && DataSource.AppItem.AppDevelopers.results ? DataSource.AppItem.AppDevelopers.results : [];
                                 for (let i = 0; i < pocs.length; i++) {
                                     // Append the email
                                     to.push(pocs[i].EMail);
@@ -334,7 +334,7 @@ export class AppActions {
                                         To: to,
                                         Subject: "Test Site Created",
                                         Body: "<p>App Developers,</p><br />" +
-                                            "<p>The '" + item.Title + "' app test site has been created. Click the link below to access the site:</p>" +
+                                            "<p>The '" + DataSource.AppItem.Title + "' app test site has been created. Click the link below to access the site:</p>" +
                                             "<p>" + window.location.origin + web.ServerRelativeUrl + "</p>" +
                                             "<p>App Team</p>"
                                     }).execute(
@@ -360,9 +360,9 @@ export class AppActions {
                             }
 
                             // Configure the test site
-                            this.configureTestSite(web.ServerRelativeUrl, item).then(() => {
+                            this.configureTestSite(web.ServerRelativeUrl).then(() => {
                                 // Get the app
-                                Web(web.ServerRelativeUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(item.AppProductID).execute(
+                                Web(web.ServerRelativeUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(DataSource.AppItem.AppProductID).execute(
                                     app => {
                                         // See if the app is already installed
                                         if (app.SkipDeploymentFeature) {
@@ -373,7 +373,7 @@ export class AppActions {
                                             sendEmail();
                                         } else {
                                             // Log
-                                            ErrorDialog.logInfo(`Installing the app '${item.Title}' with id ${item.AppProductID}...`);
+                                            ErrorDialog.logInfo(`Installing the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID}...`);
 
                                             // Update the loading dialog
                                             LoadingDialog.setHeader("Installing the App");
@@ -384,7 +384,7 @@ export class AppActions {
                                                 // Success
                                                 () => {
                                                     // Log
-                                                    ErrorDialog.logInfo(`The app '${item.Title}' with id ${item.AppProductID} was installed successfully...`);
+                                                    ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was installed successfully...`);
 
                                                     // Send the email
                                                     sendEmail();
@@ -421,11 +421,11 @@ export class AppActions {
     }
 
     // Method to delete the test site
-    static deleteTestSite(item: IAppItem): PromiseLike<void> {
+    static deleteTestSite(): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve, reject) => {
             // Log
-            ErrorDialog.logInfo(`Deleting the test site for app '${item.Title}' with id ${item.AppProductID}...`);
+            ErrorDialog.logInfo(`Deleting the test site for app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID}...`);
 
             // Update the loading dialog
             LoadingDialog.setHeader("Deleting the Test Site");
@@ -433,7 +433,7 @@ export class AppActions {
             LoadingDialog.show();
 
             // Delete the test site
-            DataSource.deleteTestSite(item).then(() => {
+            DataSource.deleteTestSite(DataSource.AppItem).then(() => {
                 // Close the dialog
                 LoadingDialog.hide();
 
@@ -444,7 +444,7 @@ export class AppActions {
     }
 
     // Deploys the solution to the app catalog
-    static deploy(item: IAppItem, tenantFl: boolean, skipFeatureDeployment: boolean, onError: () => void, onUpdate: () => void) {
+    static deploy(tenantFl: boolean, skipFeatureDeployment: boolean, onError: () => void, onUpdate: () => void) {
         let appFile: Types.SP.File = null;
 
         // Log
@@ -498,9 +498,9 @@ export class AppActions {
                         let web = Web(catalogUrl, { requestDigest });
 
                         // Retract the app
-                        this.retract(item, tenantFl, true, () => {
+                        this.retract(tenantFl, true, () => {
                             // Log
-                            ErrorDialog.logInfo(`Uploading the app '${item.Title}' with id ${item.AppProductID} to the catalog...`);
+                            ErrorDialog.logInfo(`Uploading the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} to the catalog...`);
 
                             // Update the dialog
                             LoadingDialog.setHeader("Uploading the Package");
@@ -511,7 +511,7 @@ export class AppActions {
                             (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog()).add(appFile.Name, true, content).execute(
                                 file => {
                                     // Log
-                                    ErrorDialog.logInfo(`The app '${item.Title}' with id ${item.AppProductID} was added to the catalog successfully...`);
+                                    ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was added to the catalog successfully...`);
 
                                     // Update the dialog
                                     LoadingDialog.setHeader("Deploying the Package");
@@ -521,30 +521,30 @@ export class AppActions {
                                     file.ListItemAllFields().execute(
                                         appItem => {
                                             // Update the metadata
-                                            this.updateAppMetadata(item, appItem.Id, tenantFl, catalogUrl, requestDigest).then(() => {
+                                            this.updateAppMetadata(appItem.Id, tenantFl, catalogUrl, requestDigest).then(() => {
                                                 // Get the app catalog
                                                 let web = Web(catalogUrl, { requestDigest });
                                                 let appCatalog = (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog());
 
                                                 // Log
-                                                ErrorDialog.logInfo(`Deploying the app '${item.Title}' with id ${item.AppProductID}...`);
+                                                ErrorDialog.logInfo(`Deploying the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID}...`);
 
                                                 // Deploy the app
-                                                appCatalog.AvailableApps(item.AppProductID).deploy(skipFeatureDeployment).execute(app => {
+                                                appCatalog.AvailableApps(DataSource.AppItem.AppProductID).deploy(skipFeatureDeployment).execute(app => {
                                                     // Log
-                                                    ErrorDialog.logInfo(`The app '${item.Title}' with id ${item.AppProductID} was deployed successfully...`);
+                                                    ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was deployed successfully...`);
 
                                                     // See if this is the tenant app
                                                     if (tenantFl) {
                                                         // Log
-                                                        ErrorDialog.logInfo(`Setting the app '${item.Title}' with id ${item.AppProductID} tenant deployed flag...`);
+                                                        ErrorDialog.logInfo(`Setting the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} tenant deployed flag...`);
 
                                                         // Update the tenant deployed flag
-                                                        item.update({
+                                                        DataSource.AppItem.update({
                                                             AppIsTenantDeployed: true
                                                         }).execute(() => {
                                                             // Log
-                                                            ErrorDialog.logInfo(`The app '${item.Title}' with id ${item.AppProductID} tenant deployed flag was set to true...`);
+                                                            ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} tenant deployed flag was set to true...`);
 
                                                             // Hide the dialog
                                                             LoadingDialog.hide();
@@ -631,7 +631,7 @@ export class AppActions {
     }
 
     // Deploys the app to a site collection app catalog
-    static deployAppToSite(item: IAppItem, siteUrl: string, updateSitesFl: boolean, onUpdate: () => void) {
+    static deployAppToSite(siteUrl: string, updateSitesFl: boolean, onUpdate: () => void) {
         let appFile: Types.SP.File = null;
 
         // Log
@@ -679,7 +679,7 @@ export class AppActions {
                         let requestDigest = context.GetContextWebInformation.FormDigestValue;
 
                         // Retract the app
-                        this.retract(item, false, true, () => {
+                        this.retract(false, true, () => {
                             // Log
                             ErrorDialog.logInfo(`Uploading the SPFx app package '${appFile.Name}' to the app catalog...`);
 
@@ -702,22 +702,22 @@ export class AppActions {
                                     file.ListItemAllFields().execute(
                                         appItem => {
                                             // Update the metadata
-                                            this.updateAppMetadata(item, appItem.Id, false, siteUrl, requestDigest).then(() => {
+                                            this.updateAppMetadata(appItem.Id, false, siteUrl, requestDigest).then(() => {
                                                 // Log
-                                                ErrorDialog.logInfo(`Deploying the SPFx app '${item.Title}' with id: ${item.AppProductID}`);
+                                                ErrorDialog.logInfo(`Deploying the SPFx app '${DataSource.AppItem.Title}' with id: ${DataSource.AppItem.AppProductID}`);
 
                                                 // Deploy the app
-                                                Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(item.AppProductID).deploy(item.AppSkipFeatureDeployment).execute(app => {
+                                                Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(DataSource.AppItem.AppProductID).deploy(DataSource.AppItem.AppSkipFeatureDeployment).execute(app => {
                                                     // Send the notification
-                                                    AppNotifications.sendAppDeployedEmail(item, context.GetContextWebInformation.WebFullUrl).then(() => {
+                                                    AppNotifications.sendAppDeployedEmail(DataSource.AppItem, context.GetContextWebInformation.WebFullUrl).then(() => {
                                                         // See if we are updating the metadata
                                                         if (updateSitesFl) {
                                                             // Append the url to the list of sites the solution has been deployed to
-                                                            let sites = (item.AppSiteDeployments || "").trim();
+                                                            let sites = (DataSource.AppItem.AppSiteDeployments || "").trim();
 
                                                             // Log
                                                             ErrorDialog.logInfo(`Updating the site deployments metadata...`);
-                                                            ErrorDialog.logInfo(`Current Value: ${item.AppProductID}`);
+                                                            ErrorDialog.logInfo(`Current Value: ${DataSource.AppItem.AppProductID}`);
 
                                                             // Ensure it doesn't contain the url already
                                                             if (sites.indexOf(context.GetContextWebInformation.WebFullUrl) < 0) {
@@ -729,7 +729,7 @@ export class AppActions {
                                                             ErrorDialog.logInfo(`New Value: ${sites}`);
 
                                                             // Update the metadata
-                                                            item.update({
+                                                            DataSource.AppItem.update({
                                                                 AppSiteDeployments: sites
                                                             }).execute(() => {
                                                                 // Log
@@ -790,18 +790,18 @@ export class AppActions {
     }
 
     // Deploys the solution to the app catalog
-    static deployToSite(item: IAppItem, siteUrl: string, onUpdate: () => void) {
+    static deployToSite(siteUrl: string, onUpdate: () => void) {
         // Deploy the app to the site
-        this.deployAppToSite(item, siteUrl, true, () => {
+        this.deployAppToSite(siteUrl, true, () => {
             // Call the update event
             onUpdate();
         });
     }
 
     // Deploys the solution to teams
-    static deployToTeams(item: IAppItem, onComplete: () => void) {
+    static deployToTeams(onComplete: () => void) {
         // Log
-        ErrorDialog.logInfo(`Deploying app '${item.Title}' with id ${item.AppProductID} to Teams...`);
+        ErrorDialog.logInfo(`Deploying app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} to Teams...`);
 
         // Show a loading dialog
         LoadingDialog.setHeader("Deploying to Teams");
@@ -816,14 +816,14 @@ export class AppActions {
             let requestDigest = context.GetContextWebInformation.FormDigestValue;
 
             // Log
-            ErrorDialog.logInfo(`Syncing app '${item.Title}' with id ${item.AppProductID} to Teams...`);
+            ErrorDialog.logInfo(`Syncing app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} to Teams...`);
 
             // Sync the app with Teams
-            Web(AppConfig.Configuration.tenantAppCatalogUrl, { requestDigest }).TenantAppCatalog().syncSolutionToTeams(item.Id).execute(
+            Web(AppConfig.Configuration.tenantAppCatalogUrl, { requestDigest }).TenantAppCatalog().syncSolutionToTeams(DataSource.AppItem.Id).execute(
                 // Success
                 () => {
                     // Log
-                    ErrorDialog.logInfo(`App '${item.Title}' with id ${item.AppProductID} was successfully synced to Teams...`);
+                    ErrorDialog.logInfo(`App '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was successfully synced to Teams...`);
 
                     // Hide the dialog
                     LoadingDialog.hide();
@@ -1039,7 +1039,7 @@ export class AppActions {
     }
 
     // Retracts the solution from the app catalog
-    static retract(item: IAppItem, tenantFl: boolean, removeFl: boolean, onUpdate: () => void) {
+    static retract(tenantFl: boolean, removeFl: boolean, onUpdate: () => void) {
         // Log
         ErrorDialog.logInfo(`Retracting the SPFx package...`);
 
@@ -1078,18 +1078,18 @@ export class AppActions {
                 ErrorDialog.logInfo(`Loading the SPFx apps in the catalog...`);
 
                 // Log
-                ErrorDialog.logInfo(`Retracting the app '${item.Title}' with id ${item.AppProductID} from the app catalog...`);
+                ErrorDialog.logInfo(`Retracting the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} from the app catalog...`);
 
                 // Load the apps
                 let web = Web(catalogUrl, { requestDigest: context.GetContextWebInformation.FormDigestValue });
-                (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog()).AvailableApps(item.AppProductID).retract().execute(() => {
+                (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog()).AvailableApps(DataSource.AppItem.AppProductID).retract().execute(() => {
                     // Log
-                    ErrorDialog.logInfo(`The app '${item.Title}' with id ${item.AppProductID} was retracted from the app catalog successfully...`);
+                    ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was retracted from the app catalog successfully...`);
 
                     // See if this is a tenant app
                     if (tenantFl) {
                         // Update the item
-                        item.update({
+                        DataSource.AppItem.update({
                             AppIsTenantDeployed: false
                         }).execute(() => {
                             // Log
@@ -1106,10 +1106,10 @@ export class AppActions {
                         ErrorDialog.logInfo(`Removing the SPFx app from the catalog...`);
 
                         // Remove the app
-                        (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog()).AvailableApps(item.AppProductID).remove().execute(
+                        (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog()).AvailableApps(DataSource.AppItem.AppProductID).remove().execute(
                             () => {
                                 // Log
-                                ErrorDialog.logInfo(`The app '${item.Title}' with id ${item.AppProductID} was removed from the app catalog successfully...`);
+                                ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was removed from the app catalog successfully...`);
 
                                 // Close the dialog
                                 LoadingDialog.hide();
@@ -1131,7 +1131,7 @@ export class AppActions {
                     }
                 }, () => {
                     // Log
-                    ErrorDialog.logInfo(`Error retracting the app '${item.Title} with id ${item.AppProductID} from the app catalog...`);
+                    ErrorDialog.logInfo(`Error retracting the app '${DataSource.AppItem.Title} with id ${DataSource.AppItem.AppProductID} from the app catalog...`);
 
                     // Close the dialog
                     LoadingDialog.hide();
@@ -1148,7 +1148,7 @@ export class AppActions {
     }
 
     // Runs the flow for the item
-    static runFlow(item: IAppItem, flowId: string) {
+    static runFlow(flowId: string) {
         // See if a flow exists
         if (flowId) {
             // Get the flow information
@@ -1189,10 +1189,10 @@ export class AppActions {
                                                 // See if it was successful
                                                 if (xhr.status >= 200 && xhr.status < 300) {
                                                     // Log
-                                                    ErrorDialog.logInfo(`Flow '${flowId} was triggered successfully for item '${item.Title}' with id '${item.Id}'.`);
+                                                    ErrorDialog.logInfo(`Flow '${flowId} was triggered successfully for item '${DataSource.AppItem.Title}' with id '${DataSource.AppItem.Id}'.`);
                                                 } else {
                                                     // Log
-                                                    ErrorDialog.logError(`Flow '${flowId} was triggered failed for item '${item.Title}' with id '${item.Id}'.`);
+                                                    ErrorDialog.logError(`Flow '${flowId} was triggered failed for item '${DataSource.AppItem.Title}' with id '${DataSource.AppItem.Id}'.`);
                                                     ErrorDialog.logError(`Flow '${flowId} failed: ${xhr.responseText}`);
                                                 }
                                             }
@@ -1211,13 +1211,13 @@ export class AppActions {
                                         xhr.send(JSON.stringify({
                                             rows: [{
                                                 entity: {
-                                                    ID: item.Id
+                                                    ID: DataSource.AppItem.Id
                                                 }
                                             }]
                                         }));
 
                                         // Log
-                                        ErrorDialog.logInfo(`Flow '${flowId} was triggered for item '${item.Title}' with id '${item.Id}'.`);
+                                        ErrorDialog.logInfo(`Flow '${flowId} was triggered for item '${DataSource.AppItem.Title}' with id '${DataSource.AppItem.Id}'.`);
                                     } else {
                                         // Log
                                         ErrorDialog.logError(`Error getting the flow token. ${xhrAuthTokens.responseText}`);
@@ -1251,7 +1251,7 @@ export class AppActions {
     }
 
     // Updates the app
-    static updateApp(item: IAppItem, siteUrl: string, isTestSite: boolean, onError: () => void): PromiseLike<void> {
+    static updateApp(siteUrl: string, isTestSite: boolean, onError: () => void): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve) => {
             // Log
@@ -1268,33 +1268,33 @@ export class AppActions {
                     LoadingDialog.show();
 
                     // Log
-                    ErrorDialog.logInfo(`Uninstalling the app '${item.Title}' with id ${item.AppProductID} from the app catalog...`);
+                    ErrorDialog.logInfo(`Uninstalling the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} from the app catalog...`);
 
                     // Uninstall the app
-                    Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(item.AppProductID).uninstall().execute(
+                    Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(DataSource.AppItem.AppProductID).uninstall().execute(
                         () => {
                             // Update the dialog
                             LoadingDialog.setHeader("Upgrading the Solution");
 
                             // Log
-                            ErrorDialog.logInfo(`Upgrading the app '${item.Title}' with id ${item.AppProductID}...`);
+                            ErrorDialog.logInfo(`Upgrading the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID}...`);
 
                             // Deploy the solution
-                            this.deploy(item, false, isTestSite ? false : item.AppSkipFeatureDeployment, onError, () => {
+                            this.deploy(false, isTestSite ? false : DataSource.AppItem.AppSkipFeatureDeployment, onError, () => {
                                 // Update the dialog
                                 LoadingDialog.setHeader("Upgrading the Solution");
 
                                 // Log
-                                ErrorDialog.logInfo(`The app '${item.Title}' with id ${item.AppProductID} was upgraded successfully...`);
+                                ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was upgraded successfully...`);
 
                                 // Log
                                 ErrorDialog.logInfo(`Getting the app from the catalog...`);
 
                                 // Get the app
-                                Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(item.AppProductID).execute(
+                                Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(DataSource.AppItem.AppProductID).execute(
                                     app => {
                                         // Log
-                                        ErrorDialog.logInfo(`The app '${item.Title}' with id ${item.AppProductID} was found in the app catalog...`);
+                                        ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was found in the app catalog...`);
 
                                         // See if the app is already installed
                                         if (app.SkipDeploymentFeature) {
@@ -1302,7 +1302,7 @@ export class AppActions {
                                             resolve();
                                         } else {
                                             // Log
-                                            ErrorDialog.logInfo(`Installing the app '${item.Title}' with id ${item.AppProductID}...`);
+                                            ErrorDialog.logInfo(`Installing the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID}...`);
 
                                             // Update the dialog
                                             LoadingDialog.setHeader("Installing the Solution");
@@ -1310,10 +1310,10 @@ export class AppActions {
                                             LoadingDialog.show();
 
                                             // Install the app
-                                            Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(item.AppProductID).install().execute(
+                                            Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(DataSource.AppItem.AppProductID).install().execute(
                                                 () => {
                                                     // Log
-                                                    ErrorDialog.logInfo(`The app '${item.Title}' with id ${item.AppProductID} was installed successfully...`);
+                                                    ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was installed successfully...`);
 
                                                     // Close the dialog
                                                     LoadingDialog.hide();
@@ -1350,7 +1350,7 @@ export class AppActions {
     }
 
     // Updates the app metadata
-    static updateAppMetadata(item: IAppItem, appItemId: number, tenantFl: boolean, catalogUrl: string, requestDigest: string): PromiseLike<void> {
+    static updateAppMetadata(appItemId: number, tenantFl: boolean, catalogUrl: string, requestDigest: string): PromiseLike<void> {
         // Return a promise
         return new Promise(resolve => {
             // Log
@@ -1369,17 +1369,17 @@ export class AppActions {
                     if (list) {
                         // Update the metadata
                         list.Items(appItemId).update({
-                            AppDescription: item.AppDescription,
-                            AppImageURL1: item.AppImageURL1 ? { Description: item.AppImageURL1.Description, Url: item.AppImageURL1.Url } : null,
-                            AppImageURL2: item.AppImageURL2 ? { Description: item.AppImageURL2.Description, Url: item.AppImageURL2.Url } : null,
-                            AppImageURL3: item.AppImageURL3 ? { Description: item.AppImageURL3.Description, Url: item.AppImageURL3.Url } : null,
-                            AppImageURL4: item.AppImageURL4 ? { Description: item.AppImageURL4.Description, Url: item.AppImageURL4.Url } : null,
-                            AppImageURL5: item.AppImageURL5 ? { Description: item.AppImageURL5.Description, Url: item.AppImageURL5.Url } : null,
-                            AppPublisher: item.AppPublisher,
-                            AppShortDescription: item.AppShortDescription,
-                            AppSupportURL: item.AppSupportURL ? { Description: item.AppSupportURL.Description, Url: item.AppSupportURL.Url } : null,
-                            AppThumbnailURL: item.AppThumbnailURL ? { Description: item.AppThumbnailURL.Description, Url: item.AppThumbnailURL.Url } : null,
-                            AppVideoURL: item.AppVideoURL ? { Description: item.AppVideoURL.Description, Url: item.AppVideoURL.Url } : null,
+                            AppDescription: DataSource.AppItem.AppDescription,
+                            AppImageURL1: DataSource.AppItem.AppImageURL1 ? { Description: DataSource.AppItem.AppImageURL1.Description, Url: DataSource.AppItem.AppImageURL1.Url } : null,
+                            AppImageURL2: DataSource.AppItem.AppImageURL2 ? { Description: DataSource.AppItem.AppImageURL2.Description, Url: DataSource.AppItem.AppImageURL2.Url } : null,
+                            AppImageURL3: DataSource.AppItem.AppImageURL3 ? { Description: DataSource.AppItem.AppImageURL3.Description, Url: DataSource.AppItem.AppImageURL3.Url } : null,
+                            AppImageURL4: DataSource.AppItem.AppImageURL4 ? { Description: DataSource.AppItem.AppImageURL4.Description, Url: DataSource.AppItem.AppImageURL4.Url } : null,
+                            AppImageURL5: DataSource.AppItem.AppImageURL5 ? { Description: DataSource.AppItem.AppImageURL5.Description, Url: DataSource.AppItem.AppImageURL5.Url } : null,
+                            AppPublisher: DataSource.AppItem.AppPublisher,
+                            AppShortDescription: DataSource.AppItem.AppShortDescription,
+                            AppSupportURL: DataSource.AppItem.AppSupportURL ? { Description: DataSource.AppItem.AppSupportURL.Description, Url: DataSource.AppItem.AppSupportURL.Url } : null,
+                            AppThumbnailURL: DataSource.AppItem.AppThumbnailURL ? { Description: DataSource.AppItem.AppThumbnailURL.Description, Url: DataSource.AppItem.AppThumbnailURL.Url } : null,
+                            AppVideoURL: DataSource.AppItem.AppVideoURL ? { Description: DataSource.AppItem.AppVideoURL.Description, Url: DataSource.AppItem.AppVideoURL.Url } : null,
                         }).execute(
                             () => {
                                 // Log
@@ -1807,7 +1807,7 @@ export class AppActions {
                             }
 
                             // Archive the package
-                            this.archivePackage(DataSource.AppItem, () => {
+                            this.archivePackage(() => {
                                 // Update the status
                                 updateStatus().then(() => {
                                     // Clear the client side assets
@@ -1819,7 +1819,7 @@ export class AppActions {
                                                 // See if there is a flow
                                                 if (AppConfig.Configuration.appFlows && AppConfig.Configuration.appFlows.upgradeApp) {
                                                     // Execute the flow
-                                                    AppActions.runFlow(DataSource.AppItem, AppConfig.Configuration.appFlows.upgradeApp);
+                                                    AppActions.runFlow(AppConfig.Configuration.appFlows.upgradeApp);
                                                 }
 
                                                 // Send the notifications

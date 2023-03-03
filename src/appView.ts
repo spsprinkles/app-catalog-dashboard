@@ -60,7 +60,7 @@ export class AppView {
     }
 
     // Refreshes the dashboard
-    private refresh(): PromiseLike<void> {
+    private refresh(itemId: number): PromiseLike<void> {
         // Return a promise
         return new Promise(resolve => {
             // Show a loading dialog
@@ -68,7 +68,7 @@ export class AppView {
             LoadingDialog.setBody("This will close after the data is loaded.");
 
             // Refresh the data source
-            DataSource.refresh().then(() => {
+            DataSource.refresh(itemId).then(() => {
                 // Clear the element
                 while (this._el.firstChild) { this._el.removeChild(this._el.firstChild); }
 
@@ -369,7 +369,7 @@ export class AppView {
                                                 // See if there is a flow
                                                 if (AppConfig.Configuration.appFlows && AppConfig.Configuration.appFlows.newApp) {
                                                     // Run the flow for this app
-                                                    AppActions.runFlow(item, AppConfig.Configuration.appFlows.newApp);
+                                                    AppActions.runFlow(AppConfig.Configuration.appFlows.newApp);
                                                 }
 
                                                 // Log
@@ -382,7 +382,7 @@ export class AppView {
                                                 }, item);
 
                                                 // Refresh the dashboard data
-                                                this.refresh().then(() => {
+                                                this.refresh(item.Id).then(() => {
                                                     // View the app details
                                                     this.viewAppDetails(item, true);
                                                 });

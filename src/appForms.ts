@@ -121,7 +121,7 @@ export class AppForms {
                                     LoadingDialog.hide();
 
                                     // Run the flow associated for this status
-                                    AppActions.runFlow(item, status.flowId);
+                                    AppActions.runFlow(status.flowId);
 
                                     // Send the notifications
                                     AppNotifications.sendEmail(status.notification, item).then(() => {
@@ -137,7 +137,7 @@ export class AppForms {
                                                         onUpdate();
                                                     } else {
                                                         // Update the app
-                                                        AppActions.updateApp(item, web.ServerRelativeUrl, true, onUpdate).then(() => {
+                                                        AppActions.updateApp(web.ServerRelativeUrl, true, onUpdate).then(() => {
                                                             // Call the update event
                                                             onUpdate();
                                                         });
@@ -147,7 +147,7 @@ export class AppForms {
                                                 // Doesn't exist
                                                 () => {
                                                     // Create the test site
-                                                    AppActions.createTestSite(item, onUpdate);
+                                                    AppActions.createTestSite(onUpdate);
                                                 }
                                             );
                                         } else {
@@ -189,7 +189,7 @@ export class AppForms {
                 // Code to run after the logic below completes
                 let onComplete = () => {
                     // Create the test site
-                    AppActions.createTestSite(item, (web) => {
+                    AppActions.createTestSite(web => {
                         // Log
                         DataSource.logItem({
                             LogUserId: ContextInfo.userId,
@@ -244,11 +244,11 @@ export class AppForms {
                 LoadingDialog.show();
 
                 // Retract the solution from the site collection app catalog
-                AppActions.retract(item, false, true, () => {
+                AppActions.retract(false, true, () => {
                     // Retract the solution from the tenant app catalog
-                    AppActions.retract(item, true, true, () => {
+                    AppActions.retract(true, true, () => {
                         // Delete the test site
-                        AppActions.deleteTestSite(item).then(() => {
+                        AppActions.deleteTestSite().then(() => {
                             // Update the loading dialog
                             LoadingDialog.setHeader("Removing Assessments");
                             LoadingDialog.setBody("Removing the assessments associated with this app.");
@@ -333,7 +333,7 @@ export class AppForms {
                 Modal.hide();
 
                 // Delete the test site
-                AppActions.deleteTestSite(item).then(() => {
+                AppActions.deleteTestSite().then(() => {
                     // Log
                     DataSource.logItem({
                         LogUserId: ContextInfo.userId,
@@ -399,11 +399,11 @@ export class AppForms {
                 let skipFeatureDeployment = form ? form.getValues()["SkipFeatureDeployment"] : false;
 
                 // Deploy the app
-                AppActions.deploy(item, tenantFl, skipFeatureDeployment, onUpdate, () => {
+                AppActions.deploy(tenantFl, skipFeatureDeployment, onUpdate, () => {
                     // See if there is a flow
                     if (AppConfig.Configuration.appFlows && AppConfig.Configuration.appFlows.deployToTenant) {
                         // Execute the flow
-                        AppActions.runFlow(item, AppConfig.Configuration.appFlows.deployToTenant);
+                        AppActions.runFlow(AppConfig.Configuration.appFlows.deployToTenant);
                     }
 
                     // Log
@@ -594,11 +594,11 @@ export class AppForms {
 
                             // Deploy the app
                             let siteUrl = form.getValues()["Url"];
-                            AppActions.deployToSite(item, siteUrl, () => {
+                            AppActions.deployToSite(siteUrl, () => {
                                 // See if there is a flow
                                 if (AppConfig.Configuration.appFlows && AppConfig.Configuration.appFlows.deployToSiteCollection) {
                                     // Execute the flow
-                                    AppActions.runFlow(item, AppConfig.Configuration.appFlows.deployToSiteCollection);
+                                    AppActions.runFlow(AppConfig.Configuration.appFlows.deployToSiteCollection);
                                 }
 
                                 // Log
@@ -653,11 +653,11 @@ export class AppForms {
                 Modal.hide();
 
                 // Deploy the app
-                AppActions.deployToTeams(item, () => {
+                AppActions.deployToTeams(() => {
                     // See if there is a flow
                     if (AppConfig.Configuration.appFlows && AppConfig.Configuration.appFlows.deployToTeams) {
                         // Execute the flow
-                        AppActions.runFlow(item, AppConfig.Configuration.appFlows.deployToTeams);
+                        AppActions.runFlow(AppConfig.Configuration.appFlows.deployToTeams);
                     }
 
                     // Call the update event
@@ -1788,7 +1788,7 @@ export class AppForms {
                 Modal.hide();
 
                 // Retract the app
-                AppActions.retract(item, true, true, () => {
+                AppActions.retract(true, true, () => {
                     // Log
                     DataSource.logItem({
                         LogUserId: ContextInfo.userId,
@@ -1825,7 +1825,7 @@ export class AppForms {
                 Modal.hide();
 
                 // Retract the app
-                AppActions.retract(item, true, false, () => {
+                AppActions.retract(true, false, () => {
                     // Log
                     DataSource.logItem({
                         LogUserId: ContextInfo.userId,
@@ -2056,7 +2056,7 @@ export class AppForms {
                                     }, { ...item, ...values });
 
                                     // Run the flow associated for this status
-                                    AppActions.runFlow(item, status.flowId);
+                                    AppActions.runFlow(status.flowId);
 
                                     // Send the notifications
                                     AppNotifications.sendEmail(status.notification, item, false).then(() => {
@@ -2114,7 +2114,7 @@ export class AppForms {
                 Modal.hide();
 
                 // Update the app
-                AppActions.updateApp(item, siteUrl, true, onUpdate).then(() => {
+                AppActions.updateApp(siteUrl, true, onUpdate).then(() => {
                     // Send the notifications
                     AppNotifications.sendAppTestSiteUpgradedEmail(DataSource.AppItem).then(() => {
                         // Call the update event
@@ -2236,7 +2236,7 @@ export class AppForms {
                             // Return a promise
                             return new Promise(resolve => {
                                 // Upgrade the app
-                                AppActions.updateApp(appItem, item.data, false, () => { resolve(null); }).then(() => {
+                                AppActions.updateApp(item.data, false, () => { resolve(null); }).then(() => {
                                     // Update the loading dialog
                                     LoadingDialog.setHeader("Upgrading Apps");
                                     LoadingDialog.setBody("Upgrading " + (++counter) + " of " + items.length);
