@@ -46,6 +46,9 @@ export class UserAgreement {
                 text: "Agree",
                 type: Components.ButtonTypes.OutlinePrimary,
                 onClick: () => {
+                    // Close the dialog
+                    Modal.hide();
+
                     // See if the user is already in the developer's group
                     if (AppSecurity.AppWeb.isInGroup(Strings.Groups.Developers)) {
                         // Call the event

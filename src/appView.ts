@@ -60,23 +60,13 @@ export class AppView {
     }
 
     // Refreshes the dashboard
-    private refresh(): PromiseLike<void> {
+    private refresh(itemId: number): PromiseLike<void> {
         // Return a promise
         return new Promise(resolve => {
-            // Show a loading dialog
-            LoadingDialog.setHeader("Refreshing the Data");
-            LoadingDialog.setBody("This will close after the data is loaded.");
-
             // Refresh the data source
-            DataSource.refresh().then(() => {
+            DataSource.refresh(itemId).then(() => {
                 // Clear the element
                 while (this._el.firstChild) { this._el.removeChild(this._el.firstChild); }
-
-                // Render the dashboard
-                this.render();
-
-                // Hide the dialog
-                LoadingDialog.hide();
 
                 // Resolve the request
                 resolve();
@@ -369,7 +359,7 @@ export class AppView {
                                                 // See if there is a flow
                                                 if (AppConfig.Configuration.appFlows && AppConfig.Configuration.appFlows.newApp) {
                                                     // Run the flow for this app
-                                                    AppActions.runFlow(item, AppConfig.Configuration.appFlows.newApp);
+                                                    AppActions.runFlow(AppConfig.Configuration.appFlows.newApp);
                                                 }
 
                                                 // Log
@@ -381,11 +371,8 @@ export class AppView {
                                                     LogComment: `A new app ${item.Title} was added.`
                                                 }, item);
 
-                                                // Refresh the dashboard data
-                                                this.refresh().then(() => {
-                                                    // View the app details
-                                                    this.viewAppDetails(item, true);
-                                                });
+                                                // View the app details
+                                                this.viewAppDetails(item.Id, true);
                                             });
                                         });
                                     }
@@ -598,7 +585,7 @@ export class AppView {
                                     type: Components.ButtonTypes.OutlinePrimary,
                                     onClick: () => {
                                         // View the app details
-                                        this.viewAppDetails(item);
+                                        this.viewAppDetails(item.Id);
                                     }
                                 }
                             });
@@ -634,38 +621,44 @@ export class AppView {
     }
 
     // Method to view the app details
-    private viewAppDetails(item: IAppItem, showEditForm: boolean = false) {
+    private viewAppDetails(itemId: number, showEditForm: boolean = false) {
         // Show a loading dialog
-        LoadingDialog.setHeader("Loading Application Information");
-        LoadingDialog.setBody("This will close after the data is loaded...");
+        LoadingDialog.setHeader("Refreshing the Data");
+        LoadingDialog.setBody("This will close after the data is loaded.");
         LoadingDialog.show();
 
-        // Load the app dashboard
-        DataSource.loadAppDashboard(item.Id).then(() => {
-            // Clear the details
-            while (this._elAppDetails.firstChild) { this._elAppDetails.removeChild(this._elAppDetails.firstChild); }
+        // Refresh the data
+        this.refresh(itemId).then(() => {
+            // Show a loading dialog
+            LoadingDialog.setHeader("Loading Application Information");
+            LoadingDialog.setBody("This will close after the data is loaded...");
 
-            // Set the body
-            new AppDashboard(this._elAppDetails, this._el, item.Id);
+            // Load the app dashboard
+            DataSource.loadAppDashboard(itemId).then(() => {
+                // Clear the details
+                while (this._elAppDetails.firstChild) { this._elAppDetails.removeChild(this._elAppDetails.firstChild); }
 
-            // Hide the apps
-            this._el.classList.add("d-none");
+                // Set the body
+                new AppDashboard(this._elAppDetails, this._el, itemId);
 
-            // Show the details
-            this._elAppDetails.classList.remove("d-none");
+                // Hide the apps
+                this._el.classList.add("d-none");
 
-            // Hide the loading dialog
-            LoadingDialog.hide();
+                // Show the details
+                this._elAppDetails.classList.remove("d-none");
 
-            // See if we are showing the edit form
-            if (showEditForm) {
-                // Display the edit form
-                this._forms.edit(item.Id, () => {
-                    // Refresh the dashboard
-                    this.viewAppDetails(item);
-                });
+                // Hide the loading dialog
+                LoadingDialog.hide();
 
-            }
+                // See if we are showing the edit form
+                if (showEditForm) {
+                    // Display the edit form
+                    this._forms.edit(itemId, () => {
+                        // Refresh the app details
+                        this.viewAppDetails(itemId);
+                    });
+                }
+            });
         });
     }
 }
