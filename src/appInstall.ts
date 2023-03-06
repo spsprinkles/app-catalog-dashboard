@@ -35,7 +35,7 @@ export class AppInstall {
     // Sees if an install is required and displays a dialog
     static InstallRequired(el: HTMLElement, showFl: boolean = false) {
         // See if an install is required
-        InstallationRequired.requiresInstall(DataSource.AuditLog.Configuration).then(installAuditLogFl => {
+        InstallationRequired.requiresInstall({ cfg: DataSource.AuditLog.Configuration }).then(installAuditLogFl => {
             let errors: Components.IListGroupItem[] = [];
 
             // See if the audit log exists
@@ -47,7 +47,7 @@ export class AppInstall {
             }
 
             // See if the audit log exists
-            InstallationRequired.requiresInstall(Configuration).then(installFl => {
+            InstallationRequired.requiresInstall({ cfg: Configuration }).then(installFl => {
                 // Ensure the document set feature is enabled
                 this.docSetEnabled().then(featureEnabledFl => {
                     // See if the feature is enabled
