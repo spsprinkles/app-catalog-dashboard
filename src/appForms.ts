@@ -1172,7 +1172,7 @@ export class AppForms {
                 // Create the item
                 DataSource.AppAssessments.createItem({
                     RelatedAppId: item.Id,
-                    Title: item.Title + " Review " + (new Date(Date.now()).toDateString())
+                    Title: "Technical Review: " + item.Title
                 }).then(
                     item => {
                         // Show the assessment form
@@ -1309,7 +1309,7 @@ export class AppForms {
                     DataSource.AppAssessments.createItem({
                         ContentTypeId: ct ? ct.StringId : null,
                         RelatedAppId: item.Id,
-                        Title: item.Title + " Tests " + (new Date(Date.now()).toDateString())
+                        Title: "Test Cases: " + item.Title
                     }).then(
                         item => {
                             // Show the assessment form
