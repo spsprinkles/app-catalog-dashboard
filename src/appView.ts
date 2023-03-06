@@ -85,42 +85,42 @@ export class AppView {
             // Set the admin buttons
             navLinks.push({
                 className: "btn-outline-light ms-2 ps-2 pt-1",
-                text: "Manage App",
+                text: "Settings",
                 iconClassName: "me-1",
                 iconSize: 24,
                 iconType: gearWideConnected,
                 isButton: true,
                 items: [
                     {
-                        text: "Manage App Configuration",
+                        text: "App Configuration",
                         onClick: () => {
                             // Show the install modal
                             AppInstall.InstallRequired(null, true);
                         }
                     },
                     {
-                        text: "Manage Approver Group",
+                        text: "Local Approver Group",
                         onClick: () => {
                             // Show the group in a new tab
                             window.open(AppSecurity.AppWeb.getUrlForGroup(Strings.Groups.Approvers), "_blank");
                         }
                     },
                     {
-                        text: "Manage Developer Group",
+                        text: "Local Developer Group",
                         onClick: () => {
                             // Show the group in a new tab
                             window.open(AppSecurity.AppWeb.getUrlForGroup(Strings.Groups.Developers), "_blank");
                         }
                     },
                     {
-                        text: "Manage Final Approver Group",
+                        text: "Local Final Approver Group",
                         onClick: () => {
                             // Show the group in a new tab
                             window.open(AppSecurity.AppWeb.getUrlForGroup(Strings.Groups.FinalApprovers), "_blank");
                         }
                     },
                     {
-                        text: "Manage Sponsor Group",
+                        text: "Local Sponsor Group",
                         onClick: () => {
                             // Show the group in a new tab
                             window.open(AppSecurity.AppWeb.getUrlForGroup(Strings.Groups.Sponsors), "_blank");
@@ -130,54 +130,46 @@ export class AppView {
                         text: "Manage Audit Log",
                         onClick: () => {
                             // Show the audit log list
-                            window.open(DataSource.AuditLog.List.ListUrl);
+                            window.open(DataSource.AuditLog.List.ListUrl), "_blank";
                         }
                     }
                 ]
             });
-        }
+            
+            if (!isSameWeb) {
+                // Add the links to manage remote groups
+                navLinks[0].items.push({
+                    text: "Remote Approver Group",
+                    onClick: () => {
+                        // Show the group in a new tab
+                        window.open(AppSecurity.AppCatalogWeb.getUrlForGroup(Strings.Groups.Approvers), "_blank");
+                    }
+                });
 
-        // See if this is the app catalog owner
-        if (!isSameWeb && (AppSecurity.AppCatalogWeb.IsAdmin || AppSecurity.AppCatalogWeb.IsOwner)) {
-            // Set the app catalog buttons
-            navLinks.push({
-                className: "btn-outline-light ms-2 ps-2 pt-1",
-                text: "Manage App Catalog",
-                iconClassName: "me-1",
-                iconSize: 24,
-                iconType: gearWideConnected,
-                isButton: true,
-                items: [
-                    {
-                        text: "Manage Approver Group",
-                        onClick: () => {
-                            // Show the group in a new tab
-                            window.open(AppSecurity.AppCatalogWeb.getUrlForGroup(Strings.Groups.Approvers), "_blank");
-                        }
-                    },
-                    {
-                        text: "Manage Developer Group",
-                        onClick: () => {
-                            // Show the group in a new tab
-                            window.open(AppSecurity.AppCatalogWeb.getUrlForGroup(Strings.Groups.Developers), "_blank");
-                        }
-                    },
-                    {
-                        text: "Manage Final Approver Group",
-                        onClick: () => {
-                            // Show the group in a new tab
-                            window.open(AppSecurity.AppCatalogWeb.getUrlForGroup(Strings.Groups.FinalApprovers), "_blank");
-                        }
-                    },
-                    {
-                        text: "Manage Sponsor Group",
-                        onClick: () => {
-                            // Show the group in a new tab
-                            window.open(AppSecurity.AppCatalogWeb.getUrlForGroup(Strings.Groups.Sponsors), "_blank");
-                        }
+                navLinks[0].items.push({
+                    text: "Remote Developer Group",
+                    onClick: () => {
+                        // Show the group in a new tab
+                        window.open(AppSecurity.AppCatalogWeb.getUrlForGroup(Strings.Groups.Developers), "_blank");
                     }
-                ]
-            });
+                });
+
+                navLinks[0].items.push({
+                    text: "Remote Final Approver Group",
+                    onClick: () => {
+                        // Show the group in a new tab
+                        window.open(AppSecurity.AppCatalogWeb.getUrlForGroup(Strings.Groups.FinalApprovers), "_blank");
+                    }
+                });
+
+                navLinks[0].items.push({
+                    text: "Remote Sponsor Group",
+                    onClick: () => {
+                        // Show the group in a new tab
+                        window.open(AppSecurity.AppCatalogWeb.getUrlForGroup(Strings.Groups.Sponsors), "_blank");
+                    }
+                });
+            }
         }
 
         // See if this is a developer/sponsor/owner
@@ -221,6 +213,14 @@ export class AppView {
             filters: {
                 items: [
                     {
+                        header: "App Status",
+                        items: DataSource.StatusFilters,
+                        onFilter: (value: string) => {
+                            // Filter the dashboard
+                            this._dashboard.filter(3, value);
+                        },
+                    },
+                    {
                         header: "App Deployment",
                         items: [
                             {
@@ -236,16 +236,8 @@ export class AppView {
                             // Filter the dashboard
                             this._dashboard.filter(4, value);
                         },
-                    },
-                    {
-                        header: "App Status",
-                        items: DataSource.StatusFilters,
-                        onFilter: (value: string) => {
-                            // Filter the dashboard
-                            this._dashboard.filter(3, value);
-                        },
-                    },
-                ],
+                    }
+                ]
             },
             navigation: {
                 itemsEnd: navLinks,
