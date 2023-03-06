@@ -16,11 +16,11 @@ export class AppNotifications {
         switch (key) {
             // Approver's Group
             case "ApproversGroup":
-                return AppSecurity.ApproverEmails;
+                return AppSecurity.AppWeb.getEmailsForGroup(Strings.Groups.Approvers);
 
             // Developer's Group
             case "DevelopersGroup":
-                return AppSecurity.DeveloperEmails;
+                return AppSecurity.AppWeb.getEmailsForGroup(Strings.Groups.Developers);
 
             // Developers
             case "Developers":
@@ -36,10 +36,10 @@ export class AppNotifications {
                 // Return the emails
                 return emails;
 
-            // Helpdesk Group
-            case "HelpdeskGroup":
+            // Helpdesk
+            case "Helpdesk":
                 // Return the email
-                return AppSecurity.HelpdeskGroup ? AppSecurity.HelpdeskEmails : [];
+                return AppConfig.Configuration.helpdesk ? [AppConfig.Configuration.helpdesk] : [];
 
             // Sponsor
             case "Sponsor":
@@ -64,7 +64,7 @@ export class AppNotifications {
             else if (key.indexOf("CurrentUser") == 0) {
                 // Get the sub-keys and update the value
                 let keys = key.split('.');
-                value = AppSecurity.CurrentUser;
+                value = AppSecurity.AppWeb.CurrentUser;
 
                 // Parse the properties of complex fields
                 for (let j = 1; j < keys.length; j++) {
@@ -99,7 +99,7 @@ export class AppNotifications {
             // See if it's the current user
             case "CurrentUser":
                 // Default to the user name
-                value = AppSecurity.CurrentUser.Title;
+                value = AppSecurity.AppWeb.CurrentUser.Title;
                 break;
 
             // Url to the site the app was deployed to

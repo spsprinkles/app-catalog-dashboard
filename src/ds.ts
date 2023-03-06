@@ -17,6 +17,7 @@ export interface IAppItem extends Types.SP.ListItem {
     AppIsTenant: boolean;
     AppIsTenantDeployed: boolean;
     AppJustification: string;
+    AppManifest: string;
     AppPermissionsJustification: string;
     AppProductID: string;
     AppPublisher: string;
@@ -390,10 +391,7 @@ export class DataSource {
                 // Load the configuration
                 AppConfig.loadConfiguration(appConfiguration).then(() => {
                     // Load the security information
-                    AppSecurity.init(
-                        AppConfig.Configuration.appCatalogUrl,
-                        AppConfig.Configuration.tenantAppCatalogUrl
-                    ).then(() => {
+                    AppSecurity.init().then(() => {
                         // Wait for the components to initialize
                         Promise.all([
                             // Initialize the app assessments
@@ -626,23 +624,23 @@ export class DataSource {
     }
 
     // Method to refresh the data source
-    static refresh(itemId?: number): PromiseLike<void> {
+    static refresh(itemId?: number): PromiseLike<any> {
         // Return a promise
         return new Promise((resolve, reject) => {
-            // Load all the items
-            this.DocSetList.refresh().then(() => {
-                // See if we need to refresh a specific app
-                if (itemId > 0) {
+            // See if we need to refresh a specific app
+            if (itemId > 0) {
+                // Load all the items
+                this.DocSetList.refreshItem(itemId).then(item => {
                     // Load the app dashboard
                     this.loadAppDashboard(itemId).then(() => {
-                        // Resolve the request
-                        resolve();
+                        // Resolve the promise
+                        resolve(item);
                     }, reject);
-                } else {
-                    // Resolve the request
-                    resolve();
-                }
-            }, reject);
+                }, reject);
+            } else {
+                // Load all the items
+                this.DocSetList.refresh().then(resolve, reject);
+            }
         });
     }
 

@@ -35,7 +35,8 @@ const AppPackageFields = [
     "AppProductID",
     "AppSharePointMinVersion",
     "AppSkipFeatureDeployment",
-    "AppVersion"
+    "AppVersion",
+    "AppManifest"
 ];
 
 // Define the app store properties
@@ -120,7 +121,7 @@ export class AppForms {
                                     LoadingDialog.hide();
 
                                     // Run the flow associated for this status
-                                    AppActions.runFlow(item, status.flowId);
+                                    AppActions.runFlow(status.flowId);
 
                                     // Send the notifications
                                     AppNotifications.sendEmail(status.notification, item).then(() => {
@@ -136,7 +137,7 @@ export class AppForms {
                                                         onUpdate();
                                                     } else {
                                                         // Update the app
-                                                        AppActions.updateApp(item, web.ServerRelativeUrl, true, onUpdate).then(() => {
+                                                        AppActions.updateApp(web.ServerRelativeUrl, true, onUpdate).then(() => {
                                                             // Call the update event
                                                             onUpdate();
                                                         });
@@ -146,7 +147,7 @@ export class AppForms {
                                                 // Doesn't exist
                                                 () => {
                                                     // Create the test site
-                                                    AppActions.createTestSite(item, onUpdate);
+                                                    AppActions.createTestSite(onUpdate);
                                                 }
                                             );
                                         } else {
@@ -170,17 +171,18 @@ export class AppForms {
     }
 
     // Creates the test site for the application
-    createTestSite(item: IAppItem, onUpdate: () => void) {
+    createTestSite(errorMessage: string, onUpdate: () => void) {
         // Set the header
-        Modal.setHeader("Create Test Site");
+        Modal.setHeader(errorMessage ? "App Error" : "Create Test Site");
 
         // Set the body
-        Modal.setBody("Are you sure you want to create the test site for this application?");
+        Modal.setBody(errorMessage || "Are you sure you want to create the test site for this application?");
 
         // Render the footer
         Modal.setFooter(Components.Button({
             text: "Create Site",
             type: Components.ButtonTypes.OutlineSuccess,
+            isDisabled: errorMessage ? true : false,
             onClick: () => {
                 // Close the modal
                 Modal.hide();
@@ -188,15 +190,15 @@ export class AppForms {
                 // Code to run after the logic below completes
                 let onComplete = () => {
                     // Create the test site
-                    AppActions.createTestSite(item, (web) => {
+                    AppActions.createTestSite(web => {
                         // Log
                         DataSource.logItem({
                             LogUserId: ContextInfo.userId,
-                            ParentId: item.AppProductID,
+                            ParentId: DataSource.AppItem.AppProductID,
                             ParentListName: Strings.Lists.Apps,
                             Title: DataSource.AuditLogStates.CreateTestSite,
-                            LogComment: `The app ${item.Title} test site was created successfully at: ${web.ServerRelativeUrl}`
-                        }, item);
+                            LogComment: `The app ${DataSource.AppItem.Title} test site was created successfully at: ${web.ServerRelativeUrl}`
+                        }, DataSource.AppItem);
 
                         // Call the update event
                         onUpdate();
@@ -222,7 +224,7 @@ export class AppForms {
     }
 
     // Delete form
-    delete(item: IAppItem, onUpdate: () => void) {
+    delete(onUpdate: () => void) {
         // Set the header
         Modal.setHeader("Delete App/Solution Package");
 
@@ -243,34 +245,34 @@ export class AppForms {
                 LoadingDialog.show();
 
                 // Retract the solution from the site collection app catalog
-                AppActions.retract(item, false, true, () => {
+                AppActions.retract(false, true, () => {
                     // Retract the solution from the tenant app catalog
-                    AppActions.retract(item, true, true, () => {
+                    AppActions.retract(true, true, () => {
                         // Delete the test site
-                        AppActions.deleteTestSite(item).then(() => {
+                        AppActions.deleteTestSite().then(() => {
                             // Update the loading dialog
                             LoadingDialog.setHeader("Removing Assessments");
                             LoadingDialog.setBody("Removing the assessments associated with this app.");
 
                             // Delete the assessments w/ this app
-                            this.deleteAssessments(item).then(() => {
+                            this.deleteAssessments(DataSource.AppItem.Id).then(() => {
                                 // Update the loading dialog
                                 LoadingDialog.setHeader("Deleting the App Request");
                                 LoadingDialog.setBody("This dialog will close after the app request is deleted.");
 
                                 // Delete this folder
-                                item.delete().execute(() => {
+                                DataSource.AppItem.delete().execute(() => {
                                     // Close the dialog
                                     LoadingDialog.hide();
 
                                     // Log
                                     DataSource.logItem({
                                         LogUserId: ContextInfo.userId,
-                                        ParentId: item.AppProductID,
+                                        ParentId: DataSource.AppItem.AppProductID,
                                         ParentListName: Strings.Lists.Apps,
                                         Title: DataSource.AuditLogStates.DeleteApp,
-                                        LogComment: `The app ${item.Title} was deleted.`
-                                    }, item);
+                                        LogComment: `The app ${DataSource.AppItem.Title} was deleted.`
+                                    }, DataSource.AppItem);
 
                                     // Execute the update event
                                     onUpdate();
@@ -287,12 +289,12 @@ export class AppForms {
     }
 
     // Method to delete the assessments associated with the app
-    private deleteAssessments(item: IAppItem): PromiseLike<void> {
+    private deleteAssessments(itemId: number): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve, reject) => {
             // Get the assoicated item
             List(Strings.Lists.Assessments).Items().query({
-                Filter: "RelatedAppId eq " + item.Id
+                Filter: "RelatedAppId eq " + itemId
             }).execute(
                 items => {
                     // Parse the items
@@ -332,7 +334,7 @@ export class AppForms {
                 Modal.hide();
 
                 // Delete the test site
-                AppActions.deleteTestSite(item).then(() => {
+                AppActions.deleteTestSite().then(() => {
                     // Log
                     DataSource.logItem({
                         LogUserId: ContextInfo.userId,
@@ -398,11 +400,11 @@ export class AppForms {
                 let skipFeatureDeployment = form ? form.getValues()["SkipFeatureDeployment"] : false;
 
                 // Deploy the app
-                AppActions.deploy(item, tenantFl, skipFeatureDeployment, onUpdate, () => {
+                AppActions.deploy(tenantFl, skipFeatureDeployment, onUpdate, () => {
                     // See if there is a flow
                     if (AppConfig.Configuration.appFlows && AppConfig.Configuration.appFlows.deployToTenant) {
                         // Execute the flow
-                        AppActions.runFlow(item, AppConfig.Configuration.appFlows.deployToTenant);
+                        AppActions.runFlow(AppConfig.Configuration.appFlows.deployToTenant);
                     }
 
                     // Log
@@ -593,11 +595,11 @@ export class AppForms {
 
                             // Deploy the app
                             let siteUrl = form.getValues()["Url"];
-                            AppActions.deployToSite(item, siteUrl, () => {
+                            AppActions.deployToSite(siteUrl, () => {
                                 // See if there is a flow
                                 if (AppConfig.Configuration.appFlows && AppConfig.Configuration.appFlows.deployToSiteCollection) {
                                     // Execute the flow
-                                    AppActions.runFlow(item, AppConfig.Configuration.appFlows.deployToSiteCollection);
+                                    AppActions.runFlow(AppConfig.Configuration.appFlows.deployToSiteCollection);
                                 }
 
                                 // Log
@@ -652,11 +654,11 @@ export class AppForms {
                 Modal.hide();
 
                 // Deploy the app
-                AppActions.deployToTeams(item, () => {
+                AppActions.deployToTeams(() => {
                     // See if there is a flow
                     if (AppConfig.Configuration.appFlows && AppConfig.Configuration.appFlows.deployToTeams) {
                         // Execute the flow
-                        AppActions.runFlow(item, AppConfig.Configuration.appFlows.deployToTeams);
+                        AppActions.runFlow(AppConfig.Configuration.appFlows.deployToTeams);
                     }
 
                     // Call the update event
@@ -860,6 +862,25 @@ export class AppForms {
                         }
                     }
 
+                    // See if this is the teams field
+                    if (field.InternalName == "AppIsTeams") {
+                        // Disable it by default
+                        ctrl.isDisabled = true;
+
+                        try {
+                            // Get the manifest information
+                            let manifest = JSON.parse(DataSource.AppItem.AppManifest);
+                            if (manifest) {
+                                // See if the app supports teams
+                                if (manifest.supportedHosts.indexOf("TeamsTab") >= 0 ||
+                                    manifest.supportedHosts.indexOf("TeamsPersonalApp") >= 0) {
+                                    // Enable the control
+                                    ctrl.isDisabled = false;
+                                }
+                            }
+                        } catch { }
+                    }
+
                     // See if this is a url field
                     if (field.InternalName.indexOf("URL") > 0 || field.InternalName == "AppSourceControl") {
                         // Hide the description field
@@ -1010,13 +1031,13 @@ export class AppForms {
                     ErrorDialog.logInfo(`Validating the app sponsor id: '${item.AppSponsorId}'`);
 
                     // Get the sponsor
-                    let sponsor = AppSecurity.getSponsor(item.AppSponsorId);
+                    let sponsor = AppSecurity.AppWeb.getUserForGroup(Strings.Groups.Sponsors, item.AppSponsorId);
                     if (sponsor == null && item.AppSponsorId > 0) {
                         // Log
                         ErrorDialog.logInfo(`App sponsor not in group. Adding the user...`);
 
                         // Add the sponsor to the group
-                        AppSecurity.addSponsor(item.AppSponsorId).then(() => {
+                        AppSecurity.AppWeb.addUserToGroup(Strings.Groups.Sponsors, item.AppSponsorId).then(() => {
                             // Get the status
                             let status = AppConfig.Status[item.AppStatus];
 
@@ -1764,7 +1785,7 @@ export class AppForms {
                 Modal.hide();
 
                 // Retract the app
-                AppActions.retract(item, true, true, () => {
+                AppActions.retract(true, true, () => {
                     // Log
                     DataSource.logItem({
                         LogUserId: ContextInfo.userId,
@@ -1801,7 +1822,7 @@ export class AppForms {
                 Modal.hide();
 
                 // Retract the app
-                AppActions.retract(item, true, false, () => {
+                AppActions.retract(true, false, () => {
                     // Log
                     DataSource.logItem({
                         LogUserId: ContextInfo.userId,
@@ -2032,7 +2053,7 @@ export class AppForms {
                                     }, { ...item, ...values });
 
                                     // Run the flow associated for this status
-                                    AppActions.runFlow(item, status.flowId);
+                                    AppActions.runFlow(status.flowId);
 
                                     // Send the notifications
                                     AppNotifications.sendEmail(status.notification, item, false).then(() => {
@@ -2048,13 +2069,13 @@ export class AppForms {
                                 ErrorDialog.logInfo(`Validating the app sponsor id: '${item.AppSponsorId}'`);
 
                                 // Get the sponsor
-                                let sponsor = AppSecurity.getSponsor(item.AppSponsorId);
+                                let sponsor = AppSecurity.AppWeb.getUserForGroup(Strings.Groups.Sponsors, item.AppSponsorId);
                                 if (sponsor == null && item.AppSponsorId > 0) {
                                     // Log
                                     ErrorDialog.logInfo(`App sponsor not in group. Adding the user...`);
 
                                     // Add the sponsor to the group
-                                    AppSecurity.addSponsor(item.AppSponsorId).then(() => {
+                                    AppSecurity.AppWeb.addUserToGroup(Strings.Groups.Sponsors, item.AppSponsorId).then(() => {
                                         // Complete the request
                                         onComplete();
                                     });
@@ -2090,7 +2111,7 @@ export class AppForms {
                 Modal.hide();
 
                 // Update the app
-                AppActions.updateApp(item, siteUrl, true, onUpdate).then(() => {
+                AppActions.updateApp(siteUrl, true, onUpdate).then(() => {
                     // Send the notifications
                     AppNotifications.sendAppTestSiteUpgradedEmail(DataSource.AppItem).then(() => {
                         // Call the update event
@@ -2212,7 +2233,7 @@ export class AppForms {
                             // Return a promise
                             return new Promise(resolve => {
                                 // Upgrade the app
-                                AppActions.updateApp(appItem, item.data, false, () => { resolve(null); }).then(() => {
+                                AppActions.updateApp(item.data, false, () => { resolve(null); }).then(() => {
                                     // Update the loading dialog
                                     LoadingDialog.setHeader("Upgrading Apps");
                                     LoadingDialog.setBody("Upgrading " + (++counter) + " of " + items.length);

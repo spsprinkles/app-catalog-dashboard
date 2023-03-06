@@ -60,23 +60,13 @@ export class AppView {
     }
 
     // Refreshes the dashboard
-    private refresh(): PromiseLike<void> {
+    private refresh(itemId: number): PromiseLike<void> {
         // Return a promise
         return new Promise(resolve => {
-            // Show a loading dialog
-            LoadingDialog.setHeader("Refreshing the Data");
-            LoadingDialog.setBody("This will close after the data is loaded.");
-
             // Refresh the data source
-            DataSource.refresh().then(() => {
+            DataSource.refresh(itemId).then(() => {
                 // Clear the element
                 while (this._el.firstChild) { this._el.removeChild(this._el.firstChild); }
-
-                // Render the dashboard
-                this.render();
-
-                // Hide the dialog
-                LoadingDialog.hide();
 
                 // Resolve the request
                 resolve();
@@ -86,9 +76,12 @@ export class AppView {
 
     // Renders the dashboard
     private render() {
+        // See if the app catalog is on the same site as the app
+        let isSameWeb = AppConfig.Configuration.appCatalogUrl == Strings.SolutionUrl;
+
         // See if this is an owner
         let navLinks: Components.INavbarItem[] = [];
-        if (AppSecurity.IsAdmin || AppSecurity.IsOwner) {
+        if (AppSecurity.AppWeb.IsAdmin || AppSecurity.AppWeb.IsOwner) {
             // Set the admin buttons
             navLinks.push({
                 className: "btn-outline-light ms-2 ps-2 pt-1",
@@ -99,49 +92,84 @@ export class AppView {
                 isButton: true,
                 items: [
                     {
-                        text: "Manage App Configuration",
+                        text: "App Configuration",
                         onClick: () => {
                             // Show the install modal
                             AppInstall.InstallRequired(null, true);
                         }
                     },
                     {
-                        text: "Manage Approver Group",
+                        text: "Local Approver Group",
                         onClick: () => {
                             // Show the group in a new tab
-                            window.open(AppSecurity.ApproverUrl, "_blank");
+                            window.open(AppSecurity.AppWeb.getUrlForGroup(Strings.Groups.Approvers), "_blank");
                         }
                     },
                     {
-                        text: "Manage Developer Group",
+                        text: "Local Developer Group",
                         onClick: () => {
                             // Show the group in a new tab
-                            window.open(AppSecurity.DevUrl, "_blank");
+                            window.open(AppSecurity.AppWeb.getUrlForGroup(Strings.Groups.Developers), "_blank");
                         }
                     },
                     {
-                        text: "Manage Final Approver Group",
+                        text: "Local Final Approver Group",
                         onClick: () => {
                             // Show the group in a new tab
-                            window.open(AppSecurity.FinalApproverUrl, "_blank");
+                            window.open(AppSecurity.AppWeb.getUrlForGroup(Strings.Groups.FinalApprovers), "_blank");
                         }
                     },
                     {
-                        text: "Manage Sponsor Group",
+                        text: "Local Sponsor Group",
                         onClick: () => {
                             // Show the group in a new tab
-                            window.open(AppSecurity.SponsorUrl, "_blank");
+                            window.open(AppSecurity.AppWeb.getUrlForGroup(Strings.Groups.Sponsors), "_blank");
                         }
                     },
                     {
                         text: "Manage Audit Log",
                         onClick: () => {
                             // Show the audit log list
-                            window.open(DataSource.AuditLog.List.ListUrl);
+                            window.open(DataSource.AuditLog.List.ListUrl), "_blank";
                         }
                     }
                 ]
             });
+            
+            if (!isSameWeb) {
+                // Add the links to manage remote groups
+                navLinks[0].items.push({
+                    text: "Remote Approver Group",
+                    onClick: () => {
+                        // Show the group in a new tab
+                        window.open(AppSecurity.AppCatalogWeb.getUrlForGroup(Strings.Groups.Approvers), "_blank");
+                    }
+                });
+
+                navLinks[0].items.push({
+                    text: "Remote Developer Group",
+                    onClick: () => {
+                        // Show the group in a new tab
+                        window.open(AppSecurity.AppCatalogWeb.getUrlForGroup(Strings.Groups.Developers), "_blank");
+                    }
+                });
+
+                navLinks[0].items.push({
+                    text: "Remote Final Approver Group",
+                    onClick: () => {
+                        // Show the group in a new tab
+                        window.open(AppSecurity.AppCatalogWeb.getUrlForGroup(Strings.Groups.FinalApprovers), "_blank");
+                    }
+                });
+
+                navLinks[0].items.push({
+                    text: "Remote Sponsor Group",
+                    onClick: () => {
+                        // Show the group in a new tab
+                        window.open(AppSecurity.AppCatalogWeb.getUrlForGroup(Strings.Groups.Sponsors), "_blank");
+                    }
+                });
+            }
         }
 
         // See if this is a developer/sponsor/owner
@@ -185,6 +213,14 @@ export class AppView {
             filters: {
                 items: [
                     {
+                        header: "App Status",
+                        items: DataSource.StatusFilters,
+                        onFilter: (value: string) => {
+                            // Filter the dashboard
+                            this._dashboard.filter(3, value);
+                        },
+                    },
+                    {
                         header: "App Deployment",
                         items: [
                             {
@@ -200,16 +236,8 @@ export class AppView {
                             // Filter the dashboard
                             this._dashboard.filter(4, value);
                         },
-                    },
-                    {
-                        header: "App Status",
-                        items: DataSource.StatusFilters,
-                        onFilter: (value: string) => {
-                            // Filter the dashboard
-                            this._dashboard.filter(3, value);
-                        },
-                    },
-                ],
+                    }
+                ]
             },
             navigation: {
                 itemsEnd: navLinks,
@@ -316,17 +344,14 @@ export class AppView {
                                     text: "Upload App",
                                     type: Components.ButtonTypes.OutlineSecondary,
                                     onClick: () => {
-                                        // Ensure the user is not an approver or developer
-                                        if (!AppSecurity.IsApprover && !AppSecurity.IsDeveloper) {
-                                            // Show the user agreement
-                                            new UserAgreement();
-                                        } else {
+                                        // Show the user agreement
+                                        new UserAgreement(() => {
                                             // Upload the package file
                                             AppActions.upload(item => {
                                                 // See if there is a flow
                                                 if (AppConfig.Configuration.appFlows && AppConfig.Configuration.appFlows.newApp) {
                                                     // Run the flow for this app
-                                                    AppActions.runFlow(item, AppConfig.Configuration.appFlows.newApp);
+                                                    AppActions.runFlow(AppConfig.Configuration.appFlows.newApp);
                                                 }
 
                                                 // Log
@@ -338,13 +363,10 @@ export class AppView {
                                                     LogComment: `A new app ${item.Title} was added.`
                                                 }, item);
 
-                                                // Refresh the dashboard data
-                                                this.refresh().then(() => {
-                                                    // View the app details
-                                                    this.viewAppDetails(item, true);
-                                                });
+                                                // View the app details
+                                                this.viewAppDetails(item.Id, true);
                                             });
-                                        }
+                                        });
                                     }
                                 },
                             });
@@ -555,7 +577,7 @@ export class AppView {
                                     type: Components.ButtonTypes.OutlinePrimary,
                                     onClick: () => {
                                         // View the app details
-                                        this.viewAppDetails(item);
+                                        this.viewAppDetails(item.Id);
                                     }
                                 }
                             });
@@ -591,38 +613,44 @@ export class AppView {
     }
 
     // Method to view the app details
-    private viewAppDetails(item: IAppItem, showEditForm: boolean = false) {
+    private viewAppDetails(itemId: number, showEditForm: boolean = false) {
         // Show a loading dialog
-        LoadingDialog.setHeader("Loading Application Information");
-        LoadingDialog.setBody("This will close after the data is loaded...");
+        LoadingDialog.setHeader("Refreshing the Data");
+        LoadingDialog.setBody("This will close after the data is loaded.");
         LoadingDialog.show();
 
-        // Load the app dashboard
-        DataSource.loadAppDashboard(item.Id).then(() => {
-            // Clear the details
-            while (this._elAppDetails.firstChild) { this._elAppDetails.removeChild(this._elAppDetails.firstChild); }
+        // Refresh the data
+        this.refresh(itemId).then(() => {
+            // Show a loading dialog
+            LoadingDialog.setHeader("Loading Application Information");
+            LoadingDialog.setBody("This will close after the data is loaded...");
 
-            // Set the body
-            new AppDashboard(this._elAppDetails, this._el, item.Id);
+            // Load the app dashboard
+            DataSource.loadAppDashboard(itemId).then(() => {
+                // Clear the details
+                while (this._elAppDetails.firstChild) { this._elAppDetails.removeChild(this._elAppDetails.firstChild); }
 
-            // Hide the apps
-            this._el.classList.add("d-none");
+                // Set the body
+                new AppDashboard(this._elAppDetails, this._el, itemId);
 
-            // Show the details
-            this._elAppDetails.classList.remove("d-none");
+                // Hide the apps
+                this._el.classList.add("d-none");
 
-            // Hide the loading dialog
-            LoadingDialog.hide();
+                // Show the details
+                this._elAppDetails.classList.remove("d-none");
 
-            // See if we are showing the edit form
-            if (showEditForm) {
-                // Display the edit form
-                this._forms.edit(item.Id, () => {
-                    // Refresh the dashboard
-                    this.viewAppDetails(item);
-                });
+                // Hide the loading dialog
+                LoadingDialog.hide();
 
-            }
+                // See if we are showing the edit form
+                if (showEditForm) {
+                    // Display the edit form
+                    this._forms.edit(itemId, () => {
+                        // Refresh the app details
+                        this.viewAppDetails(itemId);
+                    });
+                }
+            });
         });
     }
 }
