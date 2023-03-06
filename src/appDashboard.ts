@@ -147,7 +147,7 @@ export class AppDashboard {
                 title: "Actions",
                 onRender: el => {
                     // Render the actions
-                    new ButtonActions(el, DataSource.AppItem, () => {
+                    new ButtonActions(el, () => {
                         // Refresh the dashboard
                         this.refresh();
                     });
