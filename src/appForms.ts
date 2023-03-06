@@ -1172,7 +1172,7 @@ export class AppForms {
                 // Create the item
                 DataSource.AppAssessments.createItem({
                     RelatedAppId: item.Id,
-                    Title: item.Title + " Review " + (new Date(Date.now()).toDateString())
+                    Title: "Technical Review: " + item.Title
                 }).then(
                     item => {
                         // Show the assessment form
@@ -1309,7 +1309,7 @@ export class AppForms {
                     DataSource.AppAssessments.createItem({
                         ContentTypeId: ct ? ct.StringId : null,
                         RelatedAppId: item.Id,
-                        Title: item.Title + " Tests " + (new Date(Date.now()).toDateString())
+                        Title: "Test Cases: " + item.Title
                     }).then(
                         item => {
                             // Show the assessment form
@@ -1450,8 +1450,14 @@ export class AppForms {
                         // Hide the dialog
                         LoadingDialog.hide();
 
-                        // See if it's not valid
-                        if (!isValid) {
+                        // See if it's valid
+                        if (isValid) {
+                            // Update the date completed field
+                            item.update({ Completed: (new Date(Date.now())).toISOString() }).execute(() => {
+                                // Resolve the request
+                                resolve(isValid);
+                            });
+                        } else {
                             // Clear the modal
                             Modal.clear();
 
@@ -1466,14 +1472,6 @@ export class AppForms {
 
                             // Resolve the request
                             resolve(isValid);
-                        } else {
-                            // Update the item
-                            item.update({
-                                Completed: new Date(Date.now())
-                            }).execute(() => {
-                                // Resolve the request
-                                resolve(isValid);
-                            });
                         }
                     } else {
                         // Hide the dialog
@@ -1548,8 +1546,14 @@ export class AppForms {
                         // Hide the dialog
                         LoadingDialog.hide();
 
-                        // See if it's not valid
-                        if (!isValid) {
+                        // See if it's valid
+                        if (isValid) {
+                            // Update the date completed field
+                            item.update({ Completed: (new Date(Date.now())).toISOString() }).execute(() => {
+                                // Resolve the request
+                                resolve(isValid);
+                            });
+                        } else {
                             // Clear the modal
                             Modal.clear();
 
@@ -1564,14 +1568,6 @@ export class AppForms {
 
                             // Resolve the request
                             resolve(isValid);
-                        } else {
-                            // Update the item
-                            item.update({
-                                Completed: new Date(Date.now())
-                            }).execute(() => {
-                                // Resolve the request
-                                resolve(isValid);
-                            });
                         }
                     } else {
                         // Hide the dialog
