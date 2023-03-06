@@ -24,7 +24,7 @@ import { AppConfig, IStatus, UserTypes } from "./appCfg";
 import { AppForms } from "./appForms";
 import { AppSecurity } from "./appSecurity";
 import * as Common from "./common";
-import { DataSource, IAppItem } from "./ds";
+import { DataSource } from "./ds";
 import Strings from "./strings";
 
 /**
@@ -34,15 +34,13 @@ import Strings from "./strings";
 export class ButtonActions {
   private _el: HTMLElement = null;
   private _forms: AppForms = null;
-  private _item: IAppItem = null;
   private _onUpdate: () => void = null;
 
   // Constructor
-  constructor(el: HTMLElement, item: IAppItem, onUpdate: () => void) {
+  constructor(el: HTMLElement, onUpdate: () => void) {
     // Initialize the component
     this._el = el;
     this._forms = new AppForms();
-    this._item = item;
     this._onUpdate = onUpdate;
 
     // Render the actions
@@ -51,7 +49,7 @@ export class ButtonActions {
 
   // Status
   private get Status(): IStatus {
-    return AppConfig.Status[this._item.AppStatus] || ({} as any);
+    return AppConfig.Status[DataSource.AppItem.AppStatus] || ({} as any);
   }
 
   // Determines if the user is an approver
@@ -76,8 +74,8 @@ export class ButtonActions {
         // Developers of the application
         case UserTypes.Developers:
           // See if this user is an owner of the app'
-          let developerIds = this._item.AppDevelopersId
-            ? this._item.AppDevelopersId.results
+          let developerIds = DataSource.AppItem.AppDevelopersId
+            ? DataSource.AppItem.AppDevelopersId.results
             : [];
           for (let j = 0; j < developerIds.length; i++) {
             // See if the user is a developer
@@ -105,7 +103,7 @@ export class ButtonActions {
         case UserTypes.Sponsor:
           // See if this user is a sponsor
           isApprover =
-            isApprover || this._item.AppSponsorId == ContextInfo.userId;
+            isApprover || DataSource.AppItem.AppSponsorId == ContextInfo.userId;
           break;
 
         // Sponsor's Group
@@ -126,8 +124,8 @@ export class ButtonActions {
 
     // See if there is an approver setting for this status
     let developers =
-      (this._item.AppDevelopersId
-        ? this._item.AppDevelopersId.results
+      (DataSource.AppItem.AppDevelopersId
+        ? DataSource.AppItem.AppDevelopersId.results
         : null) || [];
 
     // Parse the developers
@@ -153,7 +151,7 @@ export class ButtonActions {
     }
 
     // Determine if the user can edit items
-    let canEdit = Common.canEdit(this._item);
+    let canEdit = Common.canEdit(DataSource.AppItem);
 
     // Render the tooltip group
     let tooltips = Components.TooltipGroup({
@@ -170,7 +168,7 @@ export class ButtonActions {
         // Approve/Reject
         case "ApproveReject":
           // See if the app is rejected
-          if (this._item.AppIsRejected) {
+          if (DataSource.AppItem.AppIsRejected) {
             // See if this is an approver or developer
             if (this.isApprover() || this.isDeveloper()) {
               // Render the resubmit button
@@ -185,7 +183,7 @@ export class ButtonActions {
                   type: Components.ButtonTypes.OutlinePrimary,
                   onClick: () => {
                     // Display the approval form
-                    this._forms.submit(this._item, () => {
+                    this._forms.submit(DataSource.AppItem, () => {
                       // Call the update event
                       this._onUpdate();
                     });
@@ -208,7 +206,7 @@ export class ButtonActions {
                 type: Components.ButtonTypes.OutlineSuccess,
                 onClick: () => {
                   // Display the approval form
-                  this._forms.approve(this._item, () => {
+                  this._forms.approve(DataSource.AppItem, () => {
                     // Call the update event
                     this._onUpdate();
                   });
@@ -228,7 +226,7 @@ export class ButtonActions {
                 type: Components.ButtonTypes.OutlineDanger,
                 onClick: () => {
                   // Display the reject form
-                  this._forms.reject(this._item, () => {
+                  this._forms.reject(DataSource.AppItem, () => {
                     // Call the update event
                     this._onUpdate();
                   });
@@ -255,7 +253,7 @@ export class ButtonActions {
                 onClick: () => {
                   // Display the audit log information
                   DataSource.AuditLog.viewLog({
-                    id: this._item.AppProductID,
+                    id: DataSource.AppItem.AppProductID,
                     listName: Strings.Lists.Apps,
                     onTableCellRendering: (el, col, item) => {
                       // See if this is the date/time column
@@ -302,7 +300,7 @@ export class ButtonActions {
           // See if this is an approver
           if (AppSecurity.IsSiteAppCatalogOwner) {
             // See if a test site exists
-            DataSource.loadTestSite(this._item).then(
+            DataSource.loadTestSite(DataSource.AppItem).then(
               // Test site exists
               () => {
                 // Render the button
@@ -317,7 +315,7 @@ export class ButtonActions {
                     type: Components.ButtonTypes.OutlineDanger,
                     onClick: () => {
                       // Display the delete site form
-                      this._forms.deleteSite(this._item, () => {
+                      this._forms.deleteSite(DataSource.AppItem, () => {
                         // Redirect to the dashboard
                         window.open(
                           AppConfig.Configuration.dashboardUrl,
@@ -350,7 +348,7 @@ export class ButtonActions {
               type: Components.ButtonTypes.OutlineSuccess,
               onClick: () => {
                 // Display the delete site form
-                this._forms.deployToSite(this._item, () => {
+                this._forms.deployToSite(DataSource.AppItem, () => {
                   // Call the update event
                   this._onUpdate();
                 });
@@ -397,7 +395,7 @@ export class ButtonActions {
                           type: Components.ButtonTypes.OutlineSuccess,
                           onClick: () => {
                             // Deploy the app
-                            this._forms.deployToTeams(this._item, () => {
+                            this._forms.deployToTeams(DataSource.AppItem, () => {
                               // Call the update event
                               this._onUpdate();
                             });
@@ -431,7 +429,7 @@ export class ButtonActions {
                   type: Components.ButtonTypes.OutlineSuccess,
                   onClick: () => {
                     // Deploy the app
-                    this._forms.deploy(this._item, true, () => {
+                    this._forms.deploy(DataSource.AppItem, true, () => {
                       // Call the update event
                       this._onUpdate();
                     });
@@ -454,7 +452,7 @@ export class ButtonActions {
                   type: Components.ButtonTypes.OutlineDanger,
                   onClick: () => {
                     // Remove the app
-                    this._forms.removeFromTenant(this._item, () => {
+                    this._forms.removeFromTenant(DataSource.AppItem, () => {
                       // Call the update event
                       this._onUpdate();
                     });
@@ -477,7 +475,7 @@ export class ButtonActions {
                   type: Components.ButtonTypes.OutlineDanger,
                   onClick: () => {
                     // Retract the app
-                    this._forms.retractFromTenant(this._item, () => {
+                    this._forms.retractFromTenant(DataSource.AppItem, () => {
                       // Call the update event
                       this._onUpdate();
                     });
@@ -503,7 +501,7 @@ export class ButtonActions {
               type: Components.ButtonTypes.OutlinePrimary,
               onClick: () => {
                 // Display the edit form
-                this._forms.edit(this._item.Id, () => {
+                this._forms.edit(DataSource.AppItem.Id, () => {
                   // Call the update event
                   this._onUpdate();
                 });
@@ -526,7 +524,7 @@ export class ButtonActions {
               type: Components.ButtonTypes.OutlinePrimary,
               onClick: () => {
                 // Display the test cases
-                this._forms.editTechReview(this._item, () => {
+                this._forms.editTechReview(DataSource.AppItem, () => {
                   // Call the update event
                   this._onUpdate();
                 });
@@ -550,7 +548,7 @@ export class ButtonActions {
               type: Components.ButtonTypes.OutlinePrimary,
               onClick: () => {
                 // Display the review form
-                this._forms.editTestCases(this._item, () => {
+                this._forms.editTestCases(DataSource.AppItem, () => {
                   // Call the update event
                   this._onUpdate();
                 });
@@ -573,12 +571,12 @@ export class ButtonActions {
               type: Components.ButtonTypes.OutlinePrimary,
               onClick: () => {
                 this._forms.sendNotification(
-                  this._item,
+                  DataSource.AppItem,
                   ["Developers", "Sponsor"],
                   "Request for Help",
                   `App Developers,
 
-We are requesting help for the app ${this._item.Title}.
+We are requesting help for the app ${DataSource.AppItem.Title}.
 
 (Enter Details Here)
 
@@ -604,7 +602,7 @@ ${ContextInfo.userDisplayName}`.trim()
               type: Components.ButtonTypes.OutlinePrimary,
               onClick: () => {
                 // Display the send notification form
-                this._forms.sendNotification(this._item);
+                this._forms.sendNotification(DataSource.AppItem);
               },
             },
           });
@@ -625,7 +623,7 @@ ${ContextInfo.userDisplayName}`.trim()
               type: Components.ButtonTypes.OutlinePrimary,
               onClick: () => {
                 // Display the submit form
-                this._forms.submit(this._item, () => {
+                this._forms.submit(DataSource.AppItem, () => {
                   // Call the update event
                   this._onUpdate();
                 });
@@ -637,7 +635,7 @@ ${ContextInfo.userDisplayName}`.trim()
         // Test Site
         case "TestSite":
           // See if a test site exists
-          DataSource.loadTestSite(this._item).then(
+          DataSource.loadTestSite(DataSource.AppItem).then(
             // Test site exists
             (web) => {
               // Render the view button
@@ -660,9 +658,9 @@ ${ContextInfo.userDisplayName}`.trim()
               // See if the current version is not deployed
               if (
                 DataSource.AppCatalogSiteItem &&
-                this._item.AppVersion !=
+                DataSource.AppItem.AppVersion !=
                 DataSource.AppCatalogSiteItem.InstalledVersion &&
-                this._item.AppVersion !=
+                DataSource.AppItem.AppVersion !=
                 DataSource.AppCatalogSiteItem.AppCatalogVersion
               ) {
                 // Render the update button
@@ -680,7 +678,7 @@ ${ContextInfo.userDisplayName}`.trim()
                     onClick: () => {
                       // Show the update form
                       this._forms.updateApp(
-                        this._item,
+                        DataSource.AppItem,
                         web.Url,
                         () => {
                           // Call the update event
@@ -708,7 +706,7 @@ ${ContextInfo.userDisplayName}`.trim()
                     onClick: () => {
                       // Show the update form
                       this._forms.updateApp(
-                        this._item,
+                        DataSource.AppItem,
                         web.Url,
                         () => {
                           // Call the update event
@@ -771,7 +769,7 @@ ${ContextInfo.userDisplayName}`.trim()
         // Upgrade
         case "Upgrade":
           // See if site collection urls exist
-          let urls = (this._item.AppSiteDeployments || "").trim();
+          let urls = (DataSource.AppItem.AppSiteDeployments || "").trim();
           if (urls.length > 0) {
             // Render the button
             tooltips.add({
@@ -786,7 +784,7 @@ ${ContextInfo.userDisplayName}`.trim()
                 type: Components.ButtonTypes.OutlinePrimary,
                 onClick: () => {
                   // Display the upgrade form
-                  this._forms.upgrade(this._item);
+                  this._forms.upgrade(DataSource.AppItem);
                 },
               },
             });
@@ -807,7 +805,7 @@ ${ContextInfo.userDisplayName}`.trim()
               type: Components.ButtonTypes.OutlineSecondary,
               onClick: () => {
                 // Display the edit form
-                this._forms.display(this._item.Id);
+                this._forms.display(DataSource.AppItem.Id);
               },
             },
           });
@@ -816,7 +814,7 @@ ${ContextInfo.userDisplayName}`.trim()
         // View Source Control
         case "ViewSourceControl":
           // Ensure the source control url exists for this app
-          if (this._item.AppSourceControl) {
+          if (DataSource.AppItem.AppSourceControl) {
             // Render the button
             tooltips.add({
               content: "Views the source code for the app.",
@@ -829,7 +827,7 @@ ${ContextInfo.userDisplayName}`.trim()
                 type: Components.ButtonTypes.OutlineSecondary,
                 onClick: () => {
                   // Display the url in a new tab
-                  window.open(this._item.AppSourceControl.Url, "_blank");
+                  window.open(DataSource.AppItem.AppSourceControl.Url, "_blank");
                 },
               },
             });
@@ -850,7 +848,7 @@ ${ContextInfo.userDisplayName}`.trim()
               type: Components.ButtonTypes.OutlineSecondary,
               onClick: () => {
                 // Display the test cases
-                this._forms.displayTechReview(this._item);
+                this._forms.displayTechReview(DataSource.AppItem);
               },
             },
           });
@@ -870,7 +868,7 @@ ${ContextInfo.userDisplayName}`.trim()
               type: Components.ButtonTypes.OutlineSecondary,
               onClick: () => {
                 // Display the review form
-                this._forms.displayTestCases(this._item);
+                this._forms.displayTestCases(DataSource.AppItem);
               },
             },
           });
