@@ -386,12 +386,17 @@ export class DataSource {
     static init(appConfiguration?: string): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve, reject) => {
-            // Initialize the audit log
-            this.initAuditLog().then(() => {
-                // Load the configuration
-                AppConfig.loadConfiguration(appConfiguration).then(() => {
+            // Load the configuration
+            AppConfig.loadConfiguration(appConfiguration).then(isValid => {
+                // Wait for the requests to complete
+                Promise.all([
+                    // Initialize the audit log
+                    this.initAuditLog(),
                     // Load the security information
-                    AppSecurity.init().then(() => {
+                    AppSecurity.init()
+                ]).then(() => {
+                    // Ensure the configuration is valid
+                    if (isValid) {
                         // Wait for the components to initialize
                         Promise.all([
                             // Initialize the app assessments
@@ -413,9 +418,12 @@ export class DataSource {
                                 resolve();
                             }
                         }, reject);
-                    });
+                    } else {
+                        // Reject the request
+                        reject();
+                    }
                 }, reject);
-            }, reject);
+            });
         });
     }
 
