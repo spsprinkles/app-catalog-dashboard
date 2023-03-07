@@ -271,8 +271,22 @@ export class ButtonActions {
 
         // Delete
         case "Delete":
-          // Ensure this is an approver
-          if (AppSecurity.AppWeb.isInGroup(Strings.Groups.Approvers)) {
+          let canDelete = false;
+
+          // See if we are before the "In Testing" state
+          if (this.Status.stepNumber < AppConfig.Status[AppConfig.TestCasesStatus].stepNumber) {
+            // Set the flag if this is the developer or sponsor
+            canDelete = this.isDeveloper() || DataSource.AppItem.AppSponsorId == ContextInfo.userId;
+          } else {
+            // Allow deletion if this is the approver
+            canDelete = this.isApprover();
+          }
+
+          // Allow deletion if this is the owner/admin
+          canDelete = AppSecurity.AppWeb.IsOwner || AppSecurity.AppWeb.IsAdmin;
+
+          // See if the user can delete the app
+          if (canDelete) {
             // Render the button
             tooltips.add({
               content: "Deletes the app.",
