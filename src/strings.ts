@@ -6,6 +6,7 @@ import { ContextInfo, Helper } from "gd-sprest-bs";
 
 // Global Path
 let AssetsUrl: string = ContextInfo.webServerRelativeUrl + "/SiteAssets/";
+let PagesUrl: string = ContextInfo.webServerRelativeUrl + "/SitePages/";
 let SPFxContext: { pageContext: any; sdks: { microsoftTeams: any } } = null;
 
 // Updates the strings for SPFx
@@ -23,17 +24,18 @@ export const setContext = (context, sourceUrl?: string) => {
     // Update the global path
     Strings.SourceUrl = sourceUrl || ContextInfo.webServerRelativeUrl;
     AssetsUrl = Strings.SourceUrl + "/SiteAssets/";
+    PagesUrl = Strings.SourceUrl + "/SitePages/";
 
     // Update the values
-    Strings.DashboardUrl = AssetsUrl + "dashboard.aspx";
+    Strings.DashboardUrl = PagesUrl + "Dashboard.aspx";
     Strings.SolutionUrl = AssetsUrl + "index.html"; 
 }
 
 // Strings
 const Strings = {
     AppElementId: "app-catalog-dashboard",
-    ConfigUrl: "siteassets/config.json",
-    DashboardUrl: AssetsUrl + "dashboard.aspx",
+    ConfigUrl: "SiteAssets/config.json",
+    DashboardUrl: PagesUrl + "Dashboard.aspx",
     GlobalVariable: "AppDashboard",
     Groups: {
         Approvers: "App Approvers",
