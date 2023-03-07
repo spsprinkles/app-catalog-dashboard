@@ -60,7 +60,7 @@ export class AppDashboard {
     // Redirects to the dashboard
     private redirectToDashboard() {
         // See if the dashboard exists
-        if (this._elDashboard && this._elDashboard.firstChild) {
+        if (this._elDashboard) {
             // Hide the details
             this._el.classList.add("d-none");
 
@@ -83,22 +83,11 @@ export class AppDashboard {
                 window.open(AppConfig.Configuration.dashboardUrl, "_blank");
             }
             else {
-                // Show a loading dialog
-                LoadingDialog.setHeader("Loading the Applications");
-                LoadingDialog.setBody("This will close after the data is loaded.");
-                LoadingDialog.show();
+                // Hide the details
+                this._el.classList.add("d-none");
 
-                // Load the data
-                DataSource.refresh().then(() => {
-                    // Hide the details
-                    this._el.classList.add("d-none");
-
-                    // Render the app view
-                    new AppView(this._elDashboard, this._el);
-
-                    // Hide the dialog
-                    LoadingDialog.hide();
-                });
+                // Render the app view
+                new AppView(this._elDashboard, this._el);
             }
         }
     }
