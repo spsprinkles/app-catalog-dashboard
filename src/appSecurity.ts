@@ -49,7 +49,7 @@ export class AppSecurity {
                     let listRequests = Web().Lists(Strings.Lists.AppCatalogRequests);
 
                     // Ensure the approver group exists
-                    let group = this._appCatalogWeb.getGroup[Strings.Groups.Approvers];
+                    let group = this._appCatalogWeb.getGroup(Strings.Groups.Approvers);
                     if (group) {
                         // Set the list permissions
                         listApps.RoleAssignments().addRoleAssignment(group.Id, permissions[SPTypes.RoleType.WebDesigner]).execute(() => {
@@ -67,7 +67,7 @@ export class AppSecurity {
                     }
 
                     // Ensure the dev group exists
-                    group = this._appCatalogWeb.getGroup[Strings.Groups.Developers];
+                    group = this._appCatalogWeb.getGroup(Strings.Groups.Developers);
                     if (group) {
                         // Set the list permissions
                         listApps.RoleAssignments().addRoleAssignment(group.Id, permissions[SPTypes.RoleType.Contributor]).execute(() => {
@@ -85,7 +85,7 @@ export class AppSecurity {
                     }
 
                     // Ensure the final approver group exists
-                    group = this._appCatalogWeb.getGroup[Strings.Groups.FinalApprovers];
+                    group = this._appCatalogWeb.getGroup(Strings.Groups.FinalApprovers);
                     if (group) {
                         // Set the list permissions
                         listApps.RoleAssignments().addRoleAssignment(group.Id, permissions[SPTypes.RoleType.WebDesigner]).execute(() => {
@@ -103,7 +103,7 @@ export class AppSecurity {
                     }
 
                     // Ensure the dev group exists
-                    group = this._appCatalogWeb.getGroup[Strings.Groups.Sponsors];
+                    group = this._appCatalogWeb.getGroup(Strings.Groups.Sponsors);
                     if (group) {
                         // Set the list permissions
                         listApps.RoleAssignments().addRoleAssignment(group.Id, permissions[SPTypes.RoleType.Contributor]).execute(() => {
