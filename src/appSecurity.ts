@@ -284,6 +284,7 @@ export class AppSecurity {
                 // Set the app catalog web
                 this._appCatalogWeb = this._appWeb;
             }
+
             // Execute the requests, and resolve the request when it completes
             Promise.all([
                 // Wait for the webs to complete
