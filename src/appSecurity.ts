@@ -242,6 +242,12 @@ export class AppSecurity {
     /** Public Interface */
 
     static hasErrors() {
+        // Ensure the webs exist
+        if (this.AppCatalogWeb == null || this.AppWeb == null) {
+            // Sites are missing
+            return true;
+        }
+
         // Check the app web
         if (this.AppWeb.getGroup(Strings.Groups.Approvers) == null ||
             this.AppWeb.getGroup(Strings.Groups.Developers) == null ||
