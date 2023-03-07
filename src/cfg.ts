@@ -1,4 +1,6 @@
 import { Helper, List, SPTypes } from "gd-sprest-bs";
+import { AppSecurity } from "./appSecurity";
+import { DataSource } from "./ds";
 import Strings from "./strings";
 
 /**
@@ -1033,6 +1035,46 @@ Configuration["addToPage"] = (pageUrl: string) => {
         ex => {
             // Load
             console.log("[" + Strings.ProjectName + "] Error adding the solution to the page.", ex);
+        }
+    );
+}
+
+// Installs the app security
+Configuration["appSecurityInstall"] = () => {
+    // Log
+    console.log("Creating the security groups");
+
+    // Create the security groups
+    AppSecurity.install().then(
+        // Success
+        () => {
+            // Log
+            console.log("Successfully created the security groups");
+        },
+        // Error
+        ex => {
+            // Log the error
+            console.log("Error Creating security groups", "There was an error creating the security groups.", ex);
+        }
+    );
+}
+
+// Installs the audit log
+Configuration["auditLogInstall"] = () => {
+    // Log
+    console.log("Creating AuditLog List");
+
+    // Create the auditLog list
+    DataSource.AuditLog.install().then(
+        // Success
+        () => {
+            // Refresh the page
+            console.log("Successfully created the AuditLog List");
+        },
+        // Error
+        ex => {
+            // Log the error
+            console.log("Error Creating List", "There was an error creating the audit log list.", ex);
         }
     );
 }
