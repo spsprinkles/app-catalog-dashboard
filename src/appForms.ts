@@ -1394,7 +1394,7 @@ export class AppForms {
                 Modal.setHeader("Error");
 
                 // Set the body
-                Modal.setBody("The following app data was not completed for this app:");
+                Modal.setBody("The following metadata was not completed for this app:");
 
                 // Set the fields
                 Components.ListGroup({
@@ -1416,7 +1416,7 @@ export class AppForms {
     private isValidTechReview(item: IAppItem, status: IStatus): PromiseLike<boolean> {
         // Return a promise
         return new Promise(resolve => {
-            let isValid = true;
+            let invalidQuestions: Components.IListGroupItem[] = [];
 
             // See if this approval requires a technical review and validation exists
             if (status.requiresTechReview && AppConfig.Configuration.validation && AppConfig.Configuration.validation.techReview) {
@@ -1448,9 +1448,18 @@ export class AppForms {
 
                                 // See if a match wasn't found
                                 if (!matchFl) {
-                                    // Form isn't valid
-                                    isValid = false;
-                                    break;
+                                    // Parse the fields
+                                    for (let i = 0; i < DataSource.AppAssessments.ListFields.length; i++) {
+                                        let field = DataSource.AppAssessments.ListFields[i];
+
+                                        // See if this is the target field
+                                        if (field.InternalName == fieldName) {
+                                            // Append the question
+                                            invalidQuestions.push({
+                                                content: field.Title
+                                            });
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -1459,11 +1468,11 @@ export class AppForms {
                         LoadingDialog.hide();
 
                         // See if it's valid
-                        if (isValid) {
+                        if (invalidQuestions.length == 0) {
                             // Update the date completed field
                             item.update({ Completed: (new Date(Date.now())).toISOString() }).execute(() => {
                                 // Resolve the request
-                                resolve(isValid);
+                                resolve(true);
                             });
                         } else {
                             // Clear the modal
@@ -1473,13 +1482,20 @@ export class AppForms {
                             Modal.setHeader("Error");
 
                             // Set the body
-                            Modal.setBody("The technical review is not valid. Please review it and try your request again.");
+                            Modal.setBody("The following questions failed the technical review:");
+
+                            // Set the questions
+                            Components.ListGroup({
+                                className: "mt-2",
+                                el: Modal.BodyElement,
+                                items: invalidQuestions
+                            });
 
                             // Show the dialog
                             Modal.show();
 
                             // Resolve the request
-                            resolve(isValid);
+                            resolve(false);
                         }
                     } else {
                         // Hide the dialog
@@ -1503,7 +1519,7 @@ export class AppForms {
                 });
             } else {
                 // Resolve the request
-                resolve(isValid);
+                resolve(true);
             }
         });
     }
@@ -1512,7 +1528,7 @@ export class AppForms {
     private isValidTestCases(item: IAppItem, status: IStatus): PromiseLike<boolean> {
         // Return a promise
         return new Promise(resolve => {
-            let isValid = true;
+            let invalidQuestions: Components.IListGroupItem[] = [];
 
             // See if this approval requires test cases and validation exists
             if (status.requiresTestCases && AppConfig.Configuration.validation && AppConfig.Configuration.validation.testCases) {
@@ -1544,9 +1560,18 @@ export class AppForms {
 
                                 // See if a match wasn't found
                                 if (!matchFl) {
-                                    // Form isn't valid
-                                    isValid = false;
-                                    break;
+                                    // Parse the fields
+                                    for (let i = 0; i < DataSource.AppAssessments.ListFields.length; i++) {
+                                        let field = DataSource.AppAssessments.ListFields[i];
+
+                                        // See if this is the target field
+                                        if (field.InternalName == fieldName) {
+                                            // Append the question
+                                            invalidQuestions.push({
+                                                content: field.Title
+                                            });
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -1555,11 +1580,11 @@ export class AppForms {
                         LoadingDialog.hide();
 
                         // See if it's valid
-                        if (isValid) {
+                        if (invalidQuestions.length == 0) {
                             // Update the date completed field
                             item.update({ Completed: (new Date(Date.now())).toISOString() }).execute(() => {
                                 // Resolve the request
-                                resolve(isValid);
+                                resolve(true);
                             });
                         } else {
                             // Clear the modal
@@ -1569,13 +1594,13 @@ export class AppForms {
                             Modal.setHeader("Error");
 
                             // Set the body
-                            Modal.setBody("The test cases are not valid. Please review them and try your request again.");
+                            Modal.setBody("The following questions failed the test cases:");
 
                             // Show the dialog
                             Modal.show();
 
                             // Resolve the request
-                            resolve(isValid);
+                            resolve(false);
                         }
                     } else {
                         // Hide the dialog
@@ -1599,7 +1624,7 @@ export class AppForms {
                 });
             } else {
                 // Resolve the request
-                resolve(isValid);
+                resolve(true);
             }
         });
     }
