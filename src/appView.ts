@@ -77,7 +77,7 @@ export class AppView {
     // Renders the dashboard
     private render() {
         // See if the app catalog is on the same site as the app
-        let isSameWeb = AppConfig.Configuration.appCatalogUrl == Strings.SolutionUrl;
+        let isSameWeb = AppConfig.Configuration.appCatalogUrl == Strings.SourceUrl;
 
         // See if this is an owner
         let navLinks: Components.INavbarItem[] = [];
@@ -135,7 +135,7 @@ export class AppView {
                     }
                 ]
             });
-            
+
             if (!isSameWeb) {
                 // Add the links to manage remote groups
                 navLinks[0].items.push({
