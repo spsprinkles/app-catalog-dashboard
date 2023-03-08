@@ -272,7 +272,7 @@ export class AppSecurityWeb {
                     let isSponsorGroup = groupName == Strings.Groups.Sponsors;
 
                     // Create the group
-                    Web().SiteGroups().add({
+                    Web(this._url, { requestDigest: this._context.FormDigestValue }).SiteGroups().add({
                         AllowMembersEditMembership: true,
                         AllowRequestToJoinLeave: isDevGroup || isSponsorGroup,
                         AutoAcceptRequestToJoinLeave: isDevGroup || isSponsorGroup,
@@ -283,7 +283,7 @@ export class AppSecurityWeb {
                         // Successful
                         group => {
                             // Get the group
-                            web.SiteGroups(group.Id).query({ Expand: ["Users"] }).execute(group => {
+                            Web(this._url, { requestDigest: this._context.FormDigestValue }).SiteGroups(group.Id).query({ Expand: ["Users"] }).execute(group => {
                                 // Set the group
                                 this._appGroups[groupName] = group;
 

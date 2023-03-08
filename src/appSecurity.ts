@@ -242,6 +242,12 @@ export class AppSecurity {
     /** Public Interface */
 
     static hasErrors() {
+        // Ensure the webs exist
+        if (this.AppCatalogWeb == null || this.AppWeb == null) {
+            // Sites are missing
+            return true;
+        }
+
         // Check the app web
         if (this.AppWeb.getGroup(Strings.Groups.Approvers) == null ||
             this.AppWeb.getGroup(Strings.Groups.Developers) == null ||
@@ -278,6 +284,7 @@ export class AppSecurity {
                 // Set the app catalog web
                 this._appCatalogWeb = this._appWeb;
             }
+
             // Execute the requests, and resolve the request when it completes
             Promise.all([
                 // Wait for the webs to complete

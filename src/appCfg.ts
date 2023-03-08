@@ -132,9 +132,9 @@ export class AppConfig {
     }
 
     // Load the configuration file
-    static loadConfiguration(appConfiguration?: string): PromiseLike<void> {
+    static loadConfiguration(appConfiguration?: string): PromiseLike<boolean> {
         // Return a promise
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             let completeRequest = () => {
                 // Ensure the configuration exists
                 if (this._cfg) {
@@ -151,14 +151,14 @@ export class AppConfig {
                     // Ensure the configuration is valid
                     if (this.IsValid) {
                         // Set the status and resolve the request
-                        this.setStatus().then(() => { resolve(); }, reject);
+                        this.setStatus().then(() => { resolve(true); }, () => { resolve(false); });
                     } else {
-                        // Reject the request
-                        reject();
+                        // Resolve the request
+                        resolve(false);
                     }
                 } else {
-                    // Reject the request
-                    reject();
+                    // Resolve the request
+                    resolve(false);
                 }
             }
 
