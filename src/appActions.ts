@@ -1830,6 +1830,11 @@ export class AppActions {
                                 // Log
                                 ErrorDialog.logInfo(`Uploading the ${DataSource.AppItem.Title} app.`);
 
+                                // Display a loading dialog
+                                LoadingDialog.setHeader("Uploading New App Package");
+                                LoadingDialog.setBody("Uploading the new package file...");
+                                LoadingDialog.show();
+
                                 // Upload the file
                                 Web(Strings.SourceUrl).getFolderByServerRelativeUrl(DataSource.AppFolder.ServerRelativeUrl).Files().add(fileInfo.name, true, fileInfo.data).execute(() => {
                                     // Update the status
