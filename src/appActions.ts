@@ -1260,6 +1260,7 @@ export class AppActions {
     }
 
     // Uninstalls the app
+    // This will delete the app and not place it in the recycle bin
     private static uninstallApp(siteUrl: string, requestDigest: string): PromiseLike<void> {
         // Return a promise
         return new Promise(resolve => {
