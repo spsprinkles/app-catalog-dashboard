@@ -1118,8 +1118,14 @@ export class AppActions {
                                 onUpdate();
                             },
                             ex => {
-                                // Log the error
-                                ErrorDialog.show("Removing App", "There was an error removing the app from the catalog.", ex);
+                                // Log
+                                ErrorDialog.logInfo(`There was an error removing the app '${DataSource.AppItem.Title}'.`);
+
+                                // Close the dialog
+                                LoadingDialog.hide();
+
+                                // Call the update event
+                                onUpdate();
                             }
                         );
                     } else {
