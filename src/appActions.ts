@@ -1250,6 +1250,32 @@ export class AppActions {
         }
     }
 
+    // Uninstalls the app
+    private static uninstallApp(siteUrl: string, requestDigest: string): PromiseLike<void> {
+        // Return a promise
+        return new Promise(resolve => {
+            // Update the dialog
+            LoadingDialog.setHeader("Uninstalling the Solution");
+            LoadingDialog.setBody("Uninstalling in site: " + siteUrl + "<br/>This will close after the app is upgraded.");
+            LoadingDialog.show();
+
+            // Log
+            ErrorDialog.logInfo(`Uninstalling the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} from the app catalog...`);
+
+            // Set the complete method
+            let onComplete = () => {
+                // Close the dialog
+                LoadingDialog.hide();
+
+                // Resolve the request
+                resolve();
+            }
+
+            // Uninstall the app
+            Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(DataSource.AppItem.AppProductID).uninstall().execute(onComplete, onComplete);
+        });
+    }
+
     // Updates the app
     static updateApp(siteUrl: string, isTestSite: boolean, onError: () => void): PromiseLike<void> {
         // Return a promise
@@ -1262,6 +1288,74 @@ export class AppActions {
                 context => {
                     let requestDigest = context.GetContextWebInformation.FormDigestValue;
 
+                    // Uninstall the app
+                    this.uninstallApp(siteUrl, requestDigest).then(() => {
+                        // Show the dialog
+                        LoadingDialog.setHeader("Upgrading the Solution");
+                        LoadingDialog.setBody("This will close after the app is upgraded...");
+                        LoadingDialog.show();
+
+                        // Log
+                        ErrorDialog.logInfo(`Upgrading the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID}...`);
+
+                        // Deploy the solution
+                        this.deploy(false, isTestSite ? false : DataSource.AppItem.AppSkipFeatureDeployment, onError, () => {
+                            // Update the dialog
+                            LoadingDialog.setHeader("Upgrading the Solution");
+
+                            // Log
+                            ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was upgraded successfully...`);
+
+                            // Log
+                            ErrorDialog.logInfo(`Getting the app from the catalog...`);
+
+                            // Get the app
+                            Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(DataSource.AppItem.AppProductID).execute(
+                                app => {
+                                    // Log
+                                    ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was found in the app catalog...`);
+
+                                    // See if the app is already installed
+                                    if (app.SkipDeploymentFeature) {
+                                        // Resolve the requst
+                                        resolve();
+                                    } else {
+                                        // Log
+                                        ErrorDialog.logInfo(`Installing the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID}...`);
+
+                                        // Update the dialog
+                                        LoadingDialog.setHeader("Installing the Solution");
+                                        LoadingDialog.setBody("Installing in site: " + siteUrl + "<br/>This will close after the app is upgraded.");
+                                        LoadingDialog.show();
+
+                                        // Install the app
+                                        Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(DataSource.AppItem.AppProductID).install().execute(
+                                            () => {
+                                                // Log
+                                                ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was installed successfully...`);
+
+                                                // Close the dialog
+                                                LoadingDialog.hide();
+
+                                                // Resolve the requst
+                                                resolve();
+                                            },
+                                            ex => {
+                                                // Log the error
+                                                ErrorDialog.show("Installing App", "There was an error installing the app.", ex);
+                                            }
+                                        );
+                                    }
+                                },
+                                ex => {
+                                    // Log the error
+                                    ErrorDialog.show("Getting App", "There was an error loading the app.", ex);
+                                }
+                            );
+                        });
+                    },
+                    );
+
                     // Update the dialog
                     LoadingDialog.setHeader("Uninstalling the Solution");
                     LoadingDialog.setBody("Uninstalling in site: " + siteUrl + "<br/>This will close after the app is upgraded.");
@@ -1271,75 +1365,69 @@ export class AppActions {
                     ErrorDialog.logInfo(`Uninstalling the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} from the app catalog...`);
 
                     // Uninstall the app
-                    Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(DataSource.AppItem.AppProductID).uninstall().execute(
-                        () => {
+                    this.uninstallApp(siteUrl, requestDigest).then(() => {
+                        // Update the dialog
+                        LoadingDialog.setHeader("Upgrading the Solution");
+
+                        // Log
+                        ErrorDialog.logInfo(`Upgrading the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID}...`);
+
+                        // Deploy the solution
+                        this.deploy(false, isTestSite ? false : DataSource.AppItem.AppSkipFeatureDeployment, onError, () => {
                             // Update the dialog
                             LoadingDialog.setHeader("Upgrading the Solution");
 
                             // Log
-                            ErrorDialog.logInfo(`Upgrading the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID}...`);
+                            ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was upgraded successfully...`);
 
-                            // Deploy the solution
-                            this.deploy(false, isTestSite ? false : DataSource.AppItem.AppSkipFeatureDeployment, onError, () => {
-                                // Update the dialog
-                                LoadingDialog.setHeader("Upgrading the Solution");
+                            // Log
+                            ErrorDialog.logInfo(`Getting the app from the catalog...`);
 
-                                // Log
-                                ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was upgraded successfully...`);
+                            // Get the app
+                            Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(DataSource.AppItem.AppProductID).execute(
+                                app => {
+                                    // Log
+                                    ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was found in the app catalog...`);
 
-                                // Log
-                                ErrorDialog.logInfo(`Getting the app from the catalog...`);
-
-                                // Get the app
-                                Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(DataSource.AppItem.AppProductID).execute(
-                                    app => {
+                                    // See if the app is already installed
+                                    if (app.SkipDeploymentFeature) {
+                                        // Resolve the requst
+                                        resolve();
+                                    } else {
                                         // Log
-                                        ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was found in the app catalog...`);
+                                        ErrorDialog.logInfo(`Installing the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID}...`);
 
-                                        // See if the app is already installed
-                                        if (app.SkipDeploymentFeature) {
-                                            // Resolve the requst
-                                            resolve();
-                                        } else {
-                                            // Log
-                                            ErrorDialog.logInfo(`Installing the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID}...`);
+                                        // Update the dialog
+                                        LoadingDialog.setHeader("Installing the Solution");
+                                        LoadingDialog.setBody("Installing in site: " + siteUrl + "<br/>This will close after the app is upgraded.");
+                                        LoadingDialog.show();
 
-                                            // Update the dialog
-                                            LoadingDialog.setHeader("Installing the Solution");
-                                            LoadingDialog.setBody("Installing in site: " + siteUrl + "<br/>This will close after the app is upgraded.");
-                                            LoadingDialog.show();
+                                        // Install the app
+                                        Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(DataSource.AppItem.AppProductID).install().execute(
+                                            () => {
+                                                // Log
+                                                ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was installed successfully...`);
 
-                                            // Install the app
-                                            Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(DataSource.AppItem.AppProductID).install().execute(
-                                                () => {
-                                                    // Log
-                                                    ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was installed successfully...`);
+                                                // Close the dialog
+                                                LoadingDialog.hide();
 
-                                                    // Close the dialog
-                                                    LoadingDialog.hide();
-
-                                                    // Resolve the requst
-                                                    resolve();
-                                                },
-                                                ex => {
-                                                    // Log the error
-                                                    ErrorDialog.show("Installing App", "There was an error installing the app.", ex);
-                                                }
-                                            );
-                                        }
-                                    },
-                                    ex => {
-                                        // Log the error
-                                        ErrorDialog.show("Getting App", "There was an error loading the app.", ex);
+                                                // Resolve the requst
+                                                resolve();
+                                            },
+                                            ex => {
+                                                // Log the error
+                                                ErrorDialog.show("Installing App", "There was an error installing the app.", ex);
+                                            }
+                                        );
                                     }
-                                );
-                            });
-                        },
-                        ex => {
-                            // Log the error
-                            ErrorDialog.show("Uninstall App", "There was an error uninstalling the app.", ex);
-                        }
-                    );
+                                },
+                                ex => {
+                                    // Log the error
+                                    ErrorDialog.show("Getting App", "There was an error loading the app.", ex);
+                                }
+                            );
+                        });
+                    });
                 },
                 ex => {
                     // Log the error
