@@ -1007,8 +1007,11 @@ export class AppActions {
 
                     // See if this is a client side asset
                     if (path.toLowerCase().indexOf("clientsideassets") == 0) {
-                        // Add the asset information
-                        assets.push(fileInfo);
+                        // Ensure this is a file
+                        if (!fileInfo.name.endsWith('/')) {
+                            // Add the asset information
+                            assets.push(fileInfo);
+                        }
                     }
 
                     // See if this is the app manifest
@@ -1780,22 +1783,6 @@ export class AppActions {
                     itemInfo.AppStatus = AppConfig.TestCasesStatus;
                     DataSource.AppItem.update(itemInfo).execute(
                         () => {
-                            /*
-                            // Archives the current app
-                            let archiveApp = () => {
-                                // See if the item is currently approved
-                                if (DataSource.AppItem.AppStatus == AppConfig.ApprovedStatus) {
-                                    // Archive the file
-                                    AppActions.archivePackage(DataSource.AppItem, () => {
-                                        // Add the file
-                                        resolve();
-                                    });
-                                } else {
-                                    // Add the file
-                                    resolve();
-                                }
-                            }
-                            */
                             // Clears the client side assets folder
                             let clearClientSideAssets = (): PromiseLike<Types.SP.Folder> => {
                                 // Update the loading dialog
@@ -1900,40 +1887,52 @@ export class AppActions {
                                 });
                             }
 
+                            // Log
+                            ErrorDialog.logInfo(`Archiving the ${DataSource.AppItem.Title} app.`);
+
                             // Archive the package
                             this.archivePackage(() => {
-                                // Update the status
-                                updateStatus().then(() => {
-                                    // Clear the client side assets
-                                    clearClientSideAssets().then(folder => {
-                                        // Upload the client side assets
-                                        uploadClientSideAssets(folder).then(() => {
-                                            // See if the app was upgraded
-                                            if (appUpgraded) {
-                                                // See if there is a flow
-                                                if (AppConfig.Configuration.appFlows && AppConfig.Configuration.appFlows.upgradeApp) {
-                                                    // Execute the flow
-                                                    AppActions.runFlow(AppConfig.Configuration.appFlows.upgradeApp);
-                                                }
+                                // Log
+                                ErrorDialog.logInfo(`Uploading the ${DataSource.AppItem.Title} app.`);
 
-                                                // Send the notifications
-                                                AppNotifications.sendAppUpgradedEmail(DataSource.AppItem).then(() => {
-                                                    // Resolve the request
-                                                    resolve();
+                                // Upload the file
+                                Web(Strings.SourceUrl).getFolderByServerRelativeUrl(DataSource.AppFolder.ServerRelativeUrl).Files().add(fileInfo.name, true, fileInfo.data).execute(() => {
+                                    // Update the status
+                                    updateStatus().then(() => {
+                                        // Clear the client side assets
+                                        clearClientSideAssets().then(folder => {
+                                            // Upload the client side assets
+                                            uploadClientSideAssets(folder).then(() => {
+                                                // Refersh the item
+                                                DataSource.refreshItem(DataSource.AppItem.Id).then(() => {
+                                                    // See if the app was upgraded
+                                                    if (appUpgraded) {
+                                                        // See if there is a flow
+                                                        if (AppConfig.Configuration.appFlows && AppConfig.Configuration.appFlows.upgradeApp) {
+                                                            // Execute the flow
+                                                            AppActions.runFlow(AppConfig.Configuration.appFlows.upgradeApp);
+                                                        }
+
+                                                        // Send the notifications
+                                                        AppNotifications.sendAppUpgradedEmail(DataSource.AppItem).then(() => {
+                                                            // Resolve the request
+                                                            resolve();
+                                                        });
+
+                                                        // Log
+                                                        DataSource.logItem({
+                                                            LogUserId: ContextInfo.userId,
+                                                            ParentId: itemInfo.AppProductID || DataSource.AppItem.AppProductID,
+                                                            ParentListName: Strings.Lists.Apps,
+                                                            Title: DataSource.AuditLogStates.AppUpdated,
+                                                            LogComment: `A new version (${itemInfo.AppVersion}) of the app ${itemInfo.Title} was added.`
+                                                        }, Object.assign({ ...DataSource.AppItem, ...itemInfo }));
+                                                    } else {
+                                                        // Resolve the request
+                                                        resolve();
+                                                    }
                                                 });
-
-                                                // Log
-                                                DataSource.logItem({
-                                                    LogUserId: ContextInfo.userId,
-                                                    ParentId: itemInfo.AppProductID || DataSource.AppItem.AppProductID,
-                                                    ParentListName: Strings.Lists.Apps,
-                                                    Title: DataSource.AuditLogStates.AppUpdated,
-                                                    LogComment: `A new version (${itemInfo.AppVersion}) of the app ${itemInfo.Title} was added.`
-                                                }, Object.assign({ ...DataSource.AppItem, ...itemInfo }));
-                                            } else {
-                                                // Resolve the request
-                                                resolve();
-                                            }
+                                            });
                                         });
                                     });
                                 });

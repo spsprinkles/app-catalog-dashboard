@@ -161,6 +161,19 @@ export class DataSource {
             });
         });
     }
+    static refreshItem(itemId: number): PromiseLike<void> {
+        // Return a promise
+        return new Promise((resolve, reject) => {
+            // Refresh the item
+            this.DocSetList.refreshItem(itemId).then(item => {
+                // Set the item
+                this._appItem = item;
+
+                // Resolve the request
+                resolve();
+            }, reject);
+        });
+    }
 
     /**
      * App Dashboard Information
