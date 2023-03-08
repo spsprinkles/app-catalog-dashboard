@@ -1297,74 +1297,6 @@ export class AppActions {
                 context => {
                     let requestDigest = context.GetContextWebInformation.FormDigestValue;
 
-                    // Uninstall the app
-                    this.uninstallApp(siteUrl, requestDigest).then(() => {
-                        // Show the dialog
-                        LoadingDialog.setHeader("Upgrading the Solution");
-                        LoadingDialog.setBody("This will close after the app is upgraded...");
-                        LoadingDialog.show();
-
-                        // Log
-                        ErrorDialog.logInfo(`Upgrading the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID}...`);
-
-                        // Deploy the solution
-                        this.deploy(false, isTestSite ? false : DataSource.AppItem.AppSkipFeatureDeployment, onError, () => {
-                            // Update the dialog
-                            LoadingDialog.setHeader("Upgrading the Solution");
-
-                            // Log
-                            ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was upgraded successfully...`);
-
-                            // Log
-                            ErrorDialog.logInfo(`Getting the app from the catalog...`);
-
-                            // Get the app
-                            Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(DataSource.AppItem.AppProductID).execute(
-                                app => {
-                                    // Log
-                                    ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was found in the app catalog...`);
-
-                                    // See if the app is already installed
-                                    if (app.SkipDeploymentFeature) {
-                                        // Resolve the requst
-                                        resolve();
-                                    } else {
-                                        // Log
-                                        ErrorDialog.logInfo(`Installing the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID}...`);
-
-                                        // Update the dialog
-                                        LoadingDialog.setHeader("Installing the Solution");
-                                        LoadingDialog.setBody("Installing in site: " + siteUrl + "<br/>This will close after the app is upgraded.");
-                                        LoadingDialog.show();
-
-                                        // Install the app
-                                        Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(DataSource.AppItem.AppProductID).install().execute(
-                                            () => {
-                                                // Log
-                                                ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was installed successfully...`);
-
-                                                // Close the dialog
-                                                LoadingDialog.hide();
-
-                                                // Resolve the requst
-                                                resolve();
-                                            },
-                                            ex => {
-                                                // Log the error
-                                                ErrorDialog.show("Installing App", "There was an error installing the app.", ex);
-                                            }
-                                        );
-                                    }
-                                },
-                                ex => {
-                                    // Log the error
-                                    ErrorDialog.show("Getting App", "There was an error loading the app.", ex);
-                                }
-                            );
-                        });
-                    },
-                    );
-
                     // Update the dialog
                     LoadingDialog.setHeader("Uninstalling the Solution");
                     LoadingDialog.setBody("Uninstalling in site: " + siteUrl + "<br/>This will close after the app is upgraded.");
@@ -1385,6 +1317,8 @@ export class AppActions {
                         this.deploy(false, isTestSite ? false : DataSource.AppItem.AppSkipFeatureDeployment, onError, () => {
                             // Update the dialog
                             LoadingDialog.setHeader("Upgrading the Solution");
+                            LoadingDialog.setBody("This will close after the app is upgraded...");
+                            LoadingDialog.show();
 
                             // Log
                             ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was upgraded successfully...`);
