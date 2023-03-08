@@ -1341,7 +1341,7 @@ export class AppForms {
     private isMetadataComplete(item: IAppItem): PromiseLike<boolean> {
         // Return a promise
         return new Promise(resolve => {
-            let isValid = true;
+            let invalidFields: Components.IListGroupItem[] = [];
 
             // Show a loading dialog
             LoadingDialog.setHeader("Validating the Metadata");
@@ -1370,9 +1370,10 @@ export class AppForms {
                             // Ensure a value exists
                             if (item[fieldName]) { continue; }
 
-                            // Set the flag and break from the loop
-                            isValid = false;
-                            break;
+                            // Append the field
+                            invalidFields.push({
+                                content: field.Title
+                            });
                         }
                     }
 
@@ -1385,7 +1386,7 @@ export class AppForms {
             LoadingDialog.hide();
 
             // See if it's not valid
-            if (!isValid) {
+            if (invalidFields.length > 0) {
                 // Clear the modal
                 Modal.clear();
 
@@ -1393,14 +1394,21 @@ export class AppForms {
                 Modal.setHeader("Error");
 
                 // Set the body
-                Modal.setBody("The metadata hasn't been completed for this app. Please update it and complete the required information.");
+                Modal.setBody("The following app data was not completed for this app:");
+
+                // Set the fields
+                Components.ListGroup({
+                    className: "mt-2",
+                    el: Modal.BodyElement,
+                    items: invalidFields
+                });
 
                 // Show the dialog
                 Modal.show();
             }
 
             // Resolve the request
-            resolve(isValid);
+            resolve(invalidFields.length == 0);
         });
     }
 
