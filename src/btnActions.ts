@@ -77,7 +77,7 @@ export class ButtonActions {
           let developerIds = DataSource.AppItem.AppDevelopersId
             ? DataSource.AppItem.AppDevelopersId.results
             : [];
-          for (let j = 0; j < developerIds.length; i++) {
+          for (let j = 0; j < developerIds.length; j++) {
             // See if the user is a developer
             if (developerIds[j] == ContextInfo.userId) {
               // Set the flag
