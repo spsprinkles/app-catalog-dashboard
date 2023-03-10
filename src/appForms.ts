@@ -431,6 +431,7 @@ export class AppForms {
         let appCatalogExists = false;
         let canDeploy = false;
         let errorMessage = "";
+        let siteExists = false;
         let webUrl = null;
 
         // Set the header
@@ -490,6 +491,7 @@ export class AppForms {
                             appCatalogExists = false;
                             canDeploy = false;
                             errorMessage = "";
+                            siteExists = false;
                             webUrl = null;
 
                             // Disable the buttons
@@ -514,6 +516,9 @@ export class AppForms {
                                             Expand: ["Lists", "Lists/EffectiveBasePermissions"],
                                             Select: ["Title", "Lists/Title", "Lists/EffectiveBasePermissions"]
                                         }).execute(web => {
+                                            // Set the flag
+                                            siteExists = true;
+
                                             // Parse the lists
                                             for (let i = 0; i < web.Lists.results.length; i++) {
                                                 // See if this is the app catalog
@@ -556,17 +561,16 @@ export class AppForms {
                                 })().then(() => {
                                     // Ensure the form is valid
                                     if (form.isValid()) {
-                                        // See if the app catalog doesn't exists
-                                        if (!appCatalogExists) {
-                                            // Enable the request button
-                                            btnRequest.enable();
-                                        }
-
                                         // See if the user can deploy
                                         if (canDeploy) {
                                             // Enable the deploy button
                                             btnDeploy.enable();
                                         }
+                                    }
+                                    // Else, see if the app catalog doesn't exists
+                                    else if (siteExists && !appCatalogExists) {
+                                        // Enable the request button
+                                        btnRequest.enable();
                                     }
 
                                     // Hide the loading dialog
