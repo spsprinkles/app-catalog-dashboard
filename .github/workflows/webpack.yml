@@ -42,4 +42,5 @@ jobs:
         name: artifacts
         path: |
           assets/config.json
+          assets/index.html
           dist
