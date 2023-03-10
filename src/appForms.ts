@@ -500,8 +500,8 @@ export class AppForms {
 
                             // Validate the url
                             // Note - trim the '/' from the end of the url. It can cause the web query to fail.
-                            let url = (form.getValues()["Url"] || "").trim().replace(/\/$/, "");
-                            if (url) {
+                            webUrl = (form.getValues()["Url"] || "").trim().replace(/\/$/, "");
+                            if (webUrl) {
                                 // Show a loading dialog
                                 LoadingDialog.setHeader("Loading App Catalog");
                                 LoadingDialog.setBody("This dialog will close after the app catalog is loaded.");
@@ -512,7 +512,7 @@ export class AppForms {
                                     // Return a promise
                                     return new Promise((resolve) => {
                                         // Query the web
-                                        Web(url).query({
+                                        Web(webUrl).query({
                                             Expand: ["Lists", "Lists/EffectiveBasePermissions"],
                                             Select: ["Title", "Lists/Title", "Lists/EffectiveBasePermissions"]
                                         }).execute(web => {
