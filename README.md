@@ -52,7 +52,6 @@ The [configuration file](https://github.com/spsprinkles/app-catalog-dashboard/ra
 | cdnTest | The absolute url to the library used to store the client side assets for testing. |
 | cdnProd | The absolute url to the library used to store the client side assets for production. |
 | dateFormat | The date format to use. _(Examples: YYYY-MM-DD or YYYY-MM-DD HH:mm:ss)_ |
-| disableClientSideAssetsExtraction | Disables the extraction of client side assets for the app. |
 | flowEndpoint | The flow authorization endpoint to use when triggering a flow. This is will default to commercial unless specified. Possible values: Flow, FlowChina, FlowDoD, FlowGov, FlowHigh, FlowUSNat, FlowUSSec or the url to the flow authorization endpoint. |
 | errorEmails | An array of email addresses to send to when a user has an error when using the application. This will help with troubleshooting issues in production. |
 | helpdesk | The email address to send notifications to the `Helpdesk` users. |

@@ -227,13 +227,6 @@ export class AppActions {
 
         // Return a promise
         return new Promise(resolve => {
-            // See if we are disabling the client side assets extraction
-            if (AppConfig.Configuration.disableClientSideAssetsExtraction) {
-                // Resolve the request and do nothing
-                resolve(null);
-                return;
-            }
-
             // Set the folder name
             let folderName = DataSource.AppItem.AppProductID.toLowerCase();
 
@@ -1594,97 +1587,65 @@ export class AppActions {
                                         LoadingDialog.setBody("Uploading the app package...");
 
                                         // Log
-                                        ErrorDialog.logInfo(`Uploading the SPFx package ${file.name} to the folder...`);
+                                        ErrorDialog.logInfo(`Uploading the SPFx package(s) ${file.name} to the folder...`);
 
                                         // Upload the packages
                                         this.uploadSPFxPackages(item.Folder(), file, pkgInfo.spfxTest, pkgInfo.spfxProd).then(() => {
                                             // Log
                                             ErrorDialog.logInfo(`The SPFx package was uploaded successfully...`);
 
-                                            // Update the loading dialog
-                                            LoadingDialog.setHeader("Uploading the Client Side Assets");
-                                            LoadingDialog.setBody("Uploading the app's assets'...");
+                                            // See if the image exists
+                                            if (pkgInfo.image) {
+                                                // Update the loading dialog
+                                                LoadingDialog.setHeader("Uploading the App Icon");
+                                                LoadingDialog.setBody("Uploading the icon for this app'...");
 
-                                            // Log
-                                            ErrorDialog.logInfo(`Uploading the SPFx package assets...`);
+                                                // Log
+                                                ErrorDialog.logInfo(`Uploading the SPFx package icon to the folder...`);
 
-                                            // Parse the assets
-                                            Helper.Executor(pkgInfo.assets, asset => {
-                                                // Return a promise
-                                                return new Promise((resolve) => {
-                                                    // See if we are disabling the client side assets extraction
-                                                    if (AppConfig.Configuration.disableClientSideAssetsExtraction) {
-                                                        // Resolve the request and do nothing
-                                                        resolve(null);
-                                                        return;
-                                                    }
+                                                // Get image in different format for later uploading
+                                                pkgInfo.image.async("arraybuffer").then(content => {
+                                                    // Get the file extension
+                                                    let fileExt: string | string[] = pkgInfo.image.name.split('.');
+                                                    fileExt = fileExt[fileExt.length - 1];
 
-                                                    // Get the file information
-                                                    asset.async("arraybuffer").then(content => {
-                                                        // Upload the file
-                                                        clientSideAssetFolder.Files().add(asset.name.replace(/clientsideassets\//i, ''), true, content).execute(resolve, () => {
-                                                            // Error uploading the asset
-                                                            ErrorDialog.logError("Error uploading the client side asset file: " + asset.name);
+                                                    // Upload the image to this folder
+                                                    item.Folder().Files().add("AppIcon." + fileExt, true, content).execute(
+                                                        file => {
+                                                            // Log
+                                                            ErrorDialog.logInfo(`The SPFx app icon '${file.Name}' was added successfully...`);
 
-                                                            // Upload the next file
-                                                            resolve(null);
-                                                        });
-                                                    });
-                                                });
-                                            }).then(() => {
-                                                // See if the image exists
-                                                if (pkgInfo.image) {
-                                                    // Update the loading dialog
-                                                    LoadingDialog.setHeader("Uploading the App Icon");
-                                                    LoadingDialog.setBody("Uploading the icon for this app'...");
-
-                                                    // Log
-                                                    ErrorDialog.logInfo(`Uploading the SPFx package icon to the folder...`);
-
-                                                    // Get image in different format for later uploading
-                                                    pkgInfo.image.async("arraybuffer").then(content => {
-                                                        // Get the file extension
-                                                        let fileExt: string | string[] = pkgInfo.image.name.split('.');
-                                                        fileExt = fileExt[fileExt.length - 1];
-
-                                                        // Upload the image to this folder
-                                                        item.Folder().Files().add("AppIcon." + fileExt, true, content).execute(
-                                                            file => {
+                                                            // Set the icon url
+                                                            item.update({
+                                                                AppThumbnailURL: {
+                                                                    __metadata: { type: "SP.FieldUrlValue" },
+                                                                    Description: file.ServerRelativeUrl,
+                                                                    Url: file.ServerRelativeUrl
+                                                                }
+                                                            }).execute(() => {
                                                                 // Log
-                                                                ErrorDialog.logInfo(`The SPFx app icon '${file.Name}' was added successfully...`);
+                                                                ErrorDialog.logInfo(`The SPFx app icon url metadata was updated successfully...`);
 
-                                                                // Set the icon url
-                                                                item.update({
-                                                                    AppThumbnailURL: {
-                                                                        __metadata: { type: "SP.FieldUrlValue" },
-                                                                        Description: file.ServerRelativeUrl,
-                                                                        Url: file.ServerRelativeUrl
-                                                                    }
-                                                                }).execute(() => {
-                                                                    // Log
-                                                                    ErrorDialog.logInfo(`The SPFx app icon url metadata was updated successfully...`);
+                                                                // Close the loading dialog
+                                                                LoadingDialog.hide();
 
-                                                                    // Close the loading dialog
-                                                                    LoadingDialog.hide();
+                                                                // Execute the completed event
+                                                                onComplete(pkgInfo.item);
+                                                            });
+                                                        },
+                                                        ex => {
+                                                            // Log the error
+                                                            ErrorDialog.show("Uploading Icon", "There was an error uploading the app icon file.", ex);
+                                                        }
+                                                    );
+                                                });
+                                            } else {
+                                                // Close the loading dialog
+                                                LoadingDialog.hide();
 
-                                                                    // Execute the completed event
-                                                                    onComplete(pkgInfo.item);
-                                                                });
-                                                            },
-                                                            ex => {
-                                                                // Log the error
-                                                                ErrorDialog.show("Uploading Icon", "There was an error uploading the app icon file.", ex);
-                                                            }
-                                                        );
-                                                    });
-                                                } else {
-                                                    // Close the loading dialog
-                                                    LoadingDialog.hide();
-
-                                                    // Execute the completed event
-                                                    onComplete(pkgInfo.item);
-                                                }
-                                            });
+                                                // Execute the completed event
+                                                onComplete(pkgInfo.item);
+                                            }
                                         }, (ex) => {
                                             // Log the error
                                             ErrorDialog.show("Uploading File", "There was an error uploading the app package file.", ex);
@@ -1778,74 +1739,6 @@ export class AppActions {
                     itemInfo.AppStatus = AppConfig.TestCasesStatus;
                     DataSource.AppItem.update(itemInfo).execute(
                         () => {
-                            // Clears the client side assets folder
-                            let clearClientSideAssets = (): PromiseLike<Types.SP.Folder> => {
-                                // Update the loading dialog
-                                LoadingDialog.setBody("Clearing the Associated Client Side Assets");
-
-                                // Return a promise
-                                return new Promise(resolve => {
-                                    // See if we are disabling the client side assets extraction
-                                    if (AppConfig.Configuration.disableClientSideAssetsExtraction) {
-                                        // Resolve the request and do nothing
-                                        resolve(null);
-                                        return;
-                                    }
-
-                                    // Ensure the folder exists
-                                    AppActions.createClientSideAssetsFolder(Web(Strings.SourceUrl).Lists(Strings.Lists.Apps).Items(DataSource.AppItem.Id).Folder()).then(folder => {
-                                        // Get the client side asset files
-                                        folder.Files().execute(files => {
-                                            // Parse the files
-                                            Helper.Executor(files.results, file => {
-                                                // Return a promise
-                                                return new Promise(resolve => {
-                                                    // Delete the file
-                                                    file.delete().execute(resolve, resolve);
-                                                });
-                                            }).then(() => {
-                                                // Resolve the request
-                                                resolve(folder);
-                                            });
-                                        });
-                                    });
-                                });
-                            }
-
-                            // Uploads the client side assets
-                            let uploadClientSideAssets = (folder: Types.SP.Folder) => {
-                                // Update the loading dialog
-                                LoadingDialog.setBody("Uploading the Associated Client Side Assets");
-
-                                // Return a promise
-                                return new Promise(resolve => {
-                                    // See if we are disabling the client side assets extraction
-                                    if (AppConfig.Configuration.disableClientSideAssetsExtraction) {
-                                        // Resolve the request and do nothing
-                                        resolve(null);
-                                        return;
-                                    }
-
-                                    // Parse the assets
-                                    Helper.Executor(pkgInfo.assets, asset => {
-                                        // Return a promise
-                                        return new Promise((resolve) => {
-                                            // Get the file information
-                                            asset.async("arraybuffer").then(content => {
-                                                // Upload the file
-                                                folder.Files().add(asset.name.replace(/clientsideassets\//i, ''), true, content).execute(resolve, () => {
-                                                    // Error uploading the asset
-                                                    ErrorDialog.logError("Error uploading the client side asset file: " + asset.name);
-
-                                                    // Upload the next file
-                                                    resolve(null);
-                                                });
-                                            });
-                                        });
-                                    }).then(resolve);
-                                });
-                            }
-
                             // Updates the status
                             let updateStatus = (): PromiseLike<void> => {
                                 // Update the loading dialog
@@ -1899,40 +1792,34 @@ export class AppActions {
                                 this.uploadSPFxPackages(Web(Strings.SourceUrl).getFolderByServerRelativeUrl(DataSource.AppFolder.ServerRelativeUrl), fileInfo, pkgInfo.spfxTest, pkgInfo.spfxProd).then(() => {
                                     // Update the status
                                     updateStatus().then(() => {
-                                        // Clear the client side assets
-                                        clearClientSideAssets().then(folder => {
-                                            // Upload the client side assets
-                                            uploadClientSideAssets(folder).then(() => {
-                                                // Refersh the item
-                                                DataSource.refreshItem(DataSource.AppItem.Id).then(() => {
-                                                    // See if the app was upgraded
-                                                    if (appUpgraded) {
-                                                        // See if there is a flow
-                                                        if (AppConfig.Configuration.appFlows && AppConfig.Configuration.appFlows.upgradeApp) {
-                                                            // Execute the flow
-                                                            AppActions.runFlow(AppConfig.Configuration.appFlows.upgradeApp);
-                                                        }
+                                        // Refersh the item
+                                        DataSource.refreshItem(DataSource.AppItem.Id).then(() => {
+                                            // See if the app was upgraded
+                                            if (appUpgraded) {
+                                                // See if there is a flow
+                                                if (AppConfig.Configuration.appFlows && AppConfig.Configuration.appFlows.upgradeApp) {
+                                                    // Execute the flow
+                                                    AppActions.runFlow(AppConfig.Configuration.appFlows.upgradeApp);
+                                                }
 
-                                                        // Send the notifications
-                                                        AppNotifications.sendAppUpgradedEmail(DataSource.AppItem).then(() => {
-                                                            // Resolve the request
-                                                            resolve();
-                                                        });
-
-                                                        // Log
-                                                        DataSource.logItem({
-                                                            LogUserId: ContextInfo.userId,
-                                                            ParentId: itemInfo.AppProductID || DataSource.AppItem.AppProductID,
-                                                            ParentListName: Strings.Lists.Apps,
-                                                            Title: DataSource.AuditLogStates.AppUpdated,
-                                                            LogComment: `A new version (${itemInfo.AppVersion}) of the app ${itemInfo.Title} was added.`
-                                                        }, Object.assign({ ...DataSource.AppItem, ...itemInfo }));
-                                                    } else {
-                                                        // Resolve the request
-                                                        resolve();
-                                                    }
+                                                // Send the notifications
+                                                AppNotifications.sendAppUpgradedEmail(DataSource.AppItem).then(() => {
+                                                    // Resolve the request
+                                                    resolve();
                                                 });
-                                            });
+
+                                                // Log
+                                                DataSource.logItem({
+                                                    LogUserId: ContextInfo.userId,
+                                                    ParentId: itemInfo.AppProductID || DataSource.AppItem.AppProductID,
+                                                    ParentListName: Strings.Lists.Apps,
+                                                    Title: DataSource.AuditLogStates.AppUpdated,
+                                                    LogComment: `A new version (${itemInfo.AppVersion}) of the app ${itemInfo.Title} was added.`
+                                                }, Object.assign({ ...DataSource.AppItem, ...itemInfo }));
+                                            } else {
+                                                // Resolve the request
+                                                resolve();
+                                            }
                                         });
                                     });
                                 }, ex => {
@@ -2073,9 +1960,17 @@ export class AppActions {
     }
 
     // Uploads the spfx packages to the folder
-    private static uploadSPFxPackages(appFolder: Types.SP.IFolder, spfxPkg: Helper.IListFormAttachmentInfo, testPkg: JSZip, prodPkg: JSZip) {
+    private static uploadSPFxPackages(appFolder: Types.SP.IFolder, spfxPkg: Helper.IListFormAttachmentInfo, testPkg: JSZip, prodPkg: JSZip): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve, reject) => {
+            // Update the loading dialog
+            LoadingDialog.setHeader("Uploading the Client Side Assets");
+            LoadingDialog.setBody("Uploading the app's assets'...");
+            LoadingDialog.show();
+
+            // Log
+            ErrorDialog.logInfo(`Uploading the SPFx package assets...`);
+
             // Get the file name without extension
             let pkgName = spfxPkg.name.replace(/.sppkg/i, '');
 
@@ -2096,7 +1991,11 @@ export class AppActions {
                             resolve(null);
                         }
                     });
-                }).then(resolve);
+                }).then(() => {
+                    // Close the dialog and resolve the request
+                    LoadingDialog.hide();
+                    resolve();
+                });
             }, reject);
         });
     }

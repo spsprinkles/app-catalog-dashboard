@@ -14,7 +14,6 @@ export interface IConfiguration {
     cdnTest?: string;
     dashboardUrl?: string;
     dateFormat?: string;
-    disableClientSideAssetsExtraction?: boolean;
     errorEmails?: string[];
     flowEndpoint?: string;
     helpdesk?: string;
