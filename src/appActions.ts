@@ -1863,8 +1863,8 @@ export class AppActions {
                                 LoadingDialog.setBody("Uploading the new package file...");
                                 LoadingDialog.show();
 
-                                // Upload the file
-                                Web(Strings.SourceUrl).getFolderByServerRelativeUrl(DataSource.AppFolder.ServerRelativeUrl).Files().add(fileInfo.name, true, fileInfo.data).execute(() => {
+                                // Upload the packages
+                                this.uploadSPFxPackages(Web(Strings.SourceUrl).getFolderByServerRelativeUrl(DataSource.AppFolder.ServerRelativeUrl), fileInfo, pkgInfo.spfxTest, pkgInfo.spfxProd).then(() => {
                                     // Update the status
                                     updateStatus().then(() => {
                                         // Clear the client side assets
@@ -1903,6 +1903,9 @@ export class AppActions {
                                             });
                                         });
                                     });
+                                }, ex => {
+                                    // Log the error
+                                    ErrorDialog.show("Uploading Package", "There was an error uploading the new package.", ex);
                                 });
                             });
                         },
