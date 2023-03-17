@@ -17,6 +17,7 @@ export class AppActions {
     // Archives the current package file
     static archivePackage(onComplete: () => void) {
         let appFile: Types.SP.File = null;
+        let appTestFile: Types.SP.File = null;
 
         // Show a loading dialog
         LoadingDialog.setHeader("Archiving the Package");
@@ -31,12 +32,23 @@ export class AppActions {
             let file = DataSource.AppFolder.Files.results[i];
 
             // See if this is the package
-            if (file.Name.toLowerCase().endsWith(".sppkg")) {
-                // Set the file
-                appFile = file;
-                break;
+            let fileName = file.Name.toLowerCase();
+            if (fileName.endsWith(".sppkg")) {
+                // See if this is a prod file and skip it
+                if (fileName.indexOf("-prod.sppkg") > 0) { continue; }
+                // Else, see if this is a test file
+                else if (fileName.indexOf("-test.sppkg") > 0) {
+                    // Set the file
+                    appTestFile = file;
+                } else {
+                    // Set the file
+                    appFile = file;
+                }
             }
         }
+
+        // Set the target app file
+        appFile = appTestFile ? appTestFile : appFile;
 
         // Ensure a file exists
         if (appFile == null) {
@@ -479,8 +491,16 @@ export class AppActions {
                     // Set the file
                     appFile = file;
                 }
-                break;
             }
+        }
+
+        // See if we are deploying to the tenant
+        if (tenantFl) {
+            // Set the target app file
+            appFile = appProdFile ? appProdFile : appFile;
+        } else {
+            // Set the target app file
+            appFile = appTestFile ? appTestFile : appFile;
         }
 
         // Ensure a file exists
@@ -491,15 +511,6 @@ export class AppActions {
             // This shouldn't happen
             LoadingDialog.hide();
             return;
-        }
-
-        // See if we are deploying to the tenant
-        if (tenantFl) {
-            // Set the target app file
-            appFile = appProdFile ? appProdFile : appFile;
-        } else {
-            // Set the target app file
-            appFile = appTestFile ? appTestFile : appFile;
         }
 
         // Log
@@ -658,6 +669,7 @@ export class AppActions {
     // Deploys the app to a site collection app catalog
     static deployAppToSite(siteUrl: string, updateSitesFl: boolean, onUpdate: () => void) {
         let appFile: Types.SP.File = null;
+        let appProdFile: Types.SP.File = null;
 
         // Log
         ErrorDialog.logInfo(`Getting the SPFx app package...`);
@@ -672,17 +684,27 @@ export class AppActions {
             let file = DataSource.AppFolder.Files.results[i];
 
             // See if this is the package
-            if (file.Name.toLowerCase().endsWith(".sppkg")) {
-                // Set the file
-                appFile = file;
-                break;
+            let fileName = file.Name.toLowerCase();
+            if (fileName.endsWith(".sppkg")) {
+                // See if this is a prod file
+                if (fileName.indexOf("-prod.sppkg") > 0) {
+                    // Set the file
+                    appProdFile = file;
+                }
+                // Else, see if this is a test file and skip it
+                else if (fileName.indexOf("-test.sppkg") > 0) { continue; }
+                // Else, set the file
+                else { appFile = file; }
             }
         }
+
+        // Set the target app file
+        appFile = appProdFile ? appProdFile : appFile;
 
         // Ensure a file exists
         if (appFile == null) {
             // Log
-            ErrorDialog.logInfo(`Unable to find the SPFx app package...`);
+            ErrorDialog.logInfo(`The SPFx package was not found...`);
 
             // This shouldn't happen
             LoadingDialog.hide();
