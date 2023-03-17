@@ -369,51 +369,48 @@ export class AppActions {
 
                             // Configure the test site
                             this.configureTestSite(web.ServerRelativeUrl).then(() => {
-                                // Upload the client side assets
-                                this.uploadClientSideAssets("test").then(() => {
-                                    // Get the app
-                                    Web(web.ServerRelativeUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(DataSource.AppItem.AppProductID).execute(
-                                        app => {
-                                            // See if the app is already installed
-                                            if (app.SkipDeploymentFeature) {
-                                                // Log
-                                                ErrorDialog.logInfo(`App has 'Skip Feature Deployment' flag set, skipping the install...`);
+                                // Get the app
+                                Web(web.ServerRelativeUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(DataSource.AppItem.AppProductID).execute(
+                                    app => {
+                                        // See if the app is already installed
+                                        if (app.SkipDeploymentFeature) {
+                                            // Log
+                                            ErrorDialog.logInfo(`App has 'Skip Feature Deployment' flag set, skipping the install...`);
 
-                                                // Send the email
-                                                sendEmail();
-                                            } else {
-                                                // Log
-                                                ErrorDialog.logInfo(`Installing the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID}...`);
+                                            // Send the email
+                                            sendEmail();
+                                        } else {
+                                            // Log
+                                            ErrorDialog.logInfo(`Installing the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID}...`);
 
-                                                // Update the loading dialog
-                                                LoadingDialog.setHeader("Installing the App");
-                                                LoadingDialog.setBody("Installing the application to the test site.");
+                                            // Update the loading dialog
+                                            LoadingDialog.setHeader("Installing the App");
+                                            LoadingDialog.setBody("Installing the application to the test site.");
 
-                                                // Install the application to the test site
-                                                app.install().execute(
-                                                    // Success
-                                                    () => {
-                                                        // Log
-                                                        ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was installed successfully...`);
+                                            // Install the application to the test site
+                                            app.install().execute(
+                                                // Success
+                                                () => {
+                                                    // Log
+                                                    ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was installed successfully...`);
 
-                                                        // Send the email
-                                                        sendEmail();
-                                                    },
+                                                    // Send the email
+                                                    sendEmail();
+                                                },
 
-                                                    // Error
-                                                    () => {
-                                                        // Log the error
-                                                        ErrorDialog.show("Error Deploying Application", "There was an error installing the application to the test site.");
-                                                    }
-                                                );
-                                            }
-                                        },
-                                        ex => {
-                                            // Log the error
-                                            ErrorDialog.show("Getting App", "There was an error getting the app item.", ex);
+                                                // Error
+                                                () => {
+                                                    // Log the error
+                                                    ErrorDialog.show("Error Deploying Application", "There was an error installing the application to the test site.");
+                                                }
+                                            );
                                         }
-                                    );
-                                });
+                                    },
+                                    ex => {
+                                        // Log the error
+                                        ErrorDialog.show("Getting App", "There was an error getting the app item.", ex);
+                                    }
+                                );
                             });
                         },
                         // Error
@@ -1872,7 +1869,7 @@ export class AppActions {
                 if (file == null) { resolve(assets); return; }
 
                 // Read the package contents
-                file.content().execute(content => {
+                Web(Strings.SourceUrl).getFileByServerRelativeUrl(file.ServerRelativeUrl).content().execute(content => {
                     // Extract the files
                     JSZip.loadAsync(content).then(zipFile => {
                         // Parse the files
@@ -1932,22 +1929,21 @@ export class AppActions {
                 // Get the package
                 let pkgFile = getSPFxPackage();
 
-                // Get the assets
-                getClientSideAssets(pkgFile).then(assets => {
-                    // Get the web and list url information
-                    let webUrl = "";
-                    let urlInfo = cdn.split('/');
-                    let listUrl = urlInfo[urlInfo.length - 1];
-                    for (let i = 0; i < urlInfo.length - 1; i++) {
-                        // Append the url info
-                        webUrl += (i == 0 ? "" : "/") + urlInfo[i];
-                    }
+                // Get the web and list url information
+                let webUrl = "";
+                let urlInfo = cdn.split('/');
+                let listUrl = urlInfo[urlInfo.length - 1];
+                for (let i = 0; i < urlInfo.length - 1; i++) {
+                    // Append the url info
+                    webUrl += (i == 0 ? "" : "/") + urlInfo[i];
+                }
 
-                    // Get the web context information
-                    ContextInfo.getWeb(webUrl).execute(context => {
-                        // Set the web
-                        let web = Web(webUrl, { requestDigest: context.GetContextWebInformation.FormDigestValue });
-
+                // Get the web context information
+                ContextInfo.getWeb(webUrl).execute(context => {
+                    // Set the web
+                    let web = Web(webUrl, { requestDigest: context.GetContextWebInformation.FormDigestValue });
+                    // Get the assets
+                    getClientSideAssets(pkgFile).then(assets => {
                         // Ensure the folder is created
                         this.createClientSideAssetsFolder(web.Folders(listUrl)).then(folder => {
                             // Parse the assets
