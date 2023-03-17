@@ -49,6 +49,8 @@ The [configuration file](https://github.com/spsprinkles/app-catalog-dashboard/ra
 | appDetails | The app details information to display. |
 | appFlows | The flow ids to trigger based on actions of the app. |
 | appNotifications | The ability to send notifications based on app actions. |
+| cdnTest | The absolute url to the library used to store the client side assets for testing. |
+| cdnProd | The absolute url to the library used to store the client side assets for production. |
 | dateFormat | The date format to use. _(Examples: YYYY-MM-DD or YYYY-MM-DD HH:mm:ss)_ |
 | disableClientSideAssetsExtraction | Disables the extraction of client side assets for the app. |
 | flowEndpoint | The flow authorization endpoint to use when triggering a flow. This is will default to commercial unless specified. Possible values: Flow, FlowChina, FlowDoD, FlowGov, FlowHigh, FlowUSNat, FlowUSSec or the url to the flow authorization endpoint. |
