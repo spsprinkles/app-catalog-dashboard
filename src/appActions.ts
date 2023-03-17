@@ -234,6 +234,9 @@ export class AppActions {
                 return;
             }
 
+            // Set the folder name
+            let folderName = DataSource.AppItem.AppProductID.toLowerCase();
+
             // Load the folders
             rootFolder.Folders().execute(folders => {
                 // Find the archive folder
@@ -241,7 +244,7 @@ export class AppActions {
                     let folder = folders.results[i];
 
                     // See if this is the archive folder
-                    if (folder.Name.toLowerCase() == "ClientSideAssets") {
+                    if (folder.Name.toLowerCase() == folderName) {
                         // Log
                         ErrorDialog.logInfo("ClientSideAssets folder already exists...");
 
@@ -255,7 +258,7 @@ export class AppActions {
                 ErrorDialog.logInfo("Creating the client side assets folder...");
 
                 // Create the folder
-                rootFolder.Folders().add("ClientSideAssets").execute(
+                rootFolder.Folders().add(folderName).execute(
                     folder => {
                         // Log
                         ErrorDialog.logInfo("Created the client side assets folder successfully...");
@@ -361,48 +364,51 @@ export class AppActions {
 
                             // Configure the test site
                             this.configureTestSite(web.ServerRelativeUrl).then(() => {
-                                // Get the app
-                                Web(web.ServerRelativeUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(DataSource.AppItem.AppProductID).execute(
-                                    app => {
-                                        // See if the app is already installed
-                                        if (app.SkipDeploymentFeature) {
-                                            // Log
-                                            ErrorDialog.logInfo(`App has 'Skip Feature Deployment' flag set, skipping the install...`);
+                                // Upload the client side assets
+                                this.uploadClientSideAssets("test").then(() => {
+                                    // Get the app
+                                    Web(web.ServerRelativeUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(DataSource.AppItem.AppProductID).execute(
+                                        app => {
+                                            // See if the app is already installed
+                                            if (app.SkipDeploymentFeature) {
+                                                // Log
+                                                ErrorDialog.logInfo(`App has 'Skip Feature Deployment' flag set, skipping the install...`);
 
-                                            // Send the email
-                                            sendEmail();
-                                        } else {
-                                            // Log
-                                            ErrorDialog.logInfo(`Installing the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID}...`);
+                                                // Send the email
+                                                sendEmail();
+                                            } else {
+                                                // Log
+                                                ErrorDialog.logInfo(`Installing the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID}...`);
 
-                                            // Update the loading dialog
-                                            LoadingDialog.setHeader("Installing the App");
-                                            LoadingDialog.setBody("Installing the application to the test site.");
+                                                // Update the loading dialog
+                                                LoadingDialog.setHeader("Installing the App");
+                                                LoadingDialog.setBody("Installing the application to the test site.");
 
-                                            // Install the application to the test site
-                                            app.install().execute(
-                                                // Success
-                                                () => {
-                                                    // Log
-                                                    ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was installed successfully...`);
+                                                // Install the application to the test site
+                                                app.install().execute(
+                                                    // Success
+                                                    () => {
+                                                        // Log
+                                                        ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was installed successfully...`);
 
-                                                    // Send the email
-                                                    sendEmail();
-                                                },
+                                                        // Send the email
+                                                        sendEmail();
+                                                    },
 
-                                                // Error
-                                                () => {
-                                                    // Log the error
-                                                    ErrorDialog.show("Error Deploying Application", "There was an error installing the application to the test site.");
-                                                }
-                                            );
+                                                    // Error
+                                                    () => {
+                                                        // Log the error
+                                                        ErrorDialog.show("Error Deploying Application", "There was an error installing the application to the test site.");
+                                                    }
+                                                );
+                                            }
+                                        },
+                                        ex => {
+                                            // Log the error
+                                            ErrorDialog.show("Getting App", "There was an error getting the app item.", ex);
                                         }
-                                    },
-                                    ex => {
-                                        // Log the error
-                                        ErrorDialog.show("Getting App", "There was an error getting the app item.", ex);
-                                    }
-                                );
+                                    );
+                                });
                             });
                         },
                         // Error
@@ -446,6 +452,8 @@ export class AppActions {
     // Deploys the solution to the app catalog
     static deploy(tenantFl: boolean, skipFeatureDeployment: boolean, onError: () => void, onUpdate: () => void) {
         let appFile: Types.SP.File = null;
+        let appProdFile: Types.SP.File = null;
+        let appTestFile: Types.SP.File = null;
 
         // Log
         ErrorDialog.logInfo(`Deploying the SPFx package to the ${tenantFl ? "tenant" : "site"} app catalog...`);
@@ -463,9 +471,21 @@ export class AppActions {
             let file = DataSource.AppFolder.Files.results[i];
 
             // See if this is the package
-            if (file.Name.toLowerCase().endsWith(".sppkg")) {
-                // Set the file
-                appFile = file;
+            let fileName = file.Name.toLowerCase();
+            if (fileName.endsWith(".sppkg")) {
+                // See if this is a prod file
+                if (fileName.indexOf("-prod.sppkg") > 0) {
+                    // Set the file
+                    appProdFile = file;
+                }
+                // Else, see if this is a test file
+                else if (fileName.indexOf("-test.sppkg") > 0) {
+                    // Set the file
+                    appTestFile = file;
+                } else {
+                    // Set the file
+                    appFile = file;
+                }
                 break;
             }
         }
@@ -478,6 +498,15 @@ export class AppActions {
             // This shouldn't happen
             LoadingDialog.hide();
             return;
+        }
+
+        // See if we are deploying to the tenant
+        if (tenantFl) {
+            // Set the target app file
+            appFile = appProdFile ? appProdFile : appFile;
+        } else {
+            // Set the target app file
+            appFile = appTestFile ? appTestFile : appFile;
         }
 
         // Log
@@ -522,73 +551,76 @@ export class AppActions {
                                         appItem => {
                                             // Update the metadata
                                             this.updateAppMetadata(appItem.Id, tenantFl, catalogUrl, requestDigest).then(() => {
-                                                // Get the app catalog
-                                                let web = Web(catalogUrl, { requestDigest });
-                                                let appCatalog = (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog());
+                                                // Upload the client side assets
+                                                this.uploadClientSideAssets(tenantFl ? "prod" : "test").then(() => {
+                                                    // Get the app catalog
+                                                    let web = Web(catalogUrl, { requestDigest });
+                                                    let appCatalog = (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog());
 
-                                                // Log
-                                                ErrorDialog.logInfo(`Deploying the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID}...`);
-
-                                                // Deploy the app
-                                                appCatalog.AvailableApps(DataSource.AppItem.AppProductID).deploy(skipFeatureDeployment).execute(app => {
                                                     // Log
-                                                    ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was deployed successfully...`);
+                                                    ErrorDialog.logInfo(`Deploying the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID}...`);
 
-                                                    // See if this is the tenant app
-                                                    if (tenantFl) {
+                                                    // Deploy the app
+                                                    appCatalog.AvailableApps(DataSource.AppItem.AppProductID).deploy(skipFeatureDeployment).execute(app => {
                                                         // Log
-                                                        ErrorDialog.logInfo(`Setting the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} tenant deployed flag...`);
+                                                        ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was deployed successfully...`);
 
-                                                        // Update the tenant deployed flag
-                                                        DataSource.AppItem.update({
-                                                            AppIsTenantDeployed: true
-                                                        }).execute(() => {
+                                                        // See if this is the tenant app
+                                                        if (tenantFl) {
                                                             // Log
-                                                            ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} tenant deployed flag was set to true...`);
+                                                            ErrorDialog.logInfo(`Setting the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} tenant deployed flag...`);
 
+                                                            // Update the tenant deployed flag
+                                                            DataSource.AppItem.update({
+                                                                AppIsTenantDeployed: true
+                                                            }).execute(() => {
+                                                                // Log
+                                                                ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} tenant deployed flag was set to true...`);
+
+                                                                // Hide the dialog
+                                                                LoadingDialog.hide();
+
+                                                                // Call the update event
+                                                                onUpdate();
+                                                            }, () => {
+                                                                // Log the error
+                                                                ErrorDialog.show("Updating App", "There was an error setting the tenant deployed flag.");
+
+                                                                // Call the event
+                                                                onError();
+                                                            });
+                                                        } else {
                                                             // Hide the dialog
                                                             LoadingDialog.hide();
 
                                                             // Call the update event
                                                             onUpdate();
-                                                        }, () => {
+                                                        }
+                                                    }, () => {
+                                                        // See if this isn't the tenant
+                                                        if (!tenantFl) {
+                                                            // Load the site collection app item
+                                                            DataSource.loadSiteAppByName(appFile.Name).then(appItem => {
+                                                                // See if the item exists
+                                                                if (appItem) {
+                                                                    // Log the error
+                                                                    ErrorDialog.show("Deploy Error", "The app was added to the catalog successfully, but there was an error with it.");
+                                                                } else {
+                                                                    // Log the error
+                                                                    ErrorDialog.show("Getting Apps", "There was an error getting the available apps from the app catalog.");
+                                                                }
+
+                                                                // Call the event
+                                                                onError();
+                                                            });
+                                                        } else {
                                                             // Log the error
-                                                            ErrorDialog.show("Updating App", "There was an error setting the tenant deployed flag.");
+                                                            ErrorDialog.show("Getting Apps", "There was an error getting the available apps from the app catalog.");
 
                                                             // Call the event
                                                             onError();
-                                                        });
-                                                    } else {
-                                                        // Hide the dialog
-                                                        LoadingDialog.hide();
-
-                                                        // Call the update event
-                                                        onUpdate();
-                                                    }
-                                                }, () => {
-                                                    // See if this isn't the tenant
-                                                    if (!tenantFl) {
-                                                        // Load the site collection app item
-                                                        DataSource.loadSiteAppByName(appFile.Name).then(appItem => {
-                                                            // See if the item exists
-                                                            if (appItem) {
-                                                                // Log the error
-                                                                ErrorDialog.show("Deploy Error", "The app was added to the catalog successfully, but there was an error with it.");
-                                                            } else {
-                                                                // Log the error
-                                                                ErrorDialog.show("Getting Apps", "There was an error getting the available apps from the app catalog.");
-                                                            }
-
-                                                            // Call the event
-                                                            onError();
-                                                        });
-                                                    } else {
-                                                        // Log the error
-                                                        ErrorDialog.show("Getting Apps", "There was an error getting the available apps from the app catalog.");
-
-                                                        // Call the event
-                                                        onError();
-                                                    }
+                                                        }
+                                                    });
                                                 });
                                             });
                                         },
@@ -1916,6 +1948,127 @@ export class AppActions {
                     );
                 }
             });
+        });
+    }
+
+    // Uploads the spfx client side assets
+    private static uploadClientSideAssets(pkgType: "test" | "prod"): PromiseLike<void> {
+        // Gets the client side assets
+        let getClientSideAssets = (file: Types.SP.File): PromiseLike<JSZip.JSZipObject[]> => {
+            let assets: JSZip.JSZipObject[] = [];
+
+            // Return a promise
+            return new Promise((resolve) => {
+                // Ensure the file exists
+                if (file == null) { resolve(assets); return; }
+
+                // Read the package contents
+                file.content().execute(content => {
+                    // Extract the files
+                    JSZip.loadAsync(content).then(zipFile => {
+                        // Parse the files
+                        zipFile.forEach((path, fileInfo) => {
+                            // See if this is a client side asset
+                            if (path.toLowerCase().indexOf("clientsideassets") == 0) {
+                                // Ensure this is a file
+                                if (!fileInfo.name.endsWith('/')) {
+                                    // Add the asset information
+                                    assets.push(fileInfo);
+                                }
+                            }
+                        });
+
+                        // Resolve the request
+                        resolve(assets);
+                    });
+                });
+            });
+        }
+
+        // Gets the spfx package
+        let getSPFxPackage = () => {
+            // Parse the Files in the app folder
+            for (let i = 0; i < DataSource.AppFolder.Files.results.length; i++) {
+                let file = DataSource.AppFolder.Files.results[i];
+                let fileName = file.Name.toLowerCase();
+                let fileInfo = fileName.split('.');
+                let fileExt = fileInfo[fileInfo.length - 1];
+
+                // See if this is a .pkg file
+                if (fileExt == "sppkg") {
+                    // See if we are looking for the
+                    if (fileName.indexOf("-" + pkgType) > 0) {
+                        // Return the package
+                        return file;
+                    }
+                }
+            }
+
+            // Not found
+            return null;
+        }
+
+        // Return a promise
+        return new Promise((resolve, reject) => {
+            let isTest = pkgType == "test";
+
+            // Get the cdn url
+            let cdn = isTest ? AppConfig.Configuration.cdnTest : AppConfig.Configuration.cdnProd;
+            if (cdn) {
+                // Show a loading dialog
+                LoadingDialog.setHeader("Uploading Client Side Assets");
+                LoadingDialog.setBody("Uploading the solution assets to the app folder...");
+                LoadingDialog.show();
+
+                // Get the package
+                let pkgFile = getSPFxPackage();
+
+                // Get the assets
+                getClientSideAssets(pkgFile).then(assets => {
+                    // Get the web and list url information
+                    let webUrl = "";
+                    let urlInfo = cdn.split('/');
+                    let listUrl = urlInfo[urlInfo.length - 1];
+                    for (let i = 0; i < urlInfo.length - 1; i++) {
+                        // Append the url info
+                        webUrl += (i == 0 ? "" : "/") + urlInfo[i];
+                    }
+
+                    // Get the web context information
+                    ContextInfo.getWeb(webUrl).execute(context => {
+                        // Set the web
+                        let web = Web(webUrl, { requestDigest: context.GetContextWebInformation.FormDigestValue });
+
+                        // Ensure the folder is created
+                        this.createClientSideAssetsFolder(web.Folders(listUrl)).then(folder => {
+                            // Parse the assets
+                            Helper.Executor(assets, assetFile => {
+                                // Return a promise
+                                return new Promise((resolve) => {
+                                    // Get the file information
+                                    assetFile.async("arraybuffer").then(content => {
+                                        // Upload the file
+                                        folder.Files().add(assetFile.name.replace(/clientsideassets\//i, ''), true, content).execute(resolve, () => {
+                                            // Error uploading the asset
+                                            ErrorDialog.logError("Error uploading the client side asset file: " + assetFile.name);
+
+                                            // Upload the next file
+                                            resolve(null);
+                                        });
+                                    });
+                                });
+                            }).then(() => {
+                                // Close the dialog and resolve the request
+                                LoadingDialog.hide();
+                                resolve();
+                            });
+                        }, reject);
+                    });
+                });
+            } else {
+                // Resolve the request
+                resolve(null);
+            }
         });
     }
 
