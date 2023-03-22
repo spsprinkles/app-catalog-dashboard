@@ -965,14 +965,14 @@ export class AppActions {
         }
 
         // Generates the CDN package
-        let generateCDNPackage = (zipFile: JSZip, files: JSZip.JSZipObject[], isTest: boolean = true): PromiseLike<JSZip> => {
+        let generateCDNPackage = (appId: string, zipFile: JSZip, files: JSZip.JSZipObject[], isTest: boolean = true): PromiseLike<JSZip> => {
             // Return a promise
             return new Promise(resolve => {
                 // Get the CDN url from the configuration and ensure it exists
                 let cdn = isTest ? AppConfig.Configuration.cdnTest : AppConfig.Configuration.cdnProd;
                 if (cdn) {
                     // Ensure the url has a trailing '/'
-                    cdn = cdn.replace(/\/$/, '') + '/';
+                    cdn = cdn.replace(/\/$/, '') + '/' + appId.toLowerCase() + '/';
 
                     // Parse the files
                     files.forEach(file => {
@@ -1092,7 +1092,6 @@ export class AppActions {
                             }
                         }
 
-
                         // See if this is a component xml file
                         if (fileName.indexOf("/") > 0 && fileName.endsWith(".xml")) {
                             // Save a reference to this file
@@ -1106,9 +1105,9 @@ export class AppActions {
                         item.AppManifest = info.content;
 
                         // Generate the test package
-                        generateCDNPackage(zipFile, info.files, true).then(spfxTest => {
+                        generateCDNPackage(item.AppProductID, zipFile, info.files, true).then(spfxTest => {
                             // Generate the production package
-                            generateCDNPackage(zipFile, info.files, false).then(spfxProd => {
+                            generateCDNPackage(item.AppProductID, zipFile, info.files, false).then(spfxProd => {
                                 // Resolve the request
                                 resolve({ assets, item, image, spfxProd, spfxTest });
                             });
@@ -1581,94 +1580,91 @@ export class AppActions {
                                 // Log
                                 ErrorDialog.logInfo(`Document set folder for ${pkgInfo.item.Title} was created succesfully...`);
 
-                                // Create the client side assets folder
-                                this.createClientSideAssetsFolder(item.Folder()).then(clientSideAssetFolder => {
-                                    // Update the loading dialog
-                                    LoadingDialog.setHeader("Updating Metadata");
-                                    LoadingDialog.setBody("Saving the package information...");
+                                // Update the loading dialog
+                                LoadingDialog.setHeader("Updating Metadata");
+                                LoadingDialog.setBody("Saving the package information...");
 
-                                    // Default the owner to the current user
-                                    pkgInfo.item.AppDevelopersId = { results: [ContextInfo.userId] } as any;
+                                // Default the owner to the current user
+                                pkgInfo.item.AppDevelopersId = { results: [ContextInfo.userId] } as any;
+
+                                // Log
+                                ErrorDialog.logInfo(`Updating the item metadata...`);
+
+                                // Update the metadata
+                                item.update(pkgInfo.item).execute(() => {
+                                    // Log
+                                    ErrorDialog.logInfo(`App's metadata was updated successfully...`);
+
+                                    // Set the id
+                                    pkgInfo.item.Id = item.Id;
+
+                                    // Update the loading dialog
+                                    LoadingDialog.setHeader("Uploading the Package");
+                                    LoadingDialog.setBody("Uploading the app package...");
 
                                     // Log
-                                    ErrorDialog.logInfo(`Updating the item metadata...`);
+                                    ErrorDialog.logInfo(`Uploading the SPFx package(s) ${file.name} to the folder...`);
 
-                                    // Update the metadata
-                                    item.update(pkgInfo.item).execute(() => {
+                                    // Upload the packages
+                                    this.uploadSPFxPackages(item.Folder(), file, pkgInfo.spfxTest, pkgInfo.spfxProd).then(() => {
                                         // Log
-                                        ErrorDialog.logInfo(`App's metadata was updated successfully...`);
+                                        ErrorDialog.logInfo(`The SPFx package was uploaded successfully...`);
 
-                                        // Set the id
-                                        pkgInfo.item.Id = item.Id;
+                                        // See if the image exists
+                                        if (pkgInfo.image) {
+                                            // Update the loading dialog
+                                            LoadingDialog.setHeader("Uploading the App Icon");
+                                            LoadingDialog.setBody("Uploading the icon for this app'...");
 
-                                        // Update the loading dialog
-                                        LoadingDialog.setHeader("Uploading the Package");
-                                        LoadingDialog.setBody("Uploading the app package...");
-
-                                        // Log
-                                        ErrorDialog.logInfo(`Uploading the SPFx package(s) ${file.name} to the folder...`);
-
-                                        // Upload the packages
-                                        this.uploadSPFxPackages(item.Folder(), file, pkgInfo.spfxTest, pkgInfo.spfxProd).then(() => {
                                             // Log
-                                            ErrorDialog.logInfo(`The SPFx package was uploaded successfully...`);
+                                            ErrorDialog.logInfo(`Uploading the SPFx package icon to the folder...`);
 
-                                            // See if the image exists
-                                            if (pkgInfo.image) {
-                                                // Update the loading dialog
-                                                LoadingDialog.setHeader("Uploading the App Icon");
-                                                LoadingDialog.setBody("Uploading the icon for this app'...");
+                                            // Get image in different format for later uploading
+                                            pkgInfo.image.async("arraybuffer").then(content => {
+                                                // Get the file extension
+                                                let fileExt: string | string[] = pkgInfo.image.name.split('.');
+                                                fileExt = fileExt[fileExt.length - 1];
 
-                                                // Log
-                                                ErrorDialog.logInfo(`Uploading the SPFx package icon to the folder...`);
+                                                // Upload the image to this folder
+                                                item.Folder().Files().add("AppIcon." + fileExt, true, content).execute(
+                                                    file => {
+                                                        // Log
+                                                        ErrorDialog.logInfo(`The SPFx app icon '${file.Name}' was added successfully...`);
 
-                                                // Get image in different format for later uploading
-                                                pkgInfo.image.async("arraybuffer").then(content => {
-                                                    // Get the file extension
-                                                    let fileExt: string | string[] = pkgInfo.image.name.split('.');
-                                                    fileExt = fileExt[fileExt.length - 1];
-
-                                                    // Upload the image to this folder
-                                                    item.Folder().Files().add("AppIcon." + fileExt, true, content).execute(
-                                                        file => {
+                                                        // Set the icon url
+                                                        item.update({
+                                                            AppThumbnailURL: {
+                                                                __metadata: { type: "SP.FieldUrlValue" },
+                                                                Description: file.ServerRelativeUrl,
+                                                                Url: file.ServerRelativeUrl
+                                                            }
+                                                        }).execute(() => {
                                                             // Log
-                                                            ErrorDialog.logInfo(`The SPFx app icon '${file.Name}' was added successfully...`);
+                                                            ErrorDialog.logInfo(`The SPFx app icon url metadata was updated successfully...`);
 
-                                                            // Set the icon url
-                                                            item.update({
-                                                                AppThumbnailURL: {
-                                                                    __metadata: { type: "SP.FieldUrlValue" },
-                                                                    Description: file.ServerRelativeUrl,
-                                                                    Url: file.ServerRelativeUrl
-                                                                }
-                                                            }).execute(() => {
-                                                                // Log
-                                                                ErrorDialog.logInfo(`The SPFx app icon url metadata was updated successfully...`);
+                                                            // Close the loading dialog
+                                                            LoadingDialog.hide();
 
-                                                                // Close the loading dialog
-                                                                LoadingDialog.hide();
+                                                            // Execute the completed event
+                                                            onComplete(pkgInfo.item);
+                                                        });
+                                                    },
+                                                    ex => {
+                                                        // Log the error
+                                                        ErrorDialog.show("Uploading Icon", "There was an error uploading the app icon file.", ex);
+                                                    }
+                                                );
+                                            });
+                                        } else {
+                                            // Close the loading dialog
+                                            LoadingDialog.hide();
 
-                                                                // Execute the completed event
-                                                                onComplete(pkgInfo.item);
-                                                            });
-                                                        },
-                                                        ex => {
-                                                            // Log the error
-                                                            ErrorDialog.show("Uploading Icon", "There was an error uploading the app icon file.", ex);
-                                                        }
-                                                    );
-                                                });
-                                            } else {
-                                                // Close the loading dialog
-                                                LoadingDialog.hide();
-
-                                                // Execute the completed event
-                                                onComplete(pkgInfo.item);
-                                            }
-                                        }, (ex) => {
-                                            // Log the error
-                                            ErrorDialog.show("Uploading File", "There was an error uploading the app package file.", ex);
-                                        });
+                                            // Execute the completed event
+                                            onComplete(pkgInfo.item);
+                                        }
+                                    }, (ex) => {
+                                        // Log the error
+                                        ErrorDialog.show("Uploading File", "There was an error uploading the app package file.", ex);
                                     });
                                 });
                             },
@@ -1994,7 +1990,7 @@ export class AppActions {
 
             // Upload the packages
             appFolder.Files().add(spfxPkg.name, true, spfxPkg.data).execute(() => {
-                Helper.Executor([{ name: pkgName + "-test.sppkg", file: testPkg }, { name: pkgName + "-test.sppkg", file: prodPkg }], pkg => {
+                Helper.Executor([{ name: pkgName + "-test.sppkg", file: testPkg }, { name: pkgName + "-prod.sppkg", file: prodPkg }], pkg => {
                     // Return a promise
                     return new Promise(resolve => {
                         // See if the file exists
