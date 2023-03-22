@@ -400,7 +400,7 @@ export class AppForms {
                 let skipFeatureDeployment = form ? form.getValues()["SkipFeatureDeployment"] : false;
 
                 // Deploy the app
-                AppActions.deploy(tenantFl, skipFeatureDeployment, onUpdate, () => {
+                AppActions.deploy(tenantFl ? "" : "prod", tenantFl, skipFeatureDeployment, onUpdate, () => {
                     // See if there is a flow
                     if (AppConfig.Configuration.appFlows && AppConfig.Configuration.appFlows.deployToTenant) {
                         // Execute the flow

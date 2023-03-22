@@ -292,7 +292,7 @@ export class AppActions {
 
         // Deploy the solution
         // Force the skip feature deployment to be false for a test site.
-        this.deploy(false, false, onComplete, () => {
+        this.deploy("test", false, false, onComplete, () => {
             // Update the loading dialog
             LoadingDialog.setHeader("Creating the Test Site");
             LoadingDialog.setBody("Creating the sub-web for testing the application.");
@@ -452,7 +452,7 @@ export class AppActions {
     }
 
     // Deploys the solution to the app catalog
-    static deploy(tenantFl: boolean, skipFeatureDeployment: boolean, onError: () => void, onUpdate: () => void) {
+    static deploy(pkgType: "" | "test" | "prod", tenantFl: boolean, skipFeatureDeployment: boolean, onError: () => void, onUpdate: () => void) {
         let appFile: Types.SP.File = null;
         let appProdFile: Types.SP.File = null;
         let appTestFile: Types.SP.File = null;
@@ -491,13 +491,16 @@ export class AppActions {
             }
         }
 
-        // See if we are deploying to the tenant
-        if (tenantFl) {
-            // Set the target app file
-            appFile = appProdFile ? appProdFile : appFile;
-        } else {
-            // Set the target app file
-            appFile = appTestFile ? appTestFile : appFile;
+        // Set the target app file to use for the deployment
+        switch (pkgType) {
+            case "test":
+                // Set the target app file
+                appFile = appTestFile ? appTestFile : appFile;
+                break;
+            case "prod":
+                // Set the target app file
+                appFile = appProdFile ? appProdFile : appFile;
+                break;
         }
 
         // Ensure a file exists
@@ -553,7 +556,7 @@ export class AppActions {
                                             // Update the metadata
                                             this.updateAppMetadata(appItem.Id, tenantFl, catalogUrl, requestDigest).then(() => {
                                                 // Upload the client side assets
-                                                this.uploadClientSideAssets(tenantFl ? "prod" : "test").then(() => {
+                                                this.uploadClientSideAssets(pkgType).then(() => {
                                                     // Get the app catalog
                                                     let web = Web(catalogUrl, { requestDigest });
                                                     let appCatalog = (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog());
@@ -889,7 +892,7 @@ export class AppActions {
     }
 
     // Reads an app package file
-    static readPackage(data): PromiseLike<{ assets: JSZip.JSZipObject[]; item: IAppItem; image: JSZip.JSZipObject; spfxProd: JSZip; spfxTest: JSZip; }> {
+    static readPackage(data): PromiseLike<{ assets: JSZip.JSZipObject[]; item: IAppItem; image: JSZip.JSZipObject; spfxProd: Uint8Array; spfxTest: Uint8Array; }> {
         // Gets the app package metadata
         let readMetadata = (fileInfo: JSZip.JSZipObject): PromiseLike<IAppItem> => {
             // Return a promise
@@ -965,7 +968,7 @@ export class AppActions {
         }
 
         // Generates the CDN package
-        let generateCDNPackage = (appId: string, zipFile: JSZip, files: JSZip.JSZipObject[], isTest: boolean = true): PromiseLike<JSZip> => {
+        let generateCDNPackage = (appId: string, zipFile: JSZip, files: JSZip.JSZipObject[], isTest: boolean = true): PromiseLike<Uint8Array> => {
             // Return a promise
             return new Promise(resolve => {
                 // Get the CDN url from the configuration and ensure it exists
@@ -975,22 +978,28 @@ export class AppActions {
                     cdn = cdn.replace(/\/$/, '') + '/' + appId.toLowerCase() + '/';
 
                     // Parse the files
-                    files.forEach(file => {
-                        // Read the file
-                        file.async("string").then(content => {
-                            // Ensure the default cdn exists
-                            if (content.indexOf("HTTPS://SPCLIENTSIDEASSETLIBRARY/") > 0) {
-                                // Replace the content
-                                content = content.replace("HTTPS://SPCLIENTSIDEASSETLIBRARY/", cdn);
+                    Helper.Executor(files, file => {
+                        // Return a promise
+                        return new Promise(resolve => {
+                            // Read the file
+                            file.async("string").then(content => {
+                                // Ensure the default cdn exists
+                                if (content.indexOf("HTTPS://SPCLIENTSIDEASSETLIBRARY/") > 0) {
+                                    // Replace the content
+                                    content = content.replace("HTTPS://SPCLIENTSIDEASSETLIBRARY/", cdn);
 
-                                // Update the file
-                                zipFile.file(file.name, content);
-                            }
+                                    // Update the file
+                                    zipFile.file(file.name, content);
+                                }
+
+                                // Resolve the request
+                                resolve(null);
+                            });
                         });
+                    }).then(() => {
+                        // Get the file contents and resolve the request
+                        zipFile.generateAsync({ type: "uint8array" }).then(resolve);
                     });
-
-                    // Resolve the request
-                    resolve(zipFile);
                 } else {
                     // Resolve the request
                     resolve(null);
@@ -1392,7 +1401,7 @@ export class AppActions {
                         ErrorDialog.logInfo(`Upgrading the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID}...`);
 
                         // Deploy the solution
-                        this.deploy(false, isTestSite ? false : DataSource.AppItem.AppSkipFeatureDeployment, onError, () => {
+                        this.deploy("test", false, isTestSite ? false : DataSource.AppItem.AppSkipFeatureDeployment, onError, () => {
                             // Update the dialog
                             LoadingDialog.setHeader("Upgrading the Solution");
                             LoadingDialog.setBody("This will close after the app is upgraded...");
@@ -1854,7 +1863,7 @@ export class AppActions {
     }
 
     // Uploads the spfx client side assets
-    private static uploadClientSideAssets(pkgType: "test" | "prod"): PromiseLike<void> {
+    private static uploadClientSideAssets(pkgType: "" | "test" | "prod"): PromiseLike<void> {
         // Gets the client side assets
         let getClientSideAssets = (file: Types.SP.File): PromiseLike<JSZip.JSZipObject[]> => {
             let assets: JSZip.JSZipObject[] = [];
@@ -1924,6 +1933,11 @@ export class AppActions {
 
                 // Get the package
                 let pkgFile = getSPFxPackage();
+                if (pkgFile == null) {
+                    // Do nothing
+                    resolve();
+                    return;
+                }
 
                 // Get the web and list url information
                 let webUrl = "";
@@ -1968,13 +1982,13 @@ export class AppActions {
                 });
             } else {
                 // Resolve the request
-                resolve(null);
+                resolve();
             }
         });
     }
 
     // Uploads the spfx packages to the folder
-    private static uploadSPFxPackages(appFolder: Types.SP.IFolder, spfxPkg: Helper.IListFormAttachmentInfo, testPkg: JSZip, prodPkg: JSZip): PromiseLike<void> {
+    private static uploadSPFxPackages(appFolder: Types.SP.IFolder, spfxPkg: Helper.IListFormAttachmentInfo, testPkg: Uint8Array, prodPkg: Uint8Array): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve, reject) => {
             // Update the loading dialog
@@ -1990,16 +2004,13 @@ export class AppActions {
 
             // Upload the packages
             appFolder.Files().add(spfxPkg.name, true, spfxPkg.data).execute(() => {
-                Helper.Executor([{ name: pkgName + "-test.sppkg", file: testPkg }, { name: pkgName + "-prod.sppkg", file: prodPkg }], pkg => {
+                Helper.Executor([{ name: pkgName + "-test.sppkg", content: testPkg }, { name: pkgName + "-prod.sppkg", content: prodPkg }], pkg => {
                     // Return a promise
                     return new Promise(resolve => {
-                        // See if the file exists
-                        if (pkg.file) {
-                            // Get the data
-                            pkg.file.generateAsync({ type: "uint8array" }).then(content => {
-                                // Upload the file and process the next file afterwards
-                                appFolder.Files().add(pkg.name, true, content).execute(resolve, reject);
-                            });
+                        // See if the file contents exists
+                        if (pkg.content) {
+                            // Upload the file and process the next file afterwards
+                            appFolder.Files().add(pkg.name, true, pkg.content).execute(resolve, reject);
                         } else {
                             // Process the next file
                             resolve(null);
