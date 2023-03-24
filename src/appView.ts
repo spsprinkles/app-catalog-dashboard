@@ -77,7 +77,7 @@ export class AppView {
     // Renders the dashboard
     private render() {
         // See if the app catalog is on the same site as the app
-        let isSameWeb = AppConfig.Configuration.appCatalogUrl == Strings.SourceUrl;
+        let isSameWeb = AppConfig.Configuration.appCatalogUrl.toLowerCase() == Strings.SourceUrl.toLowerCase();
 
         // See if this is an owner
         let navLinks: Components.INavbarItem[] = [];
