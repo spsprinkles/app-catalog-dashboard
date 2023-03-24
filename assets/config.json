@@ -1,7 +1,6 @@
 {
     "appCatalogUrl": "/sites/demo",
     "dashboardUrl": "~site/SiteAssets/dashboard.aspx",
-    "disableClientSideAssetsExtraction": true,
     "helpPageUrl": "~site/SitePages/Help.aspx",
     "templatesLibraryUrl": "~site/Shared%20Documents/Templates",
     "tenantAppCatalogUrl": "/sites/appcatalog",

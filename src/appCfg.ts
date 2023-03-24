@@ -10,9 +10,10 @@ export interface IConfiguration {
     appDetails?: IAppDetails;
     appFlows?: IAppFlows;
     appNotifications?: IAppNotifications;
+    cdnProd?: string;
+    cdnTest?: string;
     dashboardUrl?: string;
     dateFormat?: string;
-    disableClientSideAssetsExtraction?: boolean;
     errorEmails?: string[];
     flowEndpoint?: string;
     helpdesk?: string;

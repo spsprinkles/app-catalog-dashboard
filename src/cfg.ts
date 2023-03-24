@@ -1045,7 +1045,7 @@ Configuration["appSecurityInstall"] = () => {
     console.log("Creating the security groups");
 
     // Create the security groups
-    AppSecurity.install().then(
+    AppSecurity.createAppSecurityGroups().then(
         // Success
         () => {
             // Log

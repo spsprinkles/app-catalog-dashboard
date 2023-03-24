@@ -101,6 +101,29 @@ export class AppInstall {
                     // Show the installation dialog
                     InstallationRequired.showDialog({
                         errors,
+                        onCompleted: (() => {
+                            // Show a loading dialog
+                            LoadingDialog.setHeader("Creating List");
+                            LoadingDialog.setBody("This dialog will close after list is created...");
+                            LoadingDialog.show();
+
+                            // Configure the web
+                            AppSecurity.configureWeb().then(
+                                // Success
+                                () => {
+                                    // Close the dialog
+                                    LoadingDialog.hide();
+
+                                    // Refresh the page
+                                    window.location.reload();
+                                },
+                                // Error
+                                ex => {
+                                    // Show the error
+                                    ErrorDialog.show("Error Configuring Web", "There was an error configuring the app web.", ex);
+                                }
+                            );
+                        }),
                         onFooterRendered: el => {
                             // See if the configuration isn't defined
                             if (!cfgIsValid || !securityGroupsExist) {
@@ -196,7 +219,7 @@ export class AppInstall {
                                             LoadingDialog.show();
 
                                             // Create the security groups
-                                            AppSecurity.install().then(() => {
+                                            AppSecurity.createAppSecurityGroups().then(() => {
                                                 // Close the dialog
                                                 LoadingDialog.hide();
 
