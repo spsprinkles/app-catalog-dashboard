@@ -271,7 +271,7 @@ export class AppSecurity {
             this._appWeb = new AppSecurityWeb(Strings.SourceUrl);
 
             // See if the app catalog is on a different web
-            if (AppConfig.Configuration.appCatalogUrl != Strings.SourceUrl) {
+            if (AppConfig.Configuration.appCatalogUrl.toLowerCase() != Strings.SourceUrl.toLowerCase()) {
                 // Initialize the app catalog web
                 this._appCatalogWeb = new AppSecurityWeb(AppConfig.Configuration.appCatalogUrl);
             } else {
@@ -316,7 +316,7 @@ export class AppSecurity {
             // Iniitialize the web
             this.init().then(onComplete, () => {
                 // Wait for the app web to be initialized
-                this._appWeb.isInitialized().then(onComplete);
+                this._appWeb.isInitialized().then(onComplete, onComplete);
             });
         });
     }

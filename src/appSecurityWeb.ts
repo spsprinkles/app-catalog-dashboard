@@ -214,9 +214,8 @@ export class AppSecurityWeb {
                     // Resolve the request
                     resolve();
                 }
-
-                // See if there was an error or we have maxed out attempts
-                if (this._errorFl || ++counter > maxTries) {
+                // Else, see if there was an error or we have maxed out attempts
+                else if (this._errorFl || ++counter > maxTries) {
                     // Stop the loop
                     clearInterval(loopId);
 
