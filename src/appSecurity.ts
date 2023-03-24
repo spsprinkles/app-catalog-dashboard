@@ -9,8 +9,6 @@ import Strings from "./strings";
  * The security group/user references for the application.
  */
 export class AppSecurity {
-    /** Public Variables */
-
     // App Web
     private static _appWeb: AppSecurityWeb = null;
     static get AppWeb(): AppSecurityWeb { return this._appWeb; }
@@ -26,10 +24,8 @@ export class AppSecurity {
     private static _isTenantAppCatalogOwner = false;
     static get IsTenantAppCatalogOwner(): boolean { return this._isTenantAppCatalogOwner; }
 
-    /** Private Interface */
-
-    // Creates the security groups for the app site
-    private static createAppSecurityGroups(webUrl: string = Strings.SourceUrl): PromiseLike<void> {
+    // Configures the app site
+    static configureWeb(webUrl: string = Strings.SourceUrl): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve) => {
             // Get the permission types
@@ -239,8 +235,6 @@ export class AppSecurity {
         });
     }
 
-    /** Public Interface */
-
     static hasErrors() {
         // Ensure the webs exist
         if (this.AppCatalogWeb == null || this.AppWeb == null) {
@@ -302,11 +296,28 @@ export class AppSecurity {
     }
 
     // Creates the security groups
-    static install(): PromiseLike<any> {
-        // Create the security groups
-        return Promise.all([
-            this.AppCatalogWeb.create(),
-            this.createAppSecurityGroups()
-        ]);
+    static createAppSecurityGroups(): PromiseLike<void> {
+        // Return a promise
+        return new Promise((resolve, reject) => {
+            let onComplete = () => {
+                // Create the security groups for the app web
+                this.AppWeb.create().then(() => {
+                    // See if the app catalog is on a different web
+                    if (AppConfig.Configuration && AppConfig.Configuration.appCatalogUrl != Strings.SourceUrl) {
+                        // Create the security groups for the app catalog web
+                        this.AppCatalogWeb.create().then(resolve, reject);
+                    } else {
+                        // Resolve the request
+                        resolve();
+                    }
+                }, reject);
+            }
+
+            // Iniitialize the web
+            this.init().then(onComplete, () => {
+                // Wait for the app web to be initialized
+                this._appWeb.isInitialized().then(onComplete);
+            });
+        });
     }
 }
