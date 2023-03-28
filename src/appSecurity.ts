@@ -28,47 +28,56 @@ export class AppSecurity {
     static addDeveloper(): PromiseLike<any> {
         // Return a promise
         return new Promise(resolve => {
-            // See if the user is in the developer's group
-            if (AppSecurity.AppWeb.isInGroup(Strings.Groups.Developers)) {
-                // Resovle the request
-                resolve(null);
-                return;
+            let requests = [];
+
+            // See if the user is not in the developer's group
+            if (!AppSecurity.AppWeb.isInGroup(Strings.Groups.Developers)) {
+                // Log
+                ErrorDialog.logInfo(`App developer not in app web group. Adding the user...`);
+
+                // Add the user to the group
+                requests.push(AppSecurity.AppWeb.addUserToGroup(Strings.Groups.Developers, this.AppWeb.CurrentUser.Id));
             }
 
-            // Add the user to the group
-            AppSecurity.AppWeb.addUserToGroup(Strings.Groups.Developers, this.AppWeb.CurrentUser.Id).then(() => {
-                // See if the app catalog is on the same site as the app
-                if (AppConfig.Configuration.appCatalogUrl.toLowerCase() == Strings.SourceUrl.toLowerCase()) {
-                    // Complete the request
-                    resolve(null);
-                    return;
-                }
+            // See if the app catalog is on a different site as the app
+            if (AppConfig.Configuration.appCatalogUrl.toLowerCase() != Strings.SourceUrl.toLowerCase()) {
+                // Log
+                ErrorDialog.logInfo(`App developer not in app catalog web group. Adding the user...`);
 
                 // Add the sponsor to the group
-                AppSecurity.AppWeb.addUserToGroup(Strings.Groups.Developers, this.AppCatalogWeb.CurrentUser.Id).then(resolve);
-            });
+                requests.push(AppSecurity.AppWeb.addUserToGroup(Strings.Groups.Developers, this.AppCatalogWeb.CurrentUser.Id));
+            }
+
+            // Wait for the requests to complete and resolve the request
+            Promise.all(requests).then(resolve);
         });
     }
 
     // Adds the sponsor to the security group
-    static addSponsor(userId: number): PromiseLike<any> {
+    static addSponsor(userId: number = -1): PromiseLike<any> {
         // Return a promise
         return new Promise(resolve => {
-            // See if the user is part of the group
-            let sponsor = AppSecurity.AppWeb.getUserForGroup(Strings.Groups.Sponsors, userId);
-            if (sponsor == null && userId > 0) {
+            let requests = [];
+
+            // Ensure the user id exists
+            if (userId < 1) { resolve(null); return; }
+
+            // See if the user is not part of the group
+            if (AppSecurity.AppWeb.getUserForGroup(Strings.Groups.Sponsors, userId) == null) {
                 // Log
-                ErrorDialog.logInfo(`App sponsor not in group. Adding the user...`);
+                ErrorDialog.logInfo(`App sponsor not in app web group. Adding the user...`);
 
                 // Add the sponsor to the group
-                AppSecurity.AppWeb.addUserToGroup(Strings.Groups.Sponsors, userId).then(() => {
-                    // See if the app catalog is on the same site as the app
-                    if (AppConfig.Configuration.appCatalogUrl.toLowerCase() == Strings.SourceUrl.toLowerCase()) {
-                        // Complete the request
-                        resolve(null);
-                        return;
-                    }
+                requests.push(AppSecurity.AppWeb.addUserToGroup(Strings.Groups.Sponsors, userId));
+            }
 
+            // See if the app catalog is on the same site as the app
+            if (AppConfig.Configuration.appCatalogUrl.toLowerCase() != Strings.SourceUrl.toLowerCase()) {
+                // Log
+                ErrorDialog.logInfo(`App sponsor not in app catalog web group. Adding the user...`);
+
+                // Add a request
+                requests.push(new Promise(resolve => {
                     // Load the user information
                     Web(Strings.SourceUrl).getUserById(userId).execute(user => {
                         // Get the context information of the other web
@@ -76,15 +85,15 @@ export class AppSecurity {
                             // Ensure the user exists in the other web
                             Web(AppConfig.Configuration.appCatalogUrl, { requestDigest: context.GetContextWebInformation.FormDigestValue }).ensureUser(user.LoginName).execute(user => {
                                 // Add the sponsor to the group
-                                AppSecurity.AppWeb.addUserToGroup(Strings.Groups.Sponsors, user.Id).then(resolve);
+                                AppSecurity.AppCatalogWeb.addUserToGroup(Strings.Groups.Sponsors, user.Id).then(resolve);
                             }, resolve);
-                        });
+                        }, resolve);
                     }, resolve)
-                });
-            } else {
-                // Complete the request
-                resolve(null);
+                }));
             }
+
+            // Wait for the requests to complete and resolve the request
+            Promise.all(requests).then(resolve);
         });
     }
 
