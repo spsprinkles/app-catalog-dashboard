@@ -49,7 +49,7 @@ export class AppSecurity {
             }
 
             // Wait for the requests to complete and resolve the request
-            Promise.all(requests).then(resolve);
+            Promise.all(requests).then(resolve, resolve);
         });
     }
 
@@ -93,7 +93,7 @@ export class AppSecurity {
             }
 
             // Wait for the requests to complete and resolve the request
-            Promise.all(requests).then(resolve);
+            Promise.all(requests).then(resolve, resolve);
         });
     }
 
