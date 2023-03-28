@@ -2078,48 +2078,35 @@ export class AppForms {
                                 AppStatus: newStatus
                             };
                             item.update(values).execute(() => {
-                                // Code to run after the sponsor is added to the security group
-                                let onComplete = () => {
-                                    // Log
-                                    DataSource.logItem({
-                                        LogUserId: ContextInfo.userId,
-                                        ParentId: item.AppProductID,
-                                        ParentListName: Strings.Lists.Apps,
-                                        Title: item.AppIsRejected ? DataSource.AuditLogStates.AppResubmitted : DataSource.AuditLogStates.AppSubmitted,
-                                        LogComment: `The app ${item.Title} was ${item.AppIsRejected ? "resubmitted" : "submitted"} for approval.`
-                                    }, { ...item, ...values });
-
-                                    // Run the flow associated for this status
-                                    AppActions.runFlow(status.flowId);
-
-                                    // Send the notifications
-                                    AppNotifications.sendEmail(status.notification, item, false).then(() => {
-                                        // Call the update event
-                                        onUpdate();
-
-                                        // Hide the dialog
-                                        LoadingDialog.hide();
-                                    });
-                                }
-
                                 // Log
                                 ErrorDialog.logInfo(`Validating the app sponsor id: '${item.AppSponsorId}'`);
 
-                                // Get the sponsor
-                                let sponsor = AppSecurity.AppWeb.getUserForGroup(Strings.Groups.Sponsors, item.AppSponsorId);
-                                if (sponsor == null && item.AppSponsorId > 0) {
-                                    // Log
-                                    ErrorDialog.logInfo(`App sponsor not in group. Adding the user...`);
+                                // Get the sponsor information
+                                Web(Strings.SourceUrl).getUserById(item.AppSponsorId).execute(user => {
+                                    // Add the user is part of the security web
+                                    AppSecurity.addSponsor(item.AppSponsorId).then(() => {
+                                        // Log
+                                        DataSource.logItem({
+                                            LogUserId: ContextInfo.userId,
+                                            ParentId: item.AppProductID,
+                                            ParentListName: Strings.Lists.Apps,
+                                            Title: item.AppIsRejected ? DataSource.AuditLogStates.AppResubmitted : DataSource.AuditLogStates.AppSubmitted,
+                                            LogComment: `The app ${item.Title} was ${item.AppIsRejected ? "resubmitted" : "submitted"} for approval.`
+                                        }, { ...item, ...values });
 
-                                    // Add the sponsor to the group
-                                    AppSecurity.AppWeb.addUserToGroup(Strings.Groups.Sponsors, item.AppSponsorId).then(() => {
-                                        // Complete the request
-                                        onComplete();
+                                        // Run the flow associated for this status
+                                        AppActions.runFlow(status.flowId);
+
+                                        // Send the notifications
+                                        AppNotifications.sendEmail(status.notification, item, false).then(() => {
+                                            // Call the update event
+                                            onUpdate();
+
+                                            // Hide the dialog
+                                            LoadingDialog.hide();
+                                        });
                                     });
-                                } else {
-                                    // Complete the request
-                                    onComplete();
-                                }
+                                });
                             });
                         });
                     });
