@@ -1,8 +1,7 @@
 import { LoadingDialog, Modal } from "dattatable";
-import { Components, ContextInfo } from "gd-sprest-bs";
+import { Components } from "gd-sprest-bs";
 import { AppConfig } from "./appCfg";
 import { AppSecurity } from "./appSecurity";
-import Strings from "./strings";
 
 /**
  * User Agreement
@@ -49,26 +48,19 @@ export class UserAgreement {
                     // Close the dialog
                     Modal.hide();
 
-                    // See if the user is already in the developer's group
-                    if (AppSecurity.AppWeb.isInGroup(Strings.Groups.Developers)) {
-                        // Call the event
+                    // Show a loading dialog
+                    LoadingDialog.setHeader("Adding User");
+                    LoadingDialog.setBody("Adding the user to the developer's security group. This will close after the user is added.");
+                    LoadingDialog.show();
+
+                    // Ensure the user is added to the developer's group
+                    AppSecurity.addDeveloper().then(() => {
+                        // Close the dialog
+                        LoadingDialog.hide();
+
+                        // Resolve the request
                         onAgree();
-                    } else {
-                        // See if the user is in the developer's group
-                        // Show a loading dialog
-                        LoadingDialog.setHeader("Adding User");
-                        LoadingDialog.setBody("Adding the user to the developer's security group. This will close after the user is added.");
-                        LoadingDialog.show();
-
-                        // Add the user to the group
-                        AppSecurity.AppWeb.addUserToGroup(Strings.Groups.Developers, ContextInfo.userId).then(() => {
-                            // Close the dialog
-                            LoadingDialog.hide();
-
-                            // Call the event
-                            onAgree();
-                        });
-                    }
+                    });
                 }
             },
             placement: Components.TooltipPlacements.Left

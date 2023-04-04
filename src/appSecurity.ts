@@ -1,4 +1,4 @@
-import { Helper, SPTypes, Web } from "gd-sprest-bs";
+import { ContextInfo, Helper, SPTypes, Web } from "gd-sprest-bs";
 import { AppConfig } from "./appCfg";
 import { AppSecurityWeb } from "./appSecurityWeb";
 import { ErrorDialog } from "./errorDialog";
@@ -23,6 +23,79 @@ export class AppSecurity {
     // Tenant App Catalog Owner
     private static _isTenantAppCatalogOwner = false;
     static get IsTenantAppCatalogOwner(): boolean { return this._isTenantAppCatalogOwner; }
+
+    // Adds the developer to the security group
+    static addDeveloper(): PromiseLike<any> {
+        // Return a promise
+        return new Promise(resolve => {
+            let requests = [];
+
+            // See if the user is not in the developer's group
+            if (!AppSecurity.AppWeb.isInGroup(Strings.Groups.Developers)) {
+                // Log
+                ErrorDialog.logInfo(`App developer not in app web group. Adding the user...`);
+
+                // Add the user to the group
+                requests.push(AppSecurity.AppWeb.addUserToGroup(Strings.Groups.Developers, this.AppWeb.CurrentUser.Id));
+            }
+
+            // See if the app catalog is on a different site as the app
+            if (AppConfig.Configuration.appCatalogUrl.toLowerCase() != Strings.SourceUrl.toLowerCase()) {
+                // Log
+                ErrorDialog.logInfo(`App developer not in app catalog web group. Adding the user...`);
+
+                // Add the sponsor to the group
+                requests.push(AppSecurity.AppWeb.addUserToGroup(Strings.Groups.Developers, this.AppCatalogWeb.CurrentUser.Id));
+            }
+
+            // Wait for the requests to complete and resolve the request
+            Promise.all(requests).then(resolve, resolve);
+        });
+    }
+
+    // Adds the sponsor to the security group
+    static addSponsor(userId: number = -1): PromiseLike<any> {
+        // Return a promise
+        return new Promise(resolve => {
+            let requests = [];
+
+            // Ensure the user id exists
+            if (userId < 1) { resolve(null); return; }
+
+            // See if the user is not part of the group
+            if (AppSecurity.AppWeb.getUserForGroup(Strings.Groups.Sponsors, userId) == null) {
+                // Log
+                ErrorDialog.logInfo(`App sponsor not in app web group. Adding the user...`);
+
+                // Add the sponsor to the group
+                requests.push(AppSecurity.AppWeb.addUserToGroup(Strings.Groups.Sponsors, userId));
+            }
+
+            // See if the app catalog is on the same site as the app
+            if (AppConfig.Configuration.appCatalogUrl.toLowerCase() != Strings.SourceUrl.toLowerCase()) {
+                // Log
+                ErrorDialog.logInfo(`App sponsor not in app catalog web group. Adding the user...`);
+
+                // Add a request
+                requests.push(new Promise(resolve => {
+                    // Load the user information
+                    Web(Strings.SourceUrl).getUserById(userId).execute(user => {
+                        // Get the context information of the other web
+                        ContextInfo.getWeb(AppConfig.Configuration.appCatalogUrl).execute(context => {
+                            // Ensure the user exists in the other web
+                            Web(AppConfig.Configuration.appCatalogUrl, { requestDigest: context.GetContextWebInformation.FormDigestValue }).ensureUser(user.LoginName).execute(user => {
+                                // Add the sponsor to the group
+                                AppSecurity.AppCatalogWeb.addUserToGroup(Strings.Groups.Sponsors, user.Id).then(resolve);
+                            }, resolve);
+                        }, resolve);
+                    }, resolve)
+                }));
+            }
+
+            // Wait for the requests to complete and resolve the request
+            Promise.all(requests).then(resolve, resolve);
+        });
+    }
 
     // Configures the app site
     static configureWeb(webUrl: string = Strings.SourceUrl): PromiseLike<void> {
