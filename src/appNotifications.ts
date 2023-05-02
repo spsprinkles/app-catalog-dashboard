@@ -1,5 +1,5 @@
 import { LoadingDialog } from "dattatable";
-import { ContextInfo, Utility } from "gd-sprest-bs";
+import { ContextInfo, Types, Utility } from "gd-sprest-bs";
 import { AppConfig, IEmail } from "./appCfg";
 import { AppSecurity } from "./appSecurity";
 import { IAppItem } from "./ds";
@@ -219,10 +219,11 @@ export class AppNotifications {
                 // Set the email properties
                 let emailProps = {
                     To,
+                    CC: [AppSecurity.AppWeb.CurrentUser.Email],
                     Subject: "App '" + item.Title + "' Sent Back",
                     Body: "App Developers,<br /><br />The '" + item.Title +
                         "' app has been sent back based on the comments below.<br /><br />" + comments
-                };
+                } as Types.IEmail;
 
                 // Send an email
                 Utility(Strings.SourceUrl).sendEmail(emailProps).execute(
@@ -369,6 +370,9 @@ export class AppNotifications {
                     LoadingDialog.setBody("This dialog will close after the notification is sent.");
                     LoadingDialog.show();
 
+                    // Add the current user to the CC
+                    CC.push(AppSecurity.AppWeb.CurrentUser.Email);
+
                     // Set the email properties
                     let emailProps = {
                         To, CC,
@@ -449,9 +453,10 @@ export class AppNotifications {
                 // Set the email properties
                 let emailProps = {
                     To,
+                    CC: [AppSecurity.AppWeb.CurrentUser.Email],
                     Body,
                     Subject: subject,
-                };
+                } as Types.IEmail;
 
                 // Send an email
                 Utility(Strings.SourceUrl).sendEmail(emailProps).execute(
