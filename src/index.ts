@@ -1,3 +1,4 @@
+import { Timeout } from "dattatable";
 import { ContextInfo } from "gd-sprest-bs";
 import { AppDashboard } from "./appDashboard";
 import { AppInstall } from "./appInstall";
@@ -67,6 +68,10 @@ const GlobalVariable = {
                         // View all of the applications
                         new AppView(elApps, elAppDetails);
                     }
+
+                    // Start the timeout
+                    Timeout.setTimer(300000);
+                    Timeout.start();
                 }
             },
             // Error
