@@ -2158,6 +2158,11 @@ export class AppForms {
         Modal.show();
     }
 
+    // Updates the metadata of the app
+    updateMetadata(item: IAppItem, onUpdate: () => void) {
+        // TODO
+    }
+
     // Displays the ugprade from
     upgrade(appItem: IAppItem) {
         // Clear the modal

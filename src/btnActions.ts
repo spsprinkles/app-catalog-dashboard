@@ -602,6 +602,29 @@ ${ContextInfo.userDisplayName}`.trim()
           });
           break;
 
+        // Metadata
+        case "Metadata":
+          // Render the button
+          tooltips.add({
+            content: "Displays the metadata and reverts the item to a 'Pending Approval' state if an update is made.",
+            btnProps: {
+              text: "Update Metadata",
+              iconClassName: "me-1",
+              iconSize: 20,
+              iconType: windowStack,
+              isSmall: true,
+              type: Components.ButtonTypes.OutlinePrimary,
+              onClick: () => {
+                // Display the send notification form
+                this._forms.updateMetadata(DataSource.AppItem, () => {
+                  // Call the update event
+                  this._onUpdate();
+                });
+              },
+            },
+          });
+          break;
+
         // Notification
         case "Notification":
           // Render the button
