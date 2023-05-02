@@ -18,9 +18,9 @@ export class AppNotifications {
             case "ApproversGroup":
                 return AppSecurity.AppWeb.getEmailsForGroup(Strings.Groups.Approvers);
 
-            // Developer's Group
-            case "DevelopersGroup":
-                return AppSecurity.AppWeb.getEmailsForGroup(Strings.Groups.Developers);
+            // Current User
+            case "CurrentUser":
+                return AppSecurity.AppWeb.CurrentUser.Email;
 
             // Developers
             case "Developers":
@@ -36,6 +36,14 @@ export class AppNotifications {
                 // Return the emails
                 return emails;
 
+            // Developer's Group
+            case "DevelopersGroup":
+                return AppSecurity.AppWeb.getEmailsForGroup(Strings.Groups.Developers);
+
+            // Final Approver's Group
+            case "FinalApproversGroup":
+                return AppSecurity.AppWeb.getEmailsForGroup(Strings.Groups.FinalApprovers);
+
             // Helpdesk
             case "Helpdesk":
                 // Return the email
@@ -45,6 +53,10 @@ export class AppNotifications {
             case "Sponsor":
                 // Return the email
                 return item.AppSponsor && item.AppSponsor.EMail ? [item.AppSponsor.EMail] : [];
+
+            // Sponsor's Group
+            case "SponsorsGroup":
+                return AppSecurity.AppWeb.getEmailsForGroup(Strings.Groups.Sponsors);
         }
     }
 
