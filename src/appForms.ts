@@ -1,4 +1,4 @@
-import { LoadingDialog, Modal } from "dattatable";
+import { AuditLog, LoadingDialog, Modal } from "dattatable";
 import { Components, ContextInfo, Helper, List, SPTypes, Web } from "gd-sprest-bs";
 import { AppActions } from "./appActions";
 import { AppConfig, IStatus } from "./appCfg";
@@ -2156,6 +2156,27 @@ export class AppForms {
 
         // Show the modal
         Modal.show();
+    }
+
+    // Updates the metadata of the app
+    updateMetadata(item: IAppItem, onUpdate: () => void) {
+        // Display the edit form
+        this.edit(item.Id, () => {
+            // See if we are past the test case status
+            if (AppConfig.Status[item.AppStatus].stepNumber > AppConfig.Status[AppConfig.TechReviewStatus].stepNumber) {
+                // Log
+                DataSource.logItem({
+                    LogUserId: ContextInfo.userId,
+                    ParentId: item.AppProductID,
+                    ParentListName: Strings.Lists.Apps,
+                    Title: DataSource.AuditLogStates.AppMetadataUpdated,
+                    LogComment: `The app's metadata was updated. Reverting the state for a technical review.`
+                }, item);
+
+                // Update the status
+                item.update({ AppStatus: AppConfig.TechReviewStatus }).execute(onUpdate);
+            }
+        });
     }
 
     // Displays the ugprade from

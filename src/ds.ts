@@ -675,6 +675,7 @@ export class DataSource {
         AppApproved: "App Approved",
         AppCatalogRequest: "App Catalog Request",
         AppDeployed: "App Deployed",
+        AppMetadataUpdated: "App Metadata Updated",
         AppRejected: "App Rejected",
         AppRetracted: "App Retracted",
         AppResubmitted: "App Resubmitted",
@@ -684,7 +685,7 @@ export class DataSource {
         AppUpgraded: "App Upgraded",
         CreateTestSite: "Create Test Site",
         DeleteApp: "Delete App",
-        DeleteTestSite: "Delete Test Site"
+        DeleteTestSite: "Delete Test Site",
     }
 
     // Audit Log
