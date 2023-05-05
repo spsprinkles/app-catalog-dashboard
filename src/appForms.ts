@@ -2160,7 +2160,14 @@ export class AppForms {
 
     // Updates the metadata of the app
     updateMetadata(item: IAppItem, onUpdate: () => void) {
-        // TODO
+        // Display the edit form
+        this.edit(item.Id, () => {
+            // See if we are past the test case status
+            if (AppConfig.Status[item.AppStatus].stepNumber < AppConfig.Status[AppConfig.TechReviewStatus].stepNumber) {
+                // Update the status
+                item.update({ AppStatus: AppConfig.TechReviewStatus }).execute(onUpdate);
+            }
+        });
     }
 
     // Displays the ugprade from
