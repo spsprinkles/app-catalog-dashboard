@@ -16,6 +16,7 @@ The tool will track a history of actions taken on an app. This audit log is visi
 | App Approved | Logged when an app is approved. |
 | App Catalog Request | Logged when an app catalog is being requested for a site collection. |
 | App Deployed | Logged when an app is deployed to a site collection app catalog. |
+| App Metadata Updated | Logged when the metadata is updated past the technical review state. |
 | App Rejected | Logged when an app is rejected. |
 | App Retracted | Logged when an app is retracted. |
 | App Resubmitted | Logged when an app is resubmitted from a rejected state. |
