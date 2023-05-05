@@ -1783,7 +1783,8 @@ export class AppForms {
                 return props;
             },
             onSave: (values) => {
-                // Set the default status
+                // Set the default properties
+                values["AppSupportURL"] = AppConfig.Configuration.supportUrl;
                 values["RequestStatus"] = "New";
 
                 // Return the values
