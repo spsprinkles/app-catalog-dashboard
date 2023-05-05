@@ -185,21 +185,25 @@ export class AppConfig {
                 ErrorDialog.logInfo("Loading the app configuration from a file.", Strings.SourceUrl + "/" + Strings.ConfigUrl);
 
                 // Load the configuration file
-                Web(Strings.SourceUrl).getFileByUrl(Strings.ConfigUrl).content().execute(
+                Web(Strings.SourceUrl).getFileByUrl(Strings.ConfigUrl).execute(
                     // Success
                     file => {
-                        // Convert the string to a json object
-                        try { this._cfg = JSON.parse(String.fromCharCode.apply(null, new Uint8Array(file))); }
-                        catch {
-                            // Clear the configuration
-                            this._cfg = null;
+                        // Get the content
+                        file.content().execute(content => {
+                            // Convert the string to a json object
+                            try { this._cfg = JSON.parse(String.fromCharCode.apply(null, new Uint8Array(content))); }
+                            catch {
+                                // Clear the configuration
+                                this._cfg = null;
 
-                            // Log
-                            ErrorDialog.logError("Error parsing the app configuration. Please review and ensure it meets JSON rules.");
-                        }
+                                // Log
+                                ErrorDialog.logError("Error parsing the app configuration. Please review and ensure it meets JSON rules.");
+                            }
 
-                        // Complete the request
-                        completeRequest();
+                            // Complete the request
+                            completeRequest();
+
+                        });
                     },
 
                     // Error
