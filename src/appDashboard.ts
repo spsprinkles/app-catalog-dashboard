@@ -198,10 +198,32 @@ export class AppDashboard {
             elAlert.classList.add("d-none");
         }
 
-        // See if the app is deployed and has an error message
+
+        // See if the app is deployed
         let errorMessage = DataSource.AppCatalogSiteItem ? DataSource.AppCatalogSiteItem.ErrorMessage : null;
         errorMessage = (DataSource.AppCatalogItem ? DataSource.AppCatalogItem.AppPackageErrorMessage : null) || errorMessage;
         errorMessage = (DataSource.AppItem ? DataSource.AppItem.AppPackageErrorMessage : null) || errorMessage;
+
+        // Parse the app files
+        for (let i = 0; i < DataSource.AppFolder.Files.results.length; i++) {
+            let file = DataSource.AppFolder.Files.results[i];
+
+            // See if this isn't the target file
+            if (file.Name.toLowerCase() != "appicon.png") { continue; }
+
+            // Check the size of the icon
+            let elAppIcon = document.createElement("img");
+            elAppIcon.src = file.ServerRelativeUrl;
+            if (elAppIcon.height != 96 || elAppIcon.width != 96) {
+                // Set the error message
+                errorMessage = "App Icon is not set to 96x96. Please resubmit a new package with the correct size.";
+            }
+
+            // Break from the loop
+            break;
+        }
+
+        // See if there is an error message
         if (errorMessage && errorMessage != "No errors.") {
             // Show the element
             elAlert.classList.remove("d-none");
