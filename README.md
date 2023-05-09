@@ -57,6 +57,7 @@ The [configuration file](https://github.com/spsprinkles/app-catalog-dashboard/ra
 | errorEmails | An array of email addresses to send to when a user has an error when using the application. This will help with troubleshooting issues in production. |
 | helpdesk | The email address to send notifications to the `Helpdesk` users. |
 | paging | The default # of apps to display on the dashboard. Valid values are `10, 25, 50, 100`. |
+| supportUrl | The default url to use for support. |
 | userAgreement | The user agreement displayed to the developers adding packages. |
 
 ### App Details

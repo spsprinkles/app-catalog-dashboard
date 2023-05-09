@@ -22,6 +22,7 @@ export interface IConfiguration {
     templatesLibraryUrl?: string;
     tenantAppCatalogUrl?: string;
     status: { [key: string]: IStatus };
+    supportUrl?: string;
     userAgreement?: string;
     validation: {
         techReview: { [key: string]: string[]; }
