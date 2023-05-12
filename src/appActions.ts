@@ -552,8 +552,8 @@ export class AppActions {
                                     ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was added to the catalog successfully...`);
 
                                     // Update the dialog
-                                    LoadingDialog.setHeader("Deploying the Package");
-                                    LoadingDialog.setBody("This will close after the app is deployed.");
+                                    LoadingDialog.setHeader("Updating the Metadata");
+                                    LoadingDialog.setBody("Updating the metadata in the app catalog...");
 
                                     // Get the app item
                                     file.ListItemAllFields().execute(
@@ -565,6 +565,11 @@ export class AppActions {
                                                     // Get the app catalog
                                                     let web = Web(catalogUrl, { requestDigest });
                                                     let appCatalog = (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog());
+
+                                                    // Update the dialog
+                                                    LoadingDialog.setHeader("Deploying the App");
+                                                    LoadingDialog.setBody("Deploying the solution in the app catalog...");
+                                                    LoadingDialog.show();
 
                                                     // Log
                                                     ErrorDialog.logInfo(`Deploying the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID}...`);
@@ -578,6 +583,10 @@ export class AppActions {
                                                         if (tenantFl) {
                                                             // Log
                                                             ErrorDialog.logInfo(`Setting the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} tenant deployed flag...`);
+
+                                                            // Update the dialog
+                                                            LoadingDialog.setHeader("Updating the App");
+                                                            LoadingDialog.setBody("Updating the app item...");
 
                                                             // Update the tenant deployed flag
                                                             DataSource.AppItem.update({
@@ -608,6 +617,11 @@ export class AppActions {
                                                     }, () => {
                                                         // See if this isn't the tenant
                                                         if (!tenantFl) {
+                                                            // Update the dialog
+                                                            LoadingDialog.setHeader("Loading the App Catalog");
+                                                            LoadingDialog.setBody("Error deploying the app, getting the information...");
+                                                            LoadingDialog.show();
+
                                                             // Load the site collection app item
                                                             DataSource.loadSiteAppByName(appFile.Name).then(appItem => {
                                                                 // See if the item exists
