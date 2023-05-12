@@ -204,25 +204,6 @@ export class AppDashboard {
         errorMessage = (DataSource.AppCatalogItem ? DataSource.AppCatalogItem.AppPackageErrorMessage : null) || errorMessage;
         errorMessage = (DataSource.AppItem ? DataSource.AppItem.AppPackageErrorMessage : null) || errorMessage;
 
-        // Parse the app files
-        for (let i = 0; i < DataSource.AppFolder.Files.results.length; i++) {
-            let file = DataSource.AppFolder.Files.results[i];
-
-            // See if this isn't the target file
-            if (file.Name.toLowerCase() != "appicon.png") { continue; }
-
-            // Check the size of the icon
-            let elAppIcon = document.createElement("img");
-            elAppIcon.src = file.ServerRelativeUrl;
-            if (elAppIcon.height != 96 || elAppIcon.width != 96) {
-                // Set the error message
-                errorMessage = "App Icon is not set to 96x96. Please resubmit a new package with the correct size.";
-            }
-
-            // Break from the loop
-            break;
-        }
-
         // See if there is an error message
         if (errorMessage && errorMessage != "No errors.") {
             // Show the element
@@ -236,6 +217,39 @@ export class AppDashboard {
                 content: errorMessage,
                 type: Components.AlertTypes.Danger
             });
+        }
+
+        // Parse the app files
+        for (let i = 0; i < DataSource.AppFolder.Files.results.length; i++) {
+            let file = DataSource.AppFolder.Files.results[i];
+
+            // See if this isn't the target file
+            if (file.Name.toLowerCase() != "appicon.png") { continue; }
+
+            // Check the size of the icon
+            let elAppIcon = document.createElement("img");
+            elAppIcon.src = file.ServerRelativeUrl;
+
+            // Wait for the image to be loaded
+            elAppIcon.onload = () => {
+                // Validate the size of the icon
+                if (elAppIcon.height != 96 || elAppIcon.width != 96) {
+                    // Show the element
+                    elAlert.classList.remove("d-none");
+
+                    // Render an alert
+                    Components.Alert({
+                        el: elAlert,
+                        className: "m-0 rounded-0",
+                        header: "App Deployment Error",
+                        content: "App Icon is not set to 96x96. Please resubmit a new package with the correct size.",
+                        type: Components.AlertTypes.Danger
+                    });
+                }
+            }
+
+            // Break from the loop
+            break;
         }
     }
 
