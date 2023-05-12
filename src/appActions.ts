@@ -1646,6 +1646,7 @@ export class AppActions {
                                             // Update the loading dialog
                                             LoadingDialog.setHeader("Uploading the App Icon");
                                             LoadingDialog.setBody("Uploading the icon for this app'...");
+                                            LoadingDialog.show();
 
                                             // Log
                                             ErrorDialog.logInfo(`Uploading the SPFx package icon to the folder...`);
