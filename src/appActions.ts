@@ -1781,6 +1781,11 @@ export class AppActions {
 
                                 // Upload the packages
                                 this.uploadSPFxPackages(Web(Strings.SourceUrl).getFolderByServerRelativeUrl(DataSource.AppFolder.ServerRelativeUrl), fileInfo, pkgInfo.spfxTest, pkgInfo.spfxProd).then(() => {
+                                    // Display a loading dialog
+                                    LoadingDialog.setHeader("Refreshing the App");
+                                    LoadingDialog.setBody("Refreshing the app details...");
+                                    LoadingDialog.show();
+
                                     // Refersh the item
                                     DataSource.refreshItem(DataSource.AppItem.Id).then(() => {
                                         // See if the app was upgraded
