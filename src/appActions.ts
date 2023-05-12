@@ -1602,6 +1602,7 @@ export class AppActions {
                         // Update the loading dialog
                         LoadingDialog.setHeader("Creating App Folder");
                         LoadingDialog.setBody("Creating the app folder...");
+                        LoadingDialog.show();
 
                         // Create the document set folder
                         Helper.createDocSet(pkgInfo.item.Title, Strings.Lists.Apps).then(
