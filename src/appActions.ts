@@ -295,7 +295,7 @@ export class AppActions {
         this.deploy("test", false, false, onComplete, () => {
             // Update the loading dialog
             LoadingDialog.setHeader("Creating the Test Site");
-            LoadingDialog.setBody("Creating the sub-web for testing the application.");
+            LoadingDialog.setBody("Getting the web context information...");
             LoadingDialog.show();
 
             // Log
@@ -305,6 +305,9 @@ export class AppActions {
             ContextInfo.getWeb(AppConfig.Configuration.appCatalogUrl).execute(
                 context => {
                     let requestDigest = context.GetContextWebInformation.FormDigestValue;
+
+                    // Update the loading dialog
+                    LoadingDialog.setBody("Creating the sub-web for testing the application...");
 
                     // Log
                     ErrorDialog.logInfo(`Creating the test web for app: ${DataSource.AppItem.AppProductID}...`);
@@ -326,6 +329,7 @@ export class AppActions {
                                 // Update the loading dialog
                                 LoadingDialog.setHeader("Sending Email Notifications");
                                 LoadingDialog.setBody("Everything is done. Sending an email to the developer poc(s).");
+                                LoadingDialog.show();
 
                                 // Get the app developers
                                 let to = [];
@@ -386,6 +390,7 @@ export class AppActions {
                                             // Update the loading dialog
                                             LoadingDialog.setHeader("Installing the App");
                                             LoadingDialog.setBody("Installing the application to the test site.");
+                                            LoadingDialog.show();
 
                                             // Install the application to the test site
                                             app.install().execute(
@@ -1393,6 +1398,8 @@ export class AppActions {
                     this.uninstallApp(siteUrl, requestDigest).then(() => {
                         // Update the dialog
                         LoadingDialog.setHeader("Upgrading the Solution");
+                        LoadingDialog.setBody("Deploying the app to the catalog...");
+                        LoadingDialog.show();
 
                         // Log
                         ErrorDialog.logInfo(`Upgrading the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID}...`);
@@ -1400,8 +1407,8 @@ export class AppActions {
                         // Deploy the solution
                         this.deploy("test", false, isTestSite ? false : DataSource.AppItem.AppSkipFeatureDeployment, onError, () => {
                             // Update the dialog
-                            LoadingDialog.setHeader("Upgrading the Solution");
-                            LoadingDialog.setBody("This will close after the app is upgraded...");
+                            LoadingDialog.setHeader("Reading the App Catalog");
+                            LoadingDialog.setBody("Getting the new app from the app catalog...");
                             LoadingDialog.show();
 
                             // Log
@@ -1418,6 +1425,9 @@ export class AppActions {
 
                                     // See if the app is already installed
                                     if (app.SkipDeploymentFeature) {
+                                        // Hide the dialog
+                                        LoadingDialog.hide();
+
                                         // Resolve the requst
                                         resolve();
                                     } else {
