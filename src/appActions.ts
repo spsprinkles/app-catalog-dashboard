@@ -1758,47 +1758,14 @@ export class AppActions {
                     // Show the modal
                     Modal.show();
                 } else {
+                    // Update the loading dialog
+                    LoadingDialog.setBody("Updating the Status");
+
                     // Update the status and set it back to the testing status
                     let itemInfo = pkgInfo.item;
                     itemInfo.AppStatus = AppConfig.TestCasesStatus;
                     DataSource.AppItem.update(itemInfo).execute(
                         () => {
-                            // Updates the status
-                            let updateStatus = (): PromiseLike<void> => {
-                                // Update the loading dialog
-                                LoadingDialog.setBody("Updating the Status");
-
-                                // Return a promise
-                                return new Promise((resolve, reject) => {
-                                    let itemInfo = pkgInfo.item;
-
-                                    // See if the status is after the test case status
-                                    let status = AppConfig.Status[DataSource.AppItem.AppStatus];
-                                    if (status.stepNumber > AppConfig.Status[AppConfig.TestCasesStatus].stepNumber) {
-                                        // Revert the status back to the testing status
-                                        itemInfo.AppStatus = AppConfig.TestCasesStatus;
-                                    } else {
-                                        // Default to the current status
-                                        itemInfo.AppStatus = DataSource.AppItem.AppStatus;
-                                    }
-
-                                    // Update the app information
-                                    DataSource.AppItem.update(itemInfo).execute(
-                                        () => {
-                                            // Resolve the request
-                                            resolve();
-                                        },
-                                        ex => {
-                                            // Log the error
-                                            ErrorDialog.show("Updating Package", "There was an error updating the package.", ex);
-
-                                            // Reject the request
-                                            reject();
-                                        }
-                                    );
-                                });
-                            }
-
                             // Log
                             ErrorDialog.logInfo(`Archiving the ${DataSource.AppItem.Title} app.`);
 
@@ -1814,37 +1781,34 @@ export class AppActions {
 
                                 // Upload the packages
                                 this.uploadSPFxPackages(Web(Strings.SourceUrl).getFolderByServerRelativeUrl(DataSource.AppFolder.ServerRelativeUrl), fileInfo, pkgInfo.spfxTest, pkgInfo.spfxProd).then(() => {
-                                    // Update the status
-                                    updateStatus().then(() => {
-                                        // Refersh the item
-                                        DataSource.refreshItem(DataSource.AppItem.Id).then(() => {
-                                            // See if the app was upgraded
-                                            if (appUpgraded) {
-                                                // See if there is a flow
-                                                if (AppConfig.Configuration.appFlows && AppConfig.Configuration.appFlows.upgradeApp) {
-                                                    // Execute the flow
-                                                    AppActions.runFlow(AppConfig.Configuration.appFlows.upgradeApp);
-                                                }
+                                    // Refersh the item
+                                    DataSource.refreshItem(DataSource.AppItem.Id).then(() => {
+                                        // See if the app was upgraded
+                                        if (appUpgraded) {
+                                            // See if there is a flow
+                                            if (AppConfig.Configuration.appFlows && AppConfig.Configuration.appFlows.upgradeApp) {
+                                                // Execute the flow
+                                                AppActions.runFlow(AppConfig.Configuration.appFlows.upgradeApp);
+                                            }
 
-                                                // Send the notifications
-                                                AppNotifications.sendAppUpgradedEmail(DataSource.AppItem).then(() => {
-                                                    // Resolve the request
-                                                    resolve();
-                                                });
-
-                                                // Log
-                                                DataSource.logItem({
-                                                    LogUserId: ContextInfo.userId,
-                                                    ParentId: itemInfo.AppProductID || DataSource.AppItem.AppProductID,
-                                                    ParentListName: Strings.Lists.Apps,
-                                                    Title: DataSource.AuditLogStates.AppUpdated,
-                                                    LogComment: `A new version (${itemInfo.AppVersion}) of the app ${itemInfo.Title} was added.`
-                                                }, Object.assign({ ...DataSource.AppItem, ...itemInfo }));
-                                            } else {
+                                            // Send the notifications
+                                            AppNotifications.sendAppUpgradedEmail(DataSource.AppItem).then(() => {
                                                 // Resolve the request
                                                 resolve();
-                                            }
-                                        });
+                                            });
+
+                                            // Log
+                                            DataSource.logItem({
+                                                LogUserId: ContextInfo.userId,
+                                                ParentId: itemInfo.AppProductID || DataSource.AppItem.AppProductID,
+                                                ParentListName: Strings.Lists.Apps,
+                                                Title: DataSource.AuditLogStates.AppUpdated,
+                                                LogComment: `A new version (${itemInfo.AppVersion}) of the app ${itemInfo.Title} was added.`
+                                            }, Object.assign({ ...DataSource.AppItem, ...itemInfo }));
+                                        } else {
+                                            // Resolve the request
+                                            resolve();
+                                        }
                                     });
                                 }, ex => {
                                     // Log the error
