@@ -1379,18 +1379,15 @@ export class AppActions {
             // Log
             ErrorDialog.logInfo(`Getting the web context information at ${siteUrl}...`);
 
+            // Show a loading dialog
+            LoadingDialog.setHeader("Getting the web information");
+            LoadingDialog.setBody("Loading the web information...");
+            LoadingDialog.show();
+
             // Load the context of the app catalog
             ContextInfo.getWeb(siteUrl).execute(
                 context => {
                     let requestDigest = context.GetContextWebInformation.FormDigestValue;
-
-                    // Update the dialog
-                    LoadingDialog.setHeader("Uninstalling the Solution");
-                    LoadingDialog.setBody("Uninstalling in site: " + siteUrl + "<br/>This will close after the app is upgraded.");
-                    LoadingDialog.show();
-
-                    // Log
-                    ErrorDialog.logInfo(`Uninstalling the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} from the app catalog...`);
 
                     // Uninstall the app
                     this.uninstallApp(siteUrl, requestDigest).then(() => {
