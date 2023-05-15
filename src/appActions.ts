@@ -1781,14 +1781,46 @@ export class AppActions {
                     // Show the modal
                     Modal.show();
                 } else {
-                    // Update the loading dialog
-                    LoadingDialog.setBody("Updating the Status");
+                    // Updates the status
+                    let updateStatus = (): PromiseLike<IAppItem> => {
+                        // Update the loading dialog
+                        LoadingDialog.setBody("Updating the Status");
+
+                        // Return a promise
+                        return new Promise((resolve, reject) => {
+                            let itemInfo = pkgInfo.item;
+
+                            // See if the status is after the test case status
+                            let status = AppConfig.Status[DataSource.AppItem.AppStatus];
+                            if (status.stepNumber > AppConfig.Status[AppConfig.TestCasesStatus].stepNumber) {
+                                // Revert the status back to the testing status
+                                itemInfo.AppStatus = AppConfig.TestCasesStatus;
+                            } else {
+                                // No update is required
+                                resolve(itemInfo);
+                                return;
+                            }
+
+                            // Update the app information
+                            DataSource.AppItem.update(itemInfo).execute(
+                                () => {
+                                    // Resolve the request
+                                    resolve(itemInfo);
+                                },
+                                ex => {
+                                    // Log the error
+                                    ErrorDialog.show("Updating Package", "There was an error updating the package.", ex);
+
+                                    // Reject the request
+                                    reject();
+                                }
+                            );
+                        });
+                    }
 
                     // Update the status and set it back to the testing status
-                    let itemInfo = pkgInfo.item;
-                    itemInfo.AppStatus = AppConfig.TestCasesStatus;
-                    DataSource.AppItem.update(itemInfo).execute(
-                        () => {
+                    updateStatus().then(
+                        (itemInfo) => {
                             // Log
                             ErrorDialog.logInfo(`Archiving the ${DataSource.AppItem.Title} app.`);
 
