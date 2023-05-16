@@ -1,6 +1,6 @@
 {
   "name": "app-catalog-dashboard",
-  "version": "0.6.4",
+  "version": "0.6.5",
   "description": "Management of apps in tenant app catalog.",
   "main": "src/index.ts",
   "scripts": {
@@ -25,8 +25,8 @@
   "dependencies": {
     "datatables.net": "^1.13.4",
     "datatables.net-bs5": "^1.13.4",
-    "dattatable": "^2.7.0",
-    "gd-sprest-bs": "^10.10.17",
+    "dattatable": "^2.7.3",
+    "gd-sprest-bs": "^10.10.18",
     "jquery": "^3.6.4",
     "jszip": "^3.10.1",
     "moment": "^2.29.4"

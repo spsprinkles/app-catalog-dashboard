@@ -295,7 +295,7 @@ export class AppActions {
         this.deploy("test", false, false, onComplete, () => {
             // Update the loading dialog
             LoadingDialog.setHeader("Creating the Test Site");
-            LoadingDialog.setBody("Creating the sub-web for testing the application.");
+            LoadingDialog.setBody("Getting the web context information...");
             LoadingDialog.show();
 
             // Log
@@ -305,6 +305,9 @@ export class AppActions {
             ContextInfo.getWeb(AppConfig.Configuration.appCatalogUrl).execute(
                 context => {
                     let requestDigest = context.GetContextWebInformation.FormDigestValue;
+
+                    // Update the loading dialog
+                    LoadingDialog.setBody("Creating the sub-web for testing the application...");
 
                     // Log
                     ErrorDialog.logInfo(`Creating the test web for app: ${DataSource.AppItem.AppProductID}...`);
@@ -326,6 +329,7 @@ export class AppActions {
                                 // Update the loading dialog
                                 LoadingDialog.setHeader("Sending Email Notifications");
                                 LoadingDialog.setBody("Everything is done. Sending an email to the developer poc(s).");
+                                LoadingDialog.show();
 
                                 // Get the app developers
                                 let to = [];
@@ -386,6 +390,7 @@ export class AppActions {
                                             // Update the loading dialog
                                             LoadingDialog.setHeader("Installing the App");
                                             LoadingDialog.setBody("Installing the application to the test site.");
+                                            LoadingDialog.show();
 
                                             // Install the application to the test site
                                             app.install().execute(
@@ -547,8 +552,8 @@ export class AppActions {
                                     ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was added to the catalog successfully...`);
 
                                     // Update the dialog
-                                    LoadingDialog.setHeader("Deploying the Package");
-                                    LoadingDialog.setBody("This will close after the app is deployed.");
+                                    LoadingDialog.setHeader("Updating the Metadata");
+                                    LoadingDialog.setBody("Updating the metadata in the app catalog...");
 
                                     // Get the app item
                                     file.ListItemAllFields().execute(
@@ -560,6 +565,11 @@ export class AppActions {
                                                     // Get the app catalog
                                                     let web = Web(catalogUrl, { requestDigest });
                                                     let appCatalog = (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog());
+
+                                                    // Update the dialog
+                                                    LoadingDialog.setHeader("Deploying the App");
+                                                    LoadingDialog.setBody("Deploying the solution in the app catalog...");
+                                                    LoadingDialog.show();
 
                                                     // Log
                                                     ErrorDialog.logInfo(`Deploying the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID}...`);
@@ -573,6 +583,10 @@ export class AppActions {
                                                         if (tenantFl) {
                                                             // Log
                                                             ErrorDialog.logInfo(`Setting the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} tenant deployed flag...`);
+
+                                                            // Update the dialog
+                                                            LoadingDialog.setHeader("Updating the App");
+                                                            LoadingDialog.setBody("Updating the app item...");
 
                                                             // Update the tenant deployed flag
                                                             DataSource.AppItem.update({
@@ -603,6 +617,11 @@ export class AppActions {
                                                     }, () => {
                                                         // See if this isn't the tenant
                                                         if (!tenantFl) {
+                                                            // Update the dialog
+                                                            LoadingDialog.setHeader("Loading the App Catalog");
+                                                            LoadingDialog.setBody("Error deploying the app, getting the information...");
+                                                            LoadingDialog.show();
+
                                                             // Load the site collection app item
                                                             DataSource.loadSiteAppByName(appFile.Name).then(appItem => {
                                                                 // See if the item exists
@@ -1379,23 +1398,22 @@ export class AppActions {
             // Log
             ErrorDialog.logInfo(`Getting the web context information at ${siteUrl}...`);
 
+            // Show a loading dialog
+            LoadingDialog.setHeader("Getting the web information");
+            LoadingDialog.setBody("Loading the web information...");
+            LoadingDialog.show();
+
             // Load the context of the app catalog
             ContextInfo.getWeb(siteUrl).execute(
                 context => {
                     let requestDigest = context.GetContextWebInformation.FormDigestValue;
 
-                    // Update the dialog
-                    LoadingDialog.setHeader("Uninstalling the Solution");
-                    LoadingDialog.setBody("Uninstalling in site: " + siteUrl + "<br/>This will close after the app is upgraded.");
-                    LoadingDialog.show();
-
-                    // Log
-                    ErrorDialog.logInfo(`Uninstalling the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} from the app catalog...`);
-
                     // Uninstall the app
                     this.uninstallApp(siteUrl, requestDigest).then(() => {
                         // Update the dialog
                         LoadingDialog.setHeader("Upgrading the Solution");
+                        LoadingDialog.setBody("Deploying the app to the catalog...");
+                        LoadingDialog.show();
 
                         // Log
                         ErrorDialog.logInfo(`Upgrading the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID}...`);
@@ -1403,8 +1421,8 @@ export class AppActions {
                         // Deploy the solution
                         this.deploy("test", false, isTestSite ? false : DataSource.AppItem.AppSkipFeatureDeployment, onError, () => {
                             // Update the dialog
-                            LoadingDialog.setHeader("Upgrading the Solution");
-                            LoadingDialog.setBody("This will close after the app is upgraded...");
+                            LoadingDialog.setHeader("Reading the App Catalog");
+                            LoadingDialog.setBody("Getting the new app from the app catalog...");
                             LoadingDialog.show();
 
                             // Log
@@ -1421,6 +1439,9 @@ export class AppActions {
 
                                     // See if the app is already installed
                                     if (app.SkipDeploymentFeature) {
+                                        // Hide the dialog
+                                        LoadingDialog.hide();
+
                                         // Resolve the requst
                                         resolve();
                                     } else {
@@ -1581,6 +1602,7 @@ export class AppActions {
                         // Update the loading dialog
                         LoadingDialog.setHeader("Creating App Folder");
                         LoadingDialog.setBody("Creating the app folder...");
+                        LoadingDialog.show();
 
                         // Create the document set folder
                         Helper.createDocSet(pkgInfo.item.Title, Strings.Lists.Apps).then(
@@ -1624,6 +1646,7 @@ export class AppActions {
                                             // Update the loading dialog
                                             LoadingDialog.setHeader("Uploading the App Icon");
                                             LoadingDialog.setBody("Uploading the icon for this app'...");
+                                            LoadingDialog.show();
 
                                             // Log
                                             ErrorDialog.logInfo(`Uploading the SPFx package icon to the folder...`);
@@ -1758,47 +1781,46 @@ export class AppActions {
                     // Show the modal
                     Modal.show();
                 } else {
-                    // Update the status and set it back to the testing status
-                    let itemInfo = pkgInfo.item;
-                    itemInfo.AppStatus = AppConfig.TestCasesStatus;
-                    DataSource.AppItem.update(itemInfo).execute(
-                        () => {
-                            // Updates the status
-                            let updateStatus = (): PromiseLike<void> => {
-                                // Update the loading dialog
-                                LoadingDialog.setBody("Updating the Status");
+                    // Updates the status
+                    let updateStatus = (): PromiseLike<IAppItem> => {
+                        // Update the loading dialog
+                        LoadingDialog.setBody("Updating the Status");
 
-                                // Return a promise
-                                return new Promise((resolve, reject) => {
-                                    let itemInfo = pkgInfo.item;
+                        // Return a promise
+                        return new Promise((resolve, reject) => {
+                            let itemInfo = pkgInfo.item;
 
-                                    // See if the status is after the test case status
-                                    let status = AppConfig.Status[DataSource.AppItem.AppStatus];
-                                    if (status.stepNumber > AppConfig.Status[AppConfig.TestCasesStatus].stepNumber) {
-                                        // Revert the status back to the testing status
-                                        itemInfo.AppStatus = AppConfig.TestCasesStatus;
-                                    } else {
-                                        // Default to the current status
-                                        itemInfo.AppStatus = DataSource.AppItem.AppStatus;
-                                    }
-
-                                    // Update the app information
-                                    DataSource.AppItem.update(itemInfo).execute(
-                                        () => {
-                                            // Resolve the request
-                                            resolve();
-                                        },
-                                        ex => {
-                                            // Log the error
-                                            ErrorDialog.show("Updating Package", "There was an error updating the package.", ex);
-
-                                            // Reject the request
-                                            reject();
-                                        }
-                                    );
-                                });
+                            // See if the status is after the test case status
+                            let status = AppConfig.Status[DataSource.AppItem.AppStatus];
+                            if (status.stepNumber > AppConfig.Status[AppConfig.TestCasesStatus].stepNumber) {
+                                // Revert the status back to the testing status
+                                itemInfo.AppStatus = AppConfig.TestCasesStatus;
+                            } else {
+                                // No update is required
+                                resolve(itemInfo);
+                                return;
                             }
 
+                            // Update the app information
+                            DataSource.AppItem.update(itemInfo).execute(
+                                () => {
+                                    // Resolve the request
+                                    resolve(itemInfo);
+                                },
+                                ex => {
+                                    // Log the error
+                                    ErrorDialog.show("Updating Package", "There was an error updating the package.", ex);
+
+                                    // Reject the request
+                                    reject();
+                                }
+                            );
+                        });
+                    }
+
+                    // Update the status and set it back to the testing status
+                    updateStatus().then(
+                        (itemInfo) => {
                             // Log
                             ErrorDialog.logInfo(`Archiving the ${DataSource.AppItem.Title} app.`);
 
@@ -1814,37 +1836,39 @@ export class AppActions {
 
                                 // Upload the packages
                                 this.uploadSPFxPackages(Web(Strings.SourceUrl).getFolderByServerRelativeUrl(DataSource.AppFolder.ServerRelativeUrl), fileInfo, pkgInfo.spfxTest, pkgInfo.spfxProd).then(() => {
-                                    // Update the status
-                                    updateStatus().then(() => {
-                                        // Refersh the item
-                                        DataSource.refreshItem(DataSource.AppItem.Id).then(() => {
-                                            // See if the app was upgraded
-                                            if (appUpgraded) {
-                                                // See if there is a flow
-                                                if (AppConfig.Configuration.appFlows && AppConfig.Configuration.appFlows.upgradeApp) {
-                                                    // Execute the flow
-                                                    AppActions.runFlow(AppConfig.Configuration.appFlows.upgradeApp);
-                                                }
+                                    // Display a loading dialog
+                                    LoadingDialog.setHeader("Refreshing the App");
+                                    LoadingDialog.setBody("Refreshing the app details...");
+                                    LoadingDialog.show();
 
-                                                // Send the notifications
-                                                AppNotifications.sendAppUpgradedEmail(DataSource.AppItem).then(() => {
-                                                    // Resolve the request
-                                                    resolve();
-                                                });
+                                    // Refersh the item
+                                    DataSource.refreshItem(DataSource.AppItem.Id).then(() => {
+                                        // See if the app was upgraded
+                                        if (appUpgraded) {
+                                            // See if there is a flow
+                                            if (AppConfig.Configuration.appFlows && AppConfig.Configuration.appFlows.upgradeApp) {
+                                                // Execute the flow
+                                                AppActions.runFlow(AppConfig.Configuration.appFlows.upgradeApp);
+                                            }
 
-                                                // Log
-                                                DataSource.logItem({
-                                                    LogUserId: ContextInfo.userId,
-                                                    ParentId: itemInfo.AppProductID || DataSource.AppItem.AppProductID,
-                                                    ParentListName: Strings.Lists.Apps,
-                                                    Title: DataSource.AuditLogStates.AppUpdated,
-                                                    LogComment: `A new version (${itemInfo.AppVersion}) of the app ${itemInfo.Title} was added.`
-                                                }, Object.assign({ ...DataSource.AppItem, ...itemInfo }));
-                                            } else {
+                                            // Send the notifications
+                                            AppNotifications.sendAppUpgradedEmail(DataSource.AppItem).then(() => {
                                                 // Resolve the request
                                                 resolve();
-                                            }
-                                        });
+                                            });
+
+                                            // Log
+                                            DataSource.logItem({
+                                                LogUserId: ContextInfo.userId,
+                                                ParentId: itemInfo.AppProductID || DataSource.AppItem.AppProductID,
+                                                ParentListName: Strings.Lists.Apps,
+                                                Title: DataSource.AuditLogStates.AppUpdated,
+                                                LogComment: `A new version (${itemInfo.AppVersion}) of the app ${itemInfo.Title} was added.`
+                                            }, Object.assign({ ...DataSource.AppItem, ...itemInfo }));
+                                        } else {
+                                            // Resolve the request
+                                            resolve();
+                                        }
                                     });
                                 }, ex => {
                                     // Log the error
