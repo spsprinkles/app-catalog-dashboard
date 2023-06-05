@@ -190,21 +190,32 @@ export class AppConfig {
                     // Success
                     file => {
                         // Get the content
-                        file.content().execute(content => {
-                            // Convert the string to a json object
-                            try { this._cfg = JSON.parse(String.fromCharCode.apply(null, new Uint8Array(content))); }
-                            catch {
+                        file.content().execute(
+                            // Successfully downloaded the file
+                            content => {
+                                // Convert the string to a json object
+                                try { this._cfg = JSON.parse(String.fromCharCode.apply(null, new Uint8Array(content))); }
+                                catch {
+                                    // Clear the configuration
+                                    this._cfg = null;
+
+                                    // Log
+                                    ErrorDialog.logError("Error parsing the app configuration. Please review and ensure it meets JSON rules.");
+                                }
+
+                                // Complete the request
+                                completeRequest();
+
+                            },
+                            // Unable to download the contents of the file
+                            () => {
                                 // Clear the configuration
                                 this._cfg = null;
 
-                                // Log
-                                ErrorDialog.logError("Error parsing the app configuration. Please review and ensure it meets JSON rules.");
+                                // Complete the request
+                                completeRequest();
                             }
-
-                            // Complete the request
-                            completeRequest();
-
-                        });
+                        );
                     },
 
                     // Error
