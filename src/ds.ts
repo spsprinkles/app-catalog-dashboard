@@ -207,7 +207,6 @@ export class DataSource {
                         "FileLeafRef",
                         "ContentTypeId",
                         "AppDevelopers/Id",
-                        "AppDevelopers/EMail",
                         "AppDevelopers/Title",
                         "AppSponsor/Id",
                         "AppSponsor/Title",
