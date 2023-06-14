@@ -213,7 +213,6 @@ export class DataSource {
                         "AppSponsor/EMail",
                         "AppSponsor/Title",
                         "CheckoutUser/Id",
-                        "CheckoutUser/EMail",
                         "CheckoutUser/Title",
                     ],
                 },
@@ -484,7 +483,7 @@ export class DataSource {
                             "*", "Id", "FileLeafRef", "ContentTypeId",
                             "AppDevelopers/Id", "AppDevelopers/EMail", "AppDevelopers/Title",
                             "AppSponsor/Id", "AppSponsor/EMail", "AppSponsor/Title",
-                            "CheckoutUser/Id", "CheckoutUser/EMail", "CheckoutUser/Title"
+                            "CheckoutUser/Id", "CheckoutUser/Title"
                         ]
                     }
                 }).then(info => {
