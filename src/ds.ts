@@ -210,7 +210,6 @@ export class DataSource {
                         "AppDevelopers/EMail",
                         "AppDevelopers/Title",
                         "AppSponsor/Id",
-                        "AppSponsor/EMail",
                         "AppSponsor/Title",
                         "CheckoutUser/Id",
                         "CheckoutUser/Title",
