@@ -421,8 +421,11 @@ export class DataSource {
                             // See if an app id was defined in the query string
                             let itemId = this.getAppIdFromQS();
                             if (itemId > 0) {
-                                // Load the app information
-                                this.loadAppDashboard(itemId).then(resolve, resolve);
+                                // Refresh the item
+                                this.refreshItem(itemId).then(() => {
+                                    // Load the app information
+                                    this.loadAppDashboard(itemId).then(resolve, resolve);
+                                });
                             } else {
                                 // Resolve the request
                                 resolve();
