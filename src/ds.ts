@@ -468,22 +468,10 @@ export class DataSource {
             ]).then(() => {
                 // Load the form information
                 Components.ListForm.create({
-                    itemId,
+                    item: this._appItem,
                     contentType: "App",
                     listName: this.DocSetList.ListName,
-                    webUrl: this.DocSetList.WebUrl,
-                    query: {
-                        Expand: [
-                            "AppDevelopers", "AppSponsor", "CheckoutUser",
-                            "Folder/Files", "Folder/Folders"
-                        ],
-                        Select: [
-                            "*", "Id", "FileLeafRef", "ContentTypeId",
-                            "AppDevelopers/Id", "AppDevelopers/EMail", "AppDevelopers/Title",
-                            "AppSponsor/Id", "AppSponsor/EMail", "AppSponsor/Title",
-                            "CheckoutUser/Id", "CheckoutUser/Title"
-                        ]
-                    }
+                    webUrl: this.DocSetList.WebUrl
                 }).then(info => {
                     // Set the form information
                     this._appFormInfo = info;
@@ -648,7 +636,18 @@ export class DataSource {
             // See if we need to refresh a specific app
             if (itemId > 0) {
                 // Load all the items
-                this.DocSetList.refreshItem(itemId).then(item => {
+                this.DocSetList.refreshItem(itemId, {
+                    Expand: [
+                        "AppDevelopers", "AppSponsor", "CheckoutUser",
+                        "Folder/Files", "Folder/Folders"
+                    ],
+                    Select: [
+                        "*", "Id", "FileLeafRef", "ContentTypeId",
+                        "AppDevelopers/Id", "AppDevelopers/EMail", "AppDevelopers/Title",
+                        "AppSponsor/Id", "AppSponsor/EMail", "AppSponsor/Title",
+                        "CheckoutUser/Id", "CheckoutUser/Title"
+                    ]
+                }).then(item => {
                     // Load the app dashboard
                     this.loadAppDashboard(itemId).then(() => {
                         // Resolve the promise
