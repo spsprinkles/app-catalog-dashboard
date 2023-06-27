@@ -121,7 +121,7 @@ export class AppSecurityWeb {
     }
 
     // Returns the group
-    getGroup(groupName: string): Types.SP.GroupOData { return this._appGroups[groupName]; }
+    getGroup(groupName: string): Types.SP.GroupOData { return this._appGroups ? this._appGroups[groupName] : null; }
 
     // Returns a user from a group
     getUserForGroup(groupName: string, userId: number): Types.SP.User {
