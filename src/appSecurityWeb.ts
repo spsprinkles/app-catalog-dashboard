@@ -66,26 +66,34 @@ export class AppSecurityWeb {
     create(): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve, reject) => {
-            let web = Web(this._url, { requestDigest: this._context.FormDigestValue });
+            // Ensure the context exists
+            if (this._context) {
+                let web = Web(this._url, { requestDigest: this._context.FormDigestValue });
 
-            // Parse the group names
-            let groupNames = this.getAppGroupNames();
-            for (let i = 0; i < groupNames.length; i++) {
-                let groupName = groupNames[i];
+                // Parse the group names
+                let groupNames = this.getAppGroupNames();
+                for (let i = 0; i < groupNames.length; i++) {
+                    let groupName = groupNames[i];
 
-                // See if this group exists
-                let group = this.getGroup(groupName);
-                if (group) { continue; }
+                    // See if this group exists
+                    let group = this.getGroup(groupName);
+                    if (group) { continue; }
 
-                // Create the group
-                this.createAppGroup(web, groupName);
+                    // Create the group
+                    this.createAppGroup(web, groupName);
+                }
+
+                // Wait for the requests to complete
+                web.done(() => {
+                    // Get the role types
+                    this.createCustomPermissionLevel().then(resolve, reject);
+                });
+            } else {
+                // Site doesn't exist
+                ErrorDialog.logError(`The site at ${this._url} does not exist.`);
+                ErrorDialog.show("Error Creating Security Groups", `The site at ${this._url} does not exist.`);
+                reject();
             }
-
-            // Wait for the requests to complete
-            web.done(() => {
-                // Get the role types
-                this.createCustomPermissionLevel().then(resolve, reject);
-            });
         });
     }
 
