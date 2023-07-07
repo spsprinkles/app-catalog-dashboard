@@ -2,6 +2,7 @@ import { LoadingDialog } from "dattatable";
 import { ContextInfo, Types, Utility } from "gd-sprest-bs";
 import { AppConfig, IEmail } from "./appCfg";
 import { AppSecurity } from "./appSecurity";
+import * as Common from "./common";
 import { IAppItem } from "./ds";
 import { ErrorDialog } from "./errorDialog";
 import Strings from "./strings";
@@ -29,8 +30,11 @@ export class AppNotifications {
                 // Parse the developers
                 let developers = item.AppDevelopers.results;
                 for (let i = 0; i < developers.length; i++) {
+                    // Get the email from the login name
+                    let email = Common.getEmail(developers[i].Name);
+
                     // Append the email
-                    developers[i].EMail ? emails.push(developers[i].EMail) : null;
+                    email ? emails.push(email) : null;
                 }
 
                 // Return the emails
@@ -51,8 +55,11 @@ export class AppNotifications {
 
             // Sponsor
             case "Sponsor":
+                // Get the email from the login name
+                let email = Common.getEmail(item.AppSponsor ? item.AppSponsor.Name : "");
+
                 // Return the email
-                return item.AppSponsor && item.AppSponsor.EMail ? [item.AppSponsor.EMail] : [];
+                return email ? [email] : [];
 
             // Sponsor's Group
             case "SponsorsGroup":
@@ -206,7 +213,8 @@ export class AppNotifications {
             let owners = item.AppDevelopers && item.AppDevelopers.results ? item.AppDevelopers.results : [];
             for (let i = 0; i < owners.length; i++) {
                 // Append the email
-                To.push(owners[i].EMail);
+                let email = Common.getEmail(owners[i].Name);
+                email ? To.push(email) : null;
             }
 
             // Ensure emails exist

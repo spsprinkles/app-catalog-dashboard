@@ -9,7 +9,7 @@ import Strings from "./strings";
 export interface IAppItem extends Types.SP.ListItem {
     AppAPIPermissions?: string;
     AppComments?: string;
-    AppDevelopers: { results: { Id: number; EMail: string; Title: string }[] };
+    AppDevelopers: { results: { Id: number; Name: string; Title: string }[] };
     AppDevelopersId: { results: number[] };
     AppIsClientSideSolution?: boolean;
     AppIsDomainIsolated?: boolean;
@@ -25,7 +25,7 @@ export interface IAppItem extends Types.SP.ListItem {
     AppSiteDeployments?: string;
     AppSkipFeatureDeployment?: boolean;
     AppSourceControl: Types.SP.FieldUrlValue;
-    AppSponsor: { Id: number; EMail: string; Title: string };
+    AppSponsor: { Id: number; Name: string; Title: string };
     AppSponsorId: number;
     AppStatus: string;
     AppVersion: string;
@@ -207,8 +207,10 @@ export class DataSource {
                         "FileLeafRef",
                         "ContentTypeId",
                         "AppDevelopers/Id",
+                        "AppDevelopers/Name",
                         "AppDevelopers/Title",
                         "AppSponsor/Id",
+                        "AppSponsor/Name",
                         "AppSponsor/Title",
                         "CheckoutUser/Id",
                         "CheckoutUser/Title",
@@ -481,8 +483,8 @@ export class DataSource {
                         ],
                         Select: [
                             "*", "Id", "FileLeafRef", "ContentTypeId",
-                            "AppDevelopers/Id", "AppDevelopers/EMail", "AppDevelopers/Title",
-                            "AppSponsor/Id", "AppSponsor/EMail", "AppSponsor/Title",
+                            "AppDevelopers/Id", "AppDevelopers/Name", "AppDevelopers/Title",
+                            "AppSponsor/Id", "AppSponsor/Name", "AppSponsor/Title",
                             "CheckoutUser/Id", "CheckoutUser/Title"
                         ]
                     }
@@ -657,8 +659,8 @@ export class DataSource {
                     ],
                     Select: [
                         "*", "Id", "FileLeafRef", "ContentTypeId",
-                        "AppDevelopers/Id", "AppDevelopers/EMail", "AppDevelopers/Title",
-                        "AppSponsor/Id", "AppSponsor/EMail", "AppSponsor/Title",
+                        "AppDevelopers/Id", "AppDevelopers/Name", "AppDevelopers/Title",
+                        "AppSponsor/Id", "AppSponsor/Name", "AppSponsor/Title",
                         "CheckoutUser/Id", "CheckoutUser/Title"
                     ]
                 }).then(item => {

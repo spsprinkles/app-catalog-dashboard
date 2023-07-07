@@ -4,6 +4,7 @@ import * as JSZip from "jszip";
 import { AppConfig } from "./appCfg";
 import { AppNotifications } from "./appNotifications";
 import { AppSecurity } from "./appSecurity";
+import * as Common from "./common";
 import { DataSource, IAppItem } from "./ds";
 import { ErrorDialog } from "./errorDialog";
 import Strings from "./strings";
@@ -136,13 +137,13 @@ export class AppActions {
                     let developers = DataSource.AppItem.AppDevelopers.results || [];
                     for (let i = 0; i < developers.length; i++) {
                         // Ensure the user exists in this site collection
-                        web.ensureUser(developers[i].EMail).execute(user => {
+                        web.ensureUser(developers[i].Name).execute(user => {
                             // Update the developers user id
                             for (let j = 0; j < developers.length; j++) {
                                 // See if this is the target user
-                                if (developers[j].EMail == user.Email) {
+                                if (developers[j].Name == user.LoginName) {
                                     // Log
-                                    ErrorDialog.logInfo(`Adding developer ${developers[j].EMail} as an owner...`);
+                                    ErrorDialog.logInfo(`Adding developer ${developers[j].Name} as an owner...`);
 
                                     // Update the id
                                     developers[j].Id = user.Id;
@@ -335,8 +336,12 @@ export class AppActions {
                                 let to = [];
                                 let pocs = DataSource.AppItem.AppDevelopers && DataSource.AppItem.AppDevelopers.results ? DataSource.AppItem.AppDevelopers.results : [];
                                 for (let i = 0; i < pocs.length; i++) {
-                                    // Append the email
-                                    to.push(pocs[i].EMail);
+                                    // Get the email from the login name
+                                    let email = Common.getEmail(pocs[i].Name);
+                                    if (email) {
+                                        // Append the email
+                                        to.push(email);
+                                    }
                                 }
 
                                 // Ensure emails exist

@@ -51,6 +51,17 @@ export function getAppIcon(height?, width?, className?) {
     return icon;
 }
 
+// Gets the email from the login name
+export function getEmail(loginName) {
+    // Get the email from the login name
+    let name = (loginName ? loginName : "").split('|');
+    let email = name.length > 0 ? name[name.length - 1] : "";
+    email = email.split('#ext#')[0];
+
+    // Return the email
+    return email || "";
+}
+
 // Determines if the user is an owner
 export function isOwner(item: IAppItem) {
     // Determine if the user is an owner
