@@ -1945,7 +1945,7 @@ export class AppActions {
             if (cdn) {
                 // Show a loading dialog
                 LoadingDialog.setHeader("Uploading Client Side Assets");
-                LoadingDialog.setBody("Uploading the solution assets to the app folder...");
+                LoadingDialog.setBody("Getting the web information...");
                 LoadingDialog.show();
 
                 // Get the package
@@ -1969,10 +1969,20 @@ export class AppActions {
                 ContextInfo.getWeb(webUrl).execute(context => {
                     // Set the web
                     let web = Web(webUrl, { requestDigest: context.GetContextWebInformation.FormDigestValue });
+
+                    // Update the loading dialog
+                    LoadingDialog.setBody("Getting the client side assets...");
+
                     // Get the assets
                     getClientSideAssets(pkgFile).then(assets => {
+                        // Update the loading dialog
+                        LoadingDialog.setBody("Creating/Getting the client side assets folder...");
+
                         // Ensure the folder is created
                         this.createClientSideAssetsFolder(web.Folders(listUrl)).then(folder => {
+                            // Update the loading dialog
+                            LoadingDialog.setBody("Uploading the solution assets to the app folder...");
+
                             // Parse the assets
                             Helper.Executor(assets, assetFile => {
                                 // Return a promise
