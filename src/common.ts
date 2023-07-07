@@ -55,8 +55,18 @@ export function getAppIcon(height?, width?, className?) {
 export function getEmail(loginName) {
     // Get the email from the login name
     let name = (loginName ? loginName : "").split('|');
-    let email = name.length > 0 ? name[name.length - 1] : "";
-    email = email.split('#ext#')[0];
+    let email: string = name.length > 0 ? name[name.length - 1] : "";
+
+    // See if this is an external user
+    if (email.indexOf("#ext#") > 0) {
+        // Get the user_domain value
+        email = email.split('#ext#')[0];
+
+        // Replace the last instance of the _ w/ @
+        // Note - This will only work for domains that do not have a '_' character
+        let idx = email.lastIndexOf('_');
+        email = email.substring(0, idx) + '@' + email.substring(idx + 1);
+    }
 
     // Return the email
     return email || "";
