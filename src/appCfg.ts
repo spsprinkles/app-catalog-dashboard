@@ -142,6 +142,8 @@ export class AppConfig {
                 if (this._cfg) {
                     // Replace the urls
                     this._cfg.appCatalogUrl = this.Configuration.appCatalogUrl ? Common.updateUrl(this._cfg.appCatalogUrl) : Strings.SourceUrl;
+                    this._cfg.cdnProd = this.Configuration.cdnProd ? Common.updateUrl(this._cfg.cdnProd) : this._cfg.cdnProd;
+                    this._cfg.cdnTest = this.Configuration.cdnTest ? Common.updateUrl(this._cfg.cdnTest) : this._cfg.cdnTest;
                     this._cfg.dashboardUrl = this.Configuration.dashboardUrl ? Common.updateUrl(this._cfg.dashboardUrl) : Strings.DashboardUrl;
                     this._cfg.helpPageUrl = this._cfg.helpPageUrl ? Common.updateUrl(this._cfg.helpPageUrl) : this._cfg.helpPageUrl;
                     this._cfg.templatesLibraryUrl = this._cfg.templatesLibraryUrl ? Common.updateUrl(this._cfg.templatesLibraryUrl) : this._cfg.templatesLibraryUrl;
