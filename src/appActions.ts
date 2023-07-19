@@ -1556,7 +1556,7 @@ export class AppActions {
     // Upload form
     static upload(onComplete: (item: IAppItem) => void) {
         // Show the upload file dialog
-        Helper.ListForm.showFileDialog().then(file => {
+        Helper.ListForm.showFileDialog([".sppkg"]).then(file => {
             // Log
             ErrorDialog.logInfo(`File uploaded: ${file.name}`);
 

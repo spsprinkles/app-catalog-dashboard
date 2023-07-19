@@ -942,7 +942,7 @@ export class AppForms {
                             }
 
                             // Display a file upload dialog
-                            Helper.ListForm.showFileDialog().then(file => {
+                            Helper.ListForm.showFileDialog([isImage ? "image/*" : "video/*"]).then(file => {
                                 // Clear the value
                                 ctrl.textbox.setValue("");
 
