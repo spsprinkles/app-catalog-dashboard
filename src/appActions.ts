@@ -1656,41 +1656,45 @@ export class AppActions {
                                             // Log
                                             ErrorDialog.logInfo(`Uploading the SPFx package icon to the folder...`);
 
-                                            // Get image in different format for later uploading
-                                            pkgInfo.image.async("arraybuffer").then(content => {
-                                                // Get the file extension
-                                                let fileExt: string | string[] = pkgInfo.image.name.split('.');
-                                                fileExt = fileExt[fileExt.length - 1];
+                                            // Get the base64 value for the image
+                                            pkgInfo.image.async("base64").then(base64 => {
+                                                // Get image in different format for later uploading
+                                                pkgInfo.image.async("arraybuffer").then(content => {
+                                                    // Get the file extension
+                                                    let fileExt: string | string[] = pkgInfo.image.name.split('.');
+                                                    fileExt = fileExt[fileExt.length - 1];
 
-                                                // Upload the image to this folder
-                                                item.Folder().Files().add("AppIcon." + fileExt, true, content).execute(
-                                                    file => {
-                                                        // Log
-                                                        ErrorDialog.logInfo(`The SPFx app icon '${file.Name}' was added successfully...`);
-
-                                                        // Set the icon url
-                                                        item.update({
-                                                            AppThumbnailURL: {
-                                                                __metadata: { type: "SP.FieldUrlValue" },
-                                                                Description: file.ServerRelativeUrl,
-                                                                Url: file.ServerRelativeUrl
-                                                            }
-                                                        }).execute(() => {
+                                                    // Upload the image to this folder
+                                                    item.Folder().Files().add("AppIcon." + fileExt, true, content).execute(
+                                                        file => {
                                                             // Log
-                                                            ErrorDialog.logInfo(`The SPFx app icon url metadata was updated successfully...`);
+                                                            ErrorDialog.logInfo(`The SPFx app icon '${file.Name}' was added successfully...`);
 
-                                                            // Close the loading dialog
-                                                            LoadingDialog.hide();
+                                                            // Set the icon url
+                                                            item.update({
+                                                                AppThumbnailURLBase64: base64,
+                                                                AppThumbnailURL: {
+                                                                    __metadata: { type: "SP.FieldUrlValue" },
+                                                                    Description: file.ServerRelativeUrl,
+                                                                    Url: file.ServerRelativeUrl
+                                                                }
+                                                            }).execute(() => {
+                                                                // Log
+                                                                ErrorDialog.logInfo(`The SPFx app icon url metadata was updated successfully...`);
 
-                                                            // Execute the completed event
-                                                            onComplete(pkgInfo.item);
-                                                        });
-                                                    },
-                                                    ex => {
-                                                        // Log the error
-                                                        ErrorDialog.show("Uploading Icon", "There was an error uploading the app icon file.", ex);
-                                                    }
-                                                );
+                                                                // Close the loading dialog
+                                                                LoadingDialog.hide();
+
+                                                                // Execute the completed event
+                                                                onComplete(pkgInfo.item);
+                                                            });
+                                                        },
+                                                        ex => {
+                                                            // Log the error
+                                                            ErrorDialog.show("Uploading Icon", "There was an error uploading the app icon file.", ex);
+                                                        }
+                                                    );
+                                                });
                                             });
                                         } else {
                                             // Close the loading dialog
