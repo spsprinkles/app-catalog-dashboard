@@ -420,7 +420,56 @@ export const Configuration = Helper.SPConfig({
                     type: Helper.SPCfgFieldType.Boolean,
                     allowDeletion: false,
                     defaultValue: "1"
-                }
+                },
+                /** Image Fields */
+                {
+                    name: "AppImageURL1Base64",
+                    title: "Screenshot URL 1 Base 64",
+                    type: Helper.SPCfgFieldType.Note,
+                    allowDeletion: false,
+                    description: "An image or screenshot for this app. Images should have a width of 512 pixels and a height of 384 pixels.",
+                    noteType: SPTypes.FieldNoteType.TextOnly
+                } as Helper.IFieldInfoNote,
+                {
+                    name: "AppImageURL2Base64",
+                    title: "Screenshot URL 2 Base 64",
+                    type: Helper.SPCfgFieldType.Note,
+                    allowDeletion: false,
+                    description: "An image or screenshot for this app. Images should have a width of 512 pixels and a height of 384 pixels.",
+                    noteType: SPTypes.FieldNoteType.TextOnly
+                } as Helper.IFieldInfoNote,
+                {
+                    name: "AppImageURL3Base64",
+                    title: "Screenshot URL 3 Base 64",
+                    type: Helper.SPCfgFieldType.Note,
+                    allowDeletion: false,
+                    description: "An image or screenshot for this app. Images should have a width of 512 pixels and a height of 384 pixels.",
+                    noteType: SPTypes.FieldNoteType.TextOnly
+                } as Helper.IFieldInfoNote,
+                {
+                    name: "AppImageURL4Base64",
+                    title: "Screenshot URL 4 Base 64",
+                    type: Helper.SPCfgFieldType.Note,
+                    allowDeletion: false,
+                    description: "An image or screenshot for this app. Images should have a width of 512 pixels and a height of 384 pixels.",
+                    noteType: SPTypes.FieldNoteType.TextOnly
+                } as Helper.IFieldInfoNote,
+                {
+                    name: "AppImageURL5Base64",
+                    title: "Screenshot URL 5 Base 64",
+                    type: Helper.SPCfgFieldType.Note,
+                    allowDeletion: false,
+                    description: "An image or screenshot for this app. Images should have a width of 512 pixels and a height of 384 pixels.",
+                    noteType: SPTypes.FieldNoteType.TextOnly
+                } as Helper.IFieldInfoNote,
+                {
+                    name: "AppThumbnailURLBase64",
+                    title: "Icon URL Base 64",
+                    type: Helper.SPCfgFieldType.Note,
+                    allowDeletion: false,
+                    description: "The URL to the app icon. The icon should have a width and height of 96 pixels.",
+                    noteType: SPTypes.FieldNoteType.TextOnly
+                } as Helper.IFieldInfoNote
             ],
             ViewInformation: [{
                 ViewName: "All Documents",
