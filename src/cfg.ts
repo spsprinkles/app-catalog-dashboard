@@ -310,7 +310,7 @@ export const Configuration = Helper.SPConfig({
                 {
                     name: "AppProductID",
                     title: "Product ID",
-                    type: Helper.SPCfgFieldType.Guid,
+                    type: Helper.SPCfgFieldType.Text,
                     allowDeletion: false,
                     showInNewForm: false
                 },
