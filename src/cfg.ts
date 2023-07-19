@@ -421,7 +421,7 @@ export const Configuration = Helper.SPConfig({
                     allowDeletion: false,
                     defaultValue: "1"
                 },
-                /** Image Fields */
+                /** Base64 Image Fields */
                 {
                     name: "AppImageURL1Base64",
                     title: "Screenshot URL 1 Base 64",
