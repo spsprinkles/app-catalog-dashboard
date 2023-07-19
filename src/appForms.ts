@@ -966,7 +966,7 @@ export class AppForms {
                                             ctrl.textbox.setValue(reader.result as string);
 
                                             // Set the base64 value
-                                            base64Images[field.InternalName + "Base64"] = file.data;
+                                            base64Images[field.InternalName + "Base64"] = reader.result as string;
 
                                             // Upload the file
                                             let fileInfo = fileName.split('.');
