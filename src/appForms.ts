@@ -788,6 +788,8 @@ export class AppForms {
 
     // Edit form
     edit(itemId: number, onUpdate: () => void) {
+        let base64Images = {};
+
         // Display the edit form
         DataSource.DocSetList.editForm({
             itemId,
@@ -952,29 +954,53 @@ export class AppForms {
                                 // Validate the file type
                                 if (isImage) {
                                     if (fileName.endsWith(".png") || fileName.endsWith(".jpg") || fileName.endsWith(".jpeg") || fileName.endsWith(".gif")) {
-                                        // Upload the file
-                                        let fileInfo = fileName.split('.');
-                                        let dstFileName = "AppImage" + field.InternalName.replace("AppImageURL", '') + "." + fileInfo[fileInfo.length - 1];
-                                        let fileUrl = [document.location.origin, DataSource.AppFolder.ServerRelativeUrl.replace(/^\//, ''), dstFileName].join('/');
-                                        uploadFile(dstFileName, file).then(
-                                            () => {
-                                                // Set the value
-                                                ctrl.textbox.setValue(fileUrl);
+                                        // Show a loading dialog
+                                        LoadingDialog.setHeader("Reading the file");
+                                        LoadingDialog.setBody("This will close after the file is converted...");
+                                        LoadingDialog.show();
 
-                                                // Validate the control
-                                                ctrl.updateValidation(ctrl.el, {
-                                                    isValid: true
-                                                });
-                                            },
-                                            // Error
-                                            () => {
-                                                // Display an error message
-                                                ctrl.updateValidation(ctrl.el, {
-                                                    isValid: false,
-                                                    invalidMessage: "Error uploading the file to the app folder. Refresh and try again."
-                                                });
-                                            }
-                                        );
+                                        // Convert the file to base64
+                                        let reader = new FileReader();
+                                        reader.onloadend = () => {
+                                            // Set the value
+                                            ctrl.textbox.setValue(reader.result as string);
+
+                                            // Set the base64 value
+                                            base64Images[field.InternalName + "Base64"] = reader.result as string;
+
+                                            // Upload the file
+                                            let fileInfo = fileName.split('.');
+                                            let dstFileName = "AppImage" + field.InternalName.replace("AppImageURL", '') + "." + fileInfo[fileInfo.length - 1];
+                                            let fileUrl = [document.location.origin, DataSource.AppFolder.ServerRelativeUrl.replace(/^\//, ''), dstFileName].join('/');
+                                            uploadFile(dstFileName, file).then(
+                                                () => {
+                                                    // Set the value
+                                                    ctrl.textbox.setValue(fileUrl);
+
+                                                    // Validate the control
+                                                    ctrl.updateValidation(ctrl.el, {
+                                                        isValid: true
+                                                    });
+
+                                                    // Close the dialog
+                                                    LoadingDialog.hide();
+                                                },
+                                                // Error
+                                                () => {
+                                                    // Display an error message
+                                                    ctrl.updateValidation(ctrl.el, {
+                                                        isValid: false,
+                                                        invalidMessage: "Error uploading the file to the app folder. Refresh and try again."
+                                                    });
+
+                                                    // Close the dialog
+                                                    LoadingDialog.hide();
+                                                }
+                                            );
+                                        }
+
+                                        // Read the file
+                                        reader.readAsText(file.src);
                                     } else {
                                         // Display an error message
                                         ctrl.updateValidation(ctrl.el, {
@@ -1027,6 +1053,13 @@ export class AppForms {
             onValidation: (values) => {
                 // Save the form by default
                 return true;
+            },
+            onSave: (values) => {
+                // Add the base64 image values
+                values = { ...values, ...base64Images };
+
+                // Return the values
+                return values;
             },
             onUpdate: (item: IAppItem) => {
                 // See if this is a new item
