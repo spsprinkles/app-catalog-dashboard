@@ -1633,6 +1633,13 @@ export class AppForms {
                             // Set the body
                             Modal.setBody("The following questions failed the test cases:");
 
+                            // Set the questions
+                            Components.ListGroup({
+                                className: "mt-2",
+                                el: Modal.BodyElement,
+                                items: invalidQuestions
+                            });
+
                             // Show the dialog
                             Modal.show();
 
