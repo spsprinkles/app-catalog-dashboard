@@ -245,8 +245,8 @@ export class AppDashboard {
                         Components.Alert({
                             el: elAlert,
                             className: "m-0 rounded-0",
-                            header: "App Deployment Error",
-                            content: "App Icon is not detected as a 96x96 size. Please check/validate the icon size before submitting the app.",
+                            header: "App Deployment Warning",
+                            content: `App Icon size detected as ${elAppIcon.height}x${elAppIcon.width}, where 96x96 is required. Please check/validate the icon size before submitting the app.`,
                             type: Components.AlertTypes.Warning
                         });
                     }
