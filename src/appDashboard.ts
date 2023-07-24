@@ -218,6 +218,44 @@ export class AppDashboard {
                 type: Components.AlertTypes.Danger
             });
         }
+
+        // See if we haven't deployed the app for "In Testing"
+        // If the state is at "In Testing", we will let the app catalog error message be displayed
+        let status = AppConfig.Status[DataSource.AppItem.AppStatus];
+        if (status.stepNumber < AppConfig.Status[AppConfig.TestCasesStatus].stepNumber) {
+            // Parse the app files
+            for (let i = 0; i < DataSource.AppFolder.Files.results.length; i++) {
+                let file = DataSource.AppFolder.Files.results[i];
+
+                // See if this isn't the target file
+                if (file.Name.toLowerCase() != "appicon.png") { continue; }
+
+                // Check the size of the icon
+                let elAppIcon = document.createElement("img");
+                elAppIcon.src = file.ServerRelativeUrl;
+
+                // Wait for the image to be loaded
+                elAppIcon.onload = () => {
+                    // Validate the size of the icon
+                    if (elAppIcon.height != 96 || elAppIcon.width != 96) {
+                        // Show the element
+                        elAlert.classList.remove("d-none");
+
+                        // Render an alert
+                        Components.Alert({
+                            el: elAlert,
+                            className: "m-0 rounded-0",
+                            header: "App Deployment Warning",
+                            content: `App Icon size detected as ${elAppIcon.height}x${elAppIcon.width}, where 96x96 is required. Please check/validate the icon size before submitting the app.`,
+                            type: Components.AlertTypes.Warning
+                        });
+                    }
+                }
+
+                // Break from the loop
+                break;
+            }
+        }
     }
 
     // Renders the documents
