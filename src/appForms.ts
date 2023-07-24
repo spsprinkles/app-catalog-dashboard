@@ -1000,7 +1000,7 @@ export class AppForms {
                                         }
 
                                         // Read the file
-                                        reader.readAsText(file.src);
+                                        reader.readAsDataURL(file.src);
                                     } else {
                                         // Display an error message
                                         ctrl.updateValidation(ctrl.el, {
