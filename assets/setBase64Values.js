@@ -15,6 +15,9 @@ DattaTable.LoadingDialog.setHeader("Setting Base64 Values")
 DattaTable.LoadingDialog.setBody("Reading the files....");
 DattaTable.LoadingDialog.show();
 
+// Log
+console.log("Starting the script...");
+
 // Get the items
 $REST.List("Developer Apps").Items().query({
     Filter: "ContentType eq 'App'"
@@ -63,6 +66,13 @@ $REST.List("Developer Apps").Items().query({
                                     resolve();
                                 }
                             };
+                            request.onerror = () => {
+                                // Log
+                                console.error("Error getting the image from: " + urlValue.Url);
+
+                                // Check the next item
+                                resolve();
+                            }
 
                             // Execute the request
                             request.send();
@@ -97,6 +107,9 @@ $REST.List("Developer Apps").Items().query({
         }).then(() => {
             // Close the dialog
             DattaTable.LoadingDialog.hide();
+
+            // Log
+            console.log("Completed the script...");
         });
     },
 
