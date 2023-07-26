@@ -117,47 +117,62 @@ export class AppForms {
                                 item.update({
                                     AppStatus: status.nextStep
                                 }).execute(() => {
-                                    // Close the dialog
-                                    LoadingDialog.hide();
+                                    let sendNotification = () => {
+                                        // Close the dialog
+                                        LoadingDialog.hide();
 
-                                    // Run the flow associated for this status
-                                    AppActions.runFlow(status.flowId);
+                                        // Run the flow associated for this status
+                                        AppActions.runFlow(status.flowId);
 
-                                    // Send the notifications
-                                    AppNotifications.sendEmail(status.notification, item).then(() => {
-                                        // See if the test app catalog exists and we are creating the test site
-                                        if (AppSecurity.IsSiteAppCatalogOwner && status.createTestSite) {
-                                            // Load the test site
-                                            DataSource.loadTestSite(item).then(
-                                                // Exists
-                                                web => {
-                                                    // See if the current version is deployed
-                                                    if (item.AppVersion == DataSource.AppCatalogSiteItem.InstalledVersion && !DataSource.AppCatalogSiteItem.SkipDeploymentFeature) {
-                                                        // Call the update event
-                                                        onUpdate();
-                                                    } else {
-                                                        // Update the app
-                                                        AppActions.updateApp(web.ServerRelativeUrl, true, onUpdate).then(() => {
+                                        // Send the notifications
+                                        AppNotifications.sendEmail(status.notification, item).then(() => {
+                                            // See if the test app catalog exists and we are creating the test site
+                                            if (AppSecurity.IsSiteAppCatalogOwner && status.createTestSite) {
+                                                // Load the test site
+                                                DataSource.loadTestSite(item).then(
+                                                    // Exists
+                                                    web => {
+                                                        // See if the current version is deployed
+                                                        if (item.AppVersion == DataSource.AppCatalogSiteItem.InstalledVersion && !DataSource.AppCatalogSiteItem.SkipDeploymentFeature) {
                                                             // Call the update event
                                                             onUpdate();
-                                                        });
-                                                    }
-                                                },
+                                                        } else {
+                                                            // Update the app
+                                                            AppActions.updateApp(web.ServerRelativeUrl, true, onUpdate).then(() => {
+                                                                // Call the update event
+                                                                onUpdate();
+                                                            });
+                                                        }
+                                                    },
 
-                                                // Doesn't exist
-                                                () => {
-                                                    // Create the test site
-                                                    AppActions.createTestSite(onUpdate);
-                                                }
-                                            );
-                                        } else {
-                                            // Call the update event
-                                            onUpdate();
-                                        }
-                                    }, ex => {
-                                        // Log the error
-                                        ErrorDialog.show("Updating Status", "There was an error updating the status.", ex);
-                                    });
+                                                    // Doesn't exist
+                                                    () => {
+                                                        // Create the test site
+                                                        AppActions.createTestSite(onUpdate);
+                                                    }
+                                                );
+                                            } else {
+                                                // Call the update event
+                                                onUpdate();
+                                            }
+                                        }, ex => {
+                                            // Log the error
+                                            ErrorDialog.show("Updating Status", "There was an error updating the status.", ex);
+                                        });
+                                    }
+
+                                    // See if this is the last step
+                                    let nextStep = AppConfig.Status[status.nextStep];
+                                    if (nextStep.lastStep) {
+                                        // Upload the client side assets
+                                        AppActions.uploadClientSideAssets("prod").then(() => {
+                                            // Send the notification
+                                            sendNotification();
+                                        });
+                                    } else {
+                                        // Send the notification
+                                        sendNotification();
+                                    }
                                 });
                             });
                         });
