@@ -1,6 +1,6 @@
 {
   "name": "app-catalog-dashboard",
-  "version": "0.6.6",
+  "version": "0.6.7",
   "description": "Management of apps in tenant app catalog.",
   "main": "src/index.ts",
   "scripts": {

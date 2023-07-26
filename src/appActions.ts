@@ -1893,7 +1893,7 @@ export class AppActions {
     }
 
     // Uploads the spfx client side assets
-    private static uploadClientSideAssets(pkgType: "" | "test" | "prod"): PromiseLike<void> {
+    static uploadClientSideAssets(pkgType: "" | "test" | "prod"): PromiseLike<void> {
         // Gets the client side assets
         let getClientSideAssets = (file: Types.SP.File): PromiseLike<JSZip.JSZipObject[]> => {
             let assets: JSZip.JSZipObject[] = [];
