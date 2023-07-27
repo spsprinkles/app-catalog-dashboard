@@ -1803,6 +1803,9 @@ export class AppActions {
                         return new Promise((resolve, reject) => {
                             let itemInfo = pkgInfo.item;
 
+                            // Set the current status
+                            itemInfo.AppStatus = DataSource.AppItem.AppStatus;
+
                             // See if the status is after the test case status
                             let status = AppConfig.Status[DataSource.AppItem.AppStatus];
                             if (status.stepNumber > AppConfig.Status[AppConfig.TestCasesStatus].stepNumber) {
