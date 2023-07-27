@@ -1,6 +1,6 @@
 {
   "name": "app-catalog-mgr",
-  "version": "0.6.4",
+  "version": "0.6.8",
   "private": true,
   "main": "lib/index.js",
   "scripts": {
