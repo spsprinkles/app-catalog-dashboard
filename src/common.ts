@@ -1,11 +1,14 @@
 import { ContextInfo } from "gd-sprest-bs";
-import { IAppItem } from "./ds";
+import { DataSource, IAppItem } from "./ds";
 
 // Determines the current application status
 export function appStatus(item: IAppItem) {
     // See if item is rejected
     if (item.AppIsRejected) { return "Rejected"; }
-    if (item.AppIsTenantDeployed) { return "Tenant Deployed"; }
+    if (item.AppIsTenantDeployed) {
+        let appItem = DataSource.getTenantAppItem(item.AppProductID);
+        return `Tenant Deployed${appItem ? "<br/>(" + appItem.AppCatalogVersion + ")": ""}`;
+    }
     if (item.AppSiteDeployments && item.AppSiteDeployments.length > 0) { return "Site Collection Deployed"; }
     return item.AppStatus;
 }

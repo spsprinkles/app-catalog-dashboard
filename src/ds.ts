@@ -419,6 +419,8 @@ export class DataSource {
                             this.initDocSetList(),
                             // Load the status filters
                             this.initStatusFilters(),
+                            // Loads the tenant app catalog items
+                            this.loadTenantApps()
                         ]).then(() => {
                             // See if an app id was defined in the query string
                             let itemId = this.getAppIdFromQS();
@@ -469,7 +471,7 @@ export class DataSource {
                 // Load the site collection app catalog item
                 this.loadSiteCollectionApp(),
                 // Load the tenant app catalog item
-                this.loadTenantApp(),
+                this.loadTenantApp()
             ]).then(() => {
                 // Load the form information
                 Components.ListForm.create({
@@ -612,6 +614,42 @@ export class DataSource {
                             resolve();
                         }
                     );
+            } else {
+                // User doesn't have access
+                resolve();
+            }
+        });
+    }
+
+    // Loads the app information from the tenant app catalog
+    private static _tenantAppItems: { [key: string]: Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata } = null;
+    static getTenantAppItem(id: string): Types.Microsoft.SharePoint.Marketplace.CorporateCuratedGallery.CorporateCatalogAppMetadata { return this._tenantAppItems[id]; }
+    private static loadTenantApps(): PromiseLike<void> {
+        // Return a promise
+        return new Promise((resolve) => {
+            // Clear the references
+            this._tenantAppItems = {};
+
+            // See if the app catalog is defined and the user is an tenant admin
+            if (AppConfig.Configuration.tenantAppCatalogUrl && AppSecurity.IsTenantAppCatalogOwner) {
+                // Load the available apps
+                Web().TenantAppCatalog().AvailableApps().execute(
+                    (appItems) => {
+                        // Parse the apps
+                        for (let i = 0; i < appItems.results.length; i++) {
+                            let app = appItems.results[i];
+
+                            this._tenantAppItems[app.ProductId] = app;
+                        }
+
+                        // Resolve the request
+                        resolve();
+                    },
+                    () => {
+                        // App not found, resolve the request
+                        resolve();
+                    }
+                );
             } else {
                 // User doesn't have access
                 resolve();
