@@ -13,7 +13,7 @@ export interface IAppCatalogManagerWebPartProps {
 }
 
 // Reference the solution
-import "../../../../dist/app-catalog-dashboard.js";
+import "../../../../dist/app-catalog-dashboard.min.js";
 declare var AppDashboard;
 
 export default class AppCatalogManagerWebPart extends BaseClientSideWebPart<IAppCatalogManagerWebPartProps> {
