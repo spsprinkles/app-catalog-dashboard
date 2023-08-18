@@ -2035,8 +2035,8 @@ export class AppActions {
         // Return a promise
         return new Promise((resolve, reject) => {
             // Update the loading dialog
-            LoadingDialog.setHeader("Uploading the Client Side Assets");
-            LoadingDialog.setBody("Uploading the app's assets'...");
+            LoadingDialog.setHeader("Uploading the SPFx Packages");
+            LoadingDialog.setBody("Uploading the test and prod generated packages...");
             LoadingDialog.show();
 
             // Log
