@@ -122,7 +122,7 @@ export class AppDashboard {
     // Renders the dashboard
     private renderActions() {
         // Define the card group parent
-        let cardGroup = this._el.querySelector("#app-info > div.card-group");
+        let cardGroup = this._el.querySelector("#app-info > div.card-group") as HTMLElement;
 
         // Clear the actions
         let elActions = cardGroup.querySelector("div.app-actions");
@@ -148,7 +148,7 @@ export class AppDashboard {
     // Renders the status information from the configuration
     private renderAlertStatus() {
         // Clear the element
-        let elAlert = this._el.querySelector("#app-status-info");
+        let elAlert = this._el.querySelector("#app-status-info") as HTMLElement;
         while (elAlert.firstChild) { elAlert.removeChild(elAlert.firstChild); }
 
         // See if an alert exists
@@ -176,7 +176,7 @@ export class AppDashboard {
     // Renders the error in an alert
     private renderAlertError() {
         // Clear the element
-        let elAlert = this._el.querySelector("#app-error");
+        let elAlert = this._el.querySelector("#app-error") as HTMLElement;
         while (elAlert.firstChild) { elAlert.removeChild(elAlert.firstChild); }
 
         // See if an alert exists
@@ -312,7 +312,7 @@ export class AppDashboard {
     // Renders the information
     private renderInfo() {
         // Clear the information
-        let elInfo = this._el.querySelector("#app-info");
+        let elInfo = this._el.querySelector("#app-info") as HTMLElement;
         while (elInfo.firstChild) { elInfo.removeChild(elInfo.firstChild); }
 
         // Update the fields after rendering them
