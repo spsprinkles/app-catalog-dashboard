@@ -630,30 +630,24 @@ export class DataSource {
             // Clear the references
             this._tenantAppItems = {};
 
-            // See if the app catalog is defined and the user is an tenant admin
-            if (AppConfig.Configuration.tenantAppCatalogUrl && AppSecurity.IsTenantAppCatalogOwner) {
-                // Load the available apps
-                Web().TenantAppCatalog().AvailableApps().execute(
-                    (appItems) => {
-                        // Parse the apps
-                        for (let i = 0; i < appItems.results.length; i++) {
-                            let app = appItems.results[i];
+            // Load the available apps
+            Web().TenantAppCatalog().AvailableApps().execute(
+                (appItems) => {
+                    // Parse the apps
+                    for (let i = 0; i < appItems.results.length; i++) {
+                        let app = appItems.results[i];
 
-                            this._tenantAppItems[app.ProductId] = app;
-                        }
-
-                        // Resolve the request
-                        resolve();
-                    },
-                    () => {
-                        // App not found, resolve the request
-                        resolve();
+                        this._tenantAppItems[app.ProductId] = app;
                     }
-                );
-            } else {
-                // User doesn't have access
-                resolve();
-            }
+
+                    // Resolve the request
+                    resolve();
+                },
+                () => {
+                    // App not found, resolve the request
+                    resolve();
+                }
+            );
         });
     }
 
