@@ -2225,6 +2225,16 @@ export class AppForms {
         // Set the body
         Modal.setBody("Are you sure you want to update the app?");
 
+        let form = Components.Form({
+            el: Modal.BodyElement,
+            controls: [{
+                name: "SkipFeatureDeployment",
+                title: "Skip Feature Deployment",
+                type: Components.FormControlTypes.Switch,
+                value: DataSource.AppCatalogTenantItem ? DataSource.AppCatalogTenantItem.SkipDeploymentFeature : false
+            }]
+        });
+
         // Render the footer
         Modal.setFooter(Components.Button({
             text: "Update",
@@ -2234,7 +2244,8 @@ export class AppForms {
                 Modal.hide();
 
                 // Update the app
-                AppActions.updateTenantApp(DataSource.AppCatalogTenantItem ? DataSource.AppCatalogTenantItem.SkipDeploymentFeature : false, onUpdate).then(() => {
+                let skipFeatureDeployment = form.getValues()["SkipFeatureDeployment"];
+                AppActions.updateTenantApp(skipFeatureDeployment, onUpdate).then(() => {
                     // Send the notifications
                     AppNotifications.sendAppUpgradedEmail(DataSource.AppItem).then(() => {
                         // Call the update event
