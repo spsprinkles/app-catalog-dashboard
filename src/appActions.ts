@@ -1396,8 +1396,8 @@ export class AppActions {
         });
     }
 
-    // Updates the app
-    static updateApp(siteUrl: string, isTestSite: boolean, onError: () => void): PromiseLike<void> {
+    // Updates the app in a site collection app catalog
+    static updateSiteApp(siteUrl: string, isTestSite: boolean, onError: () => void): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve) => {
             // Log
@@ -1460,6 +1460,103 @@ export class AppActions {
 
                                         // Install the app
                                         Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(DataSource.AppItem.AppProductID).install().execute(
+                                            () => {
+                                                // Log
+                                                ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was installed successfully...`);
+
+                                                // Close the dialog
+                                                LoadingDialog.hide();
+
+                                                // Resolve the requst
+                                                resolve();
+                                            },
+                                            ex => {
+                                                // Log the error
+                                                ErrorDialog.show("Installing App", "There was an error installing the app.", ex);
+                                            }
+                                        );
+                                    }
+                                },
+                                ex => {
+                                    // Log the error
+                                    ErrorDialog.show("Getting App", "There was an error loading the app.", ex);
+                                }
+                            );
+                        });
+                    });
+                },
+                ex => {
+                    // Log the error
+                    ErrorDialog.show("Getting Context", "There was an error getting the web context", ex);
+                }
+            );
+        });
+    }
+
+    // Updates the app in a tenant app catalog
+    static updateTenantApp(skipFeatureDeployment: boolean, onError: () => void): PromiseLike<void> {
+        // Return a promise
+        return new Promise((resolve) => {
+            // Log
+            ErrorDialog.logInfo(`Getting the web context information at ${AppConfig.Configuration.tenantAppCatalogUrl}...`);
+
+            // Show a loading dialog
+            LoadingDialog.setHeader("Getting the web information");
+            LoadingDialog.setBody("Loading the web information...");
+            LoadingDialog.show();
+
+            // Load the context of the app catalog
+            ContextInfo.getWeb(AppConfig.Configuration.tenantAppCatalogUrl).execute(
+                context => {
+                    let requestDigest = context.GetContextWebInformation.FormDigestValue;
+
+                    // Uninstall the app
+                    this.uninstallApp(AppConfig.Configuration.tenantAppCatalogUrl, requestDigest).then(() => {
+                        // Update the dialog
+                        LoadingDialog.setHeader("Upgrading the Solution");
+                        LoadingDialog.setBody("Deploying the app to the catalog...");
+                        LoadingDialog.show();
+
+                        // Log
+                        ErrorDialog.logInfo(`Upgrading the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID}...`);
+
+                        // Deploy the solution
+                        this.deploy("", true, skipFeatureDeployment, onError, () => {
+                            // Update the dialog
+                            LoadingDialog.setHeader("Reading the App Catalog");
+                            LoadingDialog.setBody("Getting the new app from the app catalog...");
+                            LoadingDialog.show();
+
+                            // Log
+                            ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was upgraded successfully...`);
+
+                            // Log
+                            ErrorDialog.logInfo(`Getting the app from the catalog...`);
+
+                            // Get the app
+                            Web(AppConfig.Configuration.tenantAppCatalogUrl, { requestDigest }).TenantAppCatalog().AvailableApps(DataSource.AppItem.AppProductID).execute(
+                                app => {
+                                    // Log
+                                    ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was found in the app catalog...`);
+
+                                    // See if the app is already installed
+                                    if (app.SkipDeploymentFeature) {
+                                        // Hide the dialog
+                                        LoadingDialog.hide();
+
+                                        // Resolve the requst
+                                        resolve();
+                                    } else {
+                                        // Log
+                                        ErrorDialog.logInfo(`Installing the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID}...`);
+
+                                        // Update the dialog
+                                        LoadingDialog.setHeader("Installing the Solution");
+                                        LoadingDialog.setBody("Installing in site: " + AppConfig.Configuration.tenantAppCatalogUrl + "<br/>This will close after the app is upgraded.");
+                                        LoadingDialog.show();
+
+                                        // Install the app
+                                        Web(AppConfig.Configuration.tenantAppCatalogUrl, { requestDigest }).TenantAppCatalog().AvailableApps(DataSource.AppItem.AppProductID).install().execute(
                                             () => {
                                                 // Log
                                                 ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was installed successfully...`);

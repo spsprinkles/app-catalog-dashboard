@@ -832,6 +832,43 @@ ${ContextInfo.userDisplayName}`.trim()
           }
           break;
 
+        // Upgrade Tenant
+        case "UpgradeTenant":
+          // See if the current version is not deployed
+          let tenantApp = DataSource.getTenantAppItem(DataSource.AppItem.AppProductID);
+          if (
+            DataSource.AppItem.AppVersion !=
+            tenantApp.InstalledVersion &&
+            DataSource.AppItem.AppVersion !=
+            tenantApp.AppCatalogVersion
+          ) {
+            // Render the update button
+            tooltips.add({
+              content:
+                "Versions do not match. Click to update the test site.",
+              btnProps: {
+                text: "Update Test Site",
+                iconClassName: "me-1",
+                iconSize: 20,
+                iconType: appIndicator,
+                isDisabled: !AppSecurity.IsSiteAppCatalogOwner,
+                isSmall: true,
+                type: Components.ButtonTypes.OutlinePrimary,
+                onClick: () => {
+                  // Show the update form
+                  this._forms.updateTenantApp(
+                    DataSource.AppItem,
+                    () => {
+                      // Call the update event
+                      this._onUpdate();
+                    }
+                  );
+                },
+              },
+            });
+          }
+          break;
+
         // View
         case "View":
           // Render the button
