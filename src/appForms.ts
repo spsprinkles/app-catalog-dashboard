@@ -138,7 +138,7 @@ export class AppForms {
                                                             onUpdate();
                                                         } else {
                                                             // Update the app
-                                                            AppActions.updateApp(web.ServerRelativeUrl, true, onUpdate).then(() => {
+                                                            AppActions.updateSiteApp(web.ServerRelativeUrl, true, onUpdate).then(() => {
                                                                 // Call the update event
                                                                 onUpdate();
                                                             });
@@ -2194,7 +2194,7 @@ export class AppForms {
                 Modal.hide();
 
                 // Update the app
-                AppActions.updateApp(siteUrl, true, onUpdate).then(() => {
+                AppActions.updateSiteApp(siteUrl, true, onUpdate).then(() => {
                     // Send the notifications
                     AppNotifications.sendAppTestSiteUpgradedEmail(DataSource.AppItem).then(() => {
                         // Call the update event
@@ -2208,6 +2208,46 @@ export class AppForms {
                         ParentListName: Strings.Lists.Apps,
                         Title: DataSource.AuditLogStates.AppUpdated,
                         LogComment: `The app ${item.Title} was updated for site: ${siteUrl}`
+                    }, item);
+                });
+            }
+        }).el);
+
+        // Show the modal
+        Modal.show();
+    }
+
+    // Updates the tenant app
+    updateTenantApp(item: IAppItem, onUpdate: () => void) {
+        // Set the header
+        Modal.setHeader("Update Tenant App");
+
+        // Set the body
+        Modal.setBody("Are you sure you want to update the app?");
+
+        // Render the footer
+        Modal.setFooter(Components.Button({
+            text: "Update",
+            type: Components.ButtonTypes.OutlineSuccess,
+            onClick: () => {
+                // Close the modal
+                Modal.hide();
+
+                // Update the app
+                AppActions.updateTenantApp(DataSource.AppCatalogTenantItem ? DataSource.AppCatalogTenantItem.SkipDeploymentFeature : false, onUpdate).then(() => {
+                    // Send the notifications
+                    AppNotifications.sendAppUpgradedEmail(DataSource.AppItem).then(() => {
+                        // Call the update event
+                        onUpdate();
+                    });
+
+                    // Log
+                    DataSource.logItem({
+                        LogUserId: ContextInfo.userId,
+                        ParentId: item.AppProductID,
+                        ParentListName: Strings.Lists.Apps,
+                        Title: DataSource.AuditLogStates.AppUpdated,
+                        LogComment: `The tenant app ${item.Title} was updated.`
                     }, item);
                 });
             }
@@ -2337,7 +2377,7 @@ export class AppForms {
                             // Return a promise
                             return new Promise(resolve => {
                                 // Upgrade the app
-                                AppActions.updateApp(item.data, false, () => { resolve(null); }).then(() => {
+                                AppActions.updateSiteApp(item.data, false, () => { resolve(null); }).then(() => {
                                     // Update the loading dialog
                                     LoadingDialog.setHeader("Upgrading Apps");
                                     LoadingDialog.setBody("Upgrading " + (++counter) + " of " + items.length);
