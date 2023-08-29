@@ -972,8 +972,16 @@ export class AppActions {
                         let elSkipFeatureDeployment = oDOM.documentElement.attributes["SkipFeatureDeployment"];
                         metadata.AppSkipFeatureDeployment = elSkipFeatureDeployment ? elSkipFeatureDeployment.value == "true" : false;
 
-                        // Set the status
+                        // Default the status
                         metadata.AppStatus = "New";
+
+                        // See if the config has a default value for the support url
+                        if (AppConfig.Configuration.supportUrl) {
+                            metadata.AppSupportURL = {
+                                Description: AppConfig.Configuration.supportUrl,
+                                Url: AppConfig.Configuration.supportUrl
+                            };
+                        }
 
                         // Log
                         ErrorDialog.logInfo(`App Information Extracted: \r\n${JSON.stringify(metadata)}`);
