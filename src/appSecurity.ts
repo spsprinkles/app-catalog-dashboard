@@ -1,3 +1,4 @@
+import { LoadingDialog } from "dattatable";
 import { ContextInfo, Helper, SPTypes, Web } from "gd-sprest-bs";
 import { AppConfig } from "./appCfg";
 import { AppSecurityWeb } from "./appSecurityWeb";
@@ -101,6 +102,11 @@ export class AppSecurity {
     static configureWeb(webUrl: string = Strings.SourceUrl): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve) => {
+            // Show a loading dialog
+            LoadingDialog.setHeader("Configuring List");
+            LoadingDialog.setBody("Getting the security groups...");
+            LoadingDialog.show();
+
             // Get the permission types
             this.AppWeb.getPermissionTypes().then(permissions => {
                 // Reset group settings
@@ -112,13 +118,16 @@ export class AppSecurity {
                     // Reset the list permissions
                     this.resetListPermissions([Strings.Lists.Apps, Strings.Lists.Assessments, Strings.Lists.AppCatalogRequests])
                 ]).then(() => {
+                    // Update the dialog
+                    LoadingDialog.setBody("Applying the security groups to the lists...");
+
                     // Get the lists to update
                     let listApps = Web().Lists(Strings.Lists.Apps);
                     let listAssessments = Web().Lists(Strings.Lists.Assessments);
                     let listRequests = Web().Lists(Strings.Lists.AppCatalogRequests);
 
                     // Ensure the approver group exists
-                    let group = this._appCatalogWeb.getGroup(Strings.Groups.Approvers);
+                    let group = this.AppWeb.getGroup(Strings.Groups.Approvers);
                     if (group) {
                         // Set the list permissions
                         listApps.RoleAssignments().addRoleAssignment(group.Id, permissions[SPTypes.RoleType.WebDesigner]).execute(() => {
@@ -136,7 +145,7 @@ export class AppSecurity {
                     }
 
                     // Ensure the dev group exists
-                    group = this._appCatalogWeb.getGroup(Strings.Groups.Developers);
+                    group = this.AppWeb.getGroup(Strings.Groups.Developers);
                     if (group) {
                         // Set the list permissions
                         listApps.RoleAssignments().addRoleAssignment(group.Id, permissions[SPTypes.RoleType.Contributor]).execute(() => {
@@ -154,7 +163,7 @@ export class AppSecurity {
                     }
 
                     // Ensure the final approver group exists
-                    group = this._appCatalogWeb.getGroup(Strings.Groups.FinalApprovers);
+                    group = this.AppWeb.getGroup(Strings.Groups.FinalApprovers);
                     if (group) {
                         // Set the list permissions
                         listApps.RoleAssignments().addRoleAssignment(group.Id, permissions[SPTypes.RoleType.WebDesigner]).execute(() => {
@@ -172,7 +181,7 @@ export class AppSecurity {
                     }
 
                     // Ensure the dev group exists
-                    group = this._appCatalogWeb.getGroup(Strings.Groups.Sponsors);
+                    group = this.AppWeb.getGroup(Strings.Groups.Sponsors);
                     if (group) {
                         // Set the list permissions
                         listApps.RoleAssignments().addRoleAssignment(group.Id, permissions[SPTypes.RoleType.Contributor]).execute(() => {
@@ -190,7 +199,7 @@ export class AppSecurity {
                     }
 
                     // Ensure the default members group exists
-                    if (this._appCatalogWeb.webMembers) {
+                    if (this.AppWeb.webMembers) {
                         // Set the list permissions
                         listApps.RoleAssignments().addRoleAssignment(this._appCatalogWeb.webMembers.Id, permissions[SPTypes.RoleType.Reader]).execute(() => {
                             // Log
@@ -207,7 +216,7 @@ export class AppSecurity {
                     }
 
                     // Ensure the default owners group exists
-                    if (this._appCatalogWeb.webOwners) {
+                    if (this.AppWeb.webOwners) {
                         // Set the list permissions
                         listApps.RoleAssignments().addRoleAssignment(this._appCatalogWeb.webOwners.Id, permissions[SPTypes.RoleType.Reader]).execute(() => {
                             // Log
@@ -224,7 +233,7 @@ export class AppSecurity {
                     }
 
                     // Ensure the default members group exists
-                    if (this._appCatalogWeb.webVisitors) {
+                    if (this.AppWeb.webVisitors) {
                         // Set the list permissions
                         listApps.RoleAssignments().addRoleAssignment(this._appCatalogWeb.webVisitors.Id, permissions[SPTypes.RoleType.Reader]).execute(() => {
                             // Log
@@ -246,6 +255,9 @@ export class AppSecurity {
                         listAssessments.done(() => {
                             // Wait for the requests list updates to complete
                             listRequests.done(() => {
+                                // Hide the dialog
+                                LoadingDialog.hide();
+
                                 // Resolve the request
                                 resolve();
                             });

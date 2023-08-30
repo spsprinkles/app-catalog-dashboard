@@ -102,18 +102,10 @@ export class AppInstall {
                     InstallationRequired.showDialog({
                         errors,
                         onCompleted: (() => {
-                            // Show a loading dialog
-                            LoadingDialog.setHeader("Creating List");
-                            LoadingDialog.setBody("This dialog will close after list is created...");
-                            LoadingDialog.show();
-
                             // Configure the web
                             AppSecurity.configureWeb().then(
                                 // Success
                                 () => {
-                                    // Close the dialog
-                                    LoadingDialog.hide();
-
                                     // Refresh the page
                                     window.location.reload();
                                 },
