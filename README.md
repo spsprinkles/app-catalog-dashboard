@@ -50,6 +50,7 @@ The [configuration file](https://github.com/spsprinkles/app-catalog-dashboard/ra
 | appDetails | The app details information to display. |
 | appFlows | The flow ids to trigger based on actions of the app. |
 | appNotifications | The ability to send notifications based on app actions. |
+| cdnImage | The absolute url to the library used to store the app icons. |
 | cdnTest | The absolute url to the library used to store the client side assets for testing. |
 | cdnProd | The absolute url to the library used to store the client side assets for production. |
 | dateFormat | The date format to use. _(Examples: YYYY-MM-DD or YYYY-MM-DD HH:mm:ss)_ |

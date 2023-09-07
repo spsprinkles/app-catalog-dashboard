@@ -166,8 +166,11 @@ export class AppForms {
                                     if (nextStep.lastStep) {
                                         // Upload the client side assets
                                         AppActions.uploadClientSideAssets("prod").then(() => {
-                                            // Send the notification
-                                            sendNotification();
+                                            // Upload the app icon
+                                            AppActions.uploadIcon().then(() => {
+                                                // Send the notification
+                                                sendNotification();
+                                            });
                                         });
                                     } else {
                                         // Send the notification
@@ -2154,11 +2157,24 @@ export class AppForms {
 
                                         // Send the notifications
                                         AppNotifications.sendEmail(status.notification, item, false).then(() => {
-                                            // Call the update event
-                                            onUpdate();
+                                            // See if this is the last step
+                                            let nextStep = AppConfig.Status[status.nextStep];
+                                            if (nextStep && nextStep.lastStep) {
+                                                // Upload the icon
+                                                AppActions.uploadIcon().then(() => {
+                                                    // Call the update event
+                                                    onUpdate();
 
-                                            // Hide the dialog
-                                            LoadingDialog.hide();
+                                                    // Hide the dialog
+                                                    LoadingDialog.hide();
+                                                });
+                                            } else {
+                                                // Call the update event
+                                                onUpdate();
+
+                                                // Hide the dialog
+                                                LoadingDialog.hide();
+                                            }
                                         });
                                     });
                                 });

@@ -233,7 +233,7 @@ export class AppActions {
         });
     }
 
-    // Creates the archive folder
+    // Creates the client side assets folder
     static createClientSideAssetsFolder(rootFolder: Types.SP.IFolder): PromiseLike<Types.SP.Folder> {
         // Log
         ErrorDialog.logInfo("Getting the client side assets folder...");
@@ -275,6 +275,54 @@ export class AppActions {
                     ex => {
                         // Log the error
                         ErrorDialog.show("ClientSideAssets Folder", "There was an error creating the client side assets folder.", ex);
+                    }
+                );
+            });
+        });
+    }
+
+    // Creates the image folder
+    static createImageFolder(rootFolder: Types.SP.IFolder): PromiseLike<Types.SP.Folder> {
+        // Log
+        ErrorDialog.logInfo("Getting the image folder...");
+
+        // Return a promise
+        return new Promise(resolve => {
+            // Set the folder name
+            let folderName = DataSource.AppItem.AppProductID.toLowerCase();
+
+            // Load the folders
+            rootFolder.Folders().execute(folders => {
+                // Find the archive folder
+                for (let i = 0; i < folders.results.length; i++) {
+                    let folder = folders.results[i];
+
+                    // See if this is the archive folder
+                    if (folder.Name.toLowerCase() == folderName) {
+                        // Log
+                        ErrorDialog.logInfo("Image folder already exists...");
+
+                        // Resolve the request
+                        resolve(folder);
+                        return;
+                    }
+                }
+
+                // Log
+                ErrorDialog.logInfo("Creating the image folder...");
+
+                // Create the folder
+                rootFolder.Folders().add(folderName).execute(
+                    folder => {
+                        // Log
+                        ErrorDialog.logInfo("Created the image folder successfully...");
+
+                        // Resolve the request
+                        resolve(folder);
+                    },
+                    ex => {
+                        // Log the error
+                        ErrorDialog.show("Image Folder", "There was an error creating the image folder.", ex);
                     }
                 );
             });
@@ -1616,6 +1664,20 @@ export class AppActions {
                     // Ensure the app catalog was found
                     let list: Types.SP.List = lists.results[0] as any;
                     if (list) {
+                        // Determine the app icon url
+                        let appIconUrl = DataSource.AppItem.AppThumbnailURL ? DataSource.AppItem.AppThumbnailURL.Url : null;
+                        if (AppConfig.Configuration.cdnImage && appIconUrl) {
+                            // Get the file name
+                            let urlInfo = AppConfig.Configuration.cdnImage.split('/');
+                            let fileName = urlInfo[urlInfo.length - 1];
+
+                            // Set the url
+                            appIconUrl = `${AppConfig.Configuration.cdnImage}/${DataSource.AppItem.AppProductID}/${fileName}`;
+
+                            // Log
+                            ErrorDialog.logInfo(`Setting the app icon url to: ${appIconUrl}`);
+                        }
+
                         // Update the metadata
                         list.Items(appItemId).update({
                             AppDescription: DataSource.AppItem.AppDescription,
@@ -1627,7 +1689,7 @@ export class AppActions {
                             AppPublisher: DataSource.AppItem.AppPublisher,
                             AppShortDescription: DataSource.AppItem.AppShortDescription,
                             AppSupportURL: DataSource.AppItem.AppSupportURL ? { Description: DataSource.AppItem.AppSupportURL.Description, Url: DataSource.AppItem.AppSupportURL.Url } : null,
-                            AppThumbnailURL: DataSource.AppItem.AppThumbnailURL ? { Description: DataSource.AppItem.AppThumbnailURL.Description, Url: DataSource.AppItem.AppThumbnailURL.Url } : null,
+                            AppThumbnailURL: appIconUrl ? { Description: appIconUrl, Url: appIconUrl } : null,
                             AppVideoURL: DataSource.AppItem.AppVideoURL ? { Description: DataSource.AppItem.AppVideoURL.Description, Url: DataSource.AppItem.AppVideoURL.Url } : null,
                         }).execute(
                             () => {
@@ -2127,6 +2189,110 @@ export class AppActions {
                             });
                         }, reject);
                     });
+                });
+            } else {
+                // Resolve the request
+                resolve();
+            }
+        });
+    }
+
+    // Uploads the app icon
+    static uploadIcon(): PromiseLike<void> {
+        // Gets the app icon
+        let getIcon = (): PromiseLike<{ file: Types.SP.File, content: any }> => {
+            // Return a promise
+            return new Promise((resolve, reject) => {
+                // Ensure the url exists
+                if (DataSource.AppItem.AppThumbnailURL && DataSource.AppItem.AppThumbnailURL.Url) {
+                    // Read the package contents
+                    Web(Strings.SourceUrl).getFileByUrl(DataSource.AppItem.AppThumbnailURL.Url).execute(
+                        file => {
+                            // Get the content
+                            file.content().execute(
+                                content => {
+                                    // Resolve the request
+                                    resolve({ file, content });
+                                },
+                                () => {
+                                    // Error getting the icon
+                                    ErrorDialog.logError("Error downloading the icon image file: " + DataSource.AppItem.AppThumbnailURL.Url);
+
+                                    // Reject the request
+                                    reject();
+                                }
+                            )
+                        },
+                        () => {
+                            // Error getting the icon
+                            ErrorDialog.logError("Error getting the icon image file: " + DataSource.AppItem.AppThumbnailURL.Url);
+
+                            // Reject the request
+                            reject();
+                        }
+                    );
+                } else {
+                    // Error getting the icon
+                    ErrorDialog.logError("Error the icon image file doesn't exist.");
+
+                    // Reject the request
+                    reject();
+                }
+            });
+        }
+
+        // Return a promise
+        return new Promise((resolve) => {
+            // Ensure the url exists
+            if (AppConfig.Configuration.cdnImage) {
+                // Show a loading dialog
+                LoadingDialog.setHeader("Uploading App Icon");
+                LoadingDialog.setBody("Getting the web information...");
+                LoadingDialog.show();
+
+                // Get the web and list url information
+                let webUrl = "";
+                let urlInfo = AppConfig.Configuration.cdnImage.split('/');
+                let listUrl = urlInfo[urlInfo.length - 1];
+                for (let i = 0; i < urlInfo.length - 1; i++) {
+                    // Append the url info
+                    webUrl += (i == 0 ? "" : "/") + urlInfo[i];
+                }
+
+                // Get the web context information
+                ContextInfo.getWeb(webUrl).execute(context => {
+                    // Set the web
+                    let web = Web(webUrl, { requestDigest: context.GetContextWebInformation.FormDigestValue });
+
+                    // Update the loading dialog
+                    LoadingDialog.setBody("Getting the app icon...");
+
+                    // Get the icon
+                    getIcon().then(appIcon => {
+                        // Update the loading dialog
+                        LoadingDialog.setBody("Creating/Getting the icon folder...");
+
+                        // Ensure the folder is created
+                        this.createImageFolder(web.Folders(listUrl)).then(folder => {
+                            // Update the loading dialog
+                            LoadingDialog.setBody("Uploading the icon to the app folder...");
+
+                            // Upload the file
+                            folder.Files().add(appIcon.file.Name, true, appIcon.content).execute(() => {
+                                // Close the dialog and resolve the request
+                                LoadingDialog.hide();
+
+                                // Resolve the request
+                                resolve();
+                            }, () => {
+                                // Error uploading the asset
+                                ErrorDialog.logError("Error uploading the app icon file: " + appIcon.file.Name);
+
+                                // Resolve the request
+                                resolve();
+                            });
+                        }, resolve);
+                    }, resolve);
                 });
             } else {
                 // Resolve the request
