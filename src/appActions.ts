@@ -615,87 +615,90 @@ export class AppActions {
                                             this.updateAppMetadata(appItem.Id, tenantFl, catalogUrl, requestDigest).then(() => {
                                                 // Upload the client side assets
                                                 this.uploadClientSideAssets(pkgType).then(() => {
-                                                    // Get the app catalog
-                                                    let web = Web(catalogUrl, { requestDigest });
-                                                    let appCatalog = (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog());
+                                                    // Upload the app icon
+                                                    this.uploadIcon().then(() => {
+                                                        // Get the app catalog
+                                                        let web = Web(catalogUrl, { requestDigest });
+                                                        let appCatalog = (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog());
 
-                                                    // Update the dialog
-                                                    LoadingDialog.setHeader("Deploying the App");
-                                                    LoadingDialog.setBody("Deploying the solution in the app catalog...");
-                                                    LoadingDialog.show();
+                                                        // Update the dialog
+                                                        LoadingDialog.setHeader("Deploying the App");
+                                                        LoadingDialog.setBody("Deploying the solution in the app catalog...");
+                                                        LoadingDialog.show();
 
-                                                    // Log
-                                                    ErrorDialog.logInfo(`Deploying the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID}...`);
-
-                                                    // Deploy the app
-                                                    appCatalog.AvailableApps(DataSource.AppItem.AppProductID).deploy(skipFeatureDeployment).execute(app => {
                                                         // Log
-                                                        ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was deployed successfully...`);
+                                                        ErrorDialog.logInfo(`Deploying the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID}...`);
 
-                                                        // See if this is the tenant app
-                                                        if (tenantFl) {
+                                                        // Deploy the app
+                                                        appCatalog.AvailableApps(DataSource.AppItem.AppProductID).deploy(skipFeatureDeployment).execute(app => {
                                                             // Log
-                                                            ErrorDialog.logInfo(`Setting the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} tenant deployed flag...`);
+                                                            ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was deployed successfully...`);
 
-                                                            // Update the dialog
-                                                            LoadingDialog.setHeader("Updating the App");
-                                                            LoadingDialog.setBody("Updating the app item...");
-
-                                                            // Update the tenant deployed flag
-                                                            DataSource.AppItem.update({
-                                                                AppIsTenantDeployed: true
-                                                            }).execute(() => {
+                                                            // See if this is the tenant app
+                                                            if (tenantFl) {
                                                                 // Log
-                                                                ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} tenant deployed flag was set to true...`);
+                                                                ErrorDialog.logInfo(`Setting the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} tenant deployed flag...`);
 
+                                                                // Update the dialog
+                                                                LoadingDialog.setHeader("Updating the App");
+                                                                LoadingDialog.setBody("Updating the app item...");
+
+                                                                // Update the tenant deployed flag
+                                                                DataSource.AppItem.update({
+                                                                    AppIsTenantDeployed: true
+                                                                }).execute(() => {
+                                                                    // Log
+                                                                    ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} tenant deployed flag was set to true...`);
+
+                                                                    // Hide the dialog
+                                                                    LoadingDialog.hide();
+
+                                                                    // Call the update event
+                                                                    onUpdate();
+                                                                }, () => {
+                                                                    // Log the error
+                                                                    ErrorDialog.show("Updating App", "There was an error setting the tenant deployed flag.");
+
+                                                                    // Call the event
+                                                                    onError();
+                                                                });
+                                                            } else {
                                                                 // Hide the dialog
                                                                 LoadingDialog.hide();
 
                                                                 // Call the update event
                                                                 onUpdate();
-                                                            }, () => {
+                                                            }
+                                                        }, () => {
+                                                            // See if this isn't the tenant
+                                                            if (!tenantFl) {
+                                                                // Update the dialog
+                                                                LoadingDialog.setHeader("Loading the App Catalog");
+                                                                LoadingDialog.setBody("Error deploying the app, getting the information...");
+                                                                LoadingDialog.show();
+
+                                                                // Load the site collection app item
+                                                                DataSource.loadSiteAppByName(appFile.Name).then(appItem => {
+                                                                    // See if the item exists
+                                                                    if (appItem) {
+                                                                        // Log the error
+                                                                        ErrorDialog.show("Deploy Error", "The app was added to the catalog successfully, but there was an error with it.");
+                                                                    } else {
+                                                                        // Log the error
+                                                                        ErrorDialog.show("Getting Apps", "There was an error getting the available apps from the app catalog.");
+                                                                    }
+
+                                                                    // Call the event
+                                                                    onError();
+                                                                });
+                                                            } else {
                                                                 // Log the error
-                                                                ErrorDialog.show("Updating App", "There was an error setting the tenant deployed flag.");
+                                                                ErrorDialog.show("Getting Apps", "There was an error getting the available apps from the app catalog.");
 
                                                                 // Call the event
                                                                 onError();
-                                                            });
-                                                        } else {
-                                                            // Hide the dialog
-                                                            LoadingDialog.hide();
-
-                                                            // Call the update event
-                                                            onUpdate();
-                                                        }
-                                                    }, () => {
-                                                        // See if this isn't the tenant
-                                                        if (!tenantFl) {
-                                                            // Update the dialog
-                                                            LoadingDialog.setHeader("Loading the App Catalog");
-                                                            LoadingDialog.setBody("Error deploying the app, getting the information...");
-                                                            LoadingDialog.show();
-
-                                                            // Load the site collection app item
-                                                            DataSource.loadSiteAppByName(appFile.Name).then(appItem => {
-                                                                // See if the item exists
-                                                                if (appItem) {
-                                                                    // Log the error
-                                                                    ErrorDialog.show("Deploy Error", "The app was added to the catalog successfully, but there was an error with it.");
-                                                                } else {
-                                                                    // Log the error
-                                                                    ErrorDialog.show("Getting Apps", "There was an error getting the available apps from the app catalog.");
-                                                                }
-
-                                                                // Call the event
-                                                                onError();
-                                                            });
-                                                        } else {
-                                                            // Log the error
-                                                            ErrorDialog.show("Getting Apps", "There was an error getting the available apps from the app catalog.");
-
-                                                            // Call the event
-                                                            onError();
-                                                        }
+                                                            }
+                                                        });
                                                     });
                                                 });
                                             });
@@ -2293,7 +2296,7 @@ export class AppActions {
                             });
                         }, resolve);
                     }, resolve);
-                });
+                }, () => { resolve(); });
             } else {
                 // Resolve the request
                 resolve();
