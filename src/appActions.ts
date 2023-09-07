@@ -2222,6 +2222,9 @@ export class AppActions {
                                         content => {
                                             // Append the file
                                             files.push({ file, content });
+
+                                            // Check the next file
+                                            resolve(null);
                                         },
                                         () => {
                                             // Error getting the image
@@ -2260,7 +2263,7 @@ export class AppActions {
             // Ensure the url exists
             if (AppConfig.Configuration.cdnImage) {
                 // Show a loading dialog
-                LoadingDialog.setHeader("Uploading App Icon");
+                LoadingDialog.setHeader("Uploading App Images");
                 LoadingDialog.setBody("Getting the web information...");
                 LoadingDialog.show();
 
