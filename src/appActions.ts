@@ -615,8 +615,8 @@ export class AppActions {
                                             this.updateAppMetadata(appItem.Id, tenantFl, catalogUrl, requestDigest).then(() => {
                                                 // Upload the client side assets
                                                 this.uploadClientSideAssets(pkgType).then(() => {
-                                                    // Upload the app icon
-                                                    this.uploadIcon().then(() => {
+                                                    // Upload the app images
+                                                    this.uploadImages().then(() => {
                                                         // Get the app catalog
                                                         let web = Web(catalogUrl, { requestDigest });
                                                         let appCatalog = (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog());
@@ -2200,47 +2200,58 @@ export class AppActions {
         });
     }
 
-    // Uploads the app icon
-    static uploadIcon(): PromiseLike<void> {
-        // Gets the app icon
-        let getIcon = (): PromiseLike<{ file: Types.SP.File, content: any }> => {
+    // Uploads the app images
+    static uploadImages(): PromiseLike<void> {
+        // Get the app images
+        let getImages = (): PromiseLike<{ file: Types.SP.File, content: any }[]> => {
+            let files: { file: Types.SP.File, content: any }[] = [];
+
             // Return a promise
-            return new Promise((resolve, reject) => {
-                // Ensure the url exists
-                if (DataSource.AppItem.AppThumbnailURL && DataSource.AppItem.AppThumbnailURL.Url) {
-                    // Read the package contents
-                    Web(Strings.SourceUrl).getFileByUrl(DataSource.AppItem.AppThumbnailURL.Url).execute(
-                        file => {
-                            // Get the content
-                            file.content().execute(
-                                content => {
-                                    // Resolve the request
-                                    resolve({ file, content });
+            return new Promise((resolve) => {
+                // Parse the fields
+                Helper.Executor(["AppThumbnailURL", "AppImageURL1", "AppImageURL2", "AppImageURL3", "AppImageURL4", "AppImageURL5"], fieldName => {
+                    // Return a promise
+                    return new Promise((resolve) => {
+                        // Ensure the url exists
+                        if (DataSource.AppItem[fieldName] && DataSource.AppItem[fieldName].Url) {
+                            // Read the package contents
+                            Web(Strings.SourceUrl).getFileByUrl(DataSource.AppItem[fieldName].Url).execute(
+                                file => {
+                                    // Get the content
+                                    file.content().execute(
+                                        content => {
+                                            // Append the file
+                                            files.push({ file, content });
+                                        },
+                                        () => {
+                                            // Error getting the image
+                                            ErrorDialog.logError("Error downloading the app image file: " + DataSource.AppItem.AppThumbnailURL.Url);
+
+                                            // Check the next file
+                                            resolve(null);
+                                        }
+                                    )
                                 },
                                 () => {
-                                    // Error getting the icon
-                                    ErrorDialog.logError("Error downloading the icon image file: " + DataSource.AppItem.AppThumbnailURL.Url);
+                                    // Error getting the image
+                                    ErrorDialog.logError("Error getting the app image file: " + DataSource.AppItem.AppThumbnailURL.Url);
 
-                                    // Reject the request
-                                    reject();
+                                    // Check the next file
+                                    resolve(null);
                                 }
-                            )
-                        },
-                        () => {
+                            );
+                        } else {
                             // Error getting the icon
-                            ErrorDialog.logError("Error getting the icon image file: " + DataSource.AppItem.AppThumbnailURL.Url);
+                            ErrorDialog.logInfo("Error the app image file doesn't exist for field: " + fieldName);
 
-                            // Reject the request
-                            reject();
+                            // Check the next file
+                            resolve(null);
                         }
-                    );
-                } else {
-                    // Error getting the icon
-                    ErrorDialog.logError("Error the icon image file doesn't exist.");
-
-                    // Reject the request
-                    reject();
-                }
+                    });
+                }).then(() => {
+                    // Resolve the request
+                    resolve(files);
+                });
             });
         }
 
@@ -2268,32 +2279,41 @@ export class AppActions {
                     let web = Web(webUrl, { requestDigest: context.GetContextWebInformation.FormDigestValue });
 
                     // Update the loading dialog
-                    LoadingDialog.setBody("Getting the app icon...");
+                    LoadingDialog.setBody("Getting the app images...");
 
-                    // Get the icon
-                    getIcon().then(appIcon => {
+                    // Get the images
+                    getImages().then(appImages => {
                         // Update the loading dialog
-                        LoadingDialog.setBody("Creating/Getting the icon folder...");
+                        LoadingDialog.setBody("Creating/Getting the image folder...");
 
                         // Ensure the folder is created
                         this.createImageFolder(web.Folders(listUrl)).then(folder => {
                             // Update the loading dialog
-                            LoadingDialog.setBody("Uploading the icon to the app folder...");
+                            LoadingDialog.setBody("Uploading the images to the app folder...");
 
-                            // Upload the file
-                            folder.Files().add(appIcon.file.Name, true, appIcon.content).execute(() => {
-                                // Close the dialog and resolve the request
-                                LoadingDialog.hide();
+                            // Parse the files
+                            Helper.Executor(appImages, appImage => {
+                                // Return a promise
+                                return new Promise((resolve) => {
+                                    // Update the loading dialog
+                                    LoadingDialog.setBody("Uploading the image: " + appImage.file.Name);
 
-                                // Resolve the request
-                                resolve();
-                            }, () => {
-                                // Error uploading the asset
-                                ErrorDialog.logError("Error uploading the app icon file: " + appIcon.file.Name);
+                                    // Upload the file
+                                    folder.Files().add(appImage.file.Name, true, appImage.content).execute(() => {
+                                        // Close the dialog and resolve the request
+                                        LoadingDialog.hide();
 
-                                // Resolve the request
-                                resolve();
-                            });
+                                        // Upload the next file
+                                        resolve(null);
+                                    }, () => {
+                                        // Error uploading the asset
+                                        ErrorDialog.logError("Error uploading the app image file: " + appImage.file.Name);
+
+                                        // Upload the next file
+                                        resolve(null);
+                                    });
+                                });
+                            }).then(resolve);
                         }, resolve);
                     }, resolve);
                 }, () => { resolve(); });

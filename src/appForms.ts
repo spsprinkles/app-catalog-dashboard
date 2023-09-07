@@ -166,8 +166,8 @@ export class AppForms {
                                     if (nextStep.lastStep) {
                                         // Upload the client side assets
                                         AppActions.uploadClientSideAssets("prod").then(() => {
-                                            // Upload the app icon
-                                            AppActions.uploadIcon().then(() => {
+                                            // Upload the app images
+                                            AppActions.uploadImages().then(() => {
                                                 // Send the notification
                                                 sendNotification();
                                             });
@@ -2160,8 +2160,8 @@ export class AppForms {
                                             // See if this is the last step
                                             let nextStep = AppConfig.Status[status.nextStep];
                                             if (nextStep && nextStep.lastStep) {
-                                                // Upload the icon
-                                                AppActions.uploadIcon().then(() => {
+                                                // Upload the images
+                                                AppActions.uploadImages().then(() => {
                                                     // Call the update event
                                                     onUpdate();
 
