@@ -836,8 +836,7 @@ ${ContextInfo.userDisplayName}`.trim()
         case "UpgradeTenant":
           // See if the current version is not deployed
           let tenantApp = DataSource.getTenantAppItem(DataSource.AppItem.AppProductID);
-          if (tenantApp && (DataSource.AppItem.AppVersion != tenantApp.InstalledVersion && DataSource.AppItem.AppVersion != tenantApp.AppCatalogVersion)
-          ) {
+          if (tenantApp && DataSource.AppItem.AppVersion != tenantApp.AppCatalogVersion) {
             // Render the update button
             tooltips.add({
               content:
