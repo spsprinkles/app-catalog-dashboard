@@ -1667,22 +1667,8 @@ export class AppActions {
                     // Ensure the app catalog was found
                     let list: Types.SP.List = lists.results[0] as any;
                     if (list) {
-                        // Determine the app icon url
-                        let appIconUrl = DataSource.AppItem.AppThumbnailURL ? DataSource.AppItem.AppThumbnailURL.Url : null;
-                        if (AppConfig.Configuration.cdnImage && appIconUrl) {
-                            // Get the file name
-                            let urlInfo = AppConfig.Configuration.cdnImage.split('/');
-                            let fileName = urlInfo[urlInfo.length - 1];
-
-                            // Set the url
-                            appIconUrl = `${AppConfig.Configuration.cdnImage}/${DataSource.AppItem.AppProductID}/${fileName}`;
-
-                            // Log
-                            ErrorDialog.logInfo(`Setting the app icon url to: ${appIconUrl}`);
-                        }
-
-                        // Update the metadata
-                        list.Items(appItemId).update({
+                        // Set the metadata
+                        let metadata = {
                             AppDescription: DataSource.AppItem.AppDescription,
                             AppImageURL1: DataSource.AppItem.AppImageURL1 ? { Description: DataSource.AppItem.AppImageURL1.Description, Url: DataSource.AppItem.AppImageURL1.Url } : null,
                             AppImageURL2: DataSource.AppItem.AppImageURL2 ? { Description: DataSource.AppItem.AppImageURL2.Description, Url: DataSource.AppItem.AppImageURL2.Url } : null,
@@ -1692,9 +1678,36 @@ export class AppActions {
                             AppPublisher: DataSource.AppItem.AppPublisher,
                             AppShortDescription: DataSource.AppItem.AppShortDescription,
                             AppSupportURL: DataSource.AppItem.AppSupportURL ? { Description: DataSource.AppItem.AppSupportURL.Description, Url: DataSource.AppItem.AppSupportURL.Url } : null,
-                            AppThumbnailURL: appIconUrl ? { Description: appIconUrl, Url: appIconUrl } : null,
+                            AppThumbnailURL: DataSource.AppItem.AppThumbnailURL ? { Description: DataSource.AppItem.AppThumbnailURL.Description, Url: DataSource.AppItem.AppThumbnailURL.Url } : null,
                             AppVideoURL: DataSource.AppItem.AppVideoURL ? { Description: DataSource.AppItem.AppVideoURL.Description, Url: DataSource.AppItem.AppVideoURL.Url } : null,
-                        }).execute(
+                        };
+
+                        // See if there is a CDN for the images
+                        if (AppConfig.Configuration.cdnImage) {
+                            // Parse the fields
+                            Helper.Executor(["AppThumbnailURL", "AppImageURL1", "AppImageURL2", "AppImageURL3", "AppImageURL4", "AppImageURL5"], fieldName => {
+                                // Ensure a value exists
+                                let fieldValue = DataSource.AppItem[fieldName] ? DataSource.AppItem[fieldName].Url : null;
+                                if (fieldValue) {
+                                    // Get the file name
+                                    let urlInfo = fieldValue.split('/');
+                                    let fileName = urlInfo[urlInfo.length - 1];
+
+                                    // Set the url
+                                    let imageUrl = `${AppConfig.Configuration.cdnImage}/${DataSource.AppItem.AppProductID}/${fileName}`;
+                                    metadata[fieldName] = { Description: imageUrl, Url: imageUrl };
+
+                                    // Log
+                                    ErrorDialog.logInfo(`Setting the ${fieldName} to: ${fieldValue}`);
+                                }
+                            });
+                        }
+
+                        // Log
+                        ErrorDialog.logInfo("Setting the metadata in the app catalog", metadata);
+
+                        // Update the metadata
+                        list.Items(appItemId).update(metadata).execute(
                             () => {
                                 // Log
                                 ErrorDialog.logInfo(`The app metadata was updated succesfully...`);
