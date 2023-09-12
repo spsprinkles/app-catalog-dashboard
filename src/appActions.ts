@@ -2245,7 +2245,7 @@ export class AppActions {
                             );
                         } else {
                             // Error getting the icon
-                            ErrorDialog.logInfo("Error the app image file doesn't exist for field: " + fieldName);
+                            ErrorDialog.logInfo("The app image file doesn't exist for field: " + fieldName);
 
                             // Check the next file
                             resolve(null);
