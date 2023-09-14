@@ -842,7 +842,7 @@ ${ContextInfo.userDisplayName}`.trim()
               content:
                 "Versions do not match. Click to update the test site.",
               btnProps: {
-                text: "Update Test Site",
+                text: "Update Tenant",
                 iconClassName: "me-1",
                 iconSize: 20,
                 iconType: appIndicator,
