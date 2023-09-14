@@ -834,33 +834,36 @@ ${ContextInfo.userDisplayName}`.trim()
 
         // Upgrade Tenant
         case "UpgradeTenant":
-          // See if the current version is not deployed
-          let tenantApp = DataSource.getTenantAppItem(DataSource.AppItem.AppProductID);
-          if (tenantApp && DataSource.AppItem.AppVersion != tenantApp.AppCatalogVersion) {
-            // Render the update button
-            tooltips.add({
-              content:
-                "Versions do not match. Click to update the test site.",
-              btnProps: {
-                text: "Update Tenant",
-                iconClassName: "me-1",
-                iconSize: 20,
-                iconType: appIndicator,
-                isDisabled: !AppSecurity.IsSiteAppCatalogOwner,
-                isSmall: true,
-                type: Components.ButtonTypes.OutlinePrimary,
-                onClick: () => {
-                  // Show the update form
-                  this._forms.updateTenantApp(
-                    DataSource.AppItem,
-                    () => {
-                      // Call the update event
-                      this._onUpdate();
-                    }
-                  );
+          // Ensure this is a tenant app catalog owner
+          if (AppSecurity.IsTenantAppCatalogOwner) {
+            // See if the current version is not deployed
+            let tenantApp = DataSource.getTenantAppItem(DataSource.AppItem.AppProductID);
+            if (tenantApp && DataSource.AppItem.AppVersion != tenantApp.AppCatalogVersion) {
+              // Render the update button
+              tooltips.add({
+                content:
+                  "Versions do not match. Click to update the test site.",
+                btnProps: {
+                  text: "Update Tenant",
+                  iconClassName: "me-1",
+                  iconSize: 20,
+                  iconType: appIndicator,
+                  isDisabled: !AppSecurity.IsSiteAppCatalogOwner,
+                  isSmall: true,
+                  type: Components.ButtonTypes.OutlinePrimary,
+                  onClick: () => {
+                    // Show the update form
+                    this._forms.updateTenantApp(
+                      DataSource.AppItem,
+                      () => {
+                        // Call the update event
+                        this._onUpdate();
+                      }
+                    );
+                  },
                 },
-              },
-            });
+              });
+            }
           }
           break;
 
