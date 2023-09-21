@@ -233,7 +233,7 @@ export class AppActions {
         });
     }
 
-    // Creates the archive folder
+    // Creates the client side assets folder
     static createClientSideAssetsFolder(rootFolder: Types.SP.IFolder): PromiseLike<Types.SP.Folder> {
         // Log
         ErrorDialog.logInfo("Getting the client side assets folder...");
@@ -275,6 +275,54 @@ export class AppActions {
                     ex => {
                         // Log the error
                         ErrorDialog.show("ClientSideAssets Folder", "There was an error creating the client side assets folder.", ex);
+                    }
+                );
+            });
+        });
+    }
+
+    // Creates the image folder
+    static createImageFolder(rootFolder: Types.SP.IFolder): PromiseLike<Types.SP.Folder> {
+        // Log
+        ErrorDialog.logInfo("Getting the image folder...");
+
+        // Return a promise
+        return new Promise(resolve => {
+            // Set the folder name
+            let folderName = DataSource.AppItem.AppProductID.toLowerCase();
+
+            // Load the folders
+            rootFolder.Folders().execute(folders => {
+                // Find the archive folder
+                for (let i = 0; i < folders.results.length; i++) {
+                    let folder = folders.results[i];
+
+                    // See if this is the archive folder
+                    if (folder.Name.toLowerCase() == folderName) {
+                        // Log
+                        ErrorDialog.logInfo("Image folder already exists...");
+
+                        // Resolve the request
+                        resolve(folder);
+                        return;
+                    }
+                }
+
+                // Log
+                ErrorDialog.logInfo("Creating the image folder...");
+
+                // Create the folder
+                rootFolder.Folders().add(folderName).execute(
+                    folder => {
+                        // Log
+                        ErrorDialog.logInfo("Created the image folder successfully...");
+
+                        // Resolve the request
+                        resolve(folder);
+                    },
+                    ex => {
+                        // Log the error
+                        ErrorDialog.show("Image Folder", "There was an error creating the image folder.", ex);
                     }
                 );
             });
@@ -567,87 +615,90 @@ export class AppActions {
                                             this.updateAppMetadata(appItem.Id, tenantFl, catalogUrl, requestDigest).then(() => {
                                                 // Upload the client side assets
                                                 this.uploadClientSideAssets(pkgType).then(() => {
-                                                    // Get the app catalog
-                                                    let web = Web(catalogUrl, { requestDigest });
-                                                    let appCatalog = (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog());
+                                                    // Upload the app images
+                                                    this.uploadImages().then(() => {
+                                                        // Get the app catalog
+                                                        let web = Web(catalogUrl, { requestDigest });
+                                                        let appCatalog = (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog());
 
-                                                    // Update the dialog
-                                                    LoadingDialog.setHeader("Deploying the App");
-                                                    LoadingDialog.setBody("Deploying the solution in the app catalog...");
-                                                    LoadingDialog.show();
+                                                        // Update the dialog
+                                                        LoadingDialog.setHeader("Deploying the App");
+                                                        LoadingDialog.setBody("Deploying the solution in the app catalog...");
+                                                        LoadingDialog.show();
 
-                                                    // Log
-                                                    ErrorDialog.logInfo(`Deploying the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID}...`);
-
-                                                    // Deploy the app
-                                                    appCatalog.AvailableApps(DataSource.AppItem.AppProductID).deploy(skipFeatureDeployment).execute(app => {
                                                         // Log
-                                                        ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was deployed successfully...`);
+                                                        ErrorDialog.logInfo(`Deploying the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID}...`);
 
-                                                        // See if this is the tenant app
-                                                        if (tenantFl) {
+                                                        // Deploy the app
+                                                        appCatalog.AvailableApps(DataSource.AppItem.AppProductID).deploy(skipFeatureDeployment).execute(app => {
                                                             // Log
-                                                            ErrorDialog.logInfo(`Setting the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} tenant deployed flag...`);
+                                                            ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was deployed successfully...`);
 
-                                                            // Update the dialog
-                                                            LoadingDialog.setHeader("Updating the App");
-                                                            LoadingDialog.setBody("Updating the app item...");
-
-                                                            // Update the tenant deployed flag
-                                                            DataSource.AppItem.update({
-                                                                AppIsTenantDeployed: true
-                                                            }).execute(() => {
+                                                            // See if this is the tenant app
+                                                            if (tenantFl) {
                                                                 // Log
-                                                                ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} tenant deployed flag was set to true...`);
+                                                                ErrorDialog.logInfo(`Setting the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} tenant deployed flag...`);
 
+                                                                // Update the dialog
+                                                                LoadingDialog.setHeader("Updating the App");
+                                                                LoadingDialog.setBody("Updating the app item...");
+
+                                                                // Update the tenant deployed flag
+                                                                DataSource.AppItem.update({
+                                                                    AppIsTenantDeployed: true
+                                                                }).execute(() => {
+                                                                    // Log
+                                                                    ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} tenant deployed flag was set to true...`);
+
+                                                                    // Hide the dialog
+                                                                    LoadingDialog.hide();
+
+                                                                    // Call the update event
+                                                                    onUpdate();
+                                                                }, () => {
+                                                                    // Log the error
+                                                                    ErrorDialog.show("Updating App", "There was an error setting the tenant deployed flag.");
+
+                                                                    // Call the event
+                                                                    onError();
+                                                                });
+                                                            } else {
                                                                 // Hide the dialog
                                                                 LoadingDialog.hide();
 
                                                                 // Call the update event
                                                                 onUpdate();
-                                                            }, () => {
+                                                            }
+                                                        }, () => {
+                                                            // See if this isn't the tenant
+                                                            if (!tenantFl) {
+                                                                // Update the dialog
+                                                                LoadingDialog.setHeader("Loading the App Catalog");
+                                                                LoadingDialog.setBody("Error deploying the app, getting the information...");
+                                                                LoadingDialog.show();
+
+                                                                // Load the site collection app item
+                                                                DataSource.loadSiteAppByName(appFile.Name).then(appItem => {
+                                                                    // See if the item exists
+                                                                    if (appItem) {
+                                                                        // Log the error
+                                                                        ErrorDialog.show("Deploy Error", "The app was added to the catalog successfully, but there was an error with it.");
+                                                                    } else {
+                                                                        // Log the error
+                                                                        ErrorDialog.show("Getting Apps", "There was an error getting the available apps from the app catalog.");
+                                                                    }
+
+                                                                    // Call the event
+                                                                    onError();
+                                                                });
+                                                            } else {
                                                                 // Log the error
-                                                                ErrorDialog.show("Updating App", "There was an error setting the tenant deployed flag.");
+                                                                ErrorDialog.show("Getting Apps", "There was an error getting the available apps from the app catalog.");
 
                                                                 // Call the event
                                                                 onError();
-                                                            });
-                                                        } else {
-                                                            // Hide the dialog
-                                                            LoadingDialog.hide();
-
-                                                            // Call the update event
-                                                            onUpdate();
-                                                        }
-                                                    }, () => {
-                                                        // See if this isn't the tenant
-                                                        if (!tenantFl) {
-                                                            // Update the dialog
-                                                            LoadingDialog.setHeader("Loading the App Catalog");
-                                                            LoadingDialog.setBody("Error deploying the app, getting the information...");
-                                                            LoadingDialog.show();
-
-                                                            // Load the site collection app item
-                                                            DataSource.loadSiteAppByName(appFile.Name).then(appItem => {
-                                                                // See if the item exists
-                                                                if (appItem) {
-                                                                    // Log the error
-                                                                    ErrorDialog.show("Deploy Error", "The app was added to the catalog successfully, but there was an error with it.");
-                                                                } else {
-                                                                    // Log the error
-                                                                    ErrorDialog.show("Getting Apps", "There was an error getting the available apps from the app catalog.");
-                                                                }
-
-                                                                // Call the event
-                                                                onError();
-                                                            });
-                                                        } else {
-                                                            // Log the error
-                                                            ErrorDialog.show("Getting Apps", "There was an error getting the available apps from the app catalog.");
-
-                                                            // Call the event
-                                                            onError();
-                                                        }
+                                                            }
+                                                        });
                                                     });
                                                 });
                                             });
@@ -1616,8 +1667,8 @@ export class AppActions {
                     // Ensure the app catalog was found
                     let list: Types.SP.List = lists.results[0] as any;
                     if (list) {
-                        // Update the metadata
-                        list.Items(appItemId).update({
+                        // Set the metadata
+                        let metadata = {
                             AppDescription: DataSource.AppItem.AppDescription,
                             AppImageURL1: DataSource.AppItem.AppImageURL1 ? { Description: DataSource.AppItem.AppImageURL1.Description, Url: DataSource.AppItem.AppImageURL1.Url } : null,
                             AppImageURL2: DataSource.AppItem.AppImageURL2 ? { Description: DataSource.AppItem.AppImageURL2.Description, Url: DataSource.AppItem.AppImageURL2.Url } : null,
@@ -1629,7 +1680,34 @@ export class AppActions {
                             AppSupportURL: DataSource.AppItem.AppSupportURL ? { Description: DataSource.AppItem.AppSupportURL.Description, Url: DataSource.AppItem.AppSupportURL.Url } : null,
                             AppThumbnailURL: DataSource.AppItem.AppThumbnailURL ? { Description: DataSource.AppItem.AppThumbnailURL.Description, Url: DataSource.AppItem.AppThumbnailURL.Url } : null,
                             AppVideoURL: DataSource.AppItem.AppVideoURL ? { Description: DataSource.AppItem.AppVideoURL.Description, Url: DataSource.AppItem.AppVideoURL.Url } : null,
-                        }).execute(
+                        };
+
+                        // See if there is a CDN for the images
+                        if (AppConfig.Configuration.cdnImage) {
+                            // Parse the fields
+                            Helper.Executor(["AppThumbnailURL", "AppImageURL1", "AppImageURL2", "AppImageURL3", "AppImageURL4", "AppImageURL5"], fieldName => {
+                                // Ensure a value exists
+                                let fieldValue = DataSource.AppItem[fieldName] ? DataSource.AppItem[fieldName].Url : null;
+                                if (fieldValue) {
+                                    // Get the file name
+                                    let urlInfo = fieldValue.split('/');
+                                    let fileName = urlInfo[urlInfo.length - 1];
+
+                                    // Set the url
+                                    let imageUrl = `${AppConfig.Configuration.cdnImage}/${DataSource.AppItem.AppProductID}/${fileName}`;
+                                    metadata[fieldName] = { Description: imageUrl, Url: imageUrl };
+
+                                    // Log
+                                    ErrorDialog.logInfo(`Setting the ${fieldName} to: ${fieldValue}`);
+                                }
+                            });
+                        }
+
+                        // Log
+                        ErrorDialog.logInfo("Setting the metadata in the app catalog", metadata);
+
+                        // Update the metadata
+                        list.Items(appItemId).update(metadata).execute(
                             () => {
                                 // Log
                                 ErrorDialog.logInfo(`The app metadata was updated succesfully...`);
@@ -2128,6 +2206,133 @@ export class AppActions {
                         }, reject);
                     });
                 });
+            } else {
+                // Resolve the request
+                resolve();
+            }
+        });
+    }
+
+    // Uploads the app images
+    static uploadImages(): PromiseLike<void> {
+        // Get the app images
+        let getImages = (): PromiseLike<{ file: Types.SP.File, content: any }[]> => {
+            let files: { file: Types.SP.File, content: any }[] = [];
+
+            // Return a promise
+            return new Promise((resolve) => {
+                // Parse the fields
+                Helper.Executor(["AppThumbnailURL", "AppImageURL1", "AppImageURL2", "AppImageURL3", "AppImageURL4", "AppImageURL5"], fieldName => {
+                    // Return a promise
+                    return new Promise((resolve) => {
+                        // Ensure the url exists
+                        if (DataSource.AppItem[fieldName] && DataSource.AppItem[fieldName].Url) {
+                            // Read the package contents
+                            Web(Strings.SourceUrl).getFileByUrl(DataSource.AppItem[fieldName].Url).execute(
+                                file => {
+                                    // Get the content
+                                    file.content().execute(
+                                        content => {
+                                            // Append the file
+                                            files.push({ file, content });
+
+                                            // Check the next file
+                                            resolve(null);
+                                        },
+                                        () => {
+                                            // Error getting the image
+                                            ErrorDialog.logError("Error downloading the app image file: " + DataSource.AppItem.AppThumbnailURL.Url);
+
+                                            // Check the next file
+                                            resolve(null);
+                                        }
+                                    )
+                                },
+                                () => {
+                                    // Error getting the image
+                                    ErrorDialog.logError("Error getting the app image file: " + DataSource.AppItem.AppThumbnailURL.Url);
+
+                                    // Check the next file
+                                    resolve(null);
+                                }
+                            );
+                        } else {
+                            // Error getting the icon
+                            ErrorDialog.logInfo("The app image file doesn't exist for field: " + fieldName);
+
+                            // Check the next file
+                            resolve(null);
+                        }
+                    });
+                }).then(() => {
+                    // Resolve the request
+                    resolve(files);
+                });
+            });
+        }
+
+        // Return a promise
+        return new Promise((resolve) => {
+            // Ensure the url exists
+            if (AppConfig.Configuration.cdnImage) {
+                // Show a loading dialog
+                LoadingDialog.setHeader("Uploading App Images");
+                LoadingDialog.setBody("Getting the web information...");
+                LoadingDialog.show();
+
+                // Get the web and list url information
+                let webUrl = "";
+                let urlInfo = AppConfig.Configuration.cdnImage.split('/');
+                let listUrl = urlInfo[urlInfo.length - 1];
+                for (let i = 0; i < urlInfo.length - 1; i++) {
+                    // Append the url info
+                    webUrl += (i == 0 ? "" : "/") + urlInfo[i];
+                }
+
+                // Get the web context information
+                ContextInfo.getWeb(webUrl).execute(context => {
+                    // Set the web
+                    let web = Web(webUrl, { requestDigest: context.GetContextWebInformation.FormDigestValue });
+
+                    // Update the loading dialog
+                    LoadingDialog.setBody("Getting the app images...");
+
+                    // Get the images
+                    getImages().then(appImages => {
+                        // Update the loading dialog
+                        LoadingDialog.setBody("Creating/Getting the image folder...");
+
+                        // Ensure the folder is created
+                        this.createImageFolder(web.Folders(listUrl)).then(folder => {
+                            // Update the loading dialog
+                            LoadingDialog.setBody("Uploading the images to the app folder...");
+
+                            // Parse the files
+                            Helper.Executor(appImages, appImage => {
+                                // Return a promise
+                                return new Promise((resolve) => {
+                                    // Update the loading dialog
+                                    LoadingDialog.setBody("Uploading the image: " + appImage.file.Name);
+
+                                    // Upload the file
+                                    folder.Files().add(appImage.file.Name, true, appImage.content).execute(() => {
+                                        // Close the dialog and resolve the request
+                                        LoadingDialog.hide();
+
+                                        // Upload the next file
+                                        resolve(null);
+                                    }, () => {
+                                        // Error uploading the asset
+                                        ErrorDialog.logError("Error uploading the app image file: " + appImage.file.Name);
+
+                                        // Upload the next file
+                                        resolve(null);
+                                    });
+                                });
+                            }).then(resolve);
+                        }, resolve);
+                    }, resolve);
+                }, () => { resolve(); });
             } else {
                 // Resolve the request
                 resolve();

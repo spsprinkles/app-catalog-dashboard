@@ -10,6 +10,7 @@ export interface IConfiguration {
     appDetails?: IAppDetails;
     appFlows?: IAppFlows;
     appNotifications?: IAppNotifications;
+    cdnImage?: string;
     cdnProd?: string;
     cdnTest?: string;
     dashboardUrl?: string;
@@ -142,6 +143,7 @@ export class AppConfig {
                 if (this._cfg) {
                     // Replace the urls
                     this._cfg.appCatalogUrl = this.Configuration.appCatalogUrl ? Common.updateUrl(this._cfg.appCatalogUrl) : Strings.SourceUrl;
+                    this._cfg.cdnImage = this.Configuration.cdnImage ? Common.updateUrl(this._cfg.cdnImage) : this._cfg.cdnImage;
                     this._cfg.cdnProd = this.Configuration.cdnProd ? Common.updateUrl(this._cfg.cdnProd) : this._cfg.cdnProd;
                     this._cfg.cdnTest = this.Configuration.cdnTest ? Common.updateUrl(this._cfg.cdnTest) : this._cfg.cdnTest;
                     this._cfg.dashboardUrl = this.Configuration.dashboardUrl ? Common.updateUrl(this._cfg.dashboardUrl) : Strings.DashboardUrl;
