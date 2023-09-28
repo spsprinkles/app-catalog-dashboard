@@ -50,3 +50,15 @@
 div.webPartContainer {
     display: none;
 }
+
+/* Icon size */
+#datatable {
+    table {
+        tbody {
+            img.icon {
+                max-height: 32px;
+                max-width: 32px;
+            }
+        }
+    }
+}
