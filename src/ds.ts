@@ -47,6 +47,13 @@ export interface IAppItem extends Types.SP.ListItem {
     ContentTypeId: string;
     IsDefaultAppMetadataLocale: boolean;
     IsAppPackageEnabled: boolean;
+
+    AppImageURL1Base64: string;
+    AppImageURL2Base64: string;
+    AppImageURL3Base64: string;
+    AppImageURL4Base64: string;
+    AppImageURL5Base64: string;
+    AppThumbnailURLBase64: string;
 }
 
 // App Catalog Item

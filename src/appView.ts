@@ -461,8 +461,15 @@ export class AppView {
                             // Set the filter value
                             el.setAttribute("data-filter", this.isMyApp(item) ? "MyApp" : "");
 
+                            // See if the base64 value of the icon exists
+                            if (item.AppThumbnailURLBase64) {
+                                let elImg = document.createElement("img");
+                                elImg.classList.add("icon");
+                                elImg.src = item.AppThumbnailURLBase64;
+                                el.appendChild(elImg);
+                            }
                             // Ensure a url exists
-                            if (item.AppThumbnailURL && item.AppThumbnailURL.Url) {
+                            else if (item.AppThumbnailURL && item.AppThumbnailURL.Url) {
                                 // Render the link
                                 el.innerHTML = '<img src="' + item.AppThumbnailURL.Url + '" height="32px" width="32px" title="' + item.Title + '">';
                             }
