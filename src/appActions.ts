@@ -2085,30 +2085,39 @@ export class AppActions {
             let assets: JSZip.JSZipObject[] = [];
 
             // Return a promise
-            return new Promise((resolve) => {
+            return new Promise((resolve, reject) => {
                 // Ensure the file exists
                 if (file == null) { resolve(assets); return; }
 
                 // Read the package contents
-                Web(Strings.SourceUrl).getFileByServerRelativeUrl(file.ServerRelativeUrl).content().execute(content => {
-                    // Extract the files
-                    JSZip.loadAsync(content).then(zipFile => {
-                        // Parse the files
-                        zipFile.forEach((path, fileInfo) => {
-                            // See if this is a client side asset
-                            if (path.toLowerCase().indexOf("clientsideassets") == 0) {
-                                // Ensure this is a file
-                                if (!fileInfo.name.endsWith('/')) {
-                                    // Add the asset information
-                                    assets.push(fileInfo);
+                Web(Strings.SourceUrl).getFileByServerRelativeUrl(file.ServerRelativeUrl).content().execute(
+                    content => {
+                        // Extract the files
+                        JSZip.loadAsync(content).then(zipFile => {
+                            // Parse the files
+                            zipFile.forEach((path, fileInfo) => {
+                                // See if this is a client side asset
+                                if (path.toLowerCase().indexOf("clientsideassets") == 0) {
+                                    // Ensure this is a file
+                                    if (!fileInfo.name.endsWith('/')) {
+                                        // Add the asset information
+                                        assets.push(fileInfo);
+                                    }
                                 }
-                            }
-                        });
+                            });
 
-                        // Resolve the request
-                        resolve(assets);
-                    });
-                });
+                            // Resolve the request
+                            resolve(assets);
+                        });
+                    },
+                    () => {
+                        // Error getting the image
+                        ErrorDialog.logError("Error getting the app image file: " + DataSource.AppItem.AppThumbnailURL.Url);
+
+                        // Reject the request
+                        reject();
+                    }
+                );
             });
         }
 
@@ -2136,7 +2145,7 @@ export class AppActions {
         }
 
         // Return a promise
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             let isTest = pkgType == "test";
 
             // Get the cdn url
@@ -2173,38 +2182,45 @@ export class AppActions {
                     LoadingDialog.setBody("Getting the client side assets...");
 
                     // Get the assets
-                    getClientSideAssets(pkgFile).then(assets => {
-                        // Update the loading dialog
-                        LoadingDialog.setBody("Creating/Getting the client side assets folder...");
-
-                        // Ensure the folder is created
-                        this.createClientSideAssetsFolder(web.Folders(listUrl)).then(folder => {
+                    getClientSideAssets(pkgFile).then(
+                        assets => {
                             // Update the loading dialog
-                            LoadingDialog.setBody("Uploading the solution assets to the app folder...");
+                            LoadingDialog.setBody("Creating/Getting the client side assets folder...");
 
-                            // Parse the assets
-                            Helper.Executor(assets, assetFile => {
-                                // Return a promise
-                                return new Promise((resolve) => {
-                                    // Get the file information
-                                    assetFile.async("arraybuffer").then(content => {
-                                        // Upload the file
-                                        folder.Files().add(assetFile.name.replace(/clientsideassets\//i, ''), true, content).execute(resolve, () => {
-                                            // Error uploading the asset
-                                            ErrorDialog.logError("Error uploading the client side asset file: " + assetFile.name);
+                            // Ensure the folder is created
+                            this.createClientSideAssetsFolder(web.Folders(listUrl)).then(folder => {
+                                // Update the loading dialog
+                                LoadingDialog.setBody("Uploading the solution assets to the app folder...");
 
-                                            // Upload the next file
-                                            resolve(null);
+                                // Parse the assets
+                                Helper.Executor(assets, assetFile => {
+                                    // Return a promise
+                                    return new Promise((resolve) => {
+                                        // Get the file information
+                                        assetFile.async("arraybuffer").then(content => {
+                                            // Upload the file
+                                            folder.Files().add(assetFile.name.replace(/clientsideassets\//i, ''), true, content).execute(resolve, () => {
+                                                // Error uploading the asset
+                                                ErrorDialog.logError("Error uploading the client side asset file: " + assetFile.name);
+
+                                                // Upload the next file
+                                                resolve(null);
+                                            });
                                         });
                                     });
+                                }).then(() => {
+                                    // Close the dialog and resolve the request
+                                    LoadingDialog.hide();
+                                    resolve();
                                 });
-                            }).then(() => {
-                                // Close the dialog and resolve the request
-                                LoadingDialog.hide();
-                                resolve();
-                            });
-                        }, reject);
-                    });
+                            }, resolve);
+                        },
+                        () => {
+                            // Unable to get the assets
+                            // Skip this and they will need to do this manually
+                            resolve();
+                        }
+                    );
                 });
             } else {
                 // Resolve the request
