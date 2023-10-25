@@ -7,6 +7,7 @@ import { boxArrowRight } from "gd-sprest-bs/build/icons/svgs/boxArrowRight";
 import { cardChecklist } from "gd-sprest-bs/build/icons/svgs/cardChecklist";
 import { cardText } from "gd-sprest-bs/build/icons/svgs/cardText";
 import { clockHistory } from "gd-sprest-bs/build/icons/svgs/clockHistory";
+import { copy } from "gd-sprest-bs/build/icons/svgs/copy";
 import { envelope } from "gd-sprest-bs/build/icons/svgs/envelope";
 import { git } from "gd-sprest-bs/build/icons/svgs/git";
 import { handThumbsDown } from "gd-sprest-bs/build/icons/svgs/handThumbsDown";
@@ -265,6 +266,29 @@ export class ButtonActions {
                   });
                 },
               },
+            });
+          }
+          break;
+
+        // CDN
+        case "CDN":
+          // Ensure this is the admin or owner
+          if (AppSecurity.AppWeb.IsAdmin || AppSecurity.AppWeb.IsOwner) {
+            // Render the cdn buttonn
+            tooltips.add({
+              content: "Allows you to manually copy the CDN assets/images for an application.",
+              btnProps: {
+                text: "CDN",
+                iconClassName: "me-1",
+                iconSize: 20,
+                iconType: copy,
+                isSmall: true,
+                type: Components.ButtonTypes.OutlineSecondary,
+                onClick: () => {
+                  // Display the cdn form
+                  this._forms.cdn(DataSource.AppItem);
+                }
+              }
             });
           }
           break;
