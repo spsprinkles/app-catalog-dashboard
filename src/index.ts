@@ -1,5 +1,5 @@
-import { Timeout } from "dattatable";
-import { ContextInfo } from "gd-sprest-bs";
+import { LoadingDialog, Timeout } from "dattatable";
+import { Components, ContextInfo } from "gd-sprest-bs";
 import { AppDashboard } from "./appDashboard";
 import { AppInstall } from "./appInstall";
 import { AppSecurity } from "./appSecurity";
@@ -43,10 +43,18 @@ const GlobalVariable = {
         wpZone = document.querySelector("#DeltaPlaceHolderMain table > tbody > tr > td:last-child");
         wpZone ? wpZone.style.width = "100%" : null;
 
+        // Show a loading dialog
+        LoadingDialog.setHeader("Loading Application");
+        LoadingDialog.setBody("This may take time based on the number of apps to load...");
+        LoadingDialog.show();
+
         // Initialize the solution
         DataSource.init(appConfiguration).then(
             // Success
             () => {
+                // Hide the loading dialog
+                LoadingDialog.hide();
+
                 // Ensure the security groups exist
                 if (AppSecurity.hasErrors()) {
                     // See if an install is required
@@ -78,6 +86,9 @@ const GlobalVariable = {
             () => {
                 // See if an install is required
                 AppInstall.InstallRequired(el);
+
+                // Hide the loading dialog
+                LoadingDialog.hide();
             }
         );
     }

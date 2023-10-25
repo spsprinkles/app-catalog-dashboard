@@ -1,4 +1,4 @@
-import { AuditLog, LoadingDialog, Modal } from "dattatable";
+import { LoadingDialog, Modal } from "dattatable";
 import { Components, ContextInfo, Helper, List, SPTypes, Web } from "gd-sprest-bs";
 import { AppActions } from "./appActions";
 import { AppConfig, IStatus } from "./appCfg";
@@ -183,6 +183,121 @@ export class AppForms {
                 }
             }
         }).el);
+
+        // Show the modal
+        Modal.show();
+    }
+
+    // CDN form
+    cdn(item: IAppItem) {
+        // Clear the modal
+        Modal.clear();
+
+        // Set the header
+        Modal.setHeader("CDN");
+
+        // Set the body
+        Modal.setBody("Click the button to manually copy/update the CDN assets.");
+
+        // Determine the buttons to add
+        let tooltips: Components.ITooltipProps[] = [];
+
+        // See if the cdn image is set
+        if (AppConfig.Configuration.cdnImage) {
+            tooltips.push({
+                content: "Copies the images for this application",
+                btnProps: {
+                    text: "Copy Images",
+                    type: Components.ButtonTypes.OutlineSecondary,
+                    onClick: () => {
+                        // Show a loading dialog
+                        LoadingDialog.setHeader("Copy Images");
+                        LoadingDialog.setBody("This will close after the file(s) are copied.");
+                        LoadingDialog.show();
+
+                        // Copy the files
+                        AppActions.uploadImages().then(() => {
+                            // Close the loading dialog
+                            LoadingDialog.hide();
+
+                            // Close the modal
+                            Modal.hide();
+                        });
+                    }
+                }
+            });
+        }
+
+        // See if the cdn test is set
+        if (AppConfig.Configuration.cdnTest) {
+            tooltips.push({
+                content: "Copies the CDN test files. This is for apps that are in testing.",
+                btnProps: {
+                    text: "Copy Test",
+                    type: Components.ButtonTypes.OutlineSecondary,
+                    onClick: () => {
+                        // Show a loading dialog
+                        LoadingDialog.setHeader("Copy Test Assets");
+                        LoadingDialog.setBody("This will close after the file(s) are copied.");
+                        LoadingDialog.show();
+
+                        // Copy the files
+                        AppActions.uploadClientSideAssets("test").then(() => {
+                            // Close the loading dialog
+                            LoadingDialog.hide();
+
+                            // Close the modal
+                            Modal.hide();
+                        });
+                    }
+                }
+            });
+        }
+
+        // See if the cdn prod is set
+        if (AppConfig.Configuration.cdnProd) {
+            tooltips.push({
+                content: "Copies the CDN production files. This is for apps that have been approved for production.",
+                btnProps: {
+                    text: "Copy Prod",
+                    type: Components.ButtonTypes.OutlineSecondary,
+                    onClick: () => {
+                        // Show a loading dialog
+                        LoadingDialog.setHeader("Copy Prod Assets");
+                        LoadingDialog.setBody("This will close after the file(s) are copied.");
+                        LoadingDialog.show();
+
+                        // Copy the files
+                        AppActions.uploadClientSideAssets("prod").then(() => {
+                            // Close the loading dialog
+                            LoadingDialog.hide();
+
+                            // Close the modal
+                            Modal.hide();
+                        });
+                    }
+                }
+            });
+        }
+
+        // Add the close button
+        tooltips.push({
+            content: "Closes the modal.",
+            btnProps: {
+                text: "Cancel",
+                type: Components.ButtonTypes.OutlineDanger,
+                onClick: () => {
+                    // Close the modal
+                    Modal.hide();
+                }
+            }
+        });
+
+        // Set the footer
+        Components.TooltipGroup({
+            el: Modal.FooterElement,
+            tooltips
+        });
 
         // Show the modal
         Modal.show();
