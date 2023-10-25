@@ -1,5 +1,5 @@
 import { Timeout } from "dattatable";
-import { ContextInfo } from "gd-sprest-bs";
+import { Components, ContextInfo } from "gd-sprest-bs";
 import { AppDashboard } from "./appDashboard";
 import { AppInstall } from "./appInstall";
 import { AppSecurity } from "./appSecurity";
@@ -43,10 +43,21 @@ const GlobalVariable = {
         wpZone = document.querySelector("#DeltaPlaceHolderMain table > tbody > tr > td:last-child");
         wpZone ? wpZone.style.width = "100%" : null;
 
+        // Render an alert
+        Components.Alert({
+            el,
+            content: "Loading the application...",
+            type: Components.AlertTypes.Primary,
+            isDismissible: false
+        });
+
         // Initialize the solution
         DataSource.init(appConfiguration).then(
             // Success
             () => {
+                // Clear the element
+                while (el.firstChild) { el.removeChild(el.firstChild); }
+
                 // Ensure the security groups exist
                 if (AppSecurity.hasErrors()) {
                     // See if an install is required
