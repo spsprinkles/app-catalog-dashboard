@@ -510,7 +510,7 @@ export class AppDashboard {
         let nav = Components.Navbar({
             el: this._el.querySelector("#app-nav"),
             brand: crumb.el,
-            className: "navbar-expand bg-sharepoint rounded-top",
+            className: "navbar-expand rounded-top",
             type: Components.NavbarTypes.Primary,
             itemsEnd
         });
