@@ -1,4 +1,4 @@
-import { ContextInfo, Helper } from "gd-sprest-bs";
+import { ContextInfo, Helper, SPTypes } from "gd-sprest-bs";
 
 /**
  * Global Constants
@@ -10,13 +10,16 @@ let PagesUrl: string = ContextInfo.webServerRelativeUrl + "/SitePages/";
 let SPFxContext: { pageContext: any; sdks: { microsoftTeams: any } } = null;
 
 // Updates the strings for SPFx
-export const setContext = (context, sourceUrl?: string) => {
+export const setContext = (context, envType?: number, sourceUrl?: string) => {
     // Set the page context
     SPFxContext = context;
     ContextInfo.setPageContext(SPFxContext.pageContext);
 
     // Load the default scripts
     Helper.loadSPCore();
+
+    // Update the properties
+    Strings.IsClassic = envType == SPTypes.EnvironmentType.ClassicSharePoint;
 
     // Set the teams flag
     Strings.IsTeams = SPFxContext.sdks.microsoftTeams ? true : false;
@@ -43,6 +46,7 @@ const Strings = {
         FinalApprovers: "App Final Approvers",
         Sponsors: "App Sponsors"
     },
+    IsClassic: true,
     IsTeams: false,
     Lists: {
         AppCatalog: "Apps for SharePoint",

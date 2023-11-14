@@ -49,3 +49,10 @@
 div.webPartContainer {
     display: none;
 }
+/* Apply changes to the Settings Panel */
+div.spPropertyPaneContainer div[aria-label='App Catalog Managment Tool property pane'] div[data-automation-id='propertyPaneGroupContent'] {
+    /* Align version to the right */
+    >div:last-child label {
+        text-align: right;
+    }
+}

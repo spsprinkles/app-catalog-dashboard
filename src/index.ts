@@ -12,27 +12,40 @@ import Strings, { setContext } from "./strings";
 // Styling
 import "./styles.scss";
 
+// Properties
+interface IProps {
+    el: HTMLElement;
+    appConfiguration?: string
+    context?: any;
+    displayMode?: number;
+    envType?: number;
+    log?: any,
+    sourceUrl?: string;
+}
+
 // Create the global variable for this solution
 const GlobalVariable = {
+    App: null,
     Configuration,
-    render: (el: HTMLElement, context?, log?, appConfiguration?: string, sourceUrl?: string) => {
+    description: Strings.ProjectDescription,
+    render: (props: IProps) => {
         // See if the log is set
-        if (log) {
+        if (props.log) {
             // Set the log and scope
-            ErrorDialog.Log = log;
-            ErrorDialog.Scope = context.serviceScope;
+            ErrorDialog.Log = props.log;
+            ErrorDialog.Scope = props.context.serviceScope;
         }
 
         // Log
         ErrorDialog.logInfo("App Catalog Manager", "Initializing the solution...");
 
         // See if the page context exists
-        if (context) {
+        if (props.context) {
             // Set the context
-            setContext(context, sourceUrl);
+            setContext(props.context, props.envType, props.sourceUrl);
 
             // Set the web url
-            Configuration.setWebUrl(sourceUrl || ContextInfo.webServerRelativeUrl);
+            Configuration.setWebUrl(props.sourceUrl || ContextInfo.webServerRelativeUrl);
         }
 
         // Hide the first column of the webpart zones
@@ -52,7 +65,7 @@ const GlobalVariable = {
         LoadingDialog.show();
 
         // Initialize the solution
-        DataSource.init(appConfiguration).then(
+        DataSource.init(props.appConfiguration).then(
             // Success
             () => {
                 // Hide the loading dialog
@@ -61,12 +74,12 @@ const GlobalVariable = {
                 // Ensure the security groups exist
                 if (AppSecurity.hasErrors()) {
                     // See if an install is required
-                    AppInstall.InstallRequired(el);
+                    AppInstall.InstallRequired(props.el);
                 } else {
                     // Create the app elements
-                    el.innerHTML = "<div id='apps'></div><div id='app-details' class='d-none'></div>";
-                    let elApps = el.querySelector("#apps") as HTMLElement;
-                    let elAppDetails = el.querySelector("#app-details") as HTMLElement;
+                    props.el.innerHTML = "<div id='apps'></div><div id='app-details' class='d-none'></div>";
+                    let elApps = props.el.querySelector("#apps") as HTMLElement;
+                    let elAppDetails = props.el.querySelector("#app-details") as HTMLElement;
 
                     // See if this is a document set and we are not in teams
                     if (!Strings.IsTeams && DataSource.AppItem) {
@@ -77,7 +90,7 @@ const GlobalVariable = {
                         elAppDetails.classList.remove("d-none");
                     } else {
                         // View all of the applications
-                        new AppView(elApps, elAppDetails);
+                        GlobalVariable.App = new AppView(elApps, elAppDetails);
                     }
 
                     // Start the timeout
@@ -88,13 +101,18 @@ const GlobalVariable = {
             // Error
             () => {
                 // See if an install is required
-                AppInstall.InstallRequired(el);
+                AppInstall.InstallRequired(props.el);
 
                 // Hide the loading dialog
                 LoadingDialog.hide();
             }
         );
-    }
+    },
+    updateTheme: (themeInfo) => {
+        // Set the theme
+        ThemeManager.setCurrentTheme(themeInfo);
+    },
+    version: Strings.Version
 };
 
 // Update the DOM
@@ -112,5 +130,5 @@ if (elApp) {
     pageTitle ? pageTitle.setAttribute("style", "display:none;") : null;
 
     // Render the application
-    GlobalVariable.render(elApp);
+    GlobalVariable.render({ el: elApp });
 }
