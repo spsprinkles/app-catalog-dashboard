@@ -245,6 +245,7 @@ export class AppView {
                 onRendering: (props) => {
                     // Set the class names
                     props.className = "navbar-expand rounded-top";
+                    props.type = Components.NavbarTypes.Primary
 
                     // Set the brand
                     let brand = document.createElement("div");
