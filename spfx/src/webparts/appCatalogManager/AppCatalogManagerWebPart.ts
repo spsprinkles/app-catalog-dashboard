@@ -61,7 +61,7 @@ export default class AppCatalogManagerWebPart extends BaseClientSideWebPart<IApp
                 PropertyPaneTextField('configuration', {
                   label: strings.ConfigLabel,
                   multiline: true,
-                  rows: 30
+                  rows: 35
                 }),
                 PropertyPaneLabel('version', {
                   text: "v" + AppDashboard.version
