@@ -1,5 +1,5 @@
 import { LoadingDialog, Timeout } from "dattatable";
-import { Components, ContextInfo } from "gd-sprest-bs";
+import { ContextInfo, ThemeManager } from "gd-sprest-bs";
 import { AppDashboard } from "./appDashboard";
 import { AppInstall } from "./appInstall";
 import { AppSecurity } from "./appSecurity";
@@ -42,6 +42,9 @@ const GlobalVariable = {
         // Make the second column of the webpart zones full width
         wpZone = document.querySelector("#DeltaPlaceHolderMain table > tbody > tr > td:last-child");
         wpZone ? wpZone.style.width = "100%" : null;
+
+        // Load the current theme
+        ThemeManager.load(true);
 
         // Show a loading dialog
         LoadingDialog.setHeader("Loading Application");
