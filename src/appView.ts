@@ -244,7 +244,7 @@ export class AppView {
                 // Add the branding icon & text
                 onRendering: (props) => {
                     // Set the class names
-                    props.className = "bg-sharepoint navbar-expand rounded-top";
+                    props.className = "navbar-expand rounded-top";
 
                     // Set the brand
                     let brand = document.createElement("div");
