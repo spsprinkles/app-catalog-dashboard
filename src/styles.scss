@@ -1,5 +1,6 @@
 #app-info {
     .card {
+        border-color: var(--sp-neutral-quaternary, #d2d0ce);
         border-top: 0;
         border-width: 3px;
     }
@@ -11,8 +12,8 @@
     }
 }
 #app-docs nav.navbar {
-    background-color: var(--sp-neutral-lighter) !important;
-    border: 3px solid var(--sp-neutral-quaternary);
+    background-color: var(--sp-neutral-lighter, #f3f2f1) !important;
+    border: 3px solid var(--sp-neutral-quaternary, #d2d0ce);
     border-radius: 0 0 0.25rem 0.25rem;
     border-top: 0;
 }
