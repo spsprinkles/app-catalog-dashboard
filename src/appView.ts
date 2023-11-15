@@ -409,10 +409,14 @@ export class AppView {
             footer: {
                 itemsEnd: [
                     {
-                        className: "pe-none text-dark",
+                        className: "p-0 pe-none text-body",
                         text: "v" + Strings.Version,
-                    },
-                ],
+                        onRender: (el) => {
+                            // Hide version footer in a modern page
+                            Strings.IsClassic ? null : el.classList.add("d-none");
+                        }
+                    }
+                ]
             },
             table: {
                 rows: DataSource.DocSetList.Items,
