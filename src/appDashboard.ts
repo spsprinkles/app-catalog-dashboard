@@ -504,7 +504,7 @@ export class AppDashboard {
         });
 
         // Update the breadcrumb divider to use a bootstrap icon
-        crumb.el.setAttribute("style", "--bs-breadcrumb-divider: " + Common.generateEmbeddedSVG(caretRightFill(18, 18)).replace("currentColor", "%23fff"));
+        crumb.el.setAttribute("style", "--bs-breadcrumb-divider: " + Common.generateEmbeddedSVG(caretRightFill(18, 18)));
 
         // Render the navigation
         let nav = Components.Navbar({
