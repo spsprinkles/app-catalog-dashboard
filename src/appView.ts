@@ -1,5 +1,5 @@
 import { Dashboard, LoadingDialog } from "dattatable";
-import { Components, ContextInfo } from "gd-sprest-bs";
+import { Components, ContextInfo, ThemeManager } from "gd-sprest-bs";
 import { chatSquareDots } from "gd-sprest-bs/build/icons/svgs/chatSquareDots";
 import { fileEarmarkArrowUp } from "gd-sprest-bs/build/icons/svgs/fileEarmarkArrowUp";
 import { filterSquare } from "gd-sprest-bs/build/icons/svgs/filterSquare";
@@ -470,13 +470,14 @@ export class AppView {
                             if (item.AppThumbnailURLBase64) {
                                 let elImg = document.createElement("img");
                                 elImg.classList.add("icon");
+                                ThemeManager.IsInverted ? elImg.classList.add("invert") : null;
                                 elImg.src = item.AppThumbnailURLBase64;
                                 el.appendChild(elImg);
                             }
                             // Ensure a url exists
                             else if (item.AppThumbnailURL && item.AppThumbnailURL.Url) {
                                 // Render the link
-                                el.innerHTML = '<img src="' + item.AppThumbnailURL.Url + '" height="32px" width="32px" title="' + item.Title + '">';
+                                el.innerHTML = `<img ${ThemeManager.IsInverted ? "class=\"invert\"" : ""} src="${item.AppThumbnailURL.Url}" height="32px" width="32px" title="${item.Title}">`;
                             }
                         }
                     },
