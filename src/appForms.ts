@@ -850,7 +850,7 @@ export class AppForms {
                 // Update the field
                 props.onControlRendering = (ctrl, field) => {
                     // See if this is a url field
-                    if (field.InternalName.indexOf("URL") > 0) {
+                    if (field && field.InternalName.indexOf("URL") > 0) {
                         // Hide the description field
                         (ctrl as Components.IFormControlUrlProps).showDescription = false;
                     }
