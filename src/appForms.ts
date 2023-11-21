@@ -830,31 +830,19 @@ export class AppForms {
                 tabs: [
                     {
                         title: "Properties",
-                        excludeFields: AppExcludeFields.concat(AppDeploymentFields, AppPackageFields, AppStoreFields),
-                        onFormRendered: (form) => {
-                            form.el ? form.el.classList.add("mt-3") : null;
-                        }
+                        excludeFields: AppExcludeFields.concat(AppDeploymentFields, AppPackageFields, AppStoreFields)
                     },
                     {
                         title: "Metadata",
-                        fields: AppPackageFields,
-                        onFormRendered: (form) => {
-                            form.el ? form.el.classList.add("mt-3") : null;
-                        }
+                        fields: AppPackageFields
                     },
                     {
                         title: "Store Details",
-                        fields: AppStoreFields,
-                        onFormRendered: (form) => {
-                            form.el ? form.el.classList.add("mt-3") : null;
-                        }
+                        fields: AppStoreFields
                     },
                     {
                         title: "Deployment",
-                        fields: AppDeploymentFields,
-                        onFormRendered: (form) => {
-                            form.el ? form.el.classList.add("mt-3") : null;
-                        }
+                        fields: AppDeploymentFields
                     }
                 ]
             },
@@ -866,6 +854,14 @@ export class AppForms {
                         // Hide the description field
                         (ctrl as Components.IFormControlUrlProps).showDescription = false;
                     }
+                }
+
+                props.onFormRendered = (form) => {
+                    // Add spacing between the tab control and the form
+                    form.el ? form.el.classList.add("mt-3") : null;
+
+                    // Hide the modal footer
+                    Modal.FooterElement.classList.add("d-none");
                 }
 
                 // Return the properties
@@ -966,31 +962,19 @@ export class AppForms {
                 tabs: [
                     {
                         title: "Properties",
-                        excludeFields: AppExcludeFields.concat(AppDeploymentFields, AppPackageFields, AppStoreFields),
-                        onFormRendered: (form) => {
-                            form.el ? form.el.classList.add("mt-3") : null;
-                        }
+                        excludeFields: AppExcludeFields.concat(AppDeploymentFields, AppPackageFields, AppStoreFields)
                     },
                     {
                         title: "Metadata",
-                        fields: AppPackageFields,
-                        onFormRendered: (form) => {
-                            form.el ? form.el.classList.add("mt-3") : null;
-                        }
+                        fields: AppPackageFields
                     },
                     {
                         title: "Store Details",
-                        fields: AppStoreFields,
-                        onFormRendered: (form) => {
-                            form.el ? form.el.classList.add("mt-3") : null;
-                        }
+                        fields: AppStoreFields
                     },
                     {
                         title: "Deployment",
-                        fields: AppDeploymentFields,
-                        onFormRendered: (form) => {
-                            form.el ? form.el.classList.add("mt-3") : null;
-                        }
+                        fields: AppDeploymentFields
                     }
                 ]
             },
@@ -1202,6 +1186,11 @@ export class AppForms {
                             });
                         });
                     }
+                }
+
+                // Add spacing between the tab control and the form
+                props.onFormRendered = (form) => {
+                    form.el ? form.el.classList.add("mt-3") : null;
                 }
 
                 // Return the properties
