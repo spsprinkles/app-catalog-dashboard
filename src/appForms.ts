@@ -830,19 +830,31 @@ export class AppForms {
                 tabs: [
                     {
                         title: "Properties",
-                        excludeFields: AppExcludeFields.concat(AppDeploymentFields, AppPackageFields, AppStoreFields)
+                        excludeFields: AppExcludeFields.concat(AppDeploymentFields, AppPackageFields, AppStoreFields),
+                        onFormRendered: (form) => {
+                            form.el ? form.el.classList.add("mt-3") : null;
+                        }
                     },
                     {
                         title: "Metadata",
-                        fields: AppPackageFields
+                        fields: AppPackageFields,
+                        onFormRendered: (form) => {
+                            form.el ? form.el.classList.add("mt-3") : null;
+                        }
                     },
                     {
                         title: "Store Details",
-                        fields: AppStoreFields
+                        fields: AppStoreFields,
+                        onFormRendered: (form) => {
+                            form.el ? form.el.classList.add("mt-3") : null;
+                        }
                     },
                     {
                         title: "Deployment",
-                        fields: AppDeploymentFields
+                        fields: AppDeploymentFields,
+                        onFormRendered: (form) => {
+                            form.el ? form.el.classList.add("mt-3") : null;
+                        }
                     }
                 ]
             },
@@ -954,19 +966,31 @@ export class AppForms {
                 tabs: [
                     {
                         title: "Properties",
-                        excludeFields: AppExcludeFields.concat(AppDeploymentFields, AppPackageFields, AppStoreFields)
+                        excludeFields: AppExcludeFields.concat(AppDeploymentFields, AppPackageFields, AppStoreFields),
+                        onFormRendered: (form) => {
+                            form.el ? form.el.classList.add("mt-3") : null;
+                        }
                     },
                     {
                         title: "Metadata",
-                        fields: AppPackageFields
+                        fields: AppPackageFields,
+                        onFormRendered: (form) => {
+                            form.el ? form.el.classList.add("mt-3") : null;
+                        }
                     },
                     {
                         title: "Store Details",
-                        fields: AppStoreFields
+                        fields: AppStoreFields,
+                        onFormRendered: (form) => {
+                            form.el ? form.el.classList.add("mt-3") : null;
+                        }
                     },
                     {
                         title: "Deployment",
-                        fields: AppDeploymentFields
+                        fields: AppDeploymentFields,
+                        onFormRendered: (form) => {
+                            form.el ? form.el.classList.add("mt-3") : null;
+                        }
                     }
                 ]
             },
