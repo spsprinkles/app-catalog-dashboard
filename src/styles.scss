@@ -1,3 +1,10 @@
+.bs {
+    .alert {
+        border-color: var(--sp-neutral-quaternary, #d2d0ce);
+        border-top: 0;
+        border-width: 3px;
+    }
+}
 #app-info {
     .card {
         border-color: var(--sp-neutral-quaternary, #d2d0ce);
