@@ -579,7 +579,7 @@ export class AppView {
                     },
                     {
                         name: "",
-                        title: "Actions",
+                        title: "",
                         className: "text-end",
                         onRenderCell: (el, column, item: IAppItem) => {
                             let tooltips: Components.ITooltipProps[] = [];
