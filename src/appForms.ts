@@ -207,8 +207,9 @@ export class AppForms {
             tooltips.push({
                 content: "Copies the images for this application",
                 btnProps: {
+                    isSmall: true,
                     text: "Copy Images",
-                    type: Components.ButtonTypes.OutlineSecondary,
+                    type: Components.ButtonTypes.OutlinePrimary,
                     onClick: () => {
                         // Show a loading dialog
                         LoadingDialog.setHeader("Copy Images");
@@ -233,8 +234,9 @@ export class AppForms {
             tooltips.push({
                 content: "Copies the CDN test files. This is for apps that are in testing.",
                 btnProps: {
+                    isSmall: true,
                     text: "Copy Test",
-                    type: Components.ButtonTypes.OutlineSecondary,
+                    type: Components.ButtonTypes.OutlinePrimary,
                     onClick: () => {
                         // Show a loading dialog
                         LoadingDialog.setHeader("Copy Test Assets");
@@ -259,8 +261,9 @@ export class AppForms {
             tooltips.push({
                 content: "Copies the CDN production files. This is for apps that have been approved for production.",
                 btnProps: {
+                    isSmall: true,
                     text: "Copy Prod",
-                    type: Components.ButtonTypes.OutlineSecondary,
+                    type: Components.ButtonTypes.OutlinePrimary,
                     onClick: () => {
                         // Show a loading dialog
                         LoadingDialog.setHeader("Copy Prod Assets");
@@ -282,10 +285,11 @@ export class AppForms {
 
         // Add the close button
         tooltips.push({
-            content: "Closes the modal.",
+            content: "Close the modal",
             btnProps: {
+                isSmall: true,
                 text: "Cancel",
-                type: Components.ButtonTypes.OutlineDanger,
+                type: Components.ButtonTypes.OutlineSecondary,
                 onClick: () => {
                     // Close the modal
                     Modal.hide();
