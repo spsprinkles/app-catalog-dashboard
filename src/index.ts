@@ -56,9 +56,6 @@ const GlobalVariable = {
         wpZone = document.querySelector("#DeltaPlaceHolderMain table > tbody > tr > td:last-child");
         wpZone ? wpZone.style.width = "100%" : null;
 
-        // Load the current theme
-        ThemeManager.load(true);
-
         // Show a loading dialog
         LoadingDialog.setHeader("Loading Application");
         LoadingDialog.setBody("This may take time based on the number of apps to load...");
