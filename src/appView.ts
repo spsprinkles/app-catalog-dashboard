@@ -76,15 +76,79 @@ export class AppView {
 
     // Renders the dashboard
     private render() {
+        let navLinks: Components.INavbarItem[] = [];
+
         // See if the app catalog is on the same site as the app
         let isSameWeb = AppConfig.Configuration.appCatalogUrl.toLowerCase() == Strings.SourceUrl.toLowerCase();
 
+        // See if the help url exists
+        if (AppConfig.Configuration.helpPageUrl) {
+            // Add the item
+            navLinks.push({
+                text: "Help",
+                onRender: (el, item) => {
+                    // Clear the existing button
+                    el.innerHTML = "";
+
+                    // Render a tooltip
+                    Components.Tooltip({
+                        el,
+                        content: "Get " + item.text,
+                        type: Components.TooltipTypes.LightBorder,
+                        btnProps: {
+                            // Render the icon button
+                            className: "btn-icon btn-outline-light me-2 p-1 pe-2 py-1",
+                            iconSize: 22,
+                            iconType: questionLg,
+                            text: item.text,
+                            type: Components.ButtonTypes.OutlineLight,
+                            onClick: () => {
+                                // Display in a new tab
+                                window.open(AppConfig.Configuration.helpPageUrl, "_blank");
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
+        // See if this is a developer/sponsor/owner
+        if (DataSource.HasAppCatalogRequests) {
+            // Add the requests button
+            navLinks.push({
+                text: "My Requests",
+                onRender: (el, item) => {
+                    // Clear the existing button
+                    el.innerHTML = "";
+
+                    // Render a tooltip
+                    Components.Tooltip({
+                        el,
+                        content: "View " + item.text,
+                        type: Components.TooltipTypes.LightBorder,
+                        btnProps: {
+                            // Render the icon button
+                            className: "btn-icon btn-outline-light me-2 p-2 py-1",
+                            iconClassName: "me-2",
+                            iconSize: 22,
+                            iconType: ticketDetailed,
+                            text: item.text,
+                            type: Components.ButtonTypes.OutlineLight,
+                            onClick: () => {
+                                // Display in app catalog requests
+                                AppCatalogRequests.viewAppCatalogRequests();
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
         // See if this is an owner
-        let navLinks: Components.INavbarItem[] = [];
         if (AppSecurity.AppWeb.IsAdmin || AppSecurity.AppWeb.IsOwner) {
             // Set the admin buttons
             navLinks.push({
-                className: "btn-icon btn-outline-light ms-2 p-2 py-1",
+                className: "btn-icon btn-outline-light me-2 p-2 py-1",
                 text: "Settings",
                 iconSize: 22,
                 iconType: gearWideConnected,
@@ -137,70 +201,37 @@ export class AppView {
 
             if (!isSameWeb) {
                 // Add the links to manage remote groups
-                navLinks[0].items.push({
-                    text: "Remote Approver Group",
-                    onClick: () => {
-                        // Show the group in a new tab
-                        window.open(AppSecurity.AppCatalogWeb.getUrlForGroup(Strings.Groups.Approvers), "_blank");
+                navLinks[navLinks.length - 1].items.push(
+                    {
+                        text: "Remote Approver Group",
+                        onClick: () => {
+                            // Show the group in a new tab
+                            window.open(AppSecurity.AppCatalogWeb.getUrlForGroup(Strings.Groups.Approvers), "_blank");
+                        }
+                    },
+                    {
+                        text: "Remote Developer Group",
+                        onClick: () => {
+                            // Show the group in a new tab
+                            window.open(AppSecurity.AppCatalogWeb.getUrlForGroup(Strings.Groups.Developers), "_blank");
+                        }
+                    },
+                    {
+                        text: "Remote Final Approver Group",
+                        onClick: () => {
+                            // Show the group in a new tab
+                            window.open(AppSecurity.AppCatalogWeb.getUrlForGroup(Strings.Groups.FinalApprovers), "_blank");
+                        }
+                    },
+                    {
+                        text: "Remote Sponsor Group",
+                        onClick: () => {
+                            // Show the group in a new tab
+                            window.open(AppSecurity.AppCatalogWeb.getUrlForGroup(Strings.Groups.Sponsors), "_blank");
+                        }
                     }
-                });
-
-                navLinks[0].items.push({
-                    text: "Remote Developer Group",
-                    onClick: () => {
-                        // Show the group in a new tab
-                        window.open(AppSecurity.AppCatalogWeb.getUrlForGroup(Strings.Groups.Developers), "_blank");
-                    }
-                });
-
-                navLinks[0].items.push({
-                    text: "Remote Final Approver Group",
-                    onClick: () => {
-                        // Show the group in a new tab
-                        window.open(AppSecurity.AppCatalogWeb.getUrlForGroup(Strings.Groups.FinalApprovers), "_blank");
-                    }
-                });
-
-                navLinks[0].items.push({
-                    text: "Remote Sponsor Group",
-                    onClick: () => {
-                        // Show the group in a new tab
-                        window.open(AppSecurity.AppCatalogWeb.getUrlForGroup(Strings.Groups.Sponsors), "_blank");
-                    }
-                });
+                );
             }
-        }
-
-        // See if this is a developer/sponsor/owner
-        if (DataSource.HasAppCatalogRequests) {
-            // Add the requests button
-            navLinks.push({
-                className: "btn-icon btn-outline-light ms-2 p-2 py-1",
-                iconSize: 22,
-                iconType: ticketDetailed,
-                isButton: true,
-                text: "My Requests",
-                onClick: () => {
-                    // Display in app catalog requests
-                    AppCatalogRequests.viewAppCatalogRequests();
-                }
-            });
-        }
-
-        // See if the help url exists
-        if (AppConfig.Configuration.helpPageUrl) {
-            // Add the item
-            navLinks.push({
-                className: "btn-icon btn-outline-light mx-2 p-1 pe-2 py-1",
-                iconSize: 22,
-                iconType: questionLg,
-                isButton: true,
-                text: "Help",
-                onClick: () => {
-                    // Display in a new tab
-                    window.open(AppConfig.Configuration.helpPageUrl, "_blank");
-                }
-            });
         }
 
         // Create the dashboard
