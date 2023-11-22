@@ -318,7 +318,7 @@ export class AppForms {
         // Render the footer
         Modal.setFooter(Components.Button({
             text: "Create Site",
-            type: Components.ButtonTypes.OutlineSuccess,
+            type: Components.ButtonTypes.OutlinePrimary,
             isDisabled: errorMessage ? true : false,
             onClick: () => {
                 // Close the modal
@@ -764,7 +764,7 @@ export class AppForms {
                         assignTo: btn => { btnRequest = btn; },
                         isDisabled: true,
                         text: "Request",
-                        type: Components.ButtonTypes.OutlineInfo,
+                        type: Components.ButtonTypes.OutlinePrimary,
                         onClick: () => {
                             // Display the request form
                             this.requestAppCatalog(webUrl);
@@ -1266,7 +1266,7 @@ export class AppForms {
                         content: "Validates the form.",
                         btnProps: {
                             text: "Validate",
-                            type: Components.ButtonTypes.OutlineSuccess,
+                            type: Components.ButtonTypes.OutlinePrimary,
                             onClick: () => {
                                 // Set the flag
                                 validateFl = true;
@@ -1398,7 +1398,7 @@ export class AppForms {
                         content: "Validates the form.",
                         btnProps: {
                             text: "Validate",
-                            type: Components.ButtonTypes.OutlineSuccess,
+                            type: Components.ButtonTypes.OutlinePrimary,
                             onClick: () => {
                                 // Set the flag
                                 validateFl = true;
@@ -2162,7 +2162,7 @@ export class AppForms {
         // Render the footer
         Modal.setFooter(Components.Button({
             text: "Send",
-            type: Components.ButtonTypes.OutlineSuccess,
+            type: Components.ButtonTypes.OutlinePrimary,
             onClick: () => {
                 // Ensure the form is valid
                 if (form.isValid()) {

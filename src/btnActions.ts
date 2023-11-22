@@ -846,7 +846,7 @@ ${ContextInfo.userDisplayName}`.trim()
                 iconSize: 20,
                 iconType: appIndicator,
                 isSmall: true,
-                type: Components.ButtonTypes.OutlinePrimary,
+                type: Components.ButtonTypes.OutlineSuccess,
                 onClick: () => {
                   // Display the upgrade form
                   this._forms.upgrade(DataSource.AppItem);
@@ -874,7 +874,7 @@ ${ContextInfo.userDisplayName}`.trim()
                   iconType: appIndicator,
                   isDisabled: !AppSecurity.IsSiteAppCatalogOwner,
                   isSmall: true,
-                  type: Components.ButtonTypes.OutlinePrimary,
+                  type: Components.ButtonTypes.OutlineSuccess,
                   onClick: () => {
                     // Show the update form
                     this._forms.updateTenantApp(
