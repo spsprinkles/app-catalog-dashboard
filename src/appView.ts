@@ -84,10 +84,9 @@ export class AppView {
         if (AppSecurity.AppWeb.IsAdmin || AppSecurity.AppWeb.IsOwner) {
             // Set the admin buttons
             navLinks.push({
-                className: "btn-outline-light ms-2 ps-2 pt-1",
+                className: "btn-icon btn-outline-light ms-2 p-2 py-1",
                 text: "Settings",
-                iconClassName: "me-1",
-                iconSize: 24,
+                iconSize: 22,
                 iconType: gearWideConnected,
                 isButton: true,
                 items: [
@@ -176,9 +175,8 @@ export class AppView {
         if (DataSource.HasAppCatalogRequests) {
             // Add the requests button
             navLinks.push({
-                className: "btn-outline-light ms-2 ps-2 pt-1",
-                iconClassName: "me-1",
-                iconSize: 24,
+                className: "btn-icon btn-outline-light ms-2 p-2 py-1",
+                iconSize: 22,
                 iconType: ticketDetailed,
                 isButton: true,
                 text: "My Requests",
@@ -193,8 +191,8 @@ export class AppView {
         if (AppConfig.Configuration.helpPageUrl) {
             // Add the item
             navLinks.push({
-                className: "btn-outline-light mx-2 ps-1 pt-1",
-                iconSize: 24,
+                className: "btn-icon btn-outline-light mx-2 p-1 pe-2 py-1",
+                iconSize: 22,
                 iconType: questionLg,
                 isButton: true,
                 text: "Help",
