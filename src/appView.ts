@@ -657,7 +657,18 @@ export class AppView {
                             });
                         }
                     }
-                ]
+                ],
+                onRendered: (el) => {
+                    // Update the form-select bg image to use a theme color
+                    let bgImg;
+                    let image;
+                    let root = document.querySelector(':root') as HTMLElement;
+                    let color = "%23" + root.style.getPropertyValue("--sp-info-icon").slice(1);
+                    let select = el.querySelector("div.dataTables_length select.form-select");
+                    select ? bgImg = getComputedStyle(select).backgroundImage : null;
+                    bgImg ? image = bgImg.slice(0, bgImg.length - 6).replaceAll("%23605e5c", color) : null;
+                    image ? select.setAttribute("style", "--bs-form-select-bg-img: " + image) : null;
+                }
             }
         });
     }
