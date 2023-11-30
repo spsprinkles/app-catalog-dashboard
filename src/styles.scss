@@ -19,7 +19,7 @@
     }
 }
 #app-docs nav.navbar {
-    background-color: var(--sp-neutral-lighter, #f3f2f1) !important;
+    background-color: color-mix(in srgb, var(--sp-black, #000000), transparent 95%) !important;
     border: 3px solid var(--sp-neutral-quaternary, #d2d0ce);
     border-radius: 0 0 0.25rem 0.25rem;
     border-top: 0;
