@@ -1,28 +1,21 @@
-.bs {
-    .alert {
-        border-color: var(--sp-neutral-quaternary, #d2d0ce);
-        border-top: 0;
-        border-width: 3px;
-    }
+#app-docs nav.navbar {
+    background-color: color-mix(in srgb, var(--sp-black, #000000), transparent 95%) !important;
+    border: 3px solid var(--sp-neutral-quaternary, #d2d0ce);
+    border-radius: 0 0 0.25rem 0.25rem;
+    border-top: 0;
+}
+#app-info .card, .bs .alert {
+    border-color: var(--sp-neutral-quaternary, #d2d0ce);
+    border-top: 0;
+    border-width: 3px;
 }
 #app-info {
-    .card {
-        border-color: var(--sp-neutral-quaternary, #d2d0ce);
-        border-top: 0;
-        border-width: 3px;
-    }
     .card-group>.card:not(:first-child) {
         border-top-right-radius: 0;
     }
     .card-group>.card:not(:last-child) {
         border-top-left-radius: 0;
     }
-}
-#app-docs nav.navbar {
-    background-color: color-mix(in srgb, var(--sp-black, #000000), transparent 95%) !important;
-    border: 3px solid var(--sp-neutral-quaternary, #d2d0ce);
-    border-radius: 0 0 0.25rem 0.25rem;
-    border-top: 0;
 }
 /* Remove the extra top padding on the content row */
 #contentRow {
