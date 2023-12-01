@@ -1,6 +1,5 @@
 import { Dashboard, LoadingDialog } from "dattatable";
 import { Components, ContextInfo, ThemeManager } from "gd-sprest-bs";
-import { chatSquareDots } from "gd-sprest-bs/build/icons/svgs/chatSquareDots";
 import { fileEarmarkArrowUp } from "gd-sprest-bs/build/icons/svgs/fileEarmarkArrowUp";
 import { filterSquare } from "gd-sprest-bs/build/icons/svgs/filterSquare";
 import { gearWideConnected } from "gd-sprest-bs/build/icons/svgs/gearWideConnected";
@@ -8,6 +7,7 @@ import { layoutTextWindow } from "gd-sprest-bs/build/icons/svgs/layoutTextWindow
 import { personBoundingBox } from "gd-sprest-bs/build/icons/svgs/personBoundingBox";
 import { questionLg } from "gd-sprest-bs/build/icons/svgs/questionLg";
 import { ticketDetailed } from "gd-sprest-bs/build/icons/svgs/ticketDetailed";
+import { window_ } from "gd-sprest-bs/build/icons/svgs/window_";
 import * as jQuery from "jquery";
 import { AppActions } from "./appActions";
 import { AppCatalogRequests } from "./appCatalogRequests";
@@ -632,7 +632,7 @@ export class AppView {
                                     className: "p-1",
                                     iconClassName: "me-1",
                                     iconSize: 20,
-                                    iconType: chatSquareDots,
+                                    iconType: window_,
                                     isSmall: true,
                                     type: Components.ButtonTypes.OutlineSecondary,
                                     onClick: () => {
