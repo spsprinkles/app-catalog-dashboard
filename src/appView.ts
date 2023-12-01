@@ -1,6 +1,5 @@
 import { Dashboard, LoadingDialog } from "dattatable";
-import { Components, ContextInfo } from "gd-sprest-bs";
-import { chatSquareDots } from "gd-sprest-bs/build/icons/svgs/chatSquareDots";
+import { Components, ContextInfo, ThemeManager } from "gd-sprest-bs";
 import { fileEarmarkArrowUp } from "gd-sprest-bs/build/icons/svgs/fileEarmarkArrowUp";
 import { filterSquare } from "gd-sprest-bs/build/icons/svgs/filterSquare";
 import { gearWideConnected } from "gd-sprest-bs/build/icons/svgs/gearWideConnected";
@@ -8,6 +7,7 @@ import { layoutTextWindow } from "gd-sprest-bs/build/icons/svgs/layoutTextWindow
 import { personBoundingBox } from "gd-sprest-bs/build/icons/svgs/personBoundingBox";
 import { questionLg } from "gd-sprest-bs/build/icons/svgs/questionLg";
 import { ticketDetailed } from "gd-sprest-bs/build/icons/svgs/ticketDetailed";
+import { window_ } from "gd-sprest-bs/build/icons/svgs/window_";
 import * as jQuery from "jquery";
 import { AppActions } from "./appActions";
 import { AppCatalogRequests } from "./appCatalogRequests";
@@ -76,18 +76,81 @@ export class AppView {
 
     // Renders the dashboard
     private render() {
+        let navLinks: Components.INavbarItem[] = [];
+
         // See if the app catalog is on the same site as the app
         let isSameWeb = AppConfig.Configuration.appCatalogUrl.toLowerCase() == Strings.SourceUrl.toLowerCase();
 
+        // See if the help url exists
+        if (AppConfig.Configuration.helpPageUrl) {
+            // Add the item
+            navLinks.push({
+                text: "Help",
+                onRender: (el, item) => {
+                    // Clear the existing button
+                    el.innerHTML = "";
+
+                    // Render a tooltip
+                    Components.Tooltip({
+                        el,
+                        content: "Get " + item.text,
+                        type: Components.TooltipTypes.LightBorder,
+                        btnProps: {
+                            // Render the icon button
+                            className: "btn-icon btn-outline-light me-2 p-1 pe-2 py-1",
+                            iconSize: 22,
+                            iconType: questionLg,
+                            text: item.text,
+                            type: Components.ButtonTypes.OutlineLight,
+                            onClick: () => {
+                                // Display in a new tab
+                                window.open(AppConfig.Configuration.helpPageUrl, "_blank");
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
+        // See if this is a developer/sponsor/owner
+        if (DataSource.HasAppCatalogRequests) {
+            // Add the requests button
+            navLinks.push({
+                text: "My Requests",
+                onRender: (el, item) => {
+                    // Clear the existing button
+                    el.innerHTML = "";
+
+                    // Render a tooltip
+                    Components.Tooltip({
+                        el,
+                        content: "View " + item.text,
+                        type: Components.TooltipTypes.LightBorder,
+                        btnProps: {
+                            // Render the icon button
+                            className: "btn-icon btn-outline-light me-2 p-2 py-1",
+                            iconClassName: "me-2",
+                            iconSize: 22,
+                            iconType: ticketDetailed,
+                            text: item.text,
+                            type: Components.ButtonTypes.OutlineLight,
+                            onClick: () => {
+                                // Display in app catalog requests
+                                AppCatalogRequests.viewAppCatalogRequests();
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
         // See if this is an owner
-        let navLinks: Components.INavbarItem[] = [];
         if (AppSecurity.AppWeb.IsAdmin || AppSecurity.AppWeb.IsOwner) {
             // Set the admin buttons
             navLinks.push({
-                className: "btn-outline-light ms-2 ps-2 pt-1",
+                className: "btn-icon btn-outline-light me-2 p-2 py-1",
                 text: "Settings",
-                iconClassName: "me-1",
-                iconSize: 24,
+                iconSize: 22,
                 iconType: gearWideConnected,
                 isButton: true,
                 items: [
@@ -138,71 +201,37 @@ export class AppView {
 
             if (!isSameWeb) {
                 // Add the links to manage remote groups
-                navLinks[0].items.push({
-                    text: "Remote Approver Group",
-                    onClick: () => {
-                        // Show the group in a new tab
-                        window.open(AppSecurity.AppCatalogWeb.getUrlForGroup(Strings.Groups.Approvers), "_blank");
+                navLinks[navLinks.length - 1].items.push(
+                    {
+                        text: "Remote Approver Group",
+                        onClick: () => {
+                            // Show the group in a new tab
+                            window.open(AppSecurity.AppCatalogWeb.getUrlForGroup(Strings.Groups.Approvers), "_blank");
+                        }
+                    },
+                    {
+                        text: "Remote Developer Group",
+                        onClick: () => {
+                            // Show the group in a new tab
+                            window.open(AppSecurity.AppCatalogWeb.getUrlForGroup(Strings.Groups.Developers), "_blank");
+                        }
+                    },
+                    {
+                        text: "Remote Final Approver Group",
+                        onClick: () => {
+                            // Show the group in a new tab
+                            window.open(AppSecurity.AppCatalogWeb.getUrlForGroup(Strings.Groups.FinalApprovers), "_blank");
+                        }
+                    },
+                    {
+                        text: "Remote Sponsor Group",
+                        onClick: () => {
+                            // Show the group in a new tab
+                            window.open(AppSecurity.AppCatalogWeb.getUrlForGroup(Strings.Groups.Sponsors), "_blank");
+                        }
                     }
-                });
-
-                navLinks[0].items.push({
-                    text: "Remote Developer Group",
-                    onClick: () => {
-                        // Show the group in a new tab
-                        window.open(AppSecurity.AppCatalogWeb.getUrlForGroup(Strings.Groups.Developers), "_blank");
-                    }
-                });
-
-                navLinks[0].items.push({
-                    text: "Remote Final Approver Group",
-                    onClick: () => {
-                        // Show the group in a new tab
-                        window.open(AppSecurity.AppCatalogWeb.getUrlForGroup(Strings.Groups.FinalApprovers), "_blank");
-                    }
-                });
-
-                navLinks[0].items.push({
-                    text: "Remote Sponsor Group",
-                    onClick: () => {
-                        // Show the group in a new tab
-                        window.open(AppSecurity.AppCatalogWeb.getUrlForGroup(Strings.Groups.Sponsors), "_blank");
-                    }
-                });
+                );
             }
-        }
-
-        // See if this is a developer/sponsor/owner
-        if (DataSource.HasAppCatalogRequests) {
-            // Add the requests button
-            navLinks.push({
-                className: "btn-outline-light ms-2 ps-2 pt-1",
-                iconClassName: "me-1",
-                iconSize: 24,
-                iconType: ticketDetailed,
-                isButton: true,
-                text: "My Requests",
-                onClick: () => {
-                    // Display in app catalog requests
-                    AppCatalogRequests.viewAppCatalogRequests();
-                }
-            });
-        }
-
-        // See if the help url exists
-        if (AppConfig.Configuration.helpPageUrl) {
-            // Add the item
-            navLinks.push({
-                className: "btn-outline-light mx-2 ps-1 pt-1",
-                iconSize: 24,
-                iconType: questionLg,
-                isButton: true,
-                text: "Help",
-                onClick: () => {
-                    // Display in a new tab
-                    window.open(AppConfig.Configuration.helpPageUrl, "_blank");
-                }
-            });
         }
 
         // Create the dashboard
@@ -244,7 +273,8 @@ export class AppView {
                 // Add the branding icon & text
                 onRendering: (props) => {
                     // Set the class names
-                    props.className = "bg-sharepoint navbar-expand rounded-top";
+                    props.className = "navbar-expand rounded-top";
+                    props.type = Components.NavbarTypes.Primary
 
                     // Set the brand
                     let brand = document.createElement("div");
@@ -408,10 +438,14 @@ export class AppView {
             footer: {
                 itemsEnd: [
                     {
-                        className: "pe-none text-dark",
+                        className: "p-0 pe-none text-body",
                         text: "v" + Strings.Version,
-                    },
-                ],
+                        onRender: (el) => {
+                            // Hide version footer in a modern page
+                            Strings.IsClassic ? null : el.classList.add("d-none");
+                        }
+                    }
+                ]
             },
             table: {
                 rows: DataSource.DocSetList.Items,
@@ -465,13 +499,14 @@ export class AppView {
                             if (item.AppThumbnailURLBase64) {
                                 let elImg = document.createElement("img");
                                 elImg.classList.add("icon");
+                                ThemeManager.IsInverted ? elImg.classList.add("invert") : null;
                                 elImg.src = item.AppThumbnailURLBase64;
                                 el.appendChild(elImg);
                             }
                             // Ensure a url exists
                             else if (item.AppThumbnailURL && item.AppThumbnailURL.Url) {
                                 // Render the link
-                                el.innerHTML = '<img src="' + item.AppThumbnailURL.Url + '" height="32px" width="32px" title="' + item.Title + '">';
+                                el.innerHTML = `<img ${ThemeManager.IsInverted ? "class=\"invert\"" : ""} src="${item.AppThumbnailURL.Url}" height="32px" width="32px" title="${item.Title}">`;
                             }
                         }
                     },
@@ -565,7 +600,7 @@ export class AppView {
                     },
                     {
                         name: "",
-                        title: "Actions",
+                        title: "",
                         className: "text-end",
                         onRenderCell: (el, column, item: IAppItem) => {
                             let tooltips: Components.ITooltipProps[] = [];
@@ -597,7 +632,7 @@ export class AppView {
                                     className: "p-1",
                                     iconClassName: "me-1",
                                     iconSize: 20,
-                                    iconType: chatSquareDots,
+                                    iconType: window_,
                                     isSmall: true,
                                     type: Components.ButtonTypes.OutlineSecondary,
                                     onClick: () => {
@@ -614,7 +649,18 @@ export class AppView {
                             });
                         }
                     }
-                ]
+                ],
+                onRendered: (el) => {
+                    // Update the form-select bg image to use a theme color
+                    let bgImg;
+                    let image;
+                    let root = document.querySelector(':root') as HTMLElement;
+                    let color = "%23" + root.style.getPropertyValue("--sp-info-icon").slice(1);
+                    let select = el.querySelector("div.dataTables_length select.form-select");
+                    select ? bgImg = getComputedStyle(select).backgroundImage : null;
+                    bgImg ? image = bgImg.slice(0, bgImg.length - 6).replaceAll("%23605e5c", color) : null;
+                    image ? select.setAttribute("style", "--bs-form-select-bg-img: " + image) : null;
+                }
             }
         });
     }

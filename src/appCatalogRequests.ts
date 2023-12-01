@@ -98,8 +98,9 @@ export class AppCatalogRequests {
 
         // Render the footer
         Modal.setFooter(Components.Button({
+            isSmall: true,
             text: "Close",
-            type: Components.ButtonTypes.OutlineSuccess,
+            type: Components.ButtonTypes.OutlineSecondary,
             onClick: () => {
                 // Close the modal
                 Modal.hide();

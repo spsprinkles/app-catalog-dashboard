@@ -207,8 +207,9 @@ export class AppForms {
             tooltips.push({
                 content: "Copies the images for this application",
                 btnProps: {
+                    isSmall: true,
                     text: "Copy Images",
-                    type: Components.ButtonTypes.OutlineSecondary,
+                    type: Components.ButtonTypes.OutlinePrimary,
                     onClick: () => {
                         // Show a loading dialog
                         LoadingDialog.setHeader("Copy Images");
@@ -233,8 +234,9 @@ export class AppForms {
             tooltips.push({
                 content: "Copies the CDN test files. This is for apps that are in testing.",
                 btnProps: {
+                    isSmall: true,
                     text: "Copy Test",
-                    type: Components.ButtonTypes.OutlineSecondary,
+                    type: Components.ButtonTypes.OutlinePrimary,
                     onClick: () => {
                         // Show a loading dialog
                         LoadingDialog.setHeader("Copy Test Assets");
@@ -259,8 +261,9 @@ export class AppForms {
             tooltips.push({
                 content: "Copies the CDN production files. This is for apps that have been approved for production.",
                 btnProps: {
+                    isSmall: true,
                     text: "Copy Prod",
-                    type: Components.ButtonTypes.OutlineSecondary,
+                    type: Components.ButtonTypes.OutlinePrimary,
                     onClick: () => {
                         // Show a loading dialog
                         LoadingDialog.setHeader("Copy Prod Assets");
@@ -282,10 +285,11 @@ export class AppForms {
 
         // Add the close button
         tooltips.push({
-            content: "Closes the modal.",
+            content: "Close the modal",
             btnProps: {
+                isSmall: true,
                 text: "Cancel",
-                type: Components.ButtonTypes.OutlineDanger,
+                type: Components.ButtonTypes.OutlineSecondary,
                 onClick: () => {
                     // Close the modal
                     Modal.hide();
@@ -314,7 +318,7 @@ export class AppForms {
         // Render the footer
         Modal.setFooter(Components.Button({
             text: "Create Site",
-            type: Components.ButtonTypes.OutlineSuccess,
+            type: Components.ButtonTypes.OutlinePrimary,
             isDisabled: errorMessage ? true : false,
             onClick: () => {
                 // Close the modal
@@ -760,7 +764,7 @@ export class AppForms {
                         assignTo: btn => { btnRequest = btn; },
                         isDisabled: true,
                         text: "Request",
-                        type: Components.ButtonTypes.OutlineInfo,
+                        type: Components.ButtonTypes.OutlinePrimary,
                         onClick: () => {
                             // Display the request form
                             this.requestAppCatalog(webUrl);
@@ -850,10 +854,18 @@ export class AppForms {
                 // Update the field
                 props.onControlRendering = (ctrl, field) => {
                     // See if this is a url field
-                    if (field.InternalName.indexOf("URL") > 0) {
+                    if (field && field.InternalName.indexOf("URL") > 0) {
                         // Hide the description field
                         (ctrl as Components.IFormControlUrlProps).showDescription = false;
                     }
+                }
+
+                props.onFormRendered = (form) => {
+                    // Add spacing between the tab control and the form
+                    form.el ? form.el.classList.add("mt-3") : null;
+
+                    // Hide the modal footer
+                    Modal.FooterElement.classList.add("d-none");
                 }
 
                 // Return the properties
@@ -1180,6 +1192,11 @@ export class AppForms {
                     }
                 }
 
+                // Add spacing between the tab control and the form
+                props.onFormRendered = (form) => {
+                    form.el ? form.el.classList.add("mt-3") : null;
+                }
+
                 // Return the properties
                 return props;
             },
@@ -1249,7 +1266,7 @@ export class AppForms {
                         content: "Validates the form.",
                         btnProps: {
                             text: "Validate",
-                            type: Components.ButtonTypes.OutlineSuccess,
+                            type: Components.ButtonTypes.OutlinePrimary,
                             onClick: () => {
                                 // Set the flag
                                 validateFl = true;
@@ -1381,7 +1398,7 @@ export class AppForms {
                         content: "Validates the form.",
                         btnProps: {
                             text: "Validate",
-                            type: Components.ButtonTypes.OutlineSuccess,
+                            type: Components.ButtonTypes.OutlinePrimary,
                             onClick: () => {
                                 // Set the flag
                                 validateFl = true;
@@ -2145,7 +2162,7 @@ export class AppForms {
         // Render the footer
         Modal.setFooter(Components.Button({
             text: "Send",
-            type: Components.ButtonTypes.OutlineSuccess,
+            type: Components.ButtonTypes.OutlinePrimary,
             onClick: () => {
                 // Ensure the form is valid
                 if (form.isValid()) {

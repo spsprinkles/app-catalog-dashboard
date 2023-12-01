@@ -1,25 +1,20 @@
-/* Fix button text size */
-.bs .btn-icon {
-    font-size: 0.875rem;
+#app-docs nav.navbar {
+    background-color: color-mix(in srgb, var(--sp-black, #000000), transparent 95%) !important;
+    border: 3px solid var(--sp-neutral-quaternary, #d2d0ce);
+    border-radius: 0 0 0.25rem 0.25rem;
+    border-top: 0;
+}
+#app-info .card, .bs .alert {
+    border-color: var(--sp-neutral-quaternary, #d2d0ce);
+    border-top: 0;
+    border-width: 3px;
 }
 #app-info {
-    .card {
-        border-top: 0;
-        border-width: 3px;
-    }
     .card-group>.card:not(:first-child) {
         border-top-right-radius: 0;
     }
     .card-group>.card:not(:last-child) {
         border-top-left-radius: 0;
-    }
-}
-#app-docs, #sub-navigation {
-    nav.navbar {
-        background-color: rgba(0, 0, 0, 0.05) !important;
-        border: 3px solid #dee2e6;
-        border-radius: 0 0 0.25rem 0.25rem;
-        border-top: 0;
     }
 }
 /* Remove the extra top padding on the content row */
@@ -38,6 +33,11 @@
         margin: 10px 0 0 0;
     }
 }
+/* Icon size */
+#datatable table tbody img.icon {
+    max-height: 32px;
+    max-width: 32px;
+}
 /* Extend the WebPart full width in a modern page */
 #spPageCanvasContent div.CanvasZone > div:first-child {
     max-width: none;
@@ -50,15 +50,10 @@
 div.webPartContainer {
     display: none;
 }
-
-/* Icon size */
-#datatable {
-    table {
-        tbody {
-            img.icon {
-                max-height: 32px;
-                max-width: 32px;
-            }
-        }
+/* Apply changes to the Settings Panel */
+div.spPropertyPaneContainer div[aria-label='App Catalog Managment Tool property pane'] div[data-automation-id='propertyPaneGroupContent'] {
+    /* Align version to the right */
+    >div:last-child label {
+        text-align: right;
     }
 }

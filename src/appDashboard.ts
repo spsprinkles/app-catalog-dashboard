@@ -1,5 +1,5 @@
 import { Documents, LoadingDialog } from "dattatable";
-import { Components, Types } from "gd-sprest-bs";
+import { Components, ThemeManager, Types } from "gd-sprest-bs";
 import { caretRightFill } from "gd-sprest-bs/build/icons/svgs/caretRightFill";
 import { folderSymlink } from "gd-sprest-bs/build/icons/svgs/folderSymlink";
 import { layoutTextWindow } from "gd-sprest-bs/build/icons/svgs/layoutTextWindow";
@@ -504,13 +504,15 @@ export class AppDashboard {
         });
 
         // Update the breadcrumb divider to use a bootstrap icon
-        crumb.el.setAttribute("style", "--bs-breadcrumb-divider: " + Common.generateEmbeddedSVG(caretRightFill(18, 18)).replace("currentColor", "%23fff"));
+        let root = document.querySelector(':root') as HTMLElement;
+        let color = "%23" + root.style.getPropertyValue("--sp-primary-button-text").slice(1);
+        crumb.el.setAttribute("style", "--bs-breadcrumb-divider: " + Common.generateEmbeddedSVG(caretRightFill(18, 18)).replace("currentColor", color));
 
         // Render the navigation
         let nav = Components.Navbar({
             el: this._el.querySelector("#app-nav"),
             brand: crumb.el,
-            className: "navbar-expand bg-sharepoint rounded-top",
+            className: "navbar-expand rounded-top",
             type: Components.NavbarTypes.Primary,
             itemsEnd
         });
