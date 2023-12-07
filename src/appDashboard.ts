@@ -32,8 +32,8 @@ export class AppDashboard {
         this._el.classList.add("bs");
         this._el.innerHTML = `
             <div id="app-dashboard" class="row">
-                <div id="app-status-info" class="col-12"></div>
                 <div id="app-nav" class="col-12"></div>
+                <div id="app-status-info" class="col-12"></div>
                 <div id="app-error" class="col-12"></div>
                 <div id="app-info" class="col-12"></div>
                 <div id="app-docs" class="col-12 d-none"></div>
