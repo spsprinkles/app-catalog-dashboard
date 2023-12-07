@@ -26,7 +26,7 @@
     "datatables.net": "^1.13.6",
     "datatables.net-bs5": "^1.13.6",
     "dattatable": "^2.9.30",
-    "gd-sprest-bs": "^10.10.89",
+    "gd-sprest-bs": "^10.10.91",
     "jquery": "^3.7.1",
     "jszip": "^3.10.1",
     "moment": "^2.29.4"
