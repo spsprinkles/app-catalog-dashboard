@@ -880,8 +880,11 @@ ${ContextInfo.userDisplayName}`.trim()
                     this._forms.updateTenantApp(
                       DataSource.AppItem,
                       () => {
-                        // Call the update event
-                        this._onUpdate();
+                        // Refresh this item
+                        DataSource.refreshTenantApp(DataSource.AppItem.AppProductID).then(() => {
+                          // Call the update event
+                          this._onUpdate();
+                        });
                       }
                     );
                   },

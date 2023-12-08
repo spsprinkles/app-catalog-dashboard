@@ -2373,6 +2373,7 @@ export class AppForms {
             el: Modal.BodyElement,
             controls: [{
                 name: "SkipFeatureDeployment",
+                label: "Skip Feature Deployment",
                 title: "Skip Feature Deployment",
                 type: Components.FormControlTypes.Switch,
                 value: DataSource.AppCatalogTenantItem ? DataSource.AppCatalogTenantItem.SkipDeploymentFeature : false
