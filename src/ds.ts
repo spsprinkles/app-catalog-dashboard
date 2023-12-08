@@ -644,6 +644,7 @@ export class DataSource {
                     for (let i = 0; i < appItems.results.length; i++) {
                         let app = appItems.results[i];
 
+                        // Save a reference to this app item
                         this._tenantAppItems[app.ProductId] = app;
                     }
 
@@ -657,15 +658,29 @@ export class DataSource {
             );
         });
     }
+    static refreshTenantApp(appId: string): PromiseLike<void> {
+        // Return a new promise
+        return new Promise(resolve => {
+            // Load the app
+            Web().TenantAppCatalog().AvailableApps(appId).execute(appItem => {
+                // Update the tenant app item
+                this._tenantAppItems[appItem.ProductId] = appItem;
+
+                // Resolve the request
+                resolve();
+            }, () => {
+                // Resolve the request
+                resolve();
+            })
+        });
+    }
 
     // Loads the app test site
     static loadTestSite(item: IAppItem): PromiseLike<Types.SP.Web> {
         // Return a promise
         return new Promise((resolve, reject) => {
             // Get the url to the test site
-            let url = [AppConfig.Configuration.appCatalogUrl, item.AppProductID].join(
-                "/"
-            );
+            let url = [AppConfig.Configuration.appCatalogUrl, item.AppProductID].join("/");
 
             // Get the web
             Web(url).execute(
