@@ -86,7 +86,7 @@ export class AppSecurity {
                             // Ensure the user exists in the other web
                             Web(AppConfig.Configuration.appCatalogUrl, { requestDigest: context.GetContextWebInformation.FormDigestValue }).ensureUser(user.LoginName).execute(user => {
                                 // Add the sponsor to the group
-                                AppSecurity.AppCatalogWeb.addUserToGroup(Strings.Groups.Sponsors, user.Id).then(resolve);
+                                AppSecurity.AppCatalogWeb.addUserToGroup(Strings.Groups.Sponsors, user.Id).then(resolve, resolve);
                             }, resolve);
                         }, resolve);
                     }, resolve)
