@@ -18,7 +18,6 @@ export class AppActions {
     // Archives the current package file
     static archivePackage(onComplete: () => void) {
         let appFile: Types.SP.File = null;
-        let appTestFile: Types.SP.File = null;
 
         // Show a loading dialog
         LoadingDialog.setHeader("Archiving the Package");
@@ -38,18 +37,11 @@ export class AppActions {
                 // See if this is a prod file and skip it
                 if (fileName.indexOf("-prod.sppkg") > 0) { continue; }
                 // Else, see if this is a test file
-                else if (fileName.indexOf("-test.sppkg") > 0) {
-                    // Set the file
-                    appTestFile = file;
-                } else {
-                    // Set the file
-                    appFile = file;
-                }
+                else if (fileName.indexOf("-test.sppkg") > 0) { continue; }
+                // Else set the file
+                else { appFile = file; }
             }
         }
-
-        // Set the target app file
-        appFile = appTestFile ? appTestFile : appFile;
 
         // Ensure a file exists
         if (appFile == null) {
@@ -58,6 +50,9 @@ export class AppActions {
 
             // This shouldn't happen
             LoadingDialog.hide();
+
+            // Call the event to continue
+            onComplete();
             return;
         }
 
