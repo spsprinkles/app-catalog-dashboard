@@ -611,7 +611,7 @@ export class AppActions {
                                                 // Upload the client side assets
                                                 this.uploadClientSideAssets(pkgType).then(() => {
                                                     // Upload the app images
-                                                    this.uploadImages().then(() => {
+                                                    this.uploadImages(pkgType).then(() => {
                                                         // Get the app catalog
                                                         let web = Web(catalogUrl, { requestDigest });
                                                         let appCatalog = (tenantFl ? web.TenantAppCatalog() : web.SiteCollectionAppCatalog());
@@ -2225,7 +2225,7 @@ export class AppActions {
     }
 
     // Uploads the app images
-    static uploadImages(): PromiseLike<void> {
+    static uploadImages(pkgType: string): PromiseLike<void> {
         // Get the app images
         let getImages = (): PromiseLike<{ file: Types.SP.File, content: any }[]> => {
             let files: { file: Types.SP.File, content: any }[] = [];
@@ -2284,6 +2284,13 @@ export class AppActions {
 
         // Return a promise
         return new Promise((resolve) => {
+            // See if this is the test site
+            if (pkgType == "test") {
+                // Do nothing
+                resolve();
+                return;
+            }
+
             // Ensure the url exists
             if (AppConfig.Configuration.cdnImage) {
                 // Show a loading dialog
