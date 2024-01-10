@@ -167,7 +167,7 @@ export class AppForms {
                                         // Upload the client side assets
                                         AppActions.uploadClientSideAssets("prod").then(() => {
                                             // Upload the app images
-                                            AppActions.uploadImages().then(() => {
+                                            AppActions.uploadImages("prod").then(() => {
                                                 // Send the notification
                                                 sendNotification();
                                             });
@@ -217,7 +217,7 @@ export class AppForms {
                         LoadingDialog.show();
 
                         // Copy the files
-                        AppActions.uploadImages().then(() => {
+                        AppActions.uploadImages("prod").then(() => {
                             // Close the loading dialog
                             LoadingDialog.hide();
 
@@ -2293,7 +2293,7 @@ export class AppForms {
                                             let nextStep = AppConfig.Status[status.nextStep];
                                             if (nextStep && nextStep.lastStep) {
                                                 // Upload the images
-                                                AppActions.uploadImages().then(() => {
+                                                AppActions.uploadImages("prod").then(() => {
                                                     // Call the update event
                                                     onUpdate();
 
