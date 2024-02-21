@@ -866,7 +866,7 @@ ${ContextInfo.userDisplayName}`.trim()
               // Render the update button
               tooltips.add({
                 content:
-                  "Versions do not match. Click to update the test site.",
+                  "Versions do not match. Click to update the tenant.",
                 btnProps: {
                   text: "Update Tenant",
                   iconClassName: "me-1",
