@@ -3,7 +3,7 @@
   "solution": {
     "name": "App Catalog Dashboard",
     "id": "fedf9867-a1dc-4204-8a07-f4c2cf162359",
-    "version": "0.0.7.4",
+    "version": "0.7.5.0",
     "includeClientSideAssets": true,
     "isDomainIsolated": false,
     "skipFeatureDeployment": true,
