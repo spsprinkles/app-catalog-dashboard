@@ -1,5 +1,5 @@
 import { AuditLog, IAuditLogItemCreation, List } from "dattatable";
-import { Components, ContextInfo, Helper, Types, Web } from "gd-sprest-bs";
+import { Components, ContextInfo, Graph, Helper, Types, Web } from "gd-sprest-bs";
 import { AppConfig } from "./appCfg";
 import { AppSecurity } from "./appSecurity";
 import { ErrorDialog } from "./errorDialog";
@@ -401,6 +401,40 @@ export class DataSource {
         return itemId;
     }
 
+
+    // License Status
+    private static _hasLicense: boolean = false;
+    static HasLicense(): boolean { return this._hasLicense; }
+    private static initLicense(): PromiseLike<any> {
+        // Return a promise
+        return new Promise((resolve) => {
+            // Get the graph token
+            Graph.getAccessToken(AppConfig.Configuration.cloudEnv).execute(token => {
+                // Get the current user licenses
+                Graph({
+                    accessToken: token.access_token,
+                    cloud: AppConfig.Configuration.cloudEnv,
+                    url: "me?$select=displayName,email,id,assignedPlans"
+                }).execute(user => {
+                    // Parse the plans
+                    let assignedPlans: any[] = user["assignedPlans"];
+                    for (let i = 0; i < assignedPlans.length; i++) {
+                        // See if they have a power apps license assigned
+                        let plan = assignedPlans[i];
+                        if (plan.service.indexOf("Power") >= 0 && plan.capabilityStatus == "Enabled") {
+                            // Set the flag
+                            this._hasLicense = true;
+                            break;
+                        }
+                    }
+
+                    // Resolve the request
+                    resolve(null);
+                }, resolve);
+            }, resolve);
+        });
+    }
+
     // Initializes the application
     static init(appConfiguration?: string): PromiseLike<void> {
         // Return a promise
@@ -424,6 +458,8 @@ export class DataSource {
                             this.initAppCatalogRequests(),
                             // Initialize the document set list
                             this.initDocSetList(),
+                            // Load the user's license
+                            this.initLicense(),
                             // Load the status filters
                             this.initStatusFilters(),
                             // Loads the tenant app catalog items
