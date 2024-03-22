@@ -21,6 +21,9 @@ export const setContext = (context, envType?: number, sourceUrl?: string) => {
     // Update the properties
     Strings.IsClassic = envType == SPTypes.EnvironmentType.ClassicSharePoint;
 
+    // Set the flow3 flag
+    Strings.IsFlow3 = ContextInfo.blockDownloadsExperienceEnabled;
+
     // Set the teams flag
     Strings.IsTeams = SPFxContext.sdks.microsoftTeams ? true : false;
 
@@ -31,7 +34,7 @@ export const setContext = (context, envType?: number, sourceUrl?: string) => {
 
     // Update the values
     Strings.DashboardUrl = PagesUrl + "Dashboard.aspx";
-    Strings.SolutionUrl = AssetsUrl + "index.html"; 
+    Strings.SolutionUrl = AssetsUrl + "index.html";
 }
 
 // Strings
@@ -47,6 +50,7 @@ const Strings = {
         Sponsors: "App Sponsors"
     },
     IsClassic: true,
+    IsFlow3: ContextInfo.blockDownloadsExperienceEnabled ? true : false,
     IsTeams: false,
     Lists: {
         AppCatalog: "Apps for SharePoint",
