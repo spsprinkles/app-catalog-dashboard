@@ -5,16 +5,35 @@
     "id": "fedf9867-a1dc-4204-8a07-f4c2cf162359",
     "version": "0.7.5.0",
     "includeClientSideAssets": true,
-    "isDomainIsolated": false,
     "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
     "iconPath": "images/AppIcon.png",
     "developer": {
-      "name": "",
-      "websiteUrl": "",
+      "name": "Dade Register & Gunjan Datta",
+      "websiteUrl": "https://github.com/spsprinkles/app-catalog-dashboard",
       "privacyUrl": "",
       "termsOfUseUrl": "",
-      "mpnId": ""
-    }
+      "mpnId": "Undefined-1.18.2"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "A tool to manage SPFx app packages to be approved and deployed to site collection and/or tenant app catalogs."
+      },
+      "longDescription": {
+        "default": "A tool to manage SPFx app packages to be approved and deployed to site collection and/or tenant app catalogs."
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "app-catalog-mgr Feature",
+        "description": "The feature that activates elements of the app-catalog-mgr solution.",
+        "id": "0e7fa402-e4ee-439a-9f85-64e2ad0b51b7",
+        "version": "1.0.0.0"
+      }
+    ]
   },
   "paths": {
     "zippedPackage": "../../dist/app-catalog-mgr.sppkg"
