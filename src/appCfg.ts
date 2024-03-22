@@ -1,4 +1,4 @@
-import { Types, Web } from "gd-sprest-bs";
+import { SPTypes, Types, Web } from "gd-sprest-bs";
 import * as Common from "./common";
 import { ErrorDialog } from "./errorDialog";
 import Strings from "./strings";
@@ -13,6 +13,7 @@ export interface IConfiguration {
     cdnImage?: string;
     cdnProd?: string;
     cdnTest?: string;
+    cloudEnv?: string;
     dashboardUrl?: string;
     dateFormat?: string;
     errorEmails?: string[];
@@ -152,6 +153,7 @@ export class AppConfig {
                     this._cfg.tenantAppCatalogUrl = this.Configuration.tenantAppCatalogUrl ? Common.updateUrl(this._cfg.tenantAppCatalogUrl) : this._cfg.tenantAppCatalogUrl;
 
                     // Default the values
+                    this._cfg.cloudEnv = this._cfg.cloudEnv || SPTypes.CloudEnvironment.Default;
                     this._cfg.dateFormat = this._cfg.dateFormat || "YYYY-MM-DD HH:mm:ss";
 
                     // Ensure the configuration is valid

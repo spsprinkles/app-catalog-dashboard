@@ -168,23 +168,68 @@ export class ButtonActions {
       switch (btnActions[i]) {
         // Approve/Reject
         case "ApproveReject":
-          // See if the app is rejected
-          if (DataSource.AppItem.AppIsRejected) {
-            // See if this is an approver or developer
-            if (this.isApprover() || this.isDeveloper()) {
-              // Render the resubmit button
+          // Ensure it's not over flow3
+          if (!Strings.IsFlow3) {
+            // See if the app is rejected
+            if (DataSource.AppItem.AppIsRejected) {
+              // See if this is an approver or developer
+              if (this.isApprover() || this.isDeveloper()) {
+                // Render the resubmit button
+                tooltips.add({
+                  content: "Resubmits the app for approval.",
+                  btnProps: {
+                    text: "Resubmit",
+                    iconClassName: "me-1",
+                    iconSize: 20,
+                    iconType: arrowClockwise,
+                    isSmall: true,
+                    type: Components.ButtonTypes.OutlinePrimary,
+                    onClick: () => {
+                      // Display the approval form
+                      this._forms.submit(DataSource.AppItem, () => {
+                        // Call the update event
+                        this._onUpdate();
+                      });
+                    },
+                  },
+                });
+              }
+            }
+            // Else, ensure this user can approve this item
+            else if (this.isApprover()) {
+              // Render the approval button
               tooltips.add({
-                content: "Resubmits the app for approval.",
+                content: "Approves the application.",
                 btnProps: {
-                  text: "Resubmit",
+                  text: "Approve",
                   iconClassName: "me-1",
                   iconSize: 20,
-                  iconType: arrowClockwise,
+                  iconType: handThumbsUp,
                   isSmall: true,
-                  type: Components.ButtonTypes.OutlinePrimary,
+                  type: Components.ButtonTypes.OutlineSuccess,
                   onClick: () => {
                     // Display the approval form
-                    this._forms.submit(DataSource.AppItem, () => {
+                    this._forms.approve(DataSource.AppItem, () => {
+                      // Call the update event
+                      this._onUpdate();
+                    });
+                  },
+                },
+              });
+
+              // Render the reject button
+              tooltips.add({
+                content: "Sends the request back to the developer(s).",
+                btnProps: {
+                  text: "Reject",
+                  iconClassName: "me-1",
+                  iconSize: 20,
+                  iconType: handThumbsDown,
+                  isSmall: true,
+                  type: Components.ButtonTypes.OutlineDanger,
+                  onClick: () => {
+                    // Display the reject form
+                    this._forms.reject(DataSource.AppItem, () => {
                       // Call the update event
                       this._onUpdate();
                     });
@@ -192,48 +237,6 @@ export class ButtonActions {
                 },
               });
             }
-          }
-          // Else, ensure this user can approve this item
-          else if (this.isApprover()) {
-            // Render the approval button
-            tooltips.add({
-              content: "Approves the application.",
-              btnProps: {
-                text: "Approve",
-                iconClassName: "me-1",
-                iconSize: 20,
-                iconType: handThumbsUp,
-                isSmall: true,
-                type: Components.ButtonTypes.OutlineSuccess,
-                onClick: () => {
-                  // Display the approval form
-                  this._forms.approve(DataSource.AppItem, () => {
-                    // Call the update event
-                    this._onUpdate();
-                  });
-                },
-              },
-            });
-
-            // Render the reject button
-            tooltips.add({
-              content: "Sends the request back to the developer(s).",
-              btnProps: {
-                text: "Reject",
-                iconClassName: "me-1",
-                iconSize: 20,
-                iconType: handThumbsDown,
-                isSmall: true,
-                type: Components.ButtonTypes.OutlineDanger,
-                onClick: () => {
-                  // Display the reject form
-                  this._forms.reject(DataSource.AppItem, () => {
-                    // Call the update event
-                    this._onUpdate();
-                  });
-                },
-              },
-            });
           }
           break;
 
@@ -272,24 +275,27 @@ export class ButtonActions {
 
         // CDN
         case "CDN":
-          // Ensure this is the admin or owner
-          if (AppSecurity.AppWeb.IsAdmin || AppSecurity.AppWeb.IsOwner) {
-            // Render the cdn buttonn
-            tooltips.add({
-              content: "Allows you to manually copy the CDN assets/images for an application.",
-              btnProps: {
-                text: "CDN",
-                iconClassName: "me-1",
-                iconSize: 20,
-                iconType: copy,
-                isSmall: true,
-                type: Components.ButtonTypes.OutlineSecondary,
-                onClick: () => {
-                  // Display the cdn form
-                  this._forms.cdn(DataSource.AppItem);
+          // Ensure it's not over flow3
+          if (!Strings.IsFlow3) {
+            // Ensure this is the admin or owner
+            if (AppSecurity.AppWeb.IsAdmin || AppSecurity.AppWeb.IsOwner) {
+              // Render the cdn buttonn
+              tooltips.add({
+                content: "Allows you to manually copy the CDN assets/images for an application.",
+                btnProps: {
+                  text: "CDN",
+                  iconClassName: "me-1",
+                  iconSize: 20,
+                  iconType: copy,
+                  isSmall: true,
+                  type: Components.ButtonTypes.OutlineSecondary,
+                  onClick: () => {
+                    // Display the cdn form
+                    this._forms.cdn(DataSource.AppItem);
+                  }
                 }
-              }
-            });
+              });
+            }
           }
           break;
 
@@ -373,153 +379,159 @@ export class ButtonActions {
 
         // Deploy Site Catalog
         case "DeploySiteCatalog":
-          // Render the retract button
-          tooltips.add({
-            content:
-              "Deploys the application to a site collection app catalog.",
-            btnProps: {
-              text: "Deploy to Site Collection",
-              iconClassName: "me-1",
-              iconSize: 20,
-              iconType: boxArrowDownRight,
-              isSmall: true,
-              type: Components.ButtonTypes.OutlineSuccess,
-              onClick: () => {
-                // Display the delete site form
-                this._forms.deployToSite(DataSource.AppItem, () => {
-                  // Call the update event
-                  this._onUpdate();
-                });
+          // Ensure it's not over flow3
+          if (!Strings.IsFlow3) {
+            // Render the retract button
+            tooltips.add({
+              content:
+                "Deploys the application to a site collection app catalog.",
+              btnProps: {
+                text: "Deploy to Site Collection",
+                iconClassName: "me-1",
+                iconSize: 20,
+                iconType: boxArrowDownRight,
+                isSmall: true,
+                type: Components.ButtonTypes.OutlineSuccess,
+                onClick: () => {
+                  // Display the delete site form
+                  this._forms.deployToSite(DataSource.AppItem, () => {
+                    // Call the update event
+                    this._onUpdate();
+                  });
+                },
               },
-            },
-          });
+            });
+          }
           break;
 
         // Deploy Tenant Catalog
         case "DeployTenantCatalog":
-          // Ensure this is a tenant app catalog owner
-          if (AppSecurity.IsTenantAppCatalogOwner) {
-            let showDeploy = false;
-            let showRemove = false;
-            let showRetract = false;
+          // Ensure it's not over flow3
+          if (!Strings.IsFlow3) {
+            // Ensure this is a tenant app catalog owner
+            if (AppSecurity.IsTenantAppCatalogOwner) {
+              let showDeploy = false;
+              let showRemove = false;
+              let showRetract = false;
 
-            // See if the app is deployed
-            if (DataSource.AppCatalogTenantItem) {
-              // See if it's deployed
-              if (DataSource.AppCatalogTenantItem.Deployed) {
-                // Set the flags
-                showRemove = true;
-                showRetract = true;
+              // See if the app is deployed
+              if (DataSource.AppCatalogTenantItem) {
+                // See if it's deployed
+                if (DataSource.AppCatalogTenantItem.Deployed) {
+                  // Set the flags
+                  showRemove = true;
+                  showRetract = true;
 
-                // Load the context of the app catalog
-                ContextInfo.getWeb(AppConfig.Configuration.tenantAppCatalogUrl).execute((context) => {
-                  let requestDigest = context.GetContextWebInformation.FormDigestValue;
-                  let web = Web(AppConfig.Configuration.tenantAppCatalogUrl, { requestDigest });
+                  // Load the context of the app catalog
+                  ContextInfo.getWeb(AppConfig.Configuration.tenantAppCatalogUrl).execute((context) => {
+                    let requestDigest = context.GetContextWebInformation.FormDigestValue;
+                    let web = Web(AppConfig.Configuration.tenantAppCatalogUrl, { requestDigest });
 
-                  // Ensure this app can be deployed to the tenant
-                  web.TenantAppCatalog().solutionContainsTeamsComponent(DataSource.AppCatalogTenantItem.ID).execute((resp: any) => {
-                    // See if we can deploy this app to teams
-                    if (resp.SolutionContainsTeamsComponent) {
-                      // Render the deploy to teams button
-                      tooltips.add({
-                        content: "Deploys the solution to Teams.",
-                        btnProps: {
-                          text: "Deploy to Teams",
-                          iconClassName: "me-1",
-                          iconSize: 20,
-                          iconType: microsoftTeams,
-                          isDisabled: AppSecurity.IsTenantAppCatalogOwner,
-                          isSmall: true,
-                          type: Components.ButtonTypes.OutlineSuccess,
-                          onClick: () => {
-                            // Deploy the app
-                            this._forms.deployToTeams(DataSource.AppItem, () => {
-                              // Call the update event
-                              this._onUpdate();
-                            });
+                    // Ensure this app can be deployed to the tenant
+                    web.TenantAppCatalog().solutionContainsTeamsComponent(DataSource.AppCatalogTenantItem.ID).execute((resp: any) => {
+                      // See if we can deploy this app to teams
+                      if (resp.SolutionContainsTeamsComponent) {
+                        // Render the deploy to teams button
+                        tooltips.add({
+                          content: "Deploys the solution to Teams.",
+                          btnProps: {
+                            text: "Deploy to Teams",
+                            iconClassName: "me-1",
+                            iconSize: 20,
+                            iconType: microsoftTeams,
+                            isDisabled: AppSecurity.IsTenantAppCatalogOwner,
+                            isSmall: true,
+                            type: Components.ButtonTypes.OutlineSuccess,
+                            onClick: () => {
+                              // Deploy the app
+                              this._forms.deployToTeams(DataSource.AppItem, () => {
+                                // Call the update event
+                                this._onUpdate();
+                              });
+                            },
                           },
-                        },
-                      });
-                    }
+                        });
+                      }
+                    });
                   });
-                });
+                } else {
+                  // Set the flags
+                  showDeploy = true;
+                  showRemove = true;
+                }
               } else {
-                // Set the flags
+                // Set the flag
                 showDeploy = true;
-                showRemove = true;
               }
-            } else {
-              // Set the flag
-              showDeploy = true;
-            }
 
-            // See if we are showing the deploy button
-            if (showDeploy) {
-              // Render the deploy button
-              tooltips.add({
-                content: "Deploys the app to the tenant app catalog.",
-                btnProps: {
-                  text: "Deploy to Tenant",
-                  iconClassName: "me-1",
-                  iconSize: 20,
-                  iconType: boxArrowRight,
-                  isSmall: true,
-                  type: Components.ButtonTypes.OutlineSuccess,
-                  onClick: () => {
-                    // Deploy the app
-                    this._forms.deploy(DataSource.AppItem, true, () => {
-                      // Call the update event
-                      this._onUpdate();
-                    });
+              // See if we are showing the deploy button
+              if (showDeploy) {
+                // Render the deploy button
+                tooltips.add({
+                  content: "Deploys the app to the tenant app catalog.",
+                  btnProps: {
+                    text: "Deploy to Tenant",
+                    iconClassName: "me-1",
+                    iconSize: 20,
+                    iconType: boxArrowRight,
+                    isSmall: true,
+                    type: Components.ButtonTypes.OutlineSuccess,
+                    onClick: () => {
+                      // Deploy the app
+                      this._forms.deploy(DataSource.AppItem, true, () => {
+                        // Call the update event
+                        this._onUpdate();
+                      });
+                    },
                   },
-                },
-              });
-            }
+                });
+              }
 
-            // See if we are showing the remove button
-            if (showRemove) {
-              // Render the retract button
-              tooltips.add({
-                content: "Removes the app from the tenant app catalog.",
-                btnProps: {
-                  text: "Remove from Tenant",
-                  iconClassName: "me-1",
-                  iconSize: 20,
-                  iconType: boxArrowInLeft,
-                  isSmall: true,
-                  type: Components.ButtonTypes.OutlineDanger,
-                  onClick: () => {
-                    // Remove the app
-                    this._forms.removeFromTenant(DataSource.AppItem, () => {
-                      // Call the update event
-                      this._onUpdate();
-                    });
+              // See if we are showing the remove button
+              if (showRemove) {
+                // Render the retract button
+                tooltips.add({
+                  content: "Removes the app from the tenant app catalog.",
+                  btnProps: {
+                    text: "Remove from Tenant",
+                    iconClassName: "me-1",
+                    iconSize: 20,
+                    iconType: boxArrowInLeft,
+                    isSmall: true,
+                    type: Components.ButtonTypes.OutlineDanger,
+                    onClick: () => {
+                      // Remove the app
+                      this._forms.removeFromTenant(DataSource.AppItem, () => {
+                        // Call the update event
+                        this._onUpdate();
+                      });
+                    },
                   },
-                },
-              });
-            }
+                });
+              }
 
-            // See if we are showing the retract button
-            if (showRetract) {
-              // Render the retract button
-              tooltips.add({
-                content: "Retracts the app from the tenant app catalog.",
-                btnProps: {
-                  text: "Retract from Tenant",
-                  iconClassName: "me-1",
-                  iconSize: 20,
-                  iconType: boxArrowInLeft,
-                  isSmall: true,
-                  type: Components.ButtonTypes.OutlineDanger,
-                  onClick: () => {
-                    // Retract the app
-                    this._forms.retractFromTenant(DataSource.AppItem, () => {
-                      // Call the update event
-                      this._onUpdate();
-                    });
+              // See if we are showing the retract button
+              if (showRetract) {
+                // Render the retract button
+                tooltips.add({
+                  content: "Retracts the app from the tenant app catalog.",
+                  btnProps: {
+                    text: "Retract from Tenant",
+                    iconClassName: "me-1",
+                    iconSize: 20,
+                    iconType: boxArrowInLeft,
+                    isSmall: true,
+                    type: Components.ButtonTypes.OutlineDanger,
+                    onClick: () => {
+                      // Retract the app
+                      this._forms.retractFromTenant(DataSource.AppItem, () => {
+                        // Call the update event
+                        this._onUpdate();
+                      });
+                    },
                   },
-                },
-              });
+                });
+              }
             }
           }
           break;
@@ -675,221 +687,233 @@ ${ContextInfo.userDisplayName}`.trim()
 
         // Submit
         case "Submit":
-          // Render the button
-          tooltips.add({
-            content: "Submits the app for approval/review",
-            btnProps: {
-              text: "Submit",
-              iconClassName: "me-1",
-              iconSize: 20,
-              iconType: send,
-              isDisabled: !canEdit || this.Status.lastStep,
-              isSmall: true,
-              type: Components.ButtonTypes.OutlinePrimary,
-              onClick: () => {
-                // Display the submit form
-                this._forms.submit(DataSource.AppItem, () => {
-                  // Call the update event
-                  this._onUpdate();
-                });
-              },
-            },
-          });
-          break;
-
-        // Test Site
-        case "TestSite":
-          // See if a test site exists
-          DataSource.loadTestSite(DataSource.AppItem).then(
-            // Test site exists
-            (web) => {
-              // Render the view button
-              tooltips.add({
-                content: "Opens the test site in a new tab.",
-                btnProps: {
-                  text: "View Test Site",
-                  iconClassName: "me-1",
-                  iconSize: 20,
-                  iconType: windowStack,
-                  isSmall: true,
-                  type: Components.ButtonTypes.OutlineSecondary,
-                  onClick: () => {
-                    // Open the test site in a new tab
-                    window.open(web.Url, "_blank");
-                  },
-                },
-              });
-
-              // See if the current version is not deployed
-              if (
-                DataSource.AppCatalogSiteItem &&
-                DataSource.AppItem.AppVersion !=
-                DataSource.AppCatalogSiteItem.InstalledVersion &&
-                DataSource.AppItem.AppVersion !=
-                DataSource.AppCatalogSiteItem.AppCatalogVersion
-              ) {
-                // Render the update button
-                tooltips.add({
-                  content:
-                    "Versions do not match. Click to update the test site.",
-                  btnProps: {
-                    text: "Update Test Site",
-                    iconClassName: "me-1",
-                    iconSize: 20,
-                    iconType: appIndicator,
-                    isDisabled: !AppSecurity.IsSiteAppCatalogOwner,
-                    isSmall: true,
-                    type: Components.ButtonTypes.OutlinePrimary,
-                    onClick: () => {
-                      // Show the update form
-                      this._forms.updateApp(
-                        DataSource.AppItem,
-                        web.Url,
-                        () => {
-                          // Call the update event
-                          this._onUpdate();
-                        }
-                      );
-                    },
-                  },
-                });
-              }
-              // Else, see if the app doesn't exist
-              else if (DataSource.AppCatalogSiteItem == null) {
-                // Render the update button
-                tooltips.add({
-                  content:
-                    "App is not installed on the test site. Click to update the test site.",
-                  btnProps: {
-                    text: "Update Test Site",
-                    iconClassName: "me-1",
-                    iconSize: 20,
-                    iconType: appIndicator,
-                    isDisabled: !AppSecurity.IsSiteAppCatalogOwner,
-                    isSmall: true,
-                    type: Components.ButtonTypes.OutlinePrimary,
-                    onClick: () => {
-                      // Show the update form
-                      this._forms.updateApp(
-                        DataSource.AppItem,
-                        web.Url,
-                        () => {
-                          // Call the update event
-                          this._onUpdate();
-                        }
-                      );
-                    },
-                  },
-                });
-              }
-            },
-
-            // Test site doesn't exist
-            () => {
-              let isError = false;
-
-              // Set the tooltip
-              let tooltip = "Creates the test site for the app.";
-
-              // See if the app catalog item is not valid
-              if (DataSource.AppCatalogItem && DataSource.AppCatalogItem.IsValidAppPackage == false) {
-                // Set the tooltip
-                tooltip = "App package is invalid. Unable to deploy app.";
-                isError = true;
-              }
-
-              // See if the user is an owner
-              if (!AppSecurity.IsSiteAppCatalogOwner) {
-                // Set the tooltip
-                tooltip = "User does not have permissions to deploy the app.";
-                isError = true;
-              }
-
-              // Render the create button
-              tooltips.add({
-                content: tooltip,
-                btnProps: {
-                  text: "Create Test Site",
-                  iconClassName: "me-1",
-                  iconSize: 20,
-                  iconType: nodePlus,
-                  isDisabled:
-                    !AppSecurity.IsSiteAppCatalogOwner &&
-                    !(DataSource.AppCatalogSiteItem ? DataSource.AppCatalogSiteItem.IsValidAppPackage : true),
-                  isSmall: true,
-                  type: Components.ButtonTypes.OutlinePrimary,
-                  onClick: () => {
-                    // Display the create test site form
-                    this._forms.createTestSite(isError ? tooltip : "", () => {
-                      // Call the update event
-                      this._onUpdate();
-                    });
-                  }
-                }
-              });
-            }
-          );
-          break;
-
-        // Upgrade
-        case "Upgrade":
-          // See if site collection urls exist
-          let urls = (DataSource.AppItem.AppSiteDeployments || "").trim();
-          if (urls.length > 0) {
+          // Ensure it's not over flow3
+          if (!Strings.IsFlow3) {
             // Render the button
             tooltips.add({
-              content:
-                "Upgrades the apps in the site collections currently deployed to.",
+              content: "Submits the app for approval/review",
               btnProps: {
-                text: "Upgrade",
+                text: "Submit",
                 iconClassName: "me-1",
                 iconSize: 20,
-                iconType: appIndicator,
+                iconType: send,
+                isDisabled: !canEdit || this.Status.lastStep,
                 isSmall: true,
-                type: Components.ButtonTypes.OutlineSuccess,
+                type: Components.ButtonTypes.OutlinePrimary,
                 onClick: () => {
-                  // Display the upgrade form
-                  this._forms.upgrade(DataSource.AppItem);
+                  // Display the submit form
+                  this._forms.submit(DataSource.AppItem, () => {
+                    // Call the update event
+                    this._onUpdate();
+                  });
                 },
               },
             });
           }
           break;
 
-        // Upgrade Tenant
-        case "UpgradeTenant":
-          // Ensure this is a tenant app catalog owner
-          if (AppSecurity.IsTenantAppCatalogOwner) {
-            // See if the current version is not deployed
-            let tenantApp = DataSource.getTenantAppItem(DataSource.AppItem.AppProductID);
-            if (tenantApp && DataSource.AppItem.AppVersion != tenantApp.AppCatalogVersion) {
-              // Render the update button
+        // Test Site
+        case "TestSite":
+          // Ensure it's not over flow3
+          if (!Strings.IsFlow3) {
+            // See if a test site exists
+            DataSource.loadTestSite(DataSource.AppItem).then(
+              // Test site exists
+              (web) => {
+                // Render the view button
+                tooltips.add({
+                  content: "Opens the test site in a new tab.",
+                  btnProps: {
+                    text: "View Test Site",
+                    iconClassName: "me-1",
+                    iconSize: 20,
+                    iconType: windowStack,
+                    isSmall: true,
+                    type: Components.ButtonTypes.OutlineSecondary,
+                    onClick: () => {
+                      // Open the test site in a new tab
+                      window.open(web.Url, "_blank");
+                    },
+                  },
+                });
+
+                // See if the current version is not deployed
+                if (
+                  DataSource.AppCatalogSiteItem &&
+                  DataSource.AppItem.AppVersion !=
+                  DataSource.AppCatalogSiteItem.InstalledVersion &&
+                  DataSource.AppItem.AppVersion !=
+                  DataSource.AppCatalogSiteItem.AppCatalogVersion
+                ) {
+                  // Render the update button
+                  tooltips.add({
+                    content:
+                      "Versions do not match. Click to update the test site.",
+                    btnProps: {
+                      text: "Update Test Site",
+                      iconClassName: "me-1",
+                      iconSize: 20,
+                      iconType: appIndicator,
+                      isDisabled: !AppSecurity.IsSiteAppCatalogOwner,
+                      isSmall: true,
+                      type: Components.ButtonTypes.OutlinePrimary,
+                      onClick: () => {
+                        // Show the update form
+                        this._forms.updateApp(
+                          DataSource.AppItem,
+                          web.Url,
+                          () => {
+                            // Call the update event
+                            this._onUpdate();
+                          }
+                        );
+                      },
+                    },
+                  });
+                }
+                // Else, see if the app doesn't exist
+                else if (DataSource.AppCatalogSiteItem == null) {
+                  // Render the update button
+                  tooltips.add({
+                    content:
+                      "App is not installed on the test site. Click to update the test site.",
+                    btnProps: {
+                      text: "Update Test Site",
+                      iconClassName: "me-1",
+                      iconSize: 20,
+                      iconType: appIndicator,
+                      isDisabled: !AppSecurity.IsSiteAppCatalogOwner,
+                      isSmall: true,
+                      type: Components.ButtonTypes.OutlinePrimary,
+                      onClick: () => {
+                        // Show the update form
+                        this._forms.updateApp(
+                          DataSource.AppItem,
+                          web.Url,
+                          () => {
+                            // Call the update event
+                            this._onUpdate();
+                          }
+                        );
+                      },
+                    },
+                  });
+                }
+              },
+
+              // Test site doesn't exist
+              () => {
+                let isError = false;
+
+                // Set the tooltip
+                let tooltip = "Creates the test site for the app.";
+
+                // See if the app catalog item is not valid
+                if (DataSource.AppCatalogItem && DataSource.AppCatalogItem.IsValidAppPackage == false) {
+                  // Set the tooltip
+                  tooltip = "App package is invalid. Unable to deploy app.";
+                  isError = true;
+                }
+
+                // See if the user is an owner
+                if (!AppSecurity.IsSiteAppCatalogOwner) {
+                  // Set the tooltip
+                  tooltip = "User does not have permissions to deploy the app.";
+                  isError = true;
+                }
+
+                // Render the create button
+                tooltips.add({
+                  content: tooltip,
+                  btnProps: {
+                    text: "Create Test Site",
+                    iconClassName: "me-1",
+                    iconSize: 20,
+                    iconType: nodePlus,
+                    isDisabled:
+                      !AppSecurity.IsSiteAppCatalogOwner &&
+                      !(DataSource.AppCatalogSiteItem ? DataSource.AppCatalogSiteItem.IsValidAppPackage : true),
+                    isSmall: true,
+                    type: Components.ButtonTypes.OutlinePrimary,
+                    onClick: () => {
+                      // Display the create test site form
+                      this._forms.createTestSite(isError ? tooltip : "", () => {
+                        // Call the update event
+                        this._onUpdate();
+                      });
+                    }
+                  }
+                });
+              }
+            );
+          }
+          break;
+
+        // Upgrade
+        case "Upgrade":
+          // Ensure it's not over flow3
+          if (!Strings.IsFlow3) {
+            // See if site collection urls exist
+            let urls = (DataSource.AppItem.AppSiteDeployments || "").trim();
+            if (urls.length > 0) {
+              // Render the button
               tooltips.add({
                 content:
-                  "Versions do not match. Click to update the tenant.",
+                  "Upgrades the apps in the site collections currently deployed to.",
                 btnProps: {
-                  text: "Update Tenant",
+                  text: "Upgrade",
                   iconClassName: "me-1",
                   iconSize: 20,
                   iconType: appIndicator,
-                  isDisabled: !AppSecurity.IsSiteAppCatalogOwner,
                   isSmall: true,
                   type: Components.ButtonTypes.OutlineSuccess,
                   onClick: () => {
-                    // Show the update form
-                    this._forms.updateTenantApp(
-                      DataSource.AppItem,
-                      () => {
-                        // Refresh this item
-                        DataSource.refreshTenantApp(DataSource.AppItem.AppProductID).then(() => {
-                          // Call the update event
-                          this._onUpdate();
-                        });
-                      }
-                    );
+                    // Display the upgrade form
+                    this._forms.upgrade(DataSource.AppItem);
                   },
                 },
               });
+            }
+          }
+          break;
+
+        // Upgrade Tenant
+        case "UpgradeTenant":
+          // Ensure it's not over flow3
+          if (!Strings.IsFlow3) {
+            // Ensure this is a tenant app catalog owner
+            if (AppSecurity.IsTenantAppCatalogOwner) {
+              // See if the current version is not deployed
+              let tenantApp = DataSource.getTenantAppItem(DataSource.AppItem.AppProductID);
+              if (tenantApp && DataSource.AppItem.AppVersion != tenantApp.AppCatalogVersion) {
+                // Render the update button
+                tooltips.add({
+                  content:
+                    "Versions do not match. Click to update the tenant.",
+                  btnProps: {
+                    text: "Update Tenant",
+                    iconClassName: "me-1",
+                    iconSize: 20,
+                    iconType: appIndicator,
+                    isDisabled: !AppSecurity.IsSiteAppCatalogOwner,
+                    isSmall: true,
+                    type: Components.ButtonTypes.OutlineSuccess,
+                    onClick: () => {
+                      // Show the update form
+                      this._forms.updateTenantApp(
+                        DataSource.AppItem,
+                        () => {
+                          // Refresh this item
+                          DataSource.refreshTenantApp(DataSource.AppItem.AppProductID).then(() => {
+                            // Call the update event
+                            this._onUpdate();
+                          });
+                        }
+                      );
+                    },
+                  },
+                });
+              }
             }
           }
           break;

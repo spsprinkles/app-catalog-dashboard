@@ -53,6 +53,7 @@ The [configuration file](https://github.com/spsprinkles/app-catalog-dashboard/ra
 | cdnImage | The absolute url to the library used to store the app icons. |
 | cdnTest | The absolute url to the library used to store the client side assets for testing. |
 | cdnProd | The absolute url to the library used to store the client side assets for production. |
+| cloudEnv | The default cloud environment the app is in. This will default to commerical if no value is specified. |
 | dateFormat | The date format to use. _(Examples: YYYY-MM-DD or YYYY-MM-DD HH:mm:ss)_ |
 | flowEndpoint | The flow authorization endpoint to use when triggering a flow. This is will default to commercial unless specified. Possible values: Flow, FlowChina, FlowDoD, FlowGov, FlowHigh, FlowUSNat, FlowUSSec or the url to the flow authorization endpoint. |
 | errorEmails | An array of email addresses to send to when a user has an error when using the application. This will help with troubleshooting issues in production. |
