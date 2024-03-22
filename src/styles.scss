@@ -25,11 +25,11 @@
 #CommentsWrapper > div:first-child {
     max-width: none;
     width: 100%;
-    div[data-sp-feature-tag="Comments"] {
+    div[data-sp-feature-tag='Comments'] {
         max-width: none;
         padding: 0 24px 20px;
     }
-    div[data-sp-feature-tag="Comments"]::before {
+    div[data-sp-feature-tag='Comments']::before {
         margin: 10px 0 0 0;
     }
 }
@@ -47,7 +47,7 @@
     }
 }
 /* Hide the page title in a modern page */
-div.webPartContainer {
+div[data-automation-id='pageHeader'] {
     display: none;
 }
 /* Apply changes to the Settings Panel */
