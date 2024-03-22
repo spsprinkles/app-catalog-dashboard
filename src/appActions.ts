@@ -2347,9 +2347,9 @@ export class AppActions {
                                         resolve(null);
                                     });
                                 });
-                            }).then(resolve);
-                        }, resolve);
-                    }, resolve);
+                            }).then(() => { resolve(); });
+                        }, () => { resolve(); });
+                    }, () => { resolve(); });
                 }, () => { resolve(); });
             } else {
                 // Resolve the request
