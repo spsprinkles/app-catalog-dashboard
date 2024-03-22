@@ -17,7 +17,7 @@
         border-top-left-radius: 0;
     }
 }
-/* Remove the extra top padding on the content row */
+/* Remove the extra top padding on the content row in a classic page */
 #contentRow {
     padding-top: 0 !important;
 }
@@ -39,21 +39,15 @@
     max-width: 32px;
 }
 /* Extend the WebPart full width in a modern page */
-#spPageCanvasContent div.CanvasZone > div:first-child {
-    max-width: none;
-    div.ControlZone {
-        margin: 24px 0 0 0;
-        padding: 0;
-    }
+div[data-automation-id='CanvasZone'] > div:first-child {
+    max-width: none !important;
+}
+/* Fix the WebPart margin in a modern page */
+div[data-automation-id='CanvasControl'] {
+    margin: 0 !important;
+    padding: 0 !important;
 }
 /* Hide the page title in a modern page */
 div[data-automation-id='pageHeader'] {
     display: none;
-}
-/* Apply changes to the Settings Panel */
-div.spPropertyPaneContainer div[aria-label='App Catalog Managment Tool property pane'] div[data-automation-id='propertyPaneGroupContent'] {
-    /* Align version to the right */
-    >div:last-child label {
-        text-align: right;
-    }
 }
