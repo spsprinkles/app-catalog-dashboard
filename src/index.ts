@@ -108,8 +108,7 @@ const GlobalVariable = {
     updateTheme: (themeInfo) => {
         // Set the theme
         ThemeManager.setCurrentTheme(themeInfo);
-    },
-    version: Strings.Version
+    }
 };
 
 // Update the DOM
