@@ -45,6 +45,8 @@ export function getAppIcon(height?, width?, className?) {
         // Set the height/width
         icon.setAttribute("height", (height ? height : 32).toString());
         icon.setAttribute("width", (width ? width : 32).toString());
+        // Hide the icon as non-interactive content from the accessibility API
+        icon.setAttribute("aria-hidden", "true");
         // Update the styling
         icon.style.pointerEvents = "none";
         // Support for IE
