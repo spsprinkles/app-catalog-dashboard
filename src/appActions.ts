@@ -1,5 +1,5 @@
 import { LoadingDialog, Modal } from "dattatable";
-import { ContextInfo, Graph, Helper, SPTypes, Types, Utility, Web } from "gd-sprest-bs";
+import { ContextInfo, Graph, Helper, List, SPTypes, Types, Utility, Web } from "gd-sprest-bs";
 import * as JSZip from "jszip";
 import { AppConfig } from "./appCfg";
 import { AppNotifications } from "./appNotifications";
@@ -1322,104 +1322,28 @@ export class AppActions {
 
     // Runs the flow for the item
     static runFlow(flowId: string) {
-        // See if a flow exists
-        if (flowId) {
-            // Get the flow information
-            Web().Lists(Strings.Lists.Apps).syncFlowInstance(flowId).execute(
-                flowData => {
-                    let flowInfo = JSON.parse(flowData.SynchronizationData);
-
-                    // Set the flow authorization url to commercial unless specified by the app configuration
-                    let spAuthUrl = SPTypes.CloudEnvironment.Flow;
-                    let flowAuthUrl = SPTypes.CloudEnvironment.FlowAPI;
-                    if (AppConfig.Configuration.flowEndpoint) {
-                        // Set the authorization urls
-                        spAuthUrl = SPTypes.CloudEnvironment[AppConfig.Configuration.flowEndpoint] || AppConfig.Configuration.flowEndpoint;
-                        flowAuthUrl = SPTypes.CloudEnvironment[AppConfig.Configuration.flowEndpoint + "API"] || AppConfig.Configuration.flowEndpoint.replace("service", "api");
-                    }
-
-                    // Get the sp token
-                    Graph.getAccessToken(spAuthUrl).execute(
-                        auth => {
-                            // Create the request for getting the authentication tokens
-                            let xhrAuthTokens = new XMLHttpRequest();
-                            xhrAuthTokens.open("POST", flowAuthUrl + flowInfo.properties.environment.id + "/users/me/onBehalfOfTokenBundle?api-version=2016-11-01", true);
-
-                            // Set the state change event
-                            xhrAuthTokens.onreadystatechange = () => {
-                                // See if the request has completed
-                                if (xhrAuthTokens.readyState == 4) {
-                                    // See if it was successful
-                                    if (xhrAuthTokens.status >= 200 && xhrAuthTokens.status < 300) {
-                                        // Create the request to trigger the flow
-                                        let xhr = new XMLHttpRequest();
-                                        xhr.open("POST", flowInfo.properties.flowTriggerUri, true);
-
-                                        // Set the state change event
-                                        xhr.onreadystatechange = () => {
-                                            // See if the request has completed
-                                            if (xhr.readyState == 4) {
-                                                // See if it was successful
-                                                if (xhr.status >= 200 && xhr.status < 300) {
-                                                    // Log
-                                                    ErrorDialog.logInfo(`Flow '${flowId} was triggered successfully for item '${DataSource.AppItem.Title}' with id '${DataSource.AppItem.Id}'.`);
-                                                } else {
-                                                    // Log
-                                                    ErrorDialog.logError(`Flow '${flowId} was triggered failed for item '${DataSource.AppItem.Title}' with id '${DataSource.AppItem.Id}'.`);
-                                                    ErrorDialog.logError(`Flow '${flowId} failed: ${xhr.responseText}`);
-                                                }
-                                            }
-                                        }
-
-                                        // Determine the flow token
-                                        let flowTokens = JSON.parse(xhrAuthTokens.response);
-                                        let flowToken = flowTokens.audienceToToken["https://" + flowInfo.properties.connectionReferences.shared_sharepointonline.swagger.host] || auth.access_token;
-
-                                        // Set the headers
-                                        xhr.setRequestHeader("Accept", "application/json");
-                                        xhr.setRequestHeader("Content-Type", "application/json");
-                                        xhr.setRequestHeader("authorization", "Bearer " + flowToken);
-
-                                        // Execute the request
-                                        xhr.send(JSON.stringify({
-                                            rows: [{
-                                                entity: {
-                                                    ID: DataSource.AppItem.Id
-                                                }
-                                            }]
-                                        }));
-
-                                        // Log
-                                        ErrorDialog.logInfo(`Flow '${flowId} was triggered for item '${DataSource.AppItem.Title}' with id '${DataSource.AppItem.Id}'.`);
-                                    } else {
-                                        // Log
-                                        ErrorDialog.logError(`Error getting the flow token. ${xhrAuthTokens.responseText}`);
-                                    }
-                                }
-                            }
-
-                            // Set the headers
-                            xhrAuthTokens.setRequestHeader("Accept", "application/json");
-                            xhrAuthTokens.setRequestHeader("Content-Type", "application/json");
-                            xhrAuthTokens.setRequestHeader("authorization", "Bearer " + auth.access_token);
-
-                            // Execute the request
-                            xhrAuthTokens.send();
-
-                            // Log
-                            ErrorDialog.logInfo(`Authentication request for a flow token has been sent.`);
-                        },
-                        () => {
-                            // Log
-                            ErrorDialog.logError(`Error getting the access token from flow.`);
+        // See if a flow exists and the user is licensed to run it
+        if (flowId && DataSource.HasLicense) {
+            // Run the flow
+            List.runFlow({
+                data: {
+                    rows: [{
+                        entity: {
+                            ID: DataSource.AppItem.Id
                         }
-                    );
+                    }]
                 },
-                () => {
-                    // Log
-                    ErrorDialog.logError(`Error getting the flow '${flowId}.`);
+                id: flowId,
+                list: Strings.Lists.Apps,
+                cloudEnv: AppConfig.Configuration.cloudEnv,
+                webUrl: Strings.SourceUrl
+            }).then(results => {
+                // See if it didn't run
+                if (!results.executed) {
+                    // Log the error
+                    ErrorDialog.logError(`Flow '${flowId} failed: ${results.errorMessage}`);
                 }
-            );
+            });
         }
     }
 
