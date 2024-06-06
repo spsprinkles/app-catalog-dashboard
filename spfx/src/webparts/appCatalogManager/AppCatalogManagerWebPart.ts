@@ -9,7 +9,7 @@ export interface IAppCatalogManagerWebPartProps {
 }
 
 // Reference the solution
-import "../../../../dist/app-catalog-dashboard.min.js";
+import "main-lib";
 declare const AppDashboard: {
   description: string;
   render: (props: {
