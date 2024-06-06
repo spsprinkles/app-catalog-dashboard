@@ -13,8 +13,8 @@
   },
   "externals": {
     "main-lib": {
-      "path": "../dist/app-catalog-dashboard.min.js",
-      "globalName": "main-lib"
+      "globalName": "main-lib",
+      "path": "../dist/app-catalog-dashboard.min.js"
     }
   },
   "localizedResources": {
