@@ -368,6 +368,23 @@ export class AppNotifications {
                     endIdx = Body.indexOf("]");
                 }
 
+                // Parse the email content and find [Key] instances w/in it.
+                let Subject = notificationCfg.subject || "";
+                startIdx = Subject.indexOf("[");
+                endIdx = Subject.indexOf("]");
+                while (startIdx > 0 && endIdx > startIdx) {
+                    // Get the key value
+                    let key = Subject.substring(startIdx + 1, endIdx);
+                    let value = this.getValue(key, item, status, deploySiteUrl);
+
+                    // Replace the value
+                    Subject = Subject.substring(0, startIdx) + value + Subject.substring(endIdx + 1);
+
+                    // Find the next instance of it
+                    startIdx = Subject.indexOf("[");
+                    endIdx = Subject.indexOf("]");
+                }
+
                 // Ensure emails exist
                 if (To.length > 0 || CC.length > 0) {
                     // Increment the send counter
@@ -385,7 +402,7 @@ export class AppNotifications {
                     let emailProps = {
                         To, CC,
                         Body,
-                        Subject: notificationCfg.subject,
+                        Subject
                     };
 
                     // Send an email
@@ -443,12 +460,28 @@ export class AppNotifications {
                 let value = this.getValue(key, item, item.AppStatus, "");
 
                 // Replace the value
-                let oldContent = Body;
                 Body = Body.substring(0, startIdx) + value + Body.substring(endIdx + 1);
 
                 // Find the next instance of it
-                startIdx = oldContent.indexOf("[", endIdx);
-                endIdx = oldContent.indexOf("]", endIdx + 1);
+                startIdx = Body.indexOf("[");
+                endIdx = Body.indexOf("]");
+            }
+
+            // Parse the email content and find [Key] instances w/in it.
+            let Subject = subject || "";
+            startIdx = Subject.indexOf("[");
+            endIdx = Subject.indexOf("]");
+            while (startIdx > 0 && endIdx > startIdx) {
+                // Get the key value
+                let key = Subject.substring(startIdx + 1, endIdx);
+                let value = this.getValue(key, item, item.AppStatus, "");
+
+                // Replace the value
+                Subject = Subject.substring(0, startIdx) + value + Subject.substring(endIdx + 1);
+
+                // Find the next instance of it
+                startIdx = Subject.indexOf("[");
+                endIdx = Subject.indexOf("]");
             }
 
             // Ensure emails exist
@@ -463,7 +496,7 @@ export class AppNotifications {
                     To,
                     CC: [AppSecurity.AppWeb.CurrentUser.Email],
                     Body,
-                    Subject: subject,
+                    Subject,
                 } as Types.IEmail;
 
                 // Send an email
