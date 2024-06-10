@@ -355,7 +355,7 @@ export class AppNotifications {
                 let Body = notificationCfg.content || "";
                 let startIdx = Body.indexOf("[");
                 let endIdx = Body.indexOf("]");
-                while (startIdx > 0 && endIdx > startIdx) {
+                while (startIdx >= 0 && endIdx > startIdx) {
                     // Get the key value
                     let key = Body.substring(startIdx + 1, endIdx);
                     let value = this.getValue(key, item, status, deploySiteUrl);
@@ -372,7 +372,7 @@ export class AppNotifications {
                 let Subject = notificationCfg.subject || "";
                 startIdx = Subject.indexOf("[");
                 endIdx = Subject.indexOf("]");
-                while (startIdx > 0 && endIdx > startIdx) {
+                while (startIdx >= 0 && endIdx > startIdx) {
                     // Get the key value
                     let key = Subject.substring(startIdx + 1, endIdx);
                     let value = this.getValue(key, item, status, deploySiteUrl);
@@ -454,7 +454,7 @@ export class AppNotifications {
             let Body = body || "";
             let startIdx = Body.indexOf("[");
             let endIdx = Body.indexOf("]");
-            while (startIdx > 0 && endIdx > startIdx) {
+            while (startIdx >= 0 && endIdx > startIdx) {
                 // Get the key value
                 let key = Body.substring(startIdx + 1, endIdx);
                 let value = this.getValue(key, item, item.AppStatus, "");
@@ -471,7 +471,7 @@ export class AppNotifications {
             let Subject = subject || "";
             startIdx = Subject.indexOf("[");
             endIdx = Subject.indexOf("]");
-            while (startIdx > 0 && endIdx > startIdx) {
+            while (startIdx >= 0 && endIdx > startIdx) {
                 // Get the key value
                 let key = Subject.substring(startIdx + 1, endIdx);
                 let value = this.getValue(key, item, item.AppStatus, "");
