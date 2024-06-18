@@ -2434,7 +2434,7 @@ export class AppForms {
         });
     }
 
-    // Displays the ugprade from
+    // Displays the upgrade from
     upgrade(appItem: IAppItem) {
         // Clear the modal
         Modal.clear();
@@ -2562,5 +2562,72 @@ export class AppForms {
             // Show the modal
             Modal.show();
         });
+    }
+
+
+    // Displays the upgrade from
+    upgradeInfo(appItem: IAppItem) {
+        // Clear the modal
+        Modal.clear();
+
+        // Set the header
+        Modal.setHeader("App Upgrade Information");
+
+        // Set the body
+        let form = Components.Form({
+            el: Modal.BodyElement,
+            controls: [{
+                name: "AppUpgradeInfo",
+                label: "Upgrade Information",
+                description: "Details of the application enhancements/bug fixes for the upgrade.",
+                type: Components.FormControlTypes.TextArea,
+                required: true,
+                value: appItem.AppUpgradeInfo
+            }]
+        });
+
+        // Render the footer
+        Components.Button({
+            el: Modal.FooterElement,
+            text: "Update",
+            type: Components.ButtonTypes.OutlineSuccess,
+            onClick: () => {
+                // Validate the form
+                if (form.isValid()) {
+                    let notes = form.getValues()["AppUpgradeInfo"];
+
+                    // Close the modal
+                    Modal.hide();
+
+                    // Show a loading dialog
+                    LoadingDialog.setHeader("Updating App");
+                    LoadingDialog.setBody("This will close after the app metadata is updated.");
+                    LoadingDialog.show();
+
+                    // Log
+                    DataSource.logItem({
+                        LogUserId: ContextInfo.userId,
+                        ParentId: appItem.AppProductID,
+                        ParentListName: Strings.Lists.Apps,
+                        Title: DataSource.AuditLogStates.AppUpgraded,
+                        LogComment: `The app ${appItem.Title} was upgraded with the following details: ${notes}`
+                    }, appItem);
+
+                    // Update the item
+                    appItem.update({
+                        AppUpgradeInfo: notes
+                    }).execute(() => {
+                        // Refresh the item
+                        DataSource.refreshItem(appItem.Id);
+
+                        // Close the dialog
+                        LoadingDialog.hide();
+                    });
+                }
+            }
+        });
+
+        // Show the modal
+        Modal.show();
     }
 }

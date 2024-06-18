@@ -6,6 +6,7 @@ import { layoutTextWindow } from "gd-sprest-bs/build/icons/svgs/layoutTextWindow
 import { questionLg } from "gd-sprest-bs/build/icons/svgs/questionLg";
 import { AppActions } from "./appActions";
 import { AppConfig } from "./appCfg";
+import { AppForms } from "./appForms";
 import { AppView } from "./appView";
 import { ButtonActions } from "./btnActions";
 import * as Common from "./common";
@@ -20,6 +21,7 @@ export class AppDashboard {
     private _docSetId: number = null;
     private _el: HTMLElement = null;
     private _elDashboard: HTMLElement = null;
+    private _forms: AppForms = null;
 
     // Constructor
     constructor(el: HTMLElement, elDashboard: HTMLElement, docSetId: number) {
@@ -27,6 +29,7 @@ export class AppDashboard {
         this._docSetId = docSetId || DataSource.AppItem.Id;
         this._el = el;
         this._elDashboard = elDashboard;
+        this._forms = new AppForms();
 
         // Render the template
         this._el.classList.add("bs");
@@ -93,29 +96,36 @@ export class AppDashboard {
     }
 
     // Refreshes the dashboard
-    private refresh() {
-        // Show a loading dialog
-        LoadingDialog.setHeader("Refreshing the Data");
-        LoadingDialog.setBody("This will close after the data is loaded.");
-        LoadingDialog.show();
+    private refresh(): PromiseLike<void> {
+        // Return a promise
+        return new Promise(resolve => {
+            // Show a loading dialog
+            LoadingDialog.setHeader("Refreshing the Data");
+            LoadingDialog.setBody("This will close after the data is loaded.");
+            LoadingDialog.show();
 
-        // Refresh the data
-        DataSource.refresh(this._docSetId).then(() => {
-            // Render the alerts
-            this.renderAlertStatus();
-            this.renderAlertError();
+            // Refresh the data
+            DataSource.refresh(this._docSetId).then(() => {
+                // Render the alerts
+                this.renderAlertStatus();
+                this.renderAlertError();
 
-            // Render the info
-            this.renderInfo();
+                // Render the info
+                this.renderInfo();
 
-            // Render the actions
-            this.renderActions();
+                // Render the actions
+                this.renderActions();
 
-            // Render the documents
-            this.renderDocuments();
+                // Render the documents
+                this.renderDocuments();
 
-            // Hide the dialog
-            LoadingDialog.hide();
+                // Hide the dialog
+                LoadingDialog.hide();
+
+                // Resolve the request
+                resolve();
+            });
+
         });
     }
 
@@ -290,7 +300,10 @@ export class AppDashboard {
                         // Update the app package
                         AppActions.uploadAppPackage(fileInfo).then(() => {
                             // Refresh the dashboard
-                            this.refresh();
+                            this.refresh().then(() => {
+                                // Display a dialog for the upgrade information
+                                this._forms.upgradeInfo(DataSource.AppItem);
+                            });
                         })
                     } else {
                         // Resolve the request

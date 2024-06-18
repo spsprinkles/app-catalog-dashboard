@@ -119,6 +119,7 @@ export const Configuration = Helper.SPConfig({
                         "AppIsTenant",
                         "AppIsTeams",
                         "AppJustification",
+                        "AppUpgradeInfo",
                         "AppShortDescription",
                         "AppThumbnailURL",
                         "AppImageURL1",
@@ -276,6 +277,12 @@ export const Configuration = Helper.SPConfig({
                         "Pending Final Approval", "Approved", "Deployed"
                     ]
                 } as Helper.IFieldInfoChoice,
+                {
+                    name: "AppUpgradeInfo",
+                    title: "Upgrade Information",
+                    type: Helper.SPCfgFieldType.Note,
+                    description: "The changes for an app being upgraded."
+                },
                 /** Fields extracted from the SPFx package */
                 {
                     name: "AppAPIPermissions",
