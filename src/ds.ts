@@ -28,6 +28,7 @@ export interface IAppItem extends Types.SP.ListItem {
     AppSponsor: { Id: number; Name: string; Title: string };
     AppSponsorId: number;
     AppStatus: string;
+    AppUpgradeInfo: string;
     AppVersion: string;
     AuthorId: number;
     AppPackageErrorMessage?: string;
