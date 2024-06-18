@@ -119,6 +119,7 @@ export const Configuration = Helper.SPConfig({
                         "AppIsTenant",
                         "AppIsTeams",
                         "AppJustification",
+                        "AppUpgradeInfo",
                         "AppShortDescription",
                         "AppThumbnailURL",
                         "AppImageURL1",

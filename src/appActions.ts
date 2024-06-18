@@ -1,5 +1,5 @@
 import { LoadingDialog, Modal } from "dattatable";
-import { ContextInfo, Graph, Helper, List, SPTypes, Types, Utility, Web } from "gd-sprest-bs";
+import { ContextInfo, Helper, List, SPTypes, Types, Utility, Web } from "gd-sprest-bs";
 import * as JSZip from "jszip";
 import { AppConfig } from "./appCfg";
 import { AppNotifications } from "./appNotifications";

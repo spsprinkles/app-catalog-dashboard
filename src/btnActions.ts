@@ -12,6 +12,7 @@ import { envelope } from "gd-sprest-bs/build/icons/svgs/envelope";
 import { git } from "gd-sprest-bs/build/icons/svgs/git";
 import { handThumbsDown } from "gd-sprest-bs/build/icons/svgs/handThumbsDown";
 import { handThumbsUp } from "gd-sprest-bs/build/icons/svgs/handThumbsUp";
+import { infoCircle } from "gd-sprest-bs/build/icons/svgs/infoCircle";
 import { inputCursorText } from "gd-sprest-bs/build/icons/svgs/inputCursorText";
 import { microsoftTeams } from "gd-sprest-bs/build/icons/svgs/microsoftTeams";
 import { nodePlus } from "gd-sprest-bs/build/icons/svgs/nodePlus";
@@ -875,6 +876,27 @@ ${ContextInfo.userDisplayName}`.trim()
               });
             }
           }
+          break;
+
+        // Upgrade Information
+        case "UpgradeInfo":
+          // Render the button
+          tooltips.add({
+            content: "Displays the form to set the app upgrade information.",
+            btnProps: {
+              text: "Upgrade Information",
+              iconClassName: "me-1",
+              iconSize: 20,
+              iconType: infoCircle,
+              isDisabled: !canEdit,
+              isSmall: true,
+              type: Components.ButtonTypes.OutlinePrimary,
+              onClick: () => {
+                // Display the edit form
+                this._forms.upgradeInfo(DataSource.AppItem);
+              },
+            },
+          });
           break;
 
         // Upgrade Tenant

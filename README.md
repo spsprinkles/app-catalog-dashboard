@@ -131,6 +131,7 @@ The available values for the `actions` status property.
 | Submit | Displays the submission form to request approval. |
 | TestSite | Displays a `create` or `view` button to the test site collection. |
 | Upgrade | Displays an upgrade button if site collection url(s) exist. |
+| UpgradeInfo | Displays a dialog for entering the app's upgrade information. |
 | UpgradeTenant | Displays an upgrade button if tenant version needs to be upgraded. |
 | View | Displays the app metadata view form. |
 | ViewSourceControl | Displays the app's source control in a new tab. |
