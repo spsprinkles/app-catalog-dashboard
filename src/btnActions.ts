@@ -153,7 +153,7 @@ export class ButtonActions {
     }
 
     // Determine if the user can edit items
-    let canEdit = Common.canEdit(DataSource.AppItem);
+    let canEdit = Common.canEdit(DataSource.AppItem) || this.isApprover();
 
     // Render the tooltip group
     let tooltips = Components.TooltipGroup({
