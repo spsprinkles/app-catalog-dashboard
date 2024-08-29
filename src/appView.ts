@@ -449,10 +449,9 @@ export class AppView {
             },
             table: {
                 rows: DataSource.DocSetList.Items,
-                dtProps: {
-                    dom: 'rt<"row"<"col-sm-4"l><"col-sm-4"i><"col-sm-4"p>>',
-                    pageLength: AppConfig.Configuration.paging,
-                    columnDefs: [
+                onRendering: dtProps => {
+                    // Set the column defs
+                    dtProps.columnDefs = [
                         {
                             targets: [0],
                             orderable: false
@@ -462,30 +461,21 @@ export class AppView {
                             orderable: false,
                             searchable: false
                         }
-                    ],
-                    createdRow: function (row, data, index) {
-                        jQuery('td', row).addClass('align-middle');
-                    },
-                    // Add some classes to the dataTable elements
-                    drawCallback: function (settings) {
-                        let api = new jQuery.fn.dataTable.Api(settings) as any;
-                        let div = api.table().container() as HTMLDivElement;
-                        let table = api.table().node() as HTMLTableElement;
-                        div.querySelector(".dataTables_info").classList.add("text-center");
-                        div.querySelector(".dataTables_length").classList.add("pt-2");
-                        div.querySelector(".dataTables_paginate").classList.add("pt-03");
-                        table.classList.remove("no-footer");
-                        table.classList.add("tbl-footer");
-                        table.classList.add("table-striped");
-                    },
-                    headerCallback: function (thead, data, start, end, display) {
-                        jQuery('th', thead).addClass('align-middle');
-                    },
-                    // Sort descending by Start Date
-                    order: [[1, "asc"]],
-                    language: {
+                    ];
+
+                    // Update the order
+                    dtProps.order = [[1, "asc"]];
+
+                    // Update the paging
+                    dtProps.lengthMenu = [5, 10, 20, 50];
+                    dtProps.pageLength = AppConfig.Configuration.paging;
+
+                    // Set the empty table message
+                    dtProps.language = {
                         emptyTable: "No apps were found",
-                    },
+                    };
+
+                    return dtProps;
                 },
                 columns: [
                     {

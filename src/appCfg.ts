@@ -149,6 +149,7 @@ export class AppConfig {
                     this._cfg.cdnTest = this.Configuration.cdnTest ? Common.updateUrl(this._cfg.cdnTest) : this._cfg.cdnTest;
                     this._cfg.dashboardUrl = this.Configuration.dashboardUrl ? Common.updateUrl(this._cfg.dashboardUrl) : Strings.DashboardUrl;
                     this._cfg.helpPageUrl = this._cfg.helpPageUrl ? Common.updateUrl(this._cfg.helpPageUrl) : this._cfg.helpPageUrl;
+                    this._cfg.paging = this._cfg.paging > 0 ? this._cfg.paging : 10;
                     this._cfg.templatesLibraryUrl = this._cfg.templatesLibraryUrl ? Common.updateUrl(this._cfg.templatesLibraryUrl) : this._cfg.templatesLibraryUrl;
                     this._cfg.tenantAppCatalogUrl = this.Configuration.tenantAppCatalogUrl ? Common.updateUrl(this._cfg.tenantAppCatalogUrl) : this._cfg.tenantAppCatalogUrl;
 
