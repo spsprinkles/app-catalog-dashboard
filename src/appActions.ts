@@ -935,29 +935,44 @@ export class AppActions {
             // Log
             ErrorDialog.logInfo(`Syncing app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} to Teams...`);
 
-            // Sync the app with Teams
-            Web(AppConfig.Configuration.tenantAppCatalogUrl, { requestDigest }).TenantAppCatalog().syncSolutionToTeams(DataSource.AppItem.Id).execute(
-                // Success
-                () => {
-                    // Log
-                    ErrorDialog.logInfo(`App '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was successfully synced to Teams...`);
+            // Get the tenant app catalog item
+            Web(AppConfig.Configuration.tenantAppCatalogUrl, { requestDigest }).Lists("Apps for SharePoint").Items().query({
+                Filter: "AppProductID eq '" + DataSource.AppItem.AppProductID + "'"
+            }).execute(items => {
+                // Ensure the item exists
+                let item = items.results[0];
+                if (item) {
+                    // Sync the app with Teams
+                    Web(AppConfig.Configuration.tenantAppCatalogUrl, { requestDigest }).TenantAppCatalog().syncSolutionToTeams(item.Id).execute(
+                        // Success
+                        () => {
+                            // Log
+                            ErrorDialog.logInfo(`App '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was successfully synced to Teams...`);
 
-                    // Hide the dialog
-                    LoadingDialog.hide();
+                            // Hide the dialog
+                            LoadingDialog.hide();
 
-                    // Notify the parent this process is complete
-                    onComplete();
-                },
+                            // Notify the parent this process is complete
+                            onComplete();
+                        },
 
-                // Error
-                ex => {
+                        // Error
+                        ex => {
+                            // Log the error
+                            ErrorDialog.show("Deploy to Teams", "There was an error deploying the app to the tenant app catalog.", ex);
+                        }
+                    );
+                } else {
                     // Log the error
-                    ErrorDialog.show("Deploy to Teams", "There was an error deploying the app to the tenant app catalog.", ex);
+                    ErrorDialog.show("Tenant App", "The app was not found in the tenant app catalog.", DataSource.AppItem);
                 }
-            );
+            }, ex => {
+                // Log the error
+                ErrorDialog.show("Tenant App", "Unable to query the tenant app catalog for the item.", ex);
+            });
         }, ex => {
             // Log
-            ErrorDialog.logInfo(`Getting the tenant app catalog...`);
+            ErrorDialog.logInfo(`Error getting the context information for the tenant app catalog...`, ex);
         });
     }
 
