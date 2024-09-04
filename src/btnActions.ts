@@ -440,7 +440,7 @@ export class ButtonActions {
                             iconClassName: "me-1",
                             iconSize: 20,
                             iconType: microsoftTeams,
-                            isDisabled: AppSecurity.IsTenantAppCatalogOwner,
+                            isDisabled: !AppSecurity.IsTenantAppCatalogOwner,
                             isSmall: true,
                             type: Components.ButtonTypes.OutlineSuccess,
                             onClick: () => {
