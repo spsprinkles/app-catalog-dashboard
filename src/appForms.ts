@@ -780,6 +780,9 @@ export class AppForms {
 
     // Deploys the solution to teams
     deployToTeams(item: IAppItem, onUpdate: () => void) {
+        // Clear the modal
+        Modal.clear();
+
         // Set the header
         Modal.setHeader("Deploy to Teams");
 
