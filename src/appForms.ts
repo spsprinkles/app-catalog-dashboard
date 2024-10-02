@@ -2395,7 +2395,7 @@ export class AppForms {
                 let skipFeatureDeployment = form.getValues()["SkipFeatureDeployment"];
                 AppActions.updateTenantApp(skipFeatureDeployment, onUpdate).then(() => {
                     // Send the notifications
-                    AppNotifications.sendAppUpgradedEmail(DataSource.AppItem).then(() => {
+                    AppNotifications.sendAppDeployedEmail(DataSource.AppItem, AppConfig.Configuration.tenantAppCatalogUrl).then(() => {
                         // Call the update event
                         onUpdate();
                     });
