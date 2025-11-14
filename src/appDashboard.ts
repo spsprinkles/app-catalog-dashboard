@@ -1,5 +1,5 @@
 import { Documents, LoadingDialog } from "dattatable";
-import { Components, ThemeManager, Types } from "gd-sprest-bs";
+import { Components, Types } from "gd-sprest-bs";
 import { caretRightFill } from "gd-sprest-bs/build/icons/svgs/caretRightFill";
 import { folderSymlink } from "gd-sprest-bs/build/icons/svgs/folderSymlink";
 import { layoutTextWindow } from "gd-sprest-bs/build/icons/svgs/layoutTextWindow";

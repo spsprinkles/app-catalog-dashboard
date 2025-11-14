@@ -1,4 +1,4 @@
-import { DataTable, LoadingDialog, Modal } from "dattatable";
+import { DataTable, Modal } from "dattatable";
 import { Components } from "gd-sprest-bs";
 import * as jQuery from "jquery";
 import { DataSource, IAppCatalogRequestItem } from "./ds";

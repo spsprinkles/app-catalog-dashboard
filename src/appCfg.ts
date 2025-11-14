@@ -9,16 +9,13 @@ export interface IConfiguration {
     appCatalogUrl?: string;
     appDetails?: IAppDetails;
     appFlows?: IAppFlows;
-    appNotifications?: IAppNotifications;
     cdnImage?: string;
     cdnProd?: string;
     cdnTest?: string;
     cloudEnv?: string;
     dashboardUrl?: string;
     dateFormat?: string;
-    errorEmails?: string[];
     flowEndpoint?: string;
-    helpdesk?: string;
     helpPageUrl?: string;
     paging?: number;
     templatesLibraryUrl?: string;
@@ -47,23 +44,6 @@ export interface IAppFlows {
     upgradeApp?: string;
 }
 
-// App Notifications
-export interface IAppNotifications {
-    deploy?: IEmail[];
-    test?: IEmail[];
-    upgrade?: IEmail[];
-}
-
-// Email
-export interface IEmail {
-    approval?: boolean;
-    content: string;
-    to: string[];
-    cc: string[];
-    subject: string;
-    submission?: boolean;
-}
-
 // Status
 export interface IStatus {
     actions?: string[];
@@ -74,7 +54,6 @@ export interface IStatus {
     flowId?: string;
     lastStep: boolean;
     name: string;
-    notification?: IEmail[];
     nextStep: string;
     prevStep: string;
     requiresTechReview?: boolean;

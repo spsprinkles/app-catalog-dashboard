@@ -8,7 +8,6 @@ import { cardChecklist } from "gd-sprest-bs/build/icons/svgs/cardChecklist";
 import { cardText } from "gd-sprest-bs/build/icons/svgs/cardText";
 import { clockHistory } from "gd-sprest-bs/build/icons/svgs/clockHistory";
 import { copy } from "gd-sprest-bs/build/icons/svgs/copy";
-import { envelope } from "gd-sprest-bs/build/icons/svgs/envelope";
 import { git } from "gd-sprest-bs/build/icons/svgs/git";
 import { handThumbsDown } from "gd-sprest-bs/build/icons/svgs/handThumbsDown";
 import { handThumbsUp } from "gd-sprest-bs/build/icons/svgs/handThumbsUp";
@@ -16,7 +15,6 @@ import { infoCircle } from "gd-sprest-bs/build/icons/svgs/infoCircle";
 import { inputCursorText } from "gd-sprest-bs/build/icons/svgs/inputCursorText";
 import { microsoftTeams } from "gd-sprest-bs/build/icons/svgs/microsoftTeams";
 import { nodePlus } from "gd-sprest-bs/build/icons/svgs/nodePlus";
-import { questionSquare } from "gd-sprest-bs/build/icons/svgs/questionSquare";
 import { send } from "gd-sprest-bs/build/icons/svgs/send";
 import { trash3 } from "gd-sprest-bs/build/icons/svgs/trash3";
 import { window_ } from "gd-sprest-bs/build/icons/svgs/window_";
@@ -609,37 +607,6 @@ export class ButtonActions {
           });
           break;
 
-        // Get Help
-        case "GetHelp":
-          // Render the button
-          tooltips.add({
-            content: "Sends a notification to the app owners.",
-            btnProps: {
-              text: "Get Help",
-              iconClassName: "me-1",
-              iconSize: 20,
-              iconType: questionSquare,
-              isSmall: true,
-              type: Components.ButtonTypes.OutlinePrimary,
-              onClick: () => {
-                this._forms.sendNotification(
-                  DataSource.AppItem,
-                  ["Developers", "Sponsor"],
-                  "Request for Help",
-                  `App Developers,
-
-We are requesting help for the app ${DataSource.AppItem.Title}.
-
-(Enter Details Here)
-
-r/,
-${ContextInfo.userDisplayName}`.trim()
-                );
-              },
-            },
-          });
-          break;
-
         // Metadata
         case "Metadata":
           // Ensure the user can edit
@@ -664,26 +631,6 @@ ${ContextInfo.userDisplayName}`.trim()
               },
             });
           }
-          break;
-
-        // Notification
-        case "Notification":
-          // Render the button
-          tooltips.add({
-            content: "Sends a notification to user(s).",
-            btnProps: {
-              text: "Notification",
-              iconClassName: "me-1",
-              iconSize: 20,
-              iconType: envelope,
-              isSmall: true,
-              type: Components.ButtonTypes.OutlinePrimary,
-              onClick: () => {
-                // Display the send notification form
-                this._forms.sendNotification(DataSource.AppItem);
-              },
-            },
-          });
           break;
 
         // Submit

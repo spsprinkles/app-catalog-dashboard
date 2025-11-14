@@ -1,10 +1,8 @@
 import { LoadingDialog, Modal } from "dattatable";
-import { ContextInfo, Helper, List, SPTypes, Types, Utility, Web } from "gd-sprest-bs";
+import { ContextInfo, Helper, List, SPTypes, Types, Web } from "gd-sprest-bs";
 import * as JSZip from "jszip";
 import { AppConfig } from "./appCfg";
-import { AppNotifications } from "./appNotifications";
 import { AppSecurity } from "./appSecurity";
-import * as Common from "./common";
 import { DataSource, IAppItem } from "./ds";
 import { ErrorDialog } from "./errorDialog";
 import Strings from "./strings";
@@ -368,57 +366,6 @@ export class AppActions {
                             // Log
                             ErrorDialog.logInfo(`Creating the test web '${web.ServerRelativeUrl}' successfully...`);
 
-                            // Method to send an email
-                            let sendEmail = () => {
-                                // Update the loading dialog
-                                LoadingDialog.setHeader("Sending Email Notifications");
-                                LoadingDialog.setBody("Everything is done. Sending an email to the developer poc(s).");
-                                LoadingDialog.show();
-
-                                // Get the app developers
-                                let to = [];
-                                let pocs = DataSource.AppItem.AppDevelopers && DataSource.AppItem.AppDevelopers.results ? DataSource.AppItem.AppDevelopers.results : [];
-                                for (let i = 0; i < pocs.length; i++) {
-                                    // Get the email from the login name
-                                    let email = Common.getEmail(pocs[i].Name);
-                                    if (email) {
-                                        // Append the email
-                                        to.push(email);
-                                    }
-                                }
-
-                                // Ensure emails exist
-                                if (to.length > 0) {
-                                    // Send an email
-                                    Utility().sendEmail({
-                                        To: to,
-                                        Subject: "Test Site Created",
-                                        Body: "<p>App Developers,</p><br />" +
-                                            "<p>The '" + DataSource.AppItem.Title + "' app test site has been created. Click the link below to access the site:</p>" +
-                                            "<p>" + window.location.origin + web.ServerRelativeUrl + "</p>" +
-                                            "<p>App Team</p>"
-                                    }).execute(
-                                        () => {
-                                            // Close the dialog
-                                            LoadingDialog.hide();
-
-                                            // Notify the parent this process is complete
-                                            onComplete(web);
-                                        },
-                                        ex => {
-                                            // Log the error
-                                            ErrorDialog.show("Sending Email", "There was an error sending the email notification.", ex);
-                                        }
-                                    );
-                                } else {
-                                    // Close the dialog
-                                    LoadingDialog.hide();
-
-                                    // Notify the parent this process is complete
-                                    onComplete(web);
-                                }
-                            }
-
                             // Configure the test site
                             this.configureTestSite(web.ServerRelativeUrl).then(() => {
                                 // Get the app
@@ -429,8 +376,11 @@ export class AppActions {
                                             // Log
                                             ErrorDialog.logInfo(`App has 'Skip Feature Deployment' flag set, skipping the install...`);
 
-                                            // Send the email
-                                            sendEmail();
+                                            // Close the dialog
+                                            LoadingDialog.hide();
+
+                                            // Notify the parent this process is complete
+                                            onComplete(web);
                                         } else {
                                             // Log
                                             ErrorDialog.logInfo(`Installing the app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID}...`);
@@ -447,8 +397,11 @@ export class AppActions {
                                                     // Log
                                                     ErrorDialog.logInfo(`The app '${DataSource.AppItem.Title}' with id ${DataSource.AppItem.AppProductID} was installed successfully...`);
 
-                                                    // Send the email
-                                                    sendEmail();
+                                                    // Close the dialog
+                                                    LoadingDialog.hide();
+
+                                                    // Notify the parent this process is complete
+                                                    onComplete(web);
                                                 },
 
                                                 // Error
@@ -825,50 +778,47 @@ export class AppActions {
 
                                                 // Deploy the app
                                                 Web(siteUrl, { requestDigest }).SiteCollectionAppCatalog().AvailableApps(DataSource.AppItem.AppProductID).deploy(DataSource.AppItem.AppSkipFeatureDeployment).execute(app => {
-                                                    // Send the notification
-                                                    AppNotifications.sendAppDeployedEmail(DataSource.AppItem, context.GetContextWebInformation.WebFullUrl).then(() => {
-                                                        // See if we are updating the metadata
-                                                        if (updateSitesFl) {
-                                                            // Append the url to the list of sites the solution has been deployed to
-                                                            let sites = (DataSource.AppItem.AppSiteDeployments || "").trim();
+                                                    // See if we are updating the metadata
+                                                    if (updateSitesFl) {
+                                                        // Append the url to the list of sites the solution has been deployed to
+                                                        let sites = (DataSource.AppItem.AppSiteDeployments || "").trim();
 
+                                                        // Log
+                                                        ErrorDialog.logInfo(`Updating the site deployments metadata...`);
+                                                        ErrorDialog.logInfo(`Current Value: ${DataSource.AppItem.AppProductID}`);
+
+                                                        // Ensure it doesn't contain the url already
+                                                        if (sites.indexOf(context.GetContextWebInformation.WebFullUrl) < 0) {
+                                                            // Append the url
+                                                            sites += (sites.length > 0 ? "\r\n" : "") + context.GetContextWebInformation.WebFullUrl;
+                                                        }
+
+                                                        // Log
+                                                        ErrorDialog.logInfo(`New Value: ${sites}`);
+
+                                                        // Update the metadata
+                                                        DataSource.AppItem.update({
+                                                            AppSiteDeployments: sites
+                                                        }).execute(() => {
                                                             // Log
-                                                            ErrorDialog.logInfo(`Updating the site deployments metadata...`);
-                                                            ErrorDialog.logInfo(`Current Value: ${DataSource.AppItem.AppProductID}`);
-
-                                                            // Ensure it doesn't contain the url already
-                                                            if (sites.indexOf(context.GetContextWebInformation.WebFullUrl) < 0) {
-                                                                // Append the url
-                                                                sites += (sites.length > 0 ? "\r\n" : "") + context.GetContextWebInformation.WebFullUrl;
-                                                            }
-
-                                                            // Log
-                                                            ErrorDialog.logInfo(`New Value: ${sites}`);
-
-                                                            // Update the metadata
-                                                            DataSource.AppItem.update({
-                                                                AppSiteDeployments: sites
-                                                            }).execute(() => {
-                                                                // Log
-                                                                ErrorDialog.logInfo(`Site deployments metadata field updated successfully...`);
-
-                                                                // Hide the dialog
-                                                                LoadingDialog.hide();
-
-                                                                // Call the update event
-                                                                onUpdate();
-                                                            });
-                                                        } else {
-                                                            // Log
-                                                            ErrorDialog.logInfo(`Error updating the site deployments metadata field...`);
+                                                            ErrorDialog.logInfo(`Site deployments metadata field updated successfully...`);
 
                                                             // Hide the dialog
                                                             LoadingDialog.hide();
 
                                                             // Call the update event
                                                             onUpdate();
-                                                        }
-                                                    });
+                                                        });
+                                                    } else {
+                                                        // Log
+                                                        ErrorDialog.logInfo(`Error updating the site deployments metadata field...`);
+
+                                                        // Hide the dialog
+                                                        LoadingDialog.hide();
+
+                                                        // Call the update event
+                                                        onUpdate();
+                                                    }
                                                 }, ex => {
                                                     // Log the error
                                                     ErrorDialog.show("Deploying App", "There was an error deploying the app.", ex);
@@ -1978,12 +1928,6 @@ export class AppActions {
                                             AppActions.runFlow(AppConfig.Configuration.appFlows.upgradeApp);
                                         }
 
-                                        // Send the notifications
-                                        AppNotifications.sendAppUpgradedEmail(DataSource.AppItem).then(() => {
-                                            // Resolve the request
-                                            resolve();
-                                        });
-
                                         // Log
                                         DataSource.logItem({
                                             LogUserId: ContextInfo.userId,
@@ -1992,6 +1936,9 @@ export class AppActions {
                                             Title: DataSource.AuditLogStates.AppUpdated,
                                             LogComment: `A new version (${itemInfo.AppVersion}) of the app ${itemInfo.Title} was added.`
                                         }, Object.assign({ ...DataSource.AppItem, ...itemInfo }));
+
+                                        // Resolve the request
+                                        resolve();
                                     } else {
                                         // Resolve the request
                                         resolve();
