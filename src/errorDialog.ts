@@ -1,6 +1,5 @@
-import { Components, ContextInfo, Utility } from "gd-sprest-bs";
+import { Components } from "gd-sprest-bs";
 import { CanvasForm, LoadingDialog, Modal } from "dattatable";
-import { AppConfig } from "./appCfg";
 import Strings from "./strings";
 
 /**

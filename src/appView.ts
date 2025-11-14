@@ -8,7 +8,6 @@ import { personBoundingBox } from "gd-sprest-bs/build/icons/svgs/personBoundingB
 import { questionLg } from "gd-sprest-bs/build/icons/svgs/questionLg";
 import { ticketDetailed } from "gd-sprest-bs/build/icons/svgs/ticketDetailed";
 import { window_ } from "gd-sprest-bs/build/icons/svgs/window_";
-import * as jQuery from "jquery";
 import { AppActions } from "./appActions";
 import { AppCatalogRequests } from "./appCatalogRequests";
 import { AppConfig } from "./appCfg";
