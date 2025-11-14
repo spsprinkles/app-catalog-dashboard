@@ -49,15 +49,12 @@ The [configuration file](https://github.com/spsprinkles/app-catalog-dashboard/ra
 | appCatalogRequests | An array of user types to send notification requests to for app catalog creation. |
 | appDetails | The app details information to display. |
 | appFlows | The flow ids to trigger based on actions of the app. |
-| appNotifications | The ability to send notifications based on app actions. |
 | cdnImage | The absolute url to the library used to store the app icons. |
 | cdnTest | The absolute url to the library used to store the client side assets for testing. |
 | cdnProd | The absolute url to the library used to store the client side assets for production. |
 | cloudEnv | The default cloud environment the app is in. This will default to commerical if no value is specified. |
 | dateFormat | The date format to use. _(Examples: YYYY-MM-DD or YYYY-MM-DD HH:mm:ss)_ |
 | flowEndpoint | The flow authorization endpoint to use when triggering a flow. This is will default to commercial unless specified. Possible values: Flow, FlowChina, FlowDoD, FlowGov, FlowHigh, FlowUSNat, FlowUSSec or the url to the flow authorization endpoint. |
-| errorEmails | An array of email addresses to send to when a user has an error when using the application. This will help with troubleshooting issues in production. |
-| helpdesk | The email address to send notifications to the `Helpdesk` users. |
 | paging | The default # of apps to display on the dashboard. Valid values are `10, 25, 50, 100`. |
 | supportUrl | The default url to use for support. |
 | userAgreement | The user agreement displayed to the developers adding packages. |
@@ -82,16 +79,6 @@ The `app actions` outside of the workflow that can be triggered.
 | deployToTenant | Triggers a flow when the app is deployed to the tenant. |
 | newApp | Triggers a flow when a new app is initially added. |
 | upgradeApp | Triggers a flow when the app is upgraded. |
-
-### App Notifications
-
-During the approval process, the app will go through different actions. This configuration will allow notifications to be sent during these events.
-
-| Name | Description |
-| --- | --- |
-| deploy | An array of notifications to be sent when an app is deployed to the site collection or tenant app catalog. |
-| test | An array of notifications to be sent when the app is upgraded in the test site. |
-| upgrade | An array of notifications to be sent when a new app is uploaded with a new version. |
 
 ### Status
 
@@ -125,9 +112,7 @@ The available values for the `actions` status property.
 | Edit | Displays the edit form to modify the app metadata. |
 | EditTechReview | Displays the edit form to modify the technical review assessment. |
 | EditTestCases | Displays the edit form to modify the test cases assessment. |
-| GetHelp | Displays a `help` button to send a notification to the app developers and app sponsor. |
 | Metadata| Displays a button to update the metadata of an approved app. This will revert the item to "Pending Approval". |
-| Notification | Displays a button to notify user types. |
 | Submit | Displays the submission form to request approval. |
 | TestSite | Displays a `create` or `view` button to the test site collection. |
 | Upgrade | Displays an upgrade button if site collection url(s) exist. |
@@ -147,33 +132,6 @@ The alert property will have the following options.
 | header | The alert header. |
 | content | The alert content. |
 
-#### Notification
-
-The notification configuration value is an array of objects with the following properties.
-
-| Name | Description |
-| --- | --- |
-| approval | If set to true, will send the notification when the approval button is clicked. |
-| submission | If set to true, will send the notification when the submit button is clicked. |
-| to | An array of user type values to notify. |
-| cc | An array of user type values to notify. |
-| subject | The email subject. |
-| content | The email body. |
-
-##### Notification Content
-
-The notification email content can be dynamically set by using the `[Internal Field Name]` template as a placeholder within it. Complex field types, like a user field, can be used to access their properties. For example, to set the sponsor's name the value `[AppSponsor.Title]` would be used as the placeholder. Other wildcard values that can be used are listed below.
-
-| Name | Description |
-| --- | --- |
-| DeploySiteUrl | The html link to the site the app was deployed to, for the `appNotifications` deploy configuration. |
-| DeploySiteUrlText | The text link to the site the app was deployed to, for the `appNotifications` deploy configuration. |
-| Internal Field Name | The item's metadata. |
-| PageUrl | The html link to display the item. |
-| PageUrlText | The text link to display the item. |
-| TestSiteUrl | The html link to the app's test site. |
-| TestSiteUrlText | The text link to the app's test site. |
-
 #### User Types
 
 The available values for the user type property values.
@@ -185,7 +143,6 @@ The available values for the user type property values.
 | Developers | The developers of the application. _Linked to the AppOwners metadata field._ |
 | DevelopersGroup | A reference to the developer's security group. |
 | FinalApproversGroup | A reference to the final approver's security group. |
-| Helpdesk | A reference to the configuration's helpdesk email. _This will require the helpdesk configuration setting to be set._ |
 | Sponsor | The sponsor of the application. _Linked to the AppSponsor metadata field._ |
 | SponsorsGroup | A reference to the sponsor's security group. |
 

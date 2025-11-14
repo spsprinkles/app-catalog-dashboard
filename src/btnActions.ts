@@ -609,37 +609,6 @@ export class ButtonActions {
           });
           break;
 
-        // Get Help
-        case "GetHelp":
-          // Render the button
-          tooltips.add({
-            content: "Sends a notification to the app owners.",
-            btnProps: {
-              text: "Get Help",
-              iconClassName: "me-1",
-              iconSize: 20,
-              iconType: questionSquare,
-              isSmall: true,
-              type: Components.ButtonTypes.OutlinePrimary,
-              onClick: () => {
-                this._forms.sendNotification(
-                  DataSource.AppItem,
-                  ["Developers", "Sponsor"],
-                  "Request for Help",
-                  `App Developers,
-
-We are requesting help for the app ${DataSource.AppItem.Title}.
-
-(Enter Details Here)
-
-r/,
-${ContextInfo.userDisplayName}`.trim()
-                );
-              },
-            },
-          });
-          break;
-
         // Metadata
         case "Metadata":
           // Ensure the user can edit
@@ -664,26 +633,6 @@ ${ContextInfo.userDisplayName}`.trim()
               },
             });
           }
-          break;
-
-        // Notification
-        case "Notification":
-          // Render the button
-          tooltips.add({
-            content: "Sends a notification to user(s).",
-            btnProps: {
-              text: "Notification",
-              iconClassName: "me-1",
-              iconSize: 20,
-              iconType: envelope,
-              isSmall: true,
-              type: Components.ButtonTypes.OutlinePrimary,
-              onClick: () => {
-                // Display the send notification form
-                this._forms.sendNotification(DataSource.AppItem);
-              },
-            },
-          });
           break;
 
         // Submit

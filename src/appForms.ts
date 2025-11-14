@@ -2,7 +2,6 @@ import { LoadingDialog, Modal } from "dattatable";
 import { Components, ContextInfo, Helper, List, SPTypes, Web } from "gd-sprest-bs";
 import { AppActions } from "./appActions";
 import { AppConfig, IStatus } from "./appCfg";
-import { AppNotifications } from "./appNotifications";
 import { AppSecurity } from "./appSecurity";
 import { DataSource, IAppCatalogRequestItem, IAppItem, IAssessmentItem } from "./ds";
 import { ErrorDialog } from "./errorDialog";
@@ -117,48 +116,42 @@ export class AppForms {
                                 item.update({
                                     AppStatus: status.nextStep
                                 }).execute(() => {
-                                    let sendNotification = () => {
+                                    let onComplete = () => {
                                         // Close the dialog
                                         LoadingDialog.hide();
 
                                         // Run the flow associated for this status
                                         AppActions.runFlow(status.flowId);
 
-                                        // Send the notifications
-                                        AppNotifications.sendEmail(status.notification, item).then(() => {
-                                            // See if the test app catalog exists and we are creating the test site
-                                            if (AppSecurity.IsSiteAppCatalogOwner && status.createTestSite) {
-                                                // Load the test site
-                                                DataSource.loadTestSite(item).then(
-                                                    // Exists
-                                                    web => {
-                                                        // See if the current version is deployed
-                                                        if (item.AppVersion == DataSource.AppCatalogSiteItem.InstalledVersion && !DataSource.AppCatalogSiteItem.SkipDeploymentFeature) {
+                                        // See if the test app catalog exists and we are creating the test site
+                                        if (AppSecurity.IsSiteAppCatalogOwner && status.createTestSite) {
+                                            // Load the test site
+                                            DataSource.loadTestSite(item).then(
+                                                // Exists
+                                                web => {
+                                                    // See if the current version is deployed
+                                                    if (item.AppVersion == DataSource.AppCatalogSiteItem.InstalledVersion && !DataSource.AppCatalogSiteItem.SkipDeploymentFeature) {
+                                                        // Call the update event
+                                                        onUpdate();
+                                                    } else {
+                                                        // Update the app
+                                                        AppActions.updateSiteApp(web.ServerRelativeUrl, true, onUpdate).then(() => {
                                                             // Call the update event
                                                             onUpdate();
-                                                        } else {
-                                                            // Update the app
-                                                            AppActions.updateSiteApp(web.ServerRelativeUrl, true, onUpdate).then(() => {
-                                                                // Call the update event
-                                                                onUpdate();
-                                                            });
-                                                        }
-                                                    },
-
-                                                    // Doesn't exist
-                                                    () => {
-                                                        // Create the test site
-                                                        AppActions.createTestSite(onUpdate);
+                                                        });
                                                     }
-                                                );
-                                            } else {
-                                                // Call the update event
-                                                onUpdate();
-                                            }
-                                        }, ex => {
-                                            // Log the error
-                                            ErrorDialog.show("Updating Status", "There was an error updating the status.", ex);
-                                        });
+                                                },
+
+                                                // Doesn't exist
+                                                () => {
+                                                    // Create the test site
+                                                    AppActions.createTestSite(onUpdate);
+                                                }
+                                            );
+                                        } else {
+                                            // Call the update event
+                                            onUpdate();
+                                        }
                                     }
 
                                     // See if this is the last step
@@ -168,13 +161,13 @@ export class AppForms {
                                         AppActions.uploadClientSideAssets("prod").then(() => {
                                             // Upload the app images
                                             AppActions.uploadImages("prod").then(() => {
-                                                // Send the notification
-                                                sendNotification();
+                                                // Complete the process
+                                                onComplete();
                                             });
                                         });
                                     } else {
-                                        // Send the notification
-                                        sendNotification();
+                                        // Complete the process
+                                        onComplete();
                                     }
                                 });
                             });
@@ -1231,14 +1224,11 @@ export class AppForms {
                             // Get the status
                             let status = AppConfig.Status[item.AppStatus];
 
-                            // Send the notifications
-                            AppNotifications.sendEmail(status.notification, item, false).then(() => {
-                                // Call the update event
-                                onUpdate();
+                            // Call the update event
+                            onUpdate();
 
-                                // Hide the dialog
-                                LoadingDialog.hide();
-                            });
+                            // Hide the dialog
+                            LoadingDialog.hide();
                         });
                     } else {
                         // Call the update event
@@ -1913,15 +1903,6 @@ export class AppForms {
                     };
                     item.update(values).execute(
                         () => {
-                            // Send the notification
-                            AppNotifications.rejectEmail(item, comments).then(() => {
-                                // Call the update event
-                                onUpdate();
-
-                                // Hide the dialog
-                                LoadingDialog.hide();
-                            });
-
                             // Log
                             DataSource.logItem({
                                 LogUserId: ContextInfo.userId,
@@ -1930,6 +1911,12 @@ export class AppForms {
                                 Title: DataSource.AuditLogStates.AppRejected,
                                 LogComment: `The app ${item.Title} was rejected. Justification: ${values.AppComments}`
                             }, { ...item, ...values });
+
+                            // Call the update event
+                            onUpdate();
+
+                            // Hide the dialog
+                            LoadingDialog.hide();
                         },
                         ex => {
                             // Log the error
@@ -2072,127 +2059,6 @@ export class AppForms {
         Modal.show();
     }
 
-
-    // Form to send a notification
-    sendNotification(item: IAppItem, to?: string[], subject?: string, body?: string) {
-        // Set the header
-        Modal.setHeader("Send Notification");
-
-        // See if the to value exists
-        let sendToValue = [];
-        if (to && to.length > 0) {
-            // Parse the options
-            for (let i = 0; i < to.length; i++) {
-                // Copy the value
-                switch (to[i]) {
-                    case "ApproversGroup":
-                        // Add the value
-                        sendToValue.push("Approver's Group");
-                        break;
-                    case "Developers":
-                        // Add the value
-                        sendToValue.push("App Developers");
-                        break;
-                    case "DevelopersGroup":
-                        // Add the value
-                        sendToValue.push("Developer's Group");
-                        break;
-                    case "Sponsor":
-                        // Add the value
-                        sendToValue.push("App Sponsor");
-                        break;
-                    case "SponsorsGroup":
-                        // Add the value
-                        sendToValue.push("Sponsor's Group");
-                        break;
-                }
-            }
-        }
-
-        // Create a form
-        let form = Components.Form({
-            controls: [
-                {
-                    name: "UserTypes",
-                    label: "Send To",
-                    type: Components.FormControlTypes.MultiSwitch,
-                    required: true,
-                    value: sendToValue,
-                    items: [
-                        {
-                            label: "Approver's Group",
-                            data: "ApproversGroup"
-                        },
-                        {
-                            label: "App Developers",
-                            data: "Developers"
-                        },
-                        {
-                            label: "Developer's Group",
-                            data: "DevelopersGroup"
-                        },
-                        {
-                            label: "App Sponsor",
-                            data: "Sponsor"
-                        },
-                        {
-                            label: "Sponsor's Group",
-                            data: "SponsorsGroup"
-                        }
-                    ]
-                } as Components.IFormControlPropsMultiCheckbox,
-                {
-                    name: "EmailSubject",
-                    label: "Email Subject",
-                    type: Components.FormControlTypes.TextField,
-                    required: true,
-                    value: subject
-                },
-                {
-                    name: "EmailBody",
-                    label: "Email Body",
-                    type: Components.FormControlTypes.TextArea,
-                    required: true,
-                    rows: 10,
-                    value: body
-                } as Components.IFormControlPropsTextField
-            ]
-        });
-
-        // Set the body
-        Modal.setBody(form.el);
-
-        // Render the footer
-        Modal.setFooter(Components.Button({
-            text: "Send",
-            type: Components.ButtonTypes.OutlinePrimary,
-            onClick: () => {
-                // Ensure the form is valid
-                if (form.isValid()) {
-                    let values = form.getValues();
-
-                    // Parse the user types
-                    let userTypes = [];
-                    for (let i = 0; i < values["UserTypes"].length; i++) {
-                        let cbValue = values["UserTypes"][i] as Components.ICheckboxGroupItem;
-
-                        // Append the value
-                        userTypes.push(cbValue.data);
-                    }
-
-                    // Send an email
-                    AppNotifications.sendNotification(item, userTypes, values["EmailSubject"], values["EmailBody"]).then(() => {
-                        // Close the modal
-                        Modal.hide();
-                    });
-                }
-            }
-        }).el);
-
-        // Show the modal
-        Modal.show();
-    }
-
     // Submit Form
     submit(item: IAppItem, onUpdate: () => void) {
         // Clear the modal
@@ -2290,27 +2156,24 @@ export class AppForms {
                                         // Run the flow associated for this status
                                         AppActions.runFlow(status.flowId);
 
-                                        // Send the notifications
-                                        AppNotifications.sendEmail(status.notification, item, false).then(() => {
-                                            // See if this is the last step
-                                            let nextStep = AppConfig.Status[status.nextStep];
-                                            if (nextStep && nextStep.lastStep) {
-                                                // Upload the images
-                                                AppActions.uploadImages("prod").then(() => {
-                                                    // Call the update event
-                                                    onUpdate();
-
-                                                    // Hide the dialog
-                                                    LoadingDialog.hide();
-                                                });
-                                            } else {
+                                        // See if this is the last step
+                                        let nextStep = AppConfig.Status[status.nextStep];
+                                        if (nextStep && nextStep.lastStep) {
+                                            // Upload the images
+                                            AppActions.uploadImages("prod").then(() => {
                                                 // Call the update event
                                                 onUpdate();
 
                                                 // Hide the dialog
                                                 LoadingDialog.hide();
-                                            }
-                                        });
+                                            });
+                                        } else {
+                                            // Call the update event
+                                            onUpdate();
+
+                                            // Hide the dialog
+                                            LoadingDialog.hide();
+                                        }
                                     });
                                 });
                             });
@@ -2342,12 +2205,6 @@ export class AppForms {
 
                 // Update the app
                 AppActions.updateSiteApp(siteUrl, true, onUpdate).then(() => {
-                    // Send the notifications
-                    AppNotifications.sendAppTestSiteUpgradedEmail(DataSource.AppItem).then(() => {
-                        // Call the update event
-                        onUpdate();
-                    });
-
                     // Log
                     DataSource.logItem({
                         LogUserId: ContextInfo.userId,
@@ -2356,6 +2213,9 @@ export class AppForms {
                         Title: DataSource.AuditLogStates.AppUpdated,
                         LogComment: `The app ${item.Title} was updated for site: ${siteUrl}`
                     }, item);
+
+                    // Call the update event
+                    onUpdate();
                 });
             }
         }).el);
@@ -2394,12 +2254,6 @@ export class AppForms {
                 // Update the app
                 let skipFeatureDeployment = form.getValues()["SkipFeatureDeployment"];
                 AppActions.updateTenantApp(skipFeatureDeployment, onUpdate).then(() => {
-                    // Send the notifications
-                    AppNotifications.sendAppDeployedEmail(DataSource.AppItem, AppConfig.Configuration.tenantAppCatalogUrl).then(() => {
-                        // Call the update event
-                        onUpdate();
-                    });
-
                     // Log
                     DataSource.logItem({
                         LogUserId: ContextInfo.userId,
@@ -2408,6 +2262,9 @@ export class AppForms {
                         Title: DataSource.AuditLogStates.AppUpdated,
                         LogComment: `The tenant app ${item.Title} was updated.`
                     }, item);
+
+                    // Call the update event
+                    onUpdate();
                 });
             }
         }).el);

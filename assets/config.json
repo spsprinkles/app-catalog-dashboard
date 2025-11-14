@@ -5,35 +5,6 @@
     "templatesLibraryUrl": "~site/Shared%20Documents/Templates",
     "tenantAppCatalogUrl": "/sites/appcatalog",
     "userAgreement": "<p>This developer agreement will be modified by the client. It should contain verbiage that defines the terms of use for this application.</p><p>By agreeing to these terms, you are not going to upload or deploy un-tested code into the app catalog. You agree to follow all company IT rules & policies.</p>",
-    "appNotifications": {
-        "deploy": [
-            {
-                "to": [
-                    "ApproversGroup"
-                ],
-                "subject": "App Deployed",
-                "content": "The app [Title] was deployed."
-            }
-        ],
-        "test": [
-            {
-                "to": [
-                    "Sponsor", "Developers"
-                ],
-                "subject": "App Updated",
-                "content": "The app [Title] was upgraded in the test site."
-            }
-        ],
-        "upgrade": [
-            {
-                "to": [
-                    "ApproversGroup"
-                ],
-                "subject": "App Deployed",
-                "content": "The app [Title] was upgraded. Please update the test site."
-            }
-        ]
-    },
     "status": {
         "Approved": {
             "actions": [
@@ -70,7 +41,6 @@
         },
         "Deployed": {
             "actions": [
-                "GetHelp",
                 "View",
                 "ViewSourceControl",
                 "ViewTestCases",
