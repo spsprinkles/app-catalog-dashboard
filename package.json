@@ -4,9 +4,10 @@
   "description": "Management of apps in tenant app catalog.",
   "main": "src/index.ts",
   "scripts": {
-    "all": "npm run clean && npm run build && npm run prod && npm run spfx",
+    "all": "npm run clean && npm run build && npm run prod && npm run spfx && npm run flow",
     "build": "webpack --mode development",
     "clean": "node ./clean.js",
+    "flow": "node ./flow.js",
     "prod": "webpack --mode production",
     "spfx": "cd spfx && npm run package",
     "increment-version": "node ./incrementVersion.js"
@@ -36,6 +37,7 @@
     "@babel/preset-env": "^7.24.3",
     "@types/datatables.net": "^1.10.28",
     "@types/jquery": "^3.5.29",
+    "archiver": "^7.0.1",
     "babel-loader": "^9.1.3",
     "css-loader": "^5.2.7",
     "html-loader": "^3.1.2",
