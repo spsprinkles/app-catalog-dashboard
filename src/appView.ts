@@ -286,7 +286,7 @@ export class AppView {
                 // Adjust the brand alignment
                 onRendered: (el) => {
                     el.querySelector("nav div.container-fluid").classList.add("ps-3");
-                    el.querySelector("nav div.container-fluid a.navbar-brand").classList.add("pe-none");
+                    el.querySelector("nav div.container-fluid a.navbar-brand")?.classList.add("pe-none");
                 },
                 onSearchRendered: (el) => {
                     el.setAttribute("placeholder", "Search this dashboard");

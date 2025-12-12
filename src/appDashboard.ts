@@ -535,6 +535,6 @@ export class AppDashboard {
         nav.el.querySelector("nav div.container-fluid").classList.add("ps-3");
 
         // Disable the link on the root nav brand
-        nav.el.querySelector("nav div.container-fluid a.navbar-brand").classList.add("pe-none");
+        nav.el.querySelector("nav div.container-fluid a.navbar-brand")?.classList.add("pe-none");
     }
 }
