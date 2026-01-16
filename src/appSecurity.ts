@@ -275,13 +275,10 @@ export class AppSecurity {
             // See if the tenant app catalog is defined
             if (AppConfig.Configuration.tenantAppCatalogUrl) {
                 // Get the user's permissions to the app catalog list
-                Web(AppConfig.Configuration.tenantAppCatalogUrl).Lists(Strings.Lists.AppCatalog).query({
-                    Expand: ["EffectiveBasePermissions"]
-                }).execute(list => {
-                    // See if the user has right access
-                    this._isTenantAppCatalogOwner = Helper.hasPermissions(list.EffectiveBasePermissions, [
-                        SPTypes.BasePermissionTypes.FullMask
-                    ]);
+                Web.getSharingSettings({
+                    objectUrl: AppConfig.Configuration.tenantAppCatalogUrl
+                }).execute(settings => {
+                    this._isTenantAppCatalogOwner = settings.IsUserSiteAdmin;
 
                     // Resolve the request
                     resolve();
