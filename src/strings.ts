@@ -22,7 +22,7 @@ export const setContext = (context, envType?: number, sourceUrl?: string) => {
     Strings.IsClassic = envType == SPTypes.EnvironmentType.ClassicSharePoint;
 
     // Set the flow3 flag
-    Strings.IsFlow3 = ContextInfo.blockDownloadsExperienceEnabled;
+    Strings.IsFlow3 = typeof(ContextInfo.blockDownloadsExperienceEnabled) === "boolean" ? ContextInfo.blockDownloadsExperienceEnabled : false;
 
     // Set the teams flag
     Strings.IsTeams = SPFxContext.sdks.microsoftTeams ? true : false;
