@@ -274,10 +274,14 @@ export class AppSecurity {
         return new Promise(resolve => {
             // See if the tenant app catalog is defined
             if (AppConfig.Configuration.tenantAppCatalogUrl) {
+                let objectUrl = AppConfig.Configuration.tenantAppCatalogUrl;
+                if (objectUrl.startsWith('/')) {
+                    // Prepend the domain
+                    objectUrl = document.location.origin + objectUrl;
+                }
+
                 // Get the user's permissions to the app catalog list
-                Web.getSharingSettings({
-                    objectUrl: AppConfig.Configuration.tenantAppCatalogUrl
-                }).execute(settings => {
+                Web.getSharingSettings({ objectUrl }).execute(settings => {
                     this._isTenantAppCatalogOwner = settings.IsUserSiteAdmin;
 
                     // Resolve the request
