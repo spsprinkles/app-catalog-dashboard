@@ -306,7 +306,7 @@ export class AppView {
                             el.appendChild(span);
 
                             // Render a tooltip
-                            Components.Tooltip({
+                            let tooltip = Components.Tooltip({
                                 el: span,
                                 content: "Show " + item.text,
                                 btnProps: {
@@ -329,7 +329,7 @@ export class AppView {
                                             elButton.classList.remove("active");
 
                                             // Update the tooltip
-                                            (elButton as any)._tippy.setContent("Show " + item.text);
+                                            tooltip.setContent("Show " + item.text);
                                         } else {
                                             // Filter the data for apps belonging to the current user
                                             this._dashboard.filter(0, "MyApp");
@@ -338,7 +338,7 @@ export class AppView {
                                             elButton.classList.add("active");
 
                                             // Update the tooltip
-                                            (elButton as any)._tippy.setContent("Hide " + item.text);
+                                            tooltip.setContent("Hide " + item.text);
                                         }
                                     }
                                 },

@@ -313,7 +313,14 @@ export class AppDashboard {
             },
             onNavigationRendered: (nav) => {
                 // Update the upload button tooltip
-                (nav.el.querySelector("#navbar_content ul:last-child li:last-child button") as any)._tippy.setContent("Upload Document");
+                let elButton: HTMLElement = nav.el.querySelector("#navbar_content ul:last-child li:last-child button");
+                if (elButton) {
+                    // Add a toolip
+                    Components.Tooltip({
+                        target: elButton,
+                        content: "Upload Document"
+                    });
+                }
             },
             onNavigationRendering: props => {
                 // Clear the subNav brand
