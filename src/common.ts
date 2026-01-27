@@ -7,7 +7,8 @@ export function appStatus(item: IAppItem) {
     if (item.AppIsRejected) { return "Rejected"; }
     if (item.AppIsTenantDeployed) {
         let appItem = DataSource.getTenantAppItem(item.AppProductID);
-        return `Tenant Deployed${appItem ? "<br/>(" + appItem.AppCatalogVersion + ")": ""}`;
+        let appVersionDiffFl = item.AppVersion != appItem.AppCatalogVersion;
+        return `${appVersionDiffFl ? "<span style=\"red\">" : ""}Tenant Deployed${appItem ? "<br/>(" + appItem.AppCatalogVersion + ")" : ""}${appVersionDiffFl ? "</span>" : ""}`;
     }
     if (item.AppSiteDeployments && item.AppSiteDeployments.length > 0) { return "Site Collection Deployed"; }
     return item.AppStatus;
