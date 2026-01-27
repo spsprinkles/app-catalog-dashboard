@@ -864,7 +864,6 @@ export class ButtonActions {
                     iconClassName: "me-1",
                     iconSize: 20,
                     iconType: appIndicator,
-                    isDisabled: !AppSecurity.IsSiteAppCatalogOwner,
                     isSmall: true,
                     type: Components.ButtonTypes.OutlineSuccess,
                     onClick: () => {
