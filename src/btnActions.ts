@@ -702,7 +702,7 @@ export class ButtonActions {
                       iconClassName: "me-1",
                       iconSize: 20,
                       iconType: appIndicator,
-                      isDisabled: !AppSecurity.IsSiteAppCatalogOwner,
+                      isDisabled: !AppSecurity.AppWeb.IsAdmin && !AppSecurity.AppWeb.IsOwner,
                       isSmall: true,
                       type: Components.ButtonTypes.OutlinePrimary,
                       onClick: () => {
@@ -730,7 +730,7 @@ export class ButtonActions {
                       iconClassName: "me-1",
                       iconSize: 20,
                       iconType: appIndicator,
-                      isDisabled: !AppSecurity.IsSiteAppCatalogOwner,
+                      isDisabled: !AppSecurity.AppWeb.IsAdmin && !AppSecurity.AppWeb.IsOwner,
                       isSmall: true,
                       type: Components.ButtonTypes.OutlinePrimary,
                       onClick: () => {
