@@ -242,7 +242,7 @@ export class ButtonActions {
         // Audit Log
         case "AuditLog":
           // Ensure the user is an admin or owner
-          if (AppSecurity.AppWeb.IsAdmin || AppSecurity.AppWeb.IsOwner) {
+          if (AppSecurity.IsSiteAppCatalogOwner) {
             // Render the resubmit button
             tooltips.add({
               content: "Displays the audit log information.",
@@ -277,7 +277,7 @@ export class ButtonActions {
           // Ensure it's not over flow3
           if (!Strings.IsFlow3) {
             // Ensure this is the admin or owner
-            if (AppSecurity.AppWeb.IsAdmin || AppSecurity.AppWeb.IsOwner) {
+            if (AppSecurity.IsSiteAppCatalogOwner) {
               // Render the cdn buttonn
               tooltips.add({
                 content: "Allows you to manually copy the CDN assets/images for an application.",
@@ -312,7 +312,7 @@ export class ButtonActions {
           }
 
           // Allow deletion if this is the owner/admin
-          canDelete = AppSecurity.AppWeb.IsOwner || AppSecurity.AppWeb.IsAdmin;
+          canDelete = AppSecurity.IsSiteAppCatalogOwner;
 
           // See if the user can delete the app
           if (canDelete) {
@@ -702,7 +702,7 @@ export class ButtonActions {
                       iconClassName: "me-1",
                       iconSize: 20,
                       iconType: appIndicator,
-                      isDisabled: !AppSecurity.AppWeb.IsAdmin && !AppSecurity.AppWeb.IsOwner,
+                      isDisabled: !AppSecurity.IsSiteAppCatalogOwner,
                       isSmall: true,
                       type: Components.ButtonTypes.OutlinePrimary,
                       onClick: () => {
@@ -730,7 +730,7 @@ export class ButtonActions {
                       iconClassName: "me-1",
                       iconSize: 20,
                       iconType: appIndicator,
-                      isDisabled: !AppSecurity.AppWeb.IsAdmin && !AppSecurity.AppWeb.IsOwner,
+                      isDisabled: !AppSecurity.IsSiteAppCatalogOwner,
                       isSmall: true,
                       type: Components.ButtonTypes.OutlinePrimary,
                       onClick: () => {

@@ -19,7 +19,7 @@ export class AppSecurity {
     static get AppCatalogWeb(): AppSecurityWeb { return this._appCatalogWeb; }
 
     // App Catalog Owner
-    static get IsSiteAppCatalogOwner(): boolean { return this.AppCatalogWeb.IsOwner; }
+    static get IsSiteAppCatalogOwner(): boolean { return this.AppCatalogWeb.IsAdmin || this.AppCatalogWeb.IsOwner; }
 
     // Tenant App Catalog Owner
     private static _isTenantAppCatalogOwner = false;
