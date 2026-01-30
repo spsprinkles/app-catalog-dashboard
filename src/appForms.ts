@@ -303,6 +303,7 @@ export class AppForms {
     // Creates the test site for the application
     createTestSite(errorMessage: string, onUpdate: () => void) {
         // Set the header
+        Modal.clear();
         Modal.setHeader(errorMessage ? "App Error" : "Create Test Site");
 
         // Set the body
@@ -356,6 +357,7 @@ export class AppForms {
     // Delete form
     delete(onUpdate: () => void) {
         // Set the header
+        Modal.clear();
         Modal.setHeader("Delete App/Solution Package");
 
         // Set the body
@@ -450,6 +452,7 @@ export class AppForms {
     // Delete test site form
     deleteSite(item: IAppItem, onUpdate: () => void) {
         // Set the header
+        Modal.clear();
         Modal.setHeader("Delete Test Site");
 
         // Set the body
@@ -565,6 +568,7 @@ export class AppForms {
         let webUrl = null;
 
         // Set the header
+        Modal.clear();
         Modal.setHeader("Deploy to App Catalog");
 
         // Create the form
@@ -1988,6 +1992,7 @@ export class AppForms {
     // Retracts the solution from the tenant app catalog
     removeFromTenant(item: IAppItem, onUpdate: () => void) {
         // Set the header
+        Modal.clear();
         Modal.setHeader("Remove App");
 
         // Set the body
@@ -2025,6 +2030,7 @@ export class AppForms {
     // Retracts the solution from the tenant app catalog
     retractFromTenant(item: IAppItem, onUpdate: () => void) {
         // Set the header
+        Modal.clear();
         Modal.setHeader("Retract App");
 
         // Set the body
@@ -2190,6 +2196,7 @@ export class AppForms {
     // Updates the app
     updateApp(item: IAppItem, siteUrl: string, onUpdate: () => void) {
         // Set the header
+        Modal.clear();
         Modal.setHeader("Update App");
 
         // Set the body
@@ -2227,6 +2234,7 @@ export class AppForms {
     // Updates the tenant app
     updateTenantApp(item: IAppItem, onUpdate: () => void) {
         // Set the header
+        Modal.clear();
         Modal.setHeader("Update Tenant App");
 
         // Set the body

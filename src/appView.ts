@@ -144,7 +144,7 @@ export class AppView {
         }
 
         // See if this is an owner
-        if (AppSecurity.AppWeb.IsAdmin || AppSecurity.AppWeb.IsOwner) {
+        if (AppSecurity.IsSiteAppCatalogOwner) {
             // Set the admin buttons
             navLinks.push({
                 className: "btn-icon btn-outline-light me-2 p-2 py-1",

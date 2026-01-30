@@ -10,6 +10,7 @@ export class AppCatalogRequests {
     // Displays the user's app catalog requests
     static viewAppCatalogRequests() {
         // Set the header
+        Modal.clear();
         Modal.setHeader("App Catalog Requests");
         Modal.setType(Components.ModalTypes.Large);
 
