@@ -27,16 +27,6 @@
                 "App manifest file submitted.",
                 "App source code submitted.",
                 "Validation of the application manifest content."
-            ],
-            "notification": [
-                {
-                    "approval": true,
-                    "to": [
-                        "ApproversGroup"
-                    ],
-                    "subject": "App Approved for Deployment",
-                    "content": "<p>An application was approved and is ready for deployment. Please click on the link below to complete the request.</p><p>[TestSiteUrl]</p><p>App Team</p>"
-                }
             ]
         },
         "Deployed": {
@@ -71,16 +61,6 @@
                 "App manifest file submitted.",
                 "App source code submitted.",
                 "Validation of the application manifest content."
-            ],
-            "notification": [
-                {
-                    "approval": true,
-                    "to": [
-                        "ApproversGroup"
-                    ],
-                    "subject": "App Testing Completed",
-                    "content": "<p>Approval Group,</p>The application testing was completed and is awaiting your review. Please click on the link below to review this request.</p><p>[PageUrl]</p><p>App Team</p>"
-                }
             ]
         },
         "New": {
@@ -98,16 +78,6 @@
                 "Justification for the application is descriptive.",
                 "Justification for custom API permissions is filled out, if needed.",
                 "App manifest is filled out correctly"
-            ],
-            "notification": [
-                {
-                    "submission": true,
-                    "to": [
-                        "Sponsor"
-                    ],
-                    "subject": "App Submitted",
-                    "content": "<p>[AppSponsor.Title],</p>An application was submitted and assigned to you as its sponsor. Please click on the link below to approve this application.</p><p>[PageUrl]</p><p>App Team</p>"
-                }
             ]
         },
         "Pending Approval": {
@@ -130,16 +100,6 @@
                 "App manifest file submitted.",
                 "App source code submitted.",
                 "Validation of the application manifest content."
-            ],
-            "notification": [
-                {
-                    "approval": true,
-                    "to": [
-                        "Developers"
-                    ],
-                    "subject": "App Approved for Deployment",
-                    "content": "<p>Your application was approved and is ready for deployment. Please click on the link below to complete the request.</p><p>[TestSiteUrl]</p><p>App Team</p>"
-                }
             ]
         },
         "Pending Final Approval": {
@@ -162,17 +122,6 @@
                 "App manifest file submitted.",
                 "App source code submitted.",
                 "Validation of the application manifest content."
-            ],
-            "notification": [
-                {
-                    "approval": true,
-                    "to": [
-                        "ApproversGroup",
-                        "Developers"
-                    ],
-                    "subject": "App Approved for Deployment",
-                    "content": "<p>Your application was approved and is ready for deployment. Please click on the link below to complete the request.</p><p>[TestSiteUrl]</p><p>App Team</p>"
-                }
             ]
         },
         "Pending Review": {
@@ -196,16 +145,6 @@
                 "App manifest file submitted.",
                 "App source code submitted.",
                 "Validation of the application manifest content."
-            ],
-            "notification": [
-                {
-                    "approval": true,
-                    "to": [
-                        "FinalApproversGroup"
-                    ],
-                    "subject": "App Testing Completed",
-                    "content": "<p>Final Approval Group,</p>The application testing was completed and is awaiting your approval. Please click on the link below to review this request.</p><p>[PageUrl]</p><p>App Team</p>"
-                }
             ]
         },
         "Pending Sponsor Approval": {
@@ -217,16 +156,6 @@
             "approval": [
                 "ApproversGroup",
                 "Sponsor"
-            ],
-            "notification": [
-                {
-                    "approval": true,
-                    "to": [
-                        "Developers"
-                    ],
-                    "subject": "App Approved for Testing",
-                    "content": "<p>Your application was approved and is ready for testing. Please click on the link below to complete the request.</p><p>[TestSiteUrl]</p><p>App Team</p>"
-                }
             ]
         }
     },
