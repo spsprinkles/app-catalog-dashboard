@@ -1857,9 +1857,6 @@ export class AppActions {
 
                     // Log the error
                     ErrorDialog.show("Uploading Package", "<p>The app package being uploaded has been denied for the following reason:</p><br/>" + errorMessage);
-
-                    // Show the modal
-                    Modal.show();
                 } else {
                     // Updates the status
                     let updateStatus = (): PromiseLike<IAppItem> => {
