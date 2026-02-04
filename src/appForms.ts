@@ -645,45 +645,50 @@ export class AppForms {
                                 ((): PromiseLike<void> => {
                                     // Return a promise
                                     return new Promise((resolve) => {
-                                        // Query the web
+                                        // See if an app catalog exists
                                         Web(webUrl).query({
-                                            Expand: ["Lists", "Lists/EffectiveBasePermissions"],
-                                            Select: ["Title", "Lists/Title", "Lists/EffectiveBasePermissions"]
+                                            Expand: ["Lists"],
+                                            Select: ["Id", "Title", "Url"]
                                         }).execute(web => {
                                             // Set the flag
                                             siteExists = true;
 
-                                            // Parse the lists
+                                            // Ensure the list exists
                                             for (let i = 0; i < web.Lists.results.length; i++) {
-                                                // See if this is the app catalog
                                                 let list = web.Lists.results[i];
+
+                                                // Set the flag if the app catalog exists
                                                 if (list.Title == Strings.Lists.AppCatalog) {
-                                                    // Set the flag
                                                     appCatalogExists = true;
-
-                                                    // Determine if the user can deploy to it
-                                                    canDeploy = Helper.hasPermissions(list.EffectiveBasePermissions, [
-                                                        SPTypes.BasePermissionTypes.FullMask
-                                                    ]);
-
-                                                    // Break from the loop
                                                     break;
                                                 }
                                             }
 
-                                            // See if the app catalog doesn't exists
-                                            if (!appCatalogExists) {
+                                            // See if the app catalog exists
+                                            if (appCatalogExists) {
+                                                // See if the user is a site admin
+                                                Web.getSharingSettings({ objectUrl: web.Url }).execute(settings => {
+                                                    // Set the flag
+                                                    canDeploy = settings.IsUserSiteAdmin;
+                                                    if (!canDeploy) {
+                                                        // Set the error message
+                                                        errorMessage = "The user does not have the permissions to deploy to the app catalog.";
+                                                    }
+
+                                                    // Resolve the request
+                                                    resolve();
+                                                }, () => {
+                                                    // Set the error message
+                                                    errorMessage = "The user does not have the permissions to deploy to the app catalog.";
+                                                    resolve();
+                                                });
+                                            } else {
                                                 // Set the error message
                                                 errorMessage = "The app catalog does not exist in this site.";
-                                            }
-                                            // Else, see if the user can't deploy
-                                            else if (!canDeploy) {
-                                                // Set the error message
-                                                errorMessage = "The user does not have the permissions to deploy to the app catalog.";
-                                            }
 
-                                            // Resolve the request
-                                            resolve();
+                                                // Resolve the request
+                                                resolve();
+                                            }
                                         }, () => {
                                             // Set the error message
                                             errorMessage = "Site does not exist or user does not have access to it.";
