@@ -497,8 +497,8 @@ export const Configuration = Helper.SPConfig({
                 ExcludeFromOfflineClient: true,
                 NoCrawl: true,
                 EnableAttachments: false,
-                ReadSecurity: 1,
-                WriteSecurity: 2,
+                ReadSecurity: SPTypes.ListReadSecurity.All,
+                WriteSecurity: SPTypes.ListWriteSecurity.All,
                 ImageUrl: "/_layouts/15/images/itcommcat.png?rev=47",
                 EnableVersioning: true,
                 MajorVersionLimit: 50
