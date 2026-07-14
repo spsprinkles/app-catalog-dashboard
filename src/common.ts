@@ -21,7 +21,7 @@ export function canEdit(item: IAppItem) {
 }
 
 // Generates an embedded SVG image to embed in a style tag
-export function generateEmbeddedSVG(svg: SVGElement) {
+export function generateEmbeddedSVG(svg: HTMLElement) {
     return "url(\"data:image/svg+xml," + (svg.outerHTML as any).replaceAll("\"", "'").replaceAll("<", "%3C").replaceAll(">", "%3E").replaceAll("\n", "").replaceAll("  ", " ") + "\");";
 }
 
