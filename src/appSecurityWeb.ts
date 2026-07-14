@@ -35,29 +35,38 @@ export class AppSecurityWeb {
     /** Public Methods */
 
     // Add the user to the developer group
-    addUserToGroup(groupName: string, userId: number): PromiseLike<void> {
+    addUserToGroup(groupName: string, userEmail: string): PromiseLike<void> {
         // Return a promise
         return new Promise((resolve, reject) => {
             // Get the group
             let group = this.getGroup(groupName);
             if (group) {
-                // Add the user
-                group.Users.addUserById(userId).execute(
-                    user => {
-                        // Append the user
-                        group.Users.results.push(user);
+                // Get the user
+                Web(this._url, { requestDigest: this._context.FormDigestValue }).ensureUser(userEmail).execute(user => {
+                    // Add the user
+                    group.Users.addUserById(user.Id).execute(
+                        user => {
+                            // Append the user
+                            group.Users.results.push(user);
 
-                        // Resolve the request
-                        resolve();
-                    },
-                    ex => {
-                        // Log the error
-                        ErrorDialog.logError(`There was an error adding the user with id ${userId} to the ${groupName} security group.`);
+                            // Resolve the request
+                            resolve();
+                        },
+                        ex => {
+                            // Log the error
+                            ErrorDialog.logError(`There was an error adding the user with id ${user.Id} to the ${groupName} security group.`);
 
-                        // Reject the request
-                        reject(ex);
-                    }
-                );
+                            // Reject the request
+                            reject(ex);
+                        }
+                    );
+                }, ex => {
+                    // Log the error
+                    ErrorDialog.logError(`There was an error getting the user ${userEmail} from the web ${this._url}.`);
+
+                    // Reject the request
+                    reject(ex);
+                });
             }
         });
     }
@@ -124,7 +133,7 @@ export class AppSecurityWeb {
     getGroup(groupName: string): Types.SP.GroupOData { return this._appGroups ? this._appGroups[groupName] : null; }
 
     // Returns a user from a group
-    getUserForGroup(groupName: string, userId: number): Types.SP.User {
+    getUserForGroup(groupName: string, usrEmail: string): Types.SP.User {
         // Get the group
         let group = this.getGroup(groupName);
         if (group) {
@@ -133,7 +142,7 @@ export class AppSecurityWeb {
                 let user = group.Users.results[i];
 
                 // Return the user, if it matches
-                if (user.Id == userId) { return user; }
+                if (user.Email == usrEmail) { return user; }
             }
         }
     }
